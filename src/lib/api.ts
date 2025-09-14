@@ -33,60 +33,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.log('API error:', error.response.data);
     const originalRequest = error.config;
 
-    // Handle network errors
-    if (typeof error.response === 'undefined') {
-      console.error(
-        'A server/network error occurred. ' +
-          'Looks like CORS might be the problem. ' +
-          'Sorry about this - we will get it fixed shortly.'
-      );
-      return Promise.reject(error);
-    }
-
-    console.log('API error:', error.response?.data);
-
-    // Prevent infinite refresh loops - if refresh endpoint fails, redirect to login
-    if (
-      error.response?.status === 401 &&
-      originalRequest.url?.includes('/token/refresh/')
-    ) {
-      console.log('Refresh token endpoint failed, redirecting to login.');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      window.location.href = '/';
-      return Promise.reject(error);
-    }
-
-    // Handle 401/403 errors with token refresh
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
-      !originalRequest._retry &&
-      (error.response?.data?.code === 'token_not_valid' ||
-        error.response?.data?.detail?.includes('token'))
+      !originalRequest._retry
     ) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          // Check if refresh token is expired before attempting refresh
-          try {
-            const tokenParts = JSON.parse(atob(refreshToken.split('.')[1]));
-            const now = Math.ceil(Date.now() / 1000);
-
-            if (tokenParts.exp <= now) {
-              console.log('Refresh token is expired', tokenParts.exp, now);
-              localStorage.removeItem('accessToken');
-              localStorage.removeItem('refreshToken');
-              window.location.href = '/';
-              return Promise.reject(new Error('Refresh token expired'));
-            }
-          } catch (tokenDecodeError) {
-            console.warn('Could not decode refresh token, attempting refresh anyway');
-          }
-
           // Use a separate axios instance for refresh to avoid circular interceptor calls
           const refreshResponse = await axios.post(
             `${API_BASE_URL}/token/refresh/`,
@@ -94,6 +52,9 @@ api.interceptors.response.use(
             {
               headers: {
                 'Content-Type': 'application/json',
+                // Some APIs expect the refresh token in Authorization header
+                // Remove this line if your API doesn't require it
+                // Authorization: `Bearer ${refreshToken}`,
               },
             }
           );
@@ -106,11 +67,8 @@ api.interceptors.response.use(
             localStorage.setItem('refreshToken', refresh);
           }
 
-          // Update both the default headers and the original request headers
-          api.defaults.headers.Authorization = `Bearer ${access}`;
+          // Update the original request with the new token
           originalRequest.headers.Authorization = `Bearer ${access}`;
-
-          console.log('Token refreshed successfully');
           return api(originalRequest);
         } else {
           // No refresh token available, clear everything
@@ -129,7 +87,7 @@ api.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-
+    console.log('Request error:', error.response?.data);
     return Promise.reject(error);
   }
 );

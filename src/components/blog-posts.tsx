@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { postsAPI } from '@/lib/api';
 import { useUIStore } from '@/stores/ui';
+import { useIntl } from '@/hooks/use-intl';
 
 interface Author {
   id: string;
@@ -47,6 +48,7 @@ interface BlogPost {
 
 function BlogPostCard({ post }: { post: BlogPost }) {
   const { language } = useUIStore();
+  const { t } = useIntl();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -75,8 +77,7 @@ function BlogPostCard({ post }: { post: BlogPost }) {
         <CardDescription>
           {post.author && (
             <span>
-              {language === 'no' ? 'Av ' : 'By '}
-              {post.author.display_name || post.author.email}
+              {t('blog.author')} {post.author.display_name || post.author.email}
               {' • '}
             </span>
           )}
@@ -245,20 +246,39 @@ export default function BlogPosts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { language } = useUIStore();
+  const { t } = useIntl();
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
         setError(null);
+
+        // Fetch real posts from API
         const response = await postsAPI.getPublicPosts();
-        setPosts(response);
+
+        // Add a sample translated post to demonstrate Next Intl capabilities
+        const samplePost: BlogPost = {
+          id: 'sample-intl-post',
+          title: t('blog.samplePost.title'),
+          body_markdown: t('blog.samplePost.content', {
+            author: 'Next Intl Demo',
+            date: new Date().toLocaleDateString()
+          }),
+          body_html: '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          author: {
+            id: 'demo-author',
+            email: 'demo@nxfs.no',
+            display_name: 'Next Intl Demo'
+          }
+        };
+
+        setPosts([samplePost, ...response]);
       } catch (err: any) {
         setError(
-          err.response?.data?.message ||
-            (language === 'no'
-              ? 'Kunne ikke laste blogginnlegg'
-              : 'Failed to load blog posts')
+          err.response?.data?.message || t('blog.errorLoading')
         );
       } finally {
         setLoading(false);
@@ -266,7 +286,7 @@ export default function BlogPosts() {
     };
 
     fetchPosts();
-  }, [language]);
+  }, [language, t]);
 
   if (loading) {
     return (
@@ -290,12 +310,10 @@ export default function BlogPosts() {
     return (
       <div className='text-center py-12'>
         <h2 className='text-2xl font-semibold mb-4'>
-          {language === 'no' ? 'Ingen blogginnlegg ennå' : 'No blog posts yet'}
+          {t('blog.noPosts')}
         </h2>
         <p className='text-muted-foreground'>
-          {language === 'no'
-            ? 'Vær den første til å publisere et innlegg!'
-            : 'Be the first to publish a post!'}
+          {t('blog.beFirstToPost')}
         </p>
       </div>
     );

@@ -62,7 +62,12 @@
     "createdAt": "Opprettet",
     "updatedAt": "Oppdatert",
     "readMore": "Les mer",
-    "loadMore": "Last flere innlegg"
+    "loadMore": "Last flere innlegg",
+    "errorLoading": "Kunne ikke laste blogginnlegg",
+    "samplePost": {
+      "title": "Introduksjon til Next.js og Internasjonalisering",
+      "content": "Velkommen til bloggen vår! Dette innlegget demonstrerer hvordan **Next Intl** kan brukes til å oversette ikke bare statisk UI-tekst, men også dynamiske API-responser.\n\n## Nøkkelfunksjoner\n\n1. **Automatisk språkdeteksjon**\n2. **Rik tekstformatering** med markdown-støtte\n3. **Interpolasjon** for dynamiske verdier som {author} og {date}\n4. **Pluralisering** støtte\n\nDenne tilnærmingen lar deg ha oversatt innhold som kan være:\n- Lagret i oversettelsesfiler\n- Hentet fra APIer\n- Kombinert for komplekse scenarier\n\n### API Oversettelsestilnærminger\n\n**Metode 1: Server-side oversettelse** - API returnerer forhåndsoversatt innhold\n**Metode 2: Klient-side oversettelse** - Bruk Next Intl til å oversette API-nøkler\n**Metode 3: Hybrid tilnærming** - Kombiner begge metoder etter behov"
+    }
   },
   "dashboard": {
     "welcome": "Velkommen tilbake",
@@ -107,6 +112,12 @@
     "voiceMessage": "Talemelding",
     "image": "Bilde",
     "file": "Fil"
+  },
+  "home": {
+    "title": "Velkommen til nxfs.no",
+    "subtitle": "En moderne plattform for å dele ideer og kunnskap",
+    "blogTranslation": "Blogginnhold oversettelse",
+    "blogTranslationDesc": "Blogginnholdet nedenfor kan oversettes automatisk ved hjelp av Next Intl sin rike tekstformatering og interpolasjonsfunksjoner."
   },
   "errors": {
     "pageNotFound": "Side Ikke Funnet",

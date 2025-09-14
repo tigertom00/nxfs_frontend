@@ -49,6 +49,8 @@ import {
   Timer,
   Target,
   Loader2,
+  EyeOff,
+  Eye,
 } from 'lucide-react';
 
 interface Task {
@@ -421,6 +423,7 @@ export default function TasksPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
   const [actionLoading, setActionLoading] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(true);
 
   useEffect(() => {
     initialize();
@@ -572,6 +575,26 @@ export default function TasksPage() {
     setEditingTask(undefined);
   };
 
+  // Filter and sort tasks
+  const filteredTasks = tasks.filter(task =>
+    showCompleted || task.status !== 'completed'
+  );
+
+  // Sort tasks: incomplete tasks first, then completed tasks
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    // Completed tasks go to the end
+    if (a.status === 'completed' && b.status !== 'completed') return 1;
+    if (a.status !== 'completed' && b.status === 'completed') return -1;
+
+    // For tasks of same completion status, sort by priority
+    const priorityOrder: Record<'high' | 'medium' | 'low', number> = {
+      high: 3,
+      medium: 2,
+      low: 1
+    };
+    return priorityOrder[b.priority] - priorityOrder[a.priority];
+  });
+
   const texts = {
     title: language === 'no' ? 'Oppgaver' : 'Tasks',
     subtitle:
@@ -587,7 +610,10 @@ export default function TasksPage() {
       language === 'no'
         ? 'Feil ved lasting av oppgaver'
         : 'Error loading tasks',
+    showCompleted: language === 'no' ? 'Vis fullførte' : 'Show completed',
+    hideCompleted: language === 'no' ? 'Skjul fullførte' : 'Hide completed',
   };
+
   if (!isInitialized || isLoading) {
     return (
       <div className='min-h-screen bg-background flex items-center justify-center'>
@@ -614,13 +640,31 @@ export default function TasksPage() {
               <h1 className='text-3xl font-bold mb-2'>{texts.title}</h1>
               <p className='text-muted-foreground'>{texts.subtitle}</p>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={handleNewTask}>
-                  <Plus className='mr-2 h-4 w-4' />
-                  {texts.newTask}
-                </Button>
-              </DialogTrigger>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => setShowCompleted(!showCompleted)}
+              >
+                {showCompleted ? (
+                  <>
+                    <EyeOff className='mr-2 h-4 w-4' />
+                    {texts.hideCompleted}
+                  </>
+                ) : (
+                  <>
+                    <Eye className='mr-2 h-4 w-4' />
+                    {texts.showCompleted}
+                  </>
+                )}
+              </Button>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={handleNewTask}>
+                    <Plus className='mr-2 h-4 w-4' />
+                    {texts.newTask}
+                  </Button>
+                </DialogTrigger>
               <DialogContent className='sm:max-w-[500px]'>
                 <DialogHeader>
                   <DialogTitle>
@@ -649,6 +693,7 @@ export default function TasksPage() {
                 />
               </DialogContent>
             </Dialog>
+            </div>
           </div>
 
           {error && (
@@ -664,6 +709,19 @@ export default function TasksPage() {
               {[...Array(6)].map((_, i) => (
                 <TaskSkeleton key={i} />
               ))}
+            </div>
+          ) : sortedTasks.length === 0 && tasks.length > 0 ? (
+            <div className='text-center py-12'>
+              <EyeOff className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+              <h2 className='text-2xl font-semibold mb-2'>
+                {language === 'no' ? 'Ingen synlige oppgaver' : 'No visible tasks'}
+              </h2>
+              <p className='text-muted-foreground mb-6'>
+                {language === 'no'
+                  ? 'Alle oppgaver er skjulte. Vis fullførte oppgaver for å se dem.'
+                  : 'All tasks are hidden. Show completed tasks to see them.'
+                }
+              </p>
             </div>
           ) : tasks.length === 0 ? (
             <div className='text-center py-12'>
@@ -699,7 +757,7 @@ export default function TasksPage() {
             </div>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {tasks.map((task) => (
+              {sortedTasks.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}

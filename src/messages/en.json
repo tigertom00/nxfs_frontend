@@ -62,7 +62,12 @@
     "createdAt": "Created at",
     "updatedAt": "Updated at",
     "readMore": "Read more",
-    "loadMore": "Load more posts"
+    "loadMore": "Load more posts",
+    "errorLoading": "Failed to load blog posts",
+    "samplePost": {
+      "title": "Introduction to Next.js and Internationalization",
+      "content": "Welcome to our blog! This post demonstrates how **Next Intl** can be used to translate not just static UI text, but also dynamic API responses. \n\n## Key Features\n\n1. **Automatic language detection**\n2. **Rich text formatting** with markdown support\n3. **Interpolation** for dynamic values like {author} and {date}\n4. **Pluralization** support\n\nThis approach allows you to have translated content that can be:\n- Stored in translation files\n- Fetched from APIs\n- Combined for complex scenarios\n\n### API Translation Approaches\n\n**Method 1: Server-side translation** - API returns pre-translated content\n**Method 2: Client-side translation** - Use Next Intl to translate API keys\n**Method 3: Hybrid approach** - Combine both methods as needed"
+    }
   },
   "dashboard": {
     "welcome": "Welcome back",
@@ -107,6 +112,12 @@
     "voiceMessage": "Voice message",
     "image": "Image",
     "file": "File"
+  },
+  "home": {
+    "title": "Welcome to nxfs.no",
+    "subtitle": "A modern platform for sharing ideas and knowledge",
+    "blogTranslation": "Blog content translation",
+    "blogTranslationDesc": "The blog post content below can be translated automatically using Next Intl's rich text formatting and interpolation features."
   },
   "errors": {
     "pageNotFound": "Page Not Found",

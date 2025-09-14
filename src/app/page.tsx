@@ -6,10 +6,12 @@ import BlogPosts from '@/components/blog-posts';
 import ChatBot from '@/components/chat/chatbot';
 import { useAuthStore } from '@/stores/auth';
 import { useUIStore } from '@/stores/ui';
+import { useIntl } from '@/hooks/use-intl';
 
 export default function Home() {
   const { isAuthenticated, getCurrentUser, initialize } = useAuthStore();
   const { theme } = useUIStore();
+  const { t } = useIntl();
 
   useEffect(() => {
     // Initialize auth state
@@ -32,11 +34,19 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 text-center">
             <h1 className="text-4xl font-bold mb-4">
-              Welcome to nxfs.no
+              {t('home.title')}
             </h1>
             <p className="text-xl text-muted-foreground">
-              A modern platform for sharing ideas and knowledge
+              {t('home.subtitle')}
             </p>
+            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+              <h2 className="text-lg font-semibold mb-2">
+                {t('home.blogTranslation')}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {t('home.blogTranslationDesc')}
+              </p>
+            </div>
           </div>
           <BlogPosts />
         </div>
