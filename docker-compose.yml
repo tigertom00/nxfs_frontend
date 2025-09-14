@@ -20,7 +20,7 @@ services:
     volumes:
       - ./public:/app/public:ro
     networks:
-      - nxfs-network
+      - main-network
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
       interval: 30s
@@ -29,5 +29,5 @@ services:
       start_period: 40s
 
 networks:
-  nxfs-network:
+  main-network:
     driver: bridge
