@@ -59,8 +59,13 @@ api.interceptors.response.use(
             }
           );
 
-          const { access } = refreshResponse.data;
+          const { access, refresh } = refreshResponse.data;
           localStorage.setItem('accessToken', access);
+
+          // Update refresh token if provided (some APIs return a new refresh token)
+          if (refresh) {
+            localStorage.setItem('refreshToken', refresh);
+          }
 
           // Update the original request with the new token
           originalRequest.headers.Authorization = `Bearer ${access}`;
