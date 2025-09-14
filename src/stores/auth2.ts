@@ -1,0 +1,236 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import {
+  authAPI,
+  usersAPI,
+  setAuthTokens,
+  clearAuthTokens,
+  getAccessToken,
+} from '@/lib/api';
+
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  display_name?: string;
+  profile_picture?: string;
+  [key: string]: any;
+}
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  isInitialized: boolean;
+
+  // Actions
+  initialize: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  getCurrentUser: () => Promise<void>;
+  updateUser: (userData: any) => Promise<void>;
+  clearError: () => void;
+  setLoading: (loading: boolean) => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+      isLoading: true, // Start with true to prevent premature redirects
+      error: null,
+      isInitialized: false,
+
+      initialize: async () => {
+        const { isInitialized, user } = get();
+        if (isInitialized) return;
+
+        set({ isLoading: true, error: null });
+
+        try {
+          const token = getAccessToken();
+
+          if (token) {
+            if (!user) {
+              // Token exists but no user data, fetch from API
+              const userData = await usersAPI.getCurrentUser();
+              const apiUser = userData[0];
+              set({
+                user: apiUser,
+                isAuthenticated: true,
+                isLoading: false,
+                error: null,
+                isInitialized: true,
+              });
+            } else {
+              // Token exists and user data is already persisted
+              // Optionally verify token is still valid by making a quick API call
+              try {
+                await usersAPI.getCurrentUser();
+                set({
+                  isAuthenticated: true,
+                  isLoading: false,
+                  isInitialized: true,
+                });
+              } catch (error) {
+                // Token might be expired, clear everything
+                clearAuthTokens();
+                set({
+                  user: null,
+                  isAuthenticated: false,
+                  isLoading: false,
+                  error: null,
+                  isInitialized: true,
+                });
+              }
+            }
+          } else {
+            // No token, clear any persisted user data
+            set({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false,
+              error: null,
+              isInitialized: true,
+            });
+          }
+        } catch (error: any) {
+          // Handle any initialization errors
+          clearAuthTokens();
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: null,
+            isInitialized: true,
+          });
+        }
+      },
+
+      login: async (email: string, password: string) => {
+        try {
+          set({ isLoading: true, error: null });
+
+          const response = await authAPI.login(email, password);
+          const { access, refresh } = response;
+
+          // Store tokens
+          setAuthTokens(access, refresh);
+
+          // Get user data
+          const userData = await usersAPI.getCurrentUser();
+          // API returns array with one object
+          const user = userData[0];
+
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+            isInitialized: true,
+          });
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.detail || 'Login failed';
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: errorMessage,
+            isInitialized: true,
+          });
+          throw error;
+        }
+      },
+
+      logout: () => {
+        clearAuthTokens();
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+          isInitialized: true,
+        });
+      },
+
+      getCurrentUser: async () => {
+        try {
+          const { isAuthenticated } = get();
+
+          if (!isAuthenticated) {
+            return;
+          }
+
+          set({ isLoading: true, error: null });
+
+          const userData = await usersAPI.getCurrentUser();
+          // API returns array with one object
+          const user = userData[0];
+
+          set({
+            user,
+            isLoading: false,
+            error: null,
+          });
+        } catch (error: any) {
+          const errorMessage =
+            error.response?.data?.detail || 'Failed to get user data';
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: errorMessage,
+          });
+          // Clear tokens if user data fetch fails
+          clearAuthTokens();
+        }
+      },
+
+      updateUser: async (userData: any) => {
+        try {
+          const { user } = get();
+
+          if (!user) {
+            throw new Error('No user logged in');
+          }
+
+          set({ isLoading: true, error: null });
+
+          const updatedUser = await usersAPI.updateUser(user.id, userData);
+
+          set({
+            user: updatedUser,
+            isLoading: false,
+            error: null,
+          });
+        } catch (error: any) {
+          const errorMessage =
+            error.response?.data?.detail || 'Failed to update user';
+          set({
+            isLoading: false,
+            error: errorMessage,
+          });
+          throw error;
+        }
+      },
+
+      clearError: () => {
+        set({ error: null });
+      },
+
+      setLoading: (loading: boolean) => {
+        set({ isLoading: loading });
+      },
+    }),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        isInitialized: state.isInitialized,
+      }),
+    }
+  )
+);
