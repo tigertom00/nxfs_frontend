@@ -1,24 +1,44 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Production optimizations
+  output: 'standalone',
+  experimental: {
+    // Add experimental options here if needed
+  },
+
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+
+  // Environment variables that should be available to the client
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
-  // 禁用 Next.js 热重载，由 nodemon 处理重编译
   reactStrictMode: false,
   webpack: (config, { dev }) => {
     if (dev) {
-      // 禁用 webpack 的热模块替换
+      // Disable webpack's hot module replacement in development
       config.watchOptions = {
-        ignored: ['**/*'], // 忽略所有文件变化
+        ignored: ['**/*'],
       };
     }
     return config;
   },
   eslint: {
-    // 构建时忽略ESLint错误
     ignoreDuringBuilds: true,
+  },
+
+  // Images optimization for production
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 };
 
