@@ -65,7 +65,7 @@ if docker-compose ps | grep -q "Up"; then
     
     # Show logs
     echo -e "${YELLOW}📋 Recent logs:${NC}"
-    docker-compose logs --tail=20 nxfs-app
+    docker-compose logs --tail=20 nxfs_frontend
     
     echo -e "${GREEN}🎉 Deployment completed successfully!${NC}"
     echo -e "${GREEN}🌐 Your application should be available at: http://localhost:3000${NC}"
