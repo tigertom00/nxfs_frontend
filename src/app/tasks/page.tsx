@@ -5,411 +5,39 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/navbar';
 import ChatBot from '@/components/chat/chatbot';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  TaskCard,
+  TaskForm,
+  TaskSkeleton,
+  CategoryManager,
+  ProjectManager,
+  ProjectCard,
+} from '@/components/tasks';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth';
 import { useUIStore } from '@/stores/ui';
-import { tasksAPI } from '@/lib/api';
+import { tasksAPI, categoriesAPI, projectsAPI } from '@/lib/api';
+import { Task, Category, Project, TaskFormData } from '@/types/task';
 import {
   Plus,
-  Edit3,
-  Trash2,
-  CheckCircle2,
-  Circle,
-  Clock,
   AlertTriangle,
-  Calendar,
-  Timer,
   Target,
   Loader2,
   EyeOff,
   Eye,
+  Filter,
+  X,
+  FolderKanban,
 } from 'lucide-react';
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: 'todo' | 'in_progress' | 'completed';
-  priority: 'low' | 'medium' | 'high';
-  due_date?: string;
-  estimated_time?: number;
-  completed: boolean;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface TaskFormData {
-  title: string;
-  description: string;
-  status: 'todo' | 'in_progress' | 'completed';
-  priority: 'low' | 'medium' | 'high';
-  due_date?: string;
-  estimated_time?: string;
-}
-
-function TaskCard({
-  task,
-  onEdit,
-  onDelete,
-}: {
-  task: Task;
-  onEdit: (task: Task) => void;
-  onDelete: (taskId: string) => void;
-}) {
-  const { language } = useUIStore();
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle2 className='h-4 w-4 text-green-500' />;
-      case 'in_progress':
-        return <Clock className='h-4 w-4 text-blue-500' />;
-      default:
-        return <Circle className='h-4 w-4 text-gray-400' />;
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default:
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'todo':
-        return language === 'no' ? 'To Do' : 'To Do';
-      case 'in_progress':
-        return language === 'no' ? 'Pågår' : 'In Progress';
-      case 'completed':
-        return language === 'no' ? 'Fullført' : 'Completed';
-      default:
-        return status;
-    }
-  };
-
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return language === 'no' ? 'Lav' : 'Low';
-      case 'medium':
-        return language === 'no' ? 'Medium' : 'Medium';
-      case 'high':
-        return language === 'no' ? 'Høy' : 'High';
-      default:
-        return priority;
-    }
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString(language === 'no' ? 'nb-NO' : 'en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  return (
-    <Card className='h-full hover:shadow-lg transition-shadow'>
-      <CardHeader className='pb-3'>
-        <div className='flex items-start justify-between'>
-          <div className='flex items-center space-x-2 flex-1'>
-            {getStatusIcon(task.status)}
-            <CardTitle className='text-lg line-clamp-2'>{task.title}</CardTitle>
-          </div>
-          <div className='flex items-center space-x-1 ml-2'>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() => onEdit(task)}
-              className='h-8 w-8 p-0'
-            >
-              <Edit3 className='h-4 w-4' />
-            </Button>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() => onDelete(task.id)}
-              className='h-8 w-8 p-0 text-destructive hover:text-destructive'
-            >
-              <Trash2 className='h-4 w-4' />
-            </Button>
-          </div>
-        </div>
-        <div className='flex items-center space-x-2'>
-          <Badge className={getPriorityColor(task.priority)}>
-            {getPriorityText(task.priority)}
-          </Badge>
-          <Badge variant='outline'>{getStatusText(task.status)}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className='pt-0'>
-        {task.description && (
-          <CardDescription className='mb-4 line-clamp-3'>
-            {task.description}
-          </CardDescription>
-        )}
-
-        <div className='space-y-2 text-sm text-muted-foreground'>
-          {task.due_date && (
-            <div className='flex items-center space-x-1'>
-              <Calendar className='h-3 w-3' />
-              <span>{formatDate(task.due_date)}</span>
-            </div>
-          )}
-          {task.estimated_time && (
-            <div className='flex items-center space-x-1'>
-              <Timer className='h-3 w-3' />
-              <span>{task.estimated_time}h</span>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function TaskForm({
-  task,
-  onSubmit,
-  onCancel,
-}: {
-  task?: Task;
-  onSubmit: (data: TaskFormData) => void;
-  onCancel: () => void;
-}) {
-  const { language } = useUIStore();
-  const [formData, setFormData] = useState<TaskFormData>({
-    title: task?.title || '',
-    description: task?.description || '',
-    status: task?.status || 'todo',
-    priority: task?.priority || 'medium',
-    due_date: task?.due_date ? task.due_date.split('T')[0] : '',
-    estimated_time: task?.estimated_time?.toString() || '',
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      await onSubmit(formData);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const texts = {
-    title: task
-      ? language === 'no'
-        ? 'Rediger Oppgave'
-        : 'Edit Task'
-      : language === 'no'
-      ? 'Ny Oppgave'
-      : 'New Task',
-    description: language === 'no' ? 'Beskrivelse' : 'Description',
-    status: language === 'no' ? 'Status' : 'Status',
-    priority: language === 'no' ? 'Prioritet' : 'Priority',
-    dueDate: language === 'no' ? 'Forfallsdato' : 'Due Date',
-    estimatedTime:
-      language === 'no' ? 'Estimert Tid (timer)' : 'Estimated Time (hours)',
-    save: language === 'no' ? 'Lagre' : 'Save',
-    cancel: language === 'no' ? 'Avbryt' : 'Cancel',
-    todo: language === 'no' ? 'To Do' : 'To Do',
-    inProgress: language === 'no' ? 'Pågår' : 'In Progress',
-    completed: language === 'no' ? 'Fullført' : 'Completed',
-    low: language === 'no' ? 'Lav' : 'Low',
-    medium: language === 'no' ? 'Medium' : 'Medium',
-    high: language === 'no' ? 'Høy' : 'High',
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      <div className='space-y-2'>
-        <Label htmlFor='title'>{texts.title}</Label>
-        <Input
-          id='title'
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          required
-          disabled={loading}
-        />
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='description'>{texts.description}</Label>
-        <Textarea
-          id='description'
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          rows={3}
-          disabled={loading}
-        />
-      </div>
-
-      <div className='grid grid-cols-2 gap-4'>
-        <div className='space-y-2'>
-          <Label htmlFor='status'>{texts.status}</Label>
-          <Select
-            value={formData.status}
-            onValueChange={(value: 'todo' | 'in_progress' | 'completed') =>
-              setFormData({ ...formData, status: value })
-            }
-            disabled={loading}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='todo'>{texts.todo}</SelectItem>
-              <SelectItem value='in_progress'>{texts.inProgress}</SelectItem>
-              <SelectItem value='completed'>{texts.completed}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className='space-y-2'>
-          <Label htmlFor='priority'>{texts.priority}</Label>
-          <Select
-            value={formData.priority}
-            onValueChange={(value: 'low' | 'medium' | 'high') =>
-              setFormData({ ...formData, priority: value })
-            }
-            disabled={loading}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='low'>{texts.low}</SelectItem>
-              <SelectItem value='medium'>{texts.medium}</SelectItem>
-              <SelectItem value='high'>{texts.high}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className='grid grid-cols-2 gap-4'>
-        <div className='space-y-2'>
-          <Label htmlFor='due_date'>{texts.dueDate}</Label>
-          <Input
-            id='due_date'
-            type='date'
-            value={formData.due_date}
-            onChange={(e) =>
-              setFormData({ ...formData, due_date: e.target.value })
-            }
-            disabled={loading}
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label htmlFor='estimated_time'>{texts.estimatedTime}</Label>
-          <Input
-            id='estimated_time'
-            type='number'
-            step='0.5'
-            min='0'
-            value={formData.estimated_time}
-            onChange={(e) =>
-              setFormData({ ...formData, estimated_time: e.target.value })
-            }
-            disabled={loading}
-          />
-        </div>
-      </div>
-
-      <div className='flex justify-end space-x-2 pt-4'>
-        <Button
-          type='button'
-          variant='outline'
-          onClick={onCancel}
-          disabled={loading}
-        >
-          {texts.cancel}
-        </Button>
-        <Button type='submit' disabled={loading}>
-          {loading
-            ? language === 'no'
-              ? 'Lagrer...'
-              : 'Saving...'
-            : texts.save}
-        </Button>
-      </div>
-    </form>
-  );
-}
-
-function TaskSkeleton() {
-  return (
-    <Card className='h-full'>
-      <CardHeader className='pb-3'>
-        <div className='flex items-start justify-between'>
-          <div className='space-y-2 flex-1'>
-            <Skeleton className='h-6 w-3/4' />
-            <div className='flex space-x-2'>
-              <Skeleton className='h-6 w-16' />
-              <Skeleton className='h-6 w-20' />
-            </div>
-          </div>
-          <div className='flex space-x-1'>
-            <Skeleton className='h-8 w-8' />
-            <Skeleton className='h-8 w-8' />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className='pt-0'>
-        <div className='space-y-2'>
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-3/4' />
-          <div className='flex space-x-4'>
-            <Skeleton className='h-4 w-20' />
-            <Skeleton className='h-4 w-16' />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default function TasksPage() {
   const { isAuthenticated, user, isLoading, initialize, isInitialized } =
@@ -418,12 +46,18 @@ export default function TasksPage() {
   const router = useRouter();
 
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
   const [actionLoading, setActionLoading] = useState(false);
   const [showCompleted, setShowCompleted] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [viewingProject, setViewingProject] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   useEffect(() => {
     initialize();
@@ -444,6 +78,8 @@ export default function TasksPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchTasks();
+      fetchCategories();
+      fetchProjects();
     }
   }, [isAuthenticated, user]);
 
@@ -468,6 +104,24 @@ export default function TasksPage() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await categoriesAPI.getCategories();
+      setCategories(response);
+    } catch (err: any) {
+      console.error('Failed to load categories:', err);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const response = await projectsAPI.getProjects();
+      setProjects(response);
+    } catch (err: any) {
+      console.error('Failed to load projects:', err);
+    }
+  };
+
   const handleCreateTask = async (taskData: TaskFormData) => {
     try {
       setActionLoading(true);
@@ -476,10 +130,16 @@ export default function TasksPage() {
         setActionLoading(false);
         return;
       }
-      await tasksAPI.createTask({
-        ...taskData,
-        user_id: user.id, // Ensure user_id is included
-      });
+
+      const payload = { ...taskData, user_id: user.id };
+      if (!payload.due_date) {
+        delete payload.due_date;
+      }
+      if (!payload.estimated_time) {
+        delete payload.estimated_time;
+      }
+
+      await tasksAPI.createTask(payload);
       await fetchTasks();
       setIsDialogOpen(false);
       setEditingTask(undefined);
@@ -508,10 +168,16 @@ export default function TasksPage() {
         setActionLoading(false);
         return;
       }
-      await tasksAPI.updateTask(editingTask.id, {
-        ...taskData,
-        user_id: user.id,
-      });
+
+      const payload = { ...taskData, user_id: user.id };
+      if (!payload.due_date) {
+        delete payload.due_date;
+      }
+      if (!payload.estimated_time) {
+        delete payload.estimated_time;
+      }
+
+      await tasksAPI.updateTask(editingTask.id, payload);
       await fetchTasks();
       setIsDialogOpen(false);
       setEditingTask(undefined);
@@ -575,13 +241,64 @@ export default function TasksPage() {
     setEditingTask(undefined);
   };
 
-  // Filter and sort tasks
-  const filteredTasks = tasks.filter(task =>
-    showCompleted || task.status !== 'completed'
-  );
+  // Filter tasks - show only standalone tasks (no project assigned) on main page
+  const standaloneTasks = tasks.filter((task) => {
+    // Only show tasks without a project (or project = null/undefined)
+    if (task.project) return false;
 
-  // Sort tasks: incomplete tasks first, then completed tasks
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    // Filter by completion status
+    if (!showCompleted && task.status === 'completed') return false;
+
+    // Filter by selected categories
+    if (selectedCategories.length > 0) {
+      return (
+        task.category &&
+        task.category.some((catId) => selectedCategories.includes(catId))
+      );
+    }
+
+    return true;
+  });
+
+  // Get tasks for a specific project
+  const getProjectTasks = (projectId: number) => {
+    return tasks.filter((task) => task.project === projectId);
+  };
+
+  const toggleCategoryFilter = (categoryId: number) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const clearCategoryFilters = () => {
+    setSelectedCategories([]);
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setSelectedProject(null);
+  };
+
+  const handleProjectClick = (project: Project) => {
+    console.log('Project clicked:', project);
+    router.push(`/tasks/project/${project.id}`);
+  };
+
+  const handleEditProject = (project: Project) => {
+    console.log('Edit project:', project);
+    setEditingProject(project);
+  };
+
+  const handleEditComplete = () => {
+    setEditingProject(null);
+    fetchProjects(); // Refresh projects after edit
+  };
+
+  // Sort standalone tasks: incomplete tasks first, then completed tasks
+  const sortedStandaloneTasks = [...standaloneTasks].sort((a, b) => {
     // Completed tasks go to the end
     if (a.status === 'completed' && b.status !== 'completed') return 1;
     if (a.status !== 'completed' && b.status === 'completed') return -1;
@@ -590,9 +307,19 @@ export default function TasksPage() {
     const priorityOrder: Record<'high' | 'medium' | 'low', number> = {
       high: 3,
       medium: 2,
-      low: 1
+      low: 1,
     };
     return priorityOrder[b.priority] - priorityOrder[a.priority];
+  });
+
+  // Sort projects by status and creation date
+  const sortedProjects = [...projects].sort((a, b) => {
+    // Completed projects go to the end
+    if (a.status === 'completed' && b.status !== 'completed') return 1;
+    if (a.status !== 'completed' && b.status === 'completed') return -1;
+
+    // Sort by creation date (newest first)
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   const texts = {
@@ -612,6 +339,19 @@ export default function TasksPage() {
         : 'Error loading tasks',
     showCompleted: language === 'no' ? 'Vis fullførte' : 'Show completed',
     hideCompleted: language === 'no' ? 'Skjul fullførte' : 'Hide completed',
+    filterByCategory:
+      language === 'no' ? 'Filtrer etter kategori' : 'Filter by category',
+    filterByProject:
+      language === 'no' ? 'Filtrer etter prosjekt' : 'Filter by project',
+    clearFilters: language === 'no' ? 'Fjern filtre' : 'Clear filters',
+    clearAllFilters:
+      language === 'no' ? 'Fjern alle filtre' : 'Clear all filters',
+    categoriesSelected:
+      language === 'no' ? 'kategorier valgt' : 'categories selected',
+    allProjects: language === 'no' ? 'Alle prosjekter' : 'All projects',
+    noProject: language === 'no' ? 'Uten prosjekt' : 'No project',
+    projects: language === 'no' ? 'Prosjekter' : 'Projects',
+    standaloneTasks: language === 'no' ? 'Løse Oppgaver' : 'Standalone Tasks',
   };
 
   if (!isInitialized || isLoading) {
@@ -640,7 +380,20 @@ export default function TasksPage() {
               <h1 className='text-3xl font-bold mb-2'>{texts.title}</h1>
               <p className='text-muted-foreground'>{texts.subtitle}</p>
             </div>
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-2 flex-wrap'>
+              <ProjectManager
+                projects={projects}
+                onProjectsChange={fetchProjects}
+                userId={Number(user.id)}
+                editProject={editingProject || undefined}
+                onEditComplete={handleEditComplete}
+              />
+
+              <CategoryManager
+                categories={categories}
+                onCategoriesChange={fetchCategories}
+              />
+
               <Button
                 variant='outline'
                 size='sm'
@@ -665,36 +418,137 @@ export default function TasksPage() {
                     {texts.newTask}
                   </Button>
                 </DialogTrigger>
-              <DialogContent className='sm:max-w-[500px]'>
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingTask
-                      ? language === 'no'
-                        ? 'Rediger Oppgave'
-                        : 'Edit Task'
-                      : language === 'no'
-                      ? 'Ny Oppgave'
-                      : 'New Task'}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {editingTask
-                      ? language === 'no'
-                        ? 'Rediger detaljene for oppgaven'
-                        : 'Edit the task details'
-                      : language === 'no'
-                      ? 'Opprett en ny oppgave'
-                      : 'Create a new task'}
-                  </DialogDescription>
-                </DialogHeader>
-                <TaskForm
-                  task={editingTask}
-                  onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
-                  onCancel={handleCloseDialog}
-                />
-              </DialogContent>
-            </Dialog>
+                <DialogContent className='sm:max-w-[500px]'>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingTask
+                        ? language === 'no'
+                          ? 'Rediger Oppgave'
+                          : 'Edit Task'
+                        : language === 'no'
+                        ? 'Ny Oppgave'
+                        : 'New Task'}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {editingTask
+                        ? language === 'no'
+                          ? 'Rediger detaljene for oppgaven'
+                          : 'Edit the task details'
+                        : language === 'no'
+                        ? 'Opprett en ny oppgave'
+                        : 'Create a new task'}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <TaskForm
+                    task={editingTask}
+                    categories={categories}
+                    projects={projects}
+                    onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
+                    onCancel={handleCloseDialog}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
+
+          {/* Filters */}
+          {(projects.length > 0 || categories.length > 0) && (
+            <div className='space-y-4'>
+              <div className='flex items-center justify-between'>
+                <h3 className='text-sm font-medium flex items-center gap-2'>
+                  <Filter className='h-4 w-4' />
+                  Filters
+                </h3>
+                {(selectedCategories.length > 0 ||
+                  selectedProject !== null) && (
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={clearAllFilters}
+                    className='text-muted-foreground hover:text-foreground'
+                  >
+                    <X className='mr-1 h-3 w-3' />
+                    {texts.clearAllFilters}
+                  </Button>
+                )}
+              </div>
+
+              {/* Project Filter */}
+              {projects.length > 0 && (
+                <div className='space-y-2'>
+                  <h4 className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                    {texts.filterByProject}
+                  </h4>
+                  <div className='flex flex-wrap gap-2'>
+                    <Badge
+                      variant={selectedProject === null ? 'default' : 'outline'}
+                      className='cursor-pointer hover:bg-primary/20'
+                      onClick={() => setSelectedProject(null)}
+                    >
+                      {texts.allProjects}
+                    </Badge>
+                    <Badge
+                      variant={selectedProject === 0 ? 'default' : 'outline'}
+                      className='cursor-pointer hover:bg-primary/20'
+                      onClick={() => setSelectedProject(0)}
+                    >
+                      {texts.noProject}
+                    </Badge>
+                    {projects.map((project) => {
+                      const isSelected = selectedProject === project.id;
+                      return (
+                        <Badge
+                          key={project.id}
+                          variant={isSelected ? 'default' : 'outline'}
+                          className='cursor-pointer hover:bg-primary/20'
+                          onClick={() =>
+                            setSelectedProject(isSelected ? null : project.id)
+                          }
+                        >
+                          {language === 'no' && project.name_nb
+                            ? project.name_nb
+                            : project.name}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Category Filter */}
+              {categories.length > 0 && (
+                <div className='space-y-2'>
+                  <h4 className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                    {texts.filterByCategory}
+                  </h4>
+                  <div className='flex flex-wrap gap-2'>
+                    {categories.map((category) => {
+                      const isSelected = selectedCategories.includes(
+                        category.id
+                      );
+                      return (
+                        <Badge
+                          key={category.id}
+                          variant={isSelected ? 'default' : 'outline'}
+                          className='cursor-pointer hover:bg-primary/20'
+                          onClick={() => toggleCategoryFilter(category.id)}
+                        >
+                          {language === 'no' && category.name_nb
+                            ? category.name_nb
+                            : category.name}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                  {selectedCategories.length > 0 && (
+                    <p className='text-xs text-muted-foreground'>
+                      {selectedCategories.length} {texts.categoriesSelected}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {error && (
             <Alert className='mb-6'>
@@ -710,20 +564,8 @@ export default function TasksPage() {
                 <TaskSkeleton key={i} />
               ))}
             </div>
-          ) : sortedTasks.length === 0 && tasks.length > 0 ? (
-            <div className='text-center py-12'>
-              <EyeOff className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
-              <h2 className='text-2xl font-semibold mb-2'>
-                {language === 'no' ? 'Ingen synlige oppgaver' : 'No visible tasks'}
-              </h2>
-              <p className='text-muted-foreground mb-6'>
-                {language === 'no'
-                  ? 'Alle oppgaver er skjulte. Vis fullførte oppgaver for å se dem.'
-                  : 'All tasks are hidden. Show completed tasks to see them.'
-                }
-              </p>
-            </div>
-          ) : tasks.length === 0 ? (
+          ) : sortedProjects.length === 0 &&
+            sortedStandaloneTasks.length === 0 ? (
             <div className='text-center py-12'>
               <Target className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
               <h2 className='text-2xl font-semibold mb-2'>{texts.noTasks}</h2>
@@ -749,6 +591,8 @@ export default function TasksPage() {
                     </DialogDescription>
                   </DialogHeader>
                   <TaskForm
+                    categories={categories}
+                    projects={projects}
                     onSubmit={handleCreateTask}
                     onCancel={handleCloseDialog}
                   />
@@ -756,15 +600,49 @@ export default function TasksPage() {
               </Dialog>
             </div>
           ) : (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {sortedTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onEdit={handleEditTask}
-                  onDelete={handleDeleteTask}
-                />
-              ))}
+            <div className='space-y-8'>
+              {/* Projects Section */}
+              {sortedProjects.length > 0 && (
+                <div>
+                  <h2 className='text-xl font-semibold mb-4 flex items-center gap-2'>
+                    <FolderKanban className='h-5 w-5' />
+                    {texts.projects}
+                  </h2>
+                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                    {sortedProjects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        projectTasks={getProjectTasks(project.id)}
+                        onEdit={handleEditProject}
+                        onClick={handleProjectClick}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Standalone Tasks Section */}
+              {sortedStandaloneTasks.length > 0 && (
+                <div>
+                  <h2 className='text-xl font-semibold mb-4 flex items-center gap-2'>
+                    <Target className='h-5 w-5' />
+                    {texts.standaloneTasks}
+                  </h2>
+                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                    {sortedStandaloneTasks.map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        categories={categories}
+                        projects={projects}
+                        onEdit={handleEditTask}
+                        onDelete={handleDeleteTask}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

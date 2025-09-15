@@ -219,6 +219,57 @@ export const tasksAPI = {
   },
 };
 
+// Categories API
+export const categoriesAPI = {
+  getCategories: async () => {
+    const response = await api.get('/app/tasks/categories/');
+    return response.data;
+  },
+  getCategory: async (categoryId: string) => {
+    const response = await api.get(`/app/tasks/categories/${categoryId}/`);
+    return response.data;
+  },
+  createCategory: async (categoryData: any) => {
+    const response = await api.post('/app/tasks/categories/', categoryData);
+    return response.data;
+  },
+  updateCategory: async (categoryId: string, categoryData: any) => {
+    const response = await api.put(
+      `/app/tasks/categories/${categoryId}/`,
+      categoryData
+    );
+    return response.data;
+  },
+  deleteCategory: async (categoryId: string) => {
+    const response = await api.delete(`/app/tasks/categories/${categoryId}/`);
+    return response.data;
+  },
+};
+
+// Projects API
+export const projectsAPI = {
+  getProjects: async () => {
+    const response = await api.get('/app/projects/');
+    return response.data;
+  },
+  getProject: async (projectId: string) => {
+    const response = await api.get(`/app/projects/${projectId}/`);
+    return response.data;
+  },
+  createProject: async (projectData: any) => {
+    const response = await api.post('/app/projects/', projectData);
+    return response.data;
+  },
+  updateProject: async (projectId: string, projectData: any) => {
+    const response = await api.put(`/app/projects/${projectId}/`, projectData);
+    return response.data;
+  },
+  deleteProject: async (projectId: string) => {
+    const response = await api.delete(`/app/projects/${projectId}/`);
+    return response.data;
+  },
+};
+
 // Utility functions
 export const setAuthTokens = (accessToken: string, refreshToken: string) => {
   localStorage.setItem('accessToken', accessToken);
