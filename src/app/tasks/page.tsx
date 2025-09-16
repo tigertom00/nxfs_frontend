@@ -8,8 +8,6 @@ import {
   TaskCard,
   TaskForm,
   TaskSkeleton,
-  CategoryManager,
-  ProjectManager,
   ProjectCard,
 } from '@/components/features/tasks';
 import { Button } from '@/components/ui/button';
@@ -381,18 +379,6 @@ export default function TasksPage() {
               <p className="text-muted-foreground">{texts.subtitle}</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <ProjectManager
-                projects={projects}
-                onProjectsChange={fetchProjects}
-                userId={Number(user.id)}
-                editProject={editingProject || undefined}
-                onEditComplete={handleEditComplete}
-              />
-
-              <CategoryManager
-                categories={categories}
-                onCategoriesChange={fetchCategories}
-              />
 
               <Button
                 variant="outline"

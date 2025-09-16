@@ -14,6 +14,10 @@ npm start
 
 # Code quality
 npm run lint
+npm run format      # Format code with Prettier
+
+# Bundle analysis
+npm run analyze     # Analyze bundle size and dependencies
 
 # Database operations
 npm run db:push      # Push schema changes to database
@@ -32,12 +36,15 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
 - **N8N Chatbot**: `https://n8n.nxfs.no/webhook/nxfs` - AI chatbot integration
 - **Authentication**: JWT tokens with automatic refresh via Axios interceptors
 - **API Structure**: All API calls go through centralized API client in `src/lib/api.ts`
+- **Type Safety**: Comprehensive TypeScript interfaces for all API requests/responses
+- **Error Handling**: Global error handler with toast notifications and retry mechanisms
 
 ### State Management Architecture
-- **Zustand stores** with persistence:
+- **Zustand stores** with persistence (centralized exports via `src/stores/index.ts`):
   - `useAuthStore`: JWT authentication, user data, automatic token refresh
   - `useUIStore`: Theme (light/dark/purple), language (en/no), UI state
 - **Authentication flow**: Auto-initialization on app start, token refresh on 401/403
+- **Environment Configuration**: Zod-validated environment variables via `src/lib/env.ts`
 
 ### Database & Backend
 - **Local Database**: SQLite with Prisma ORM (basic User/Post models)
@@ -59,12 +66,21 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
 - **Socket.IO**: Real-time features integrated with custom server
 - **TanStack Query**: Data fetching and caching (ready but not extensively used)
 - **Framer Motion**: Animations and transitions
+- **Sonner**: Toast notifications with enhanced UX and error handling
+- **Prettier**: Code formatting with `.prettierrc` configuration
+- **Bundle Analyzer**: Performance monitoring and optimization insights
 
 ### Component Architecture
 - **Pages**: Next.js 15 App Router structure in `src/app/`
-- **Shared Components**: Reusable components in `src/components/`
+- **Feature Components**: Feature-specific components in `src/components/features/`
+  - `features/blog/`: Blog post components
+  - `features/chat/`: Chatbot components
+  - `features/tasks/`: Task management components
+- **Shared Components**: Reusable components in `src/components/shared/`
+  - `ErrorBoundary`: React error boundary for component-level error handling
+- **Layout Components**: Navigation and layout in `src/components/layouts/`
 - **UI Components**: shadcn/ui components in `src/components/ui/`
-- **Layout**: Global navbar and chatbot components
+- **Centralized Exports**: All components accessible via `src/components/features/index.ts`
 
 ### Authentication Pattern
 ```typescript
@@ -81,7 +97,9 @@ useEffect(() => {
 ### API Response Patterns
 - **User API**: Returns arrays (user data is `response.data[0]`)
 - **Tasks API**: Standard REST endpoints with full CRUD
-- **Error handling**: Centralized in API client with automatic token refresh
+- **Type Safety**: All API responses use TypeScript interfaces from `src/types/api.ts`
+- **Error Handling**: Global error handler (`src/lib/error-handler.ts`) with toast notifications
+- **Payload Types**: Separate request/response types (e.g., `CreateTaskPayload` vs `Task`)
 
 ### Styling System
 - **Tailwind CSS 4**: Utility-first styling
@@ -110,3 +128,99 @@ function Component() {
   return <h1>{t('home.title')}</h1>; // Auto-switches based on UI store language
 }
 ```
+
+## Utility Hooks
+
+The project includes a comprehensive set of utility hooks (centralized via `src/hooks/index.ts`):
+
+### Core Hooks
+- **`useDebounce`**: Debounce values for search optimization and performance
+- **`useLocalStorage`**: Type-safe localStorage integration with React state
+- **`useApi`**: Enhanced API calls with loading states and error handling
+- **`useAsync`**: Generic async operation handling with loading/error states
+
+### Usage Examples
+```typescript
+import { useDebounce, useLocalStorage, useApi } from '@/hooks';
+
+// Debounced search
+const [searchTerm, setSearchTerm] = useState('');
+const debouncedSearch = useDebounce(searchTerm, 300);
+
+// Persistent local storage
+const [settings, setSettings] = useLocalStorage('user-settings', defaultSettings);
+
+// API calls with loading states
+const { data, loading, error, execute } = useApi(tasksAPI.getTasks);
+```
+
+## Error Handling Architecture
+
+### Global Error Handler
+- **Location**: `src/lib/error-handler.ts`
+- **Features**: Centralized error processing, toast notifications, retry mechanisms
+- **Integration**: Automatic handling of Axios errors, network failures, and API errors
+
+### React Error Boundary
+- **Location**: `src/components/shared/error-boundary.tsx`
+- **Purpose**: Catch component-level errors and provide fallback UI
+- **Features**: Error retry functionality, user-friendly error messages
+
+### Error Handling Patterns
+```typescript
+import { ErrorHandler } from '@/lib/error-handler';
+
+try {
+  const result = await api.someOperation();
+  return result;
+} catch (error) {
+  ErrorHandler.handle(error, 'Operation context');
+  throw error; // Re-throw if needed for component handling
+}
+```
+
+## Type Safety
+
+### API Types
+- **Location**: `src/types/api.ts` and `src/types/index.ts`
+- **Coverage**: Complete TypeScript interfaces for all API operations
+- **Pattern**: Separate request payloads and response types for clarity
+
+### Key Type Interfaces
+```typescript
+// Request types
+interface CreateTaskPayload {
+  title: string;
+  description: string;
+  status: 'todo' | 'in_progress' | 'completed';
+  user_id: string;
+}
+
+// Response types
+interface Task extends CreateTaskPayload {
+  id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// API response patterns
+type CreateTaskResponse = Task;
+type GetTasksResponse = Task[];
+```
+
+## Development Tools
+
+### Bundle Analysis
+```bash
+npm run analyze  # Generate bundle analysis report
+```
+
+### Code Formatting
+```bash
+npm run format   # Format all code with Prettier
+```
+
+### Environment Configuration
+- **Validation**: Zod schema validation for environment variables
+- **Location**: `src/lib/env.ts`
+- **Type Safety**: Compile-time validation of required environment variables

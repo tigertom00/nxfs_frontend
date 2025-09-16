@@ -33,7 +33,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useUIStore } from '@/stores/ui';
-import { Project, ProjectFormData } from '@/types/task';
+import { Project } from '@/types/api';
+import { ProjectFormData } from '@/types/task';
 import { projectsAPI } from '@/lib/api';
 import {
   Plus,
@@ -167,7 +168,7 @@ export function ProjectManager({
         completed: 'fullført' as const,
       };
 
-      const projectData = {
+      const projectData: any = {
         name: formData.name.trim(),
         status: formData.status,
         status_nb: statusMapping[formData.status as keyof typeof statusMapping],
@@ -184,10 +185,10 @@ export function ProjectManager({
       if (editingProject) {
         await projectsAPI.updateProject(
           editingProject.id.toString(),
-          projectData
+          projectData as Partial<Project>
         );
       } else {
-        await projectsAPI.createProject(projectData);
+        await projectsAPI.createProject(projectData as Partial<Project>);
       }
 
       onProjectsChange();

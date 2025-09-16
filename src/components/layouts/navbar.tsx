@@ -20,54 +20,16 @@ import {
   User,
   Settings,
   LogOut,
-  Globe,
-  Sun,
-  Moon,
-  Palette,
   ChevronDown,
 } from 'lucide-react';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { theme, language, setTheme, setLanguage } = useUIStore();
+  const { language } = useUIStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-  };
-
-  const handleLanguageChange = (newLanguage: 'en' | 'no') => {
-    setLanguage(newLanguage);
-  };
-
-  const handleThemeChange = (newTheme: 'light' | 'dark' | 'purple') => {
-    setTheme(newTheme);
-  };
-
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'dark':
-        return <Moon className="h-4 w-4" />;
-      case 'purple':
-        return <Palette className="h-4 w-4" />;
-      default:
-        return <Sun className="h-4 w-4" />;
-    }
-  };
-
-  const getThemeLabel = () => {
-    switch (theme) {
-      case 'dark':
-        return language === 'no' ? 'Mørk' : 'Dark';
-      case 'purple':
-        return language === 'no' ? 'Lilla' : 'Purple';
-      default:
-        return language === 'no' ? 'Lys' : 'Light';
-    }
-  };
-
-  const getLanguageLabel = () => {
-    return language === 'no' ? 'Norsk' : 'English';
   };
 
   return (
@@ -187,47 +149,6 @@ export default function Navbar() {
 
         {/* Right side buttons */}
         <div className="flex items-center space-x-2">
-          {/* Language and Theme selectors */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Globe className="h-4 w-4 mr-2" />
-                {getLanguageLabel()}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleLanguageChange('en')}>
-                English
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleLanguageChange('no')}>
-                Norsk
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                {getThemeIcon()}
-                <span className="ml-2">{getThemeLabel()}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleThemeChange('light')}>
-                <Sun className="h-4 w-4 mr-2" />
-                {language === 'no' ? 'Lys' : 'Light'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleThemeChange('dark')}>
-                <Moon className="h-4 w-4 mr-2" />
-                {language === 'no' ? 'Mørk' : 'Dark'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleThemeChange('purple')}>
-                <Palette className="h-4 w-4 mr-2" />
-                {language === 'no' ? 'Lilla' : 'Purple'}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Authentication buttons */}
           {isAuthenticated ? (
             <DropdownMenu>
