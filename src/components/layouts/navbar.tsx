@@ -14,8 +14,7 @@ import {
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuthStore } from '@/stores/auth';
-import { useUIStore } from '@/stores/ui';
+import { useAuthStore, useUIStore } from '@/stores';
 import {
   Menu,
   User,
@@ -82,7 +81,9 @@ export default function Navbar() {
                 <Button variant="ghost" className="p-2 h-auto">
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <span className="text-primary-foreground font-bold text-sm">NX</span>
+                      <span className="text-primary-foreground font-bold text-sm">
+                        NX
+                      </span>
                     </div>
                     <ChevronDown className="h-4 w-4" />
                   </div>
@@ -112,7 +113,7 @@ export default function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
-                
+
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <span className="mr-2">📁</span>
@@ -136,7 +137,7 @@ export default function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
-                
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/dashboard" className="w-full">
@@ -167,14 +168,19 @@ export default function Navbar() {
             </DropdownMenu>
           ) : (
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">NX</span>
+              <span className="text-primary-foreground font-bold text-sm">
+                NX
+              </span>
             </div>
           )}
         </div>
 
         {/* Center - Site Title */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <Link href="/" className="font-semibold text-lg hover:opacity-80 transition-opacity">
+          <Link
+            href="/"
+            className="font-semibold text-lg hover:opacity-80 transition-opacity"
+          >
             nxfs.no
           </Link>
         </div>
@@ -226,11 +232,19 @@ export default function Navbar() {
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.profile_picture} alt={user?.display_name || user?.username} />
+                    <AvatarImage
+                      src={user?.profile_picture}
+                      alt={user?.display_name || user?.username}
+                    />
                     <AvatarFallback>
-                      {(user?.display_name || user?.username || 'U').charAt(0).toUpperCase()}
+                      {(user?.display_name || user?.username || 'U')
+                        .charAt(0)
+                        .toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>

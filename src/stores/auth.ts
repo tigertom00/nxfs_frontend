@@ -7,6 +7,7 @@ import {
   clearAuthTokens,
   getAccessToken,
 } from '@/lib/api';
+import { handleApiError, showSuccessToast } from '@/lib/error-handler';
 
 interface User {
   id: string;
@@ -84,12 +85,9 @@ export const useAuthStore = create<AuthState>()(
           const response = await authAPI.login(email, password);
           const { access, refresh } = response;
 
-          // Store tokens
           setAuthTokens(access, refresh);
 
-          // Get user data
           const userData = await usersAPI.getCurrentUser();
-          // API returns array with one object
           const user = userData[0];
 
           set({
@@ -99,13 +97,17 @@ export const useAuthStore = create<AuthState>()(
             error: null,
             isInitialized: true,
           });
+
+          showSuccessToast(
+            `Welcome back, ${user.display_name || user.username}!`
+          );
         } catch (error: any) {
-          const errorMessage = error.response?.data?.detail || 'Login failed';
+          const apiError = handleApiError(error, 'Login');
           set({
             user: null,
             isAuthenticated: false,
             isLoading: false,
-            error: errorMessage,
+            error: apiError.message,
             isInitialized: true,
           });
           throw error;
@@ -121,6 +123,7 @@ export const useAuthStore = create<AuthState>()(
           error: null,
           isInitialized: true,
         });
+        showSuccessToast('Successfully logged out');
       },
 
       getCurrentUser: async () => {
@@ -173,12 +176,13 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null,
           });
+
+          showSuccessToast('Profile updated successfully');
         } catch (error: any) {
-          const errorMessage =
-            error.response?.data?.detail || 'Failed to update user';
+          const apiError = handleApiError(error, 'Updating profile');
           set({
             isLoading: false,
-            error: errorMessage,
+            error: apiError.message,
           });
           throw error;
         }

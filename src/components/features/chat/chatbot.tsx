@@ -49,10 +49,14 @@ export default function ChatBot() {
 
   const texts = {
     title: language === 'no' ? 'Chat med AI' : 'Chat with AI',
-    placeholder: language === 'no' ? 'Skriv meldingen din...' : 'Type your message...',
+    placeholder:
+      language === 'no' ? 'Skriv meldingen din...' : 'Type your message...',
     send: language === 'no' ? 'Send' : 'Send',
     typing: language === 'no' ? 'AI skriver...' : 'AI is typing...',
-    error: language === 'no' ? 'Feil ved sending av melding' : 'Error sending message',
+    error:
+      language === 'no'
+        ? 'Feil ved sending av melding'
+        : 'Error sending message',
     retry: language === 'no' ? 'Prøv igjen' : 'Retry',
     newChat: language === 'no' ? 'Ny Chat' : 'New Chat',
     clearChat: language === 'no' ? 'Tøm Chat' : 'Clear Chat',
@@ -62,10 +66,16 @@ export default function ChatBot() {
     file: language === 'no' ? 'Fil' : 'File',
     chatWithAI: language === 'no' ? 'Chat med AI' : 'Chat with AI',
     online: language === 'no' ? 'Online' : 'Online',
-    startConversation: language === 'no' ? 'Start en samtale med AI-assistenten' : 'Start a conversation with the AI assistant',
+    startConversation:
+      language === 'no'
+        ? 'Start en samtale med AI-assistenten'
+        : 'Start a conversation with the AI assistant',
   };
 
-  const secretKey = process.env.NEXT_PUBLIC_N8N_SECRET_KEY || process.env.N8N_SECRET_KEY || 'your-secret-key';
+  const secretKey =
+    process.env.NEXT_PUBLIC_N8N_SECRET_KEY ||
+    process.env.N8N_SECRET_KEY ||
+    'your-secret-key';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -163,9 +173,11 @@ export default function ChatBot() {
   }
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
-      isMinimized ? 'w-80' : 'w-96 md:w-[440px]'
-    }`}>
+    <div
+      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
+        isMinimized ? 'w-80' : 'w-96 md:w-[440px]'
+      }`}
+    >
       <Card className="shadow-xl border-0">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -200,7 +212,7 @@ export default function ChatBot() {
             </div>
           </div>
         </CardHeader>
-        
+
         {!isMinimized && (
           <>
             <CardContent className="p-0">
@@ -220,7 +232,9 @@ export default function ChatBot() {
                       <div
                         key={message.id}
                         className={`flex ${
-                          message.sender === 'user' ? 'justify-end' : 'justify-start'
+                          message.sender === 'user'
+                            ? 'justify-end'
+                            : 'justify-start'
                         }`}
                       >
                         <div
@@ -238,27 +252,30 @@ export default function ChatBot() {
                               <p className="text-sm whitespace-pre-wrap">
                                 {message.content}
                               </p>
-                              {message.attachments && message.attachments.length > 0 && (
-                                <div className="mt-2 space-y-1">
-                                  {message.attachments.map((attachment, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex items-center space-x-1 text-xs opacity-80"
-                                    >
-                                      {attachment.type === 'image' && (
-                                        <ImageIcon className="h-3 w-3" />
-                                      )}
-                                      {attachment.type === 'file' && (
-                                        <File className="h-3 w-3" />
-                                      )}
-                                      {attachment.type === 'voice' && (
-                                        <Mic className="h-3 w-3" />
-                                      )}
-                                      <span>{attachment.name}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              {message.attachments &&
+                                message.attachments.length > 0 && (
+                                  <div className="mt-2 space-y-1">
+                                    {message.attachments.map(
+                                      (attachment, index) => (
+                                        <div
+                                          key={index}
+                                          className="flex items-center space-x-1 text-xs opacity-80"
+                                        >
+                                          {attachment.type === 'image' && (
+                                            <ImageIcon className="h-3 w-3" />
+                                          )}
+                                          {attachment.type === 'file' && (
+                                            <File className="h-3 w-3" />
+                                          )}
+                                          {attachment.type === 'voice' && (
+                                            <Mic className="h-3 w-3" />
+                                          )}
+                                          <span>{attachment.name}</span>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )}
                               <p className="text-xs opacity-70 mt-1">
                                 {formatTime(message.timestamp)}
                               </p>
@@ -303,7 +320,7 @@ export default function ChatBot() {
                   </div>
                 )}
               </ScrollArea>
-              
+
               <div className="border-t p-4">
                 <div className="flex space-x-2">
                   <Button
@@ -358,7 +375,8 @@ export default function ChatBot() {
                     {texts.clearChat}
                   </Button>
                   <span className="text-xs text-muted-foreground">
-                    {messages.length} {messages.length === 1 ? 'message' : 'messages'}
+                    {messages.length}{' '}
+                    {messages.length === 1 ? 'message' : 'messages'}
                   </span>
                 </div>
               </div>

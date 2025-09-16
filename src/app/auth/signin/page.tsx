@@ -67,21 +67,21 @@ export default function SignInPage() {
   };
 
   return (
-    <div className='min-h-screen bg-background flex items-center justify-center p-4'>
-      <Card className='w-full max-w-md'>
-        <CardHeader className='space-y-1'>
-          <CardTitle className='text-2xl text-center'>{texts.title}</CardTitle>
-          <CardDescription className='text-center'>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center">{texts.title}</CardTitle>
+          <CardDescription className="text-center">
             {texts.description}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className='space-y-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='email'>{texts.emailLabel}</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">{texts.emailLabel}</Label>
               <Input
-                id='email'
-                type='email'
+                id="email"
+                type="email"
                 placeholder={
                   language === 'no' ? 'din@epost.no' : 'your@email.com'
                 }
@@ -91,12 +91,12 @@ export default function SignInPage() {
                 disabled={isLoading}
               />
             </div>
-            <div className='space-y-2'>
-              <Label htmlFor='password'>{texts.passwordLabel}</Label>
+            <div className="space-y-2">
+              <Label htmlFor="password">{texts.passwordLabel}</Label>
               <Input
-                id='password'
-                type='password'
-                placeholder='••••••••'
+                id="password"
+                type="password"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -105,7 +105,7 @@ export default function SignInPage() {
             </div>
 
             {error && (
-              <Alert variant='destructive'>
+              <Alert variant="destructive">
                 <AlertDescription>
                   {error === 'Invalid credentials'
                     ? texts.invalidCredentials
@@ -115,13 +115,13 @@ export default function SignInPage() {
             )}
 
             <Button
-              type='submit'
-              className='w-full'
+              type="submit"
+              className="w-full"
               disabled={isLoading || !email || !password}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {language === 'no' ? 'Logger inn...' : 'Signing in...'}
                 </>
               ) : (
@@ -130,10 +130,10 @@ export default function SignInPage() {
             </Button>
           </form>
 
-          <div className='mt-6 text-center'>
+          <div className="mt-6 text-center">
             <Link
-              href='/'
-              className='text-sm text-muted-foreground hover:text-primary underline'
+              href="/"
+              className="text-sm text-muted-foreground hover:text-primary underline"
             >
               {texts.backToHome}
             </Link>

@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import Navbar from '@/components/layout/navbar';
-import BlogPosts from '@/components/blog-posts';
-import ChatBot from '@/components/chat/chatbot';
-import { useAuthStore } from '@/stores/auth';
-import { useUIStore } from '@/stores/ui';
+import Navbar from '@/components/layouts/navbar';
+import BlogPosts from '@/components/features/blog/blog-posts';
+import ChatBot from '@/components/features/chat/chatbot';
+import { useAuthStore, useUIStore } from '@/stores';
 import { useIntl } from '@/hooks/use-intl';
 
 export default function Home() {
@@ -16,11 +15,11 @@ export default function Home() {
   useEffect(() => {
     // Initialize auth state
     initialize();
-    
+
     // Apply theme to document
     document.documentElement.classList.remove('light', 'dark', 'purple');
     document.documentElement.classList.add(theme);
-    
+
     // Get user data if authenticated
     if (isAuthenticated) {
       getCurrentUser();
@@ -33,9 +32,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold mb-4">
-              {t('home.title')}
-            </h1>
+            <h1 className="text-4xl font-bold mb-4">{t('home.title')}</h1>
             <p className="text-xl text-muted-foreground">
               {t('home.subtitle')}
             </p>

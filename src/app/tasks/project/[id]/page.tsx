@@ -2,9 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Navbar from '@/components/layout/navbar';
-import ChatBot from '@/components/chat/chatbot';
-import { TaskCard, TaskForm, TaskSkeleton, ProjectManager } from '@/components/tasks';
+import Navbar from '@/components/layouts/navbar';
+import ChatBot from '@/components/features/chat/chatbot';
+import {
+  TaskCard,
+  TaskForm,
+  TaskSkeleton,
+  ProjectManager,
+} from '@/components/features/tasks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -38,7 +43,8 @@ import {
 } from 'lucide-react';
 
 export default function ProjectDetailPage() {
-  const { isAuthenticated, user, isLoading, initialize, isInitialized } = useAuthStore();
+  const { isAuthenticated, user, isLoading, initialize, isInitialized } =
+    useAuthStore();
   const { language, theme } = useUIStore();
   const router = useRouter();
   const params = useParams();
@@ -83,7 +89,12 @@ export default function ProjectDetailPage() {
       setError(null);
 
       // Fetch project, tasks, and categories in parallel
-      const [projectResponse, tasksResponse, categoriesResponse, projectsResponse] = await Promise.all([
+      const [
+        projectResponse,
+        tasksResponse,
+        categoriesResponse,
+        projectsResponse,
+      ] = await Promise.all([
         projectsAPI.getProject(projectId),
         tasksAPI.getTasks(),
         categoriesAPI.getCategories(),
@@ -101,8 +112,8 @@ export default function ProjectDetailPage() {
         errorMessages.length > 0
           ? errorMessages.join('\n')
           : language === 'no'
-          ? 'Kunne ikke laste prosjektdata'
-          : 'Failed to load project data'
+            ? 'Kunne ikke laste prosjektdata'
+            : 'Failed to load project data'
       );
     } finally {
       setLoading(false);
@@ -120,7 +131,7 @@ export default function ProjectDetailPage() {
       const payload = {
         ...taskData,
         user_id: user.id,
-        project: parseInt(projectId) // Assign to current project
+        project: parseInt(projectId), // Assign to current project
       };
 
       if (!payload.due_date) delete payload.due_date;
@@ -137,8 +148,8 @@ export default function ProjectDetailPage() {
         errorMessages.length > 0
           ? errorMessages.join('\n')
           : language === 'no'
-          ? 'Kunne ikke opprette oppgave'
-          : 'Failed to create task'
+            ? 'Kunne ikke opprette oppgave'
+            : 'Failed to create task'
       );
     } finally {
       setActionLoading(false);
@@ -170,8 +181,8 @@ export default function ProjectDetailPage() {
         errorMessages.length > 0
           ? errorMessages.join('\n')
           : language === 'no'
-          ? 'Kunne ikke oppdatere oppgave'
-          : 'Failed to update task'
+            ? 'Kunne ikke oppdatere oppgave'
+            : 'Failed to update task'
       );
     } finally {
       setActionLoading(false);
@@ -200,8 +211,8 @@ export default function ProjectDetailPage() {
         errorMessages.length > 0
           ? errorMessages.join('\n')
           : language === 'no'
-          ? 'Kunne ikke slette oppgave'
-          : 'Failed to delete task'
+            ? 'Kunne ikke slette oppgave'
+            : 'Failed to delete task'
       );
     } finally {
       setActionLoading(false);
@@ -233,11 +244,13 @@ export default function ProjectDetailPage() {
   };
 
   // Filter tasks for this project
-  const projectTasks = tasks.filter(task => task.project === parseInt(projectId));
+  const projectTasks = tasks.filter(
+    (task) => task.project === parseInt(projectId)
+  );
 
   // Filter by completion status
-  const filteredTasks = projectTasks.filter(task =>
-    showCompleted || task.status !== 'completed'
+  const filteredTasks = projectTasks.filter(
+    (task) => showCompleted || task.status !== 'completed'
   );
 
   // Sort tasks
@@ -248,7 +261,7 @@ export default function ProjectDetailPage() {
     const priorityOrder: Record<'high' | 'medium' | 'low', number> = {
       high: 3,
       medium: 2,
-      low: 1
+      low: 1,
     };
     return priorityOrder[b.priority] - priorityOrder[a.priority];
   });
@@ -256,11 +269,11 @@ export default function ProjectDetailPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className='h-5 w-5 text-green-500' />;
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
       case 'in_progress':
-        return <Clock className='h-5 w-5 text-blue-500' />;
+        return <Clock className="h-5 w-5 text-blue-500" />;
       default:
-        return <Circle className='h-5 w-5 text-gray-400' />;
+        return <Circle className="h-5 w-5 text-gray-400" />;
     }
   };
 
@@ -299,19 +312,30 @@ export default function ProjectDetailPage() {
 
   const taskStats = {
     total: projectTasks.length,
-    completed: projectTasks.filter(task => task.status === 'completed').length,
-    inProgress: projectTasks.filter(task => task.status === 'in_progress').length,
-    todo: projectTasks.filter(task => task.status === 'todo').length,
+    completed: projectTasks.filter((task) => task.status === 'completed')
+      .length,
+    inProgress: projectTasks.filter((task) => task.status === 'in_progress')
+      .length,
+    todo: projectTasks.filter((task) => task.status === 'todo').length,
   };
 
-  const completionPercentage = taskStats.total > 0 ? Math.round((taskStats.completed / taskStats.total) * 100) : 0;
+  const completionPercentage =
+    taskStats.total > 0
+      ? Math.round((taskStats.completed / taskStats.total) * 100)
+      : 0;
 
   const texts = {
     backToTasks: language === 'no' ? 'Tilbake til oppgaver' : 'Back to tasks',
     newTask: language === 'no' ? 'Ny oppgave' : 'New task',
     editProject: language === 'no' ? 'Rediger prosjekt' : 'Edit project',
-    noTasks: language === 'no' ? 'Ingen oppgaver i dette prosjektet' : 'No tasks in this project',
-    createFirstTask: language === 'no' ? 'Opprett din første oppgave for dette prosjektet' : 'Create your first task for this project',
+    noTasks:
+      language === 'no'
+        ? 'Ingen oppgaver i dette prosjektet'
+        : 'No tasks in this project',
+    createFirstTask:
+      language === 'no'
+        ? 'Opprett din første oppgave for dette prosjektet'
+        : 'Create your first task for this project',
     showCompleted: language === 'no' ? 'Vis fullførte' : 'Show completed',
     hideCompleted: language === 'no' ? 'Skjul fullførte' : 'Hide completed',
     tasks: language === 'no' ? 'oppgaver' : 'tasks',
@@ -325,10 +349,10 @@ export default function ProjectDetailPage() {
 
   if (!isInitialized || isLoading || loading) {
     return (
-      <div className='min-h-screen bg-background flex items-center justify-center'>
-        <div className='text-center'>
-          <Loader2 className='h-8 w-8 animate-spin mx-auto mb-4' />
-          <p className='text-muted-foreground'>{texts.loading}</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">{texts.loading}</p>
         </div>
       </div>
     );
@@ -340,23 +364,24 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className='min-h-screen bg-background'>
+      <div className="min-h-screen bg-background">
         <Navbar />
-        <main className='container mx-auto px-4 py-8'>
-          <div className='max-w-7xl mx-auto'>
-            <div className='text-center py-12'>
-              <AlertTriangle className='h-12 w-12 text-destructive mx-auto mb-4' />
-              <h2 className='text-2xl font-semibold mb-2'>
-                {language === 'no' ? 'Prosjekt ikke funnet' : 'Project not found'}
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-12">
+              <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h2 className="text-2xl font-semibold mb-2">
+                {language === 'no'
+                  ? 'Prosjekt ikke funnet'
+                  : 'Project not found'}
               </h2>
-              <p className='text-muted-foreground mb-6'>
+              <p className="text-muted-foreground mb-6">
                 {language === 'no'
                   ? 'Prosjektet du leter etter eksisterer ikke eller du har ikke tilgang til det.'
-                  : 'The project you are looking for does not exist or you do not have access to it.'
-                }
+                  : 'The project you are looking for does not exist or you do not have access to it.'}
               </p>
               <Button onClick={() => router.push('/tasks')}>
-                <ArrowLeft className='mr-2 h-4 w-4' />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 {texts.backToTasks}
               </Button>
             </div>
@@ -367,73 +392,83 @@ export default function ProjectDetailPage() {
   }
 
   return (
-    <div className='min-h-screen bg-background'>
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <main className='container mx-auto px-4 py-8'>
-        <div className='max-w-7xl mx-auto'>
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className='mb-8'>
-            <div className='flex items-center gap-4 mb-6'>
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-6">
               <Button
-                variant='ghost'
+                variant="ghost"
                 onClick={() => router.push('/tasks')}
-                className='flex items-center gap-2'
+                className="flex items-center gap-2"
               >
-                <ArrowLeft className='h-4 w-4' />
+                <ArrowLeft className="h-4 w-4" />
                 {texts.backToTasks}
               </Button>
             </div>
 
             {/* Project Info Card */}
-            <div className='bg-card border rounded-lg p-6 mb-6'>
-              <div className='flex items-start justify-between mb-4'>
-                <div className='flex items-center gap-3'>
-                  <FolderKanban className='h-8 w-8 text-primary' />
+            <div className="bg-card border rounded-lg p-6 mb-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <FolderKanban className="h-8 w-8 text-primary" />
                   <div>
-                    <h1 className='text-3xl font-bold mb-2'>
-                      {language === 'no' && project.name_nb ? project.name_nb : project.name}
+                    <h1 className="text-3xl font-bold mb-2">
+                      {language === 'no' && project.name_nb
+                        ? project.name_nb
+                        : project.name}
                     </h1>
-                    <div className='flex items-center gap-2'>
+                    <div className="flex items-center gap-2">
                       {getStatusIcon(project.status)}
                       <Badge className={getStatusColor(project.status)}>
                         {getStatusText(project.status)}
                       </Badge>
-                      <Badge variant='outline'>
+                      <Badge variant="outline">
                         {taskStats.total} {texts.tasks}
                       </Badge>
                     </div>
                   </div>
                 </div>
-                <div className='flex items-center gap-2'>
-                  <Button variant='outline' size='sm' onClick={handleEditProject}>
-                    <Edit3 className='mr-2 h-4 w-4' />
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditProject}
+                  >
+                    <Edit3 className="mr-2 h-4 w-4" />
                     {texts.editProject}
                   </Button>
                   <Button onClick={handleNewTask}>
-                    <Plus className='mr-2 h-4 w-4' />
+                    <Plus className="mr-2 h-4 w-4" />
                     {texts.newTask}
                   </Button>
                 </div>
               </div>
 
               {(project.description || project.description_nb) && (
-                <p className='text-muted-foreground mb-4'>
-                  {language === 'no' && project.description_nb ? project.description_nb : project.description}
+                <p className="text-muted-foreground mb-4">
+                  {language === 'no' && project.description_nb
+                    ? project.description_nb
+                    : project.description}
                 </p>
               )}
 
               {/* Progress and Stats */}
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Progress Bar */}
                 {taskStats.total > 0 && (
                   <div>
-                    <div className='flex items-center justify-between text-sm mb-2'>
-                      <span className='font-medium'>{texts.progress}</span>
-                      <span className='font-semibold'>{completionPercentage}%</span>
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <span className="font-medium">{texts.progress}</span>
+                      <span className="font-semibold">
+                        {completionPercentage}%
+                      </span>
                     </div>
-                    <div className='w-full bg-secondary rounded-full h-3 mb-3'>
+                    <div className="w-full bg-secondary rounded-full h-3 mb-3">
                       <div
-                        className='bg-primary h-3 rounded-full transition-all'
+                        className="bg-primary h-3 rounded-full transition-all"
                         style={{ width: `${completionPercentage}%` }}
                       />
                     </div>
@@ -442,51 +477,65 @@ export default function ProjectDetailPage() {
 
                 {/* Task Stats */}
                 {taskStats.total > 0 && (
-                  <div className='grid grid-cols-3 gap-3'>
-                    <div className='text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg'>
-                      <div className='text-2xl font-bold text-green-600'>{taskStats.completed}</div>
-                      <div className='text-xs text-green-600 font-medium'>{texts.completed}</div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">
+                        {taskStats.completed}
+                      </div>
+                      <div className="text-xs text-green-600 font-medium">
+                        {texts.completed}
+                      </div>
                     </div>
-                    <div className='text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg'>
-                      <div className='text-2xl font-bold text-blue-600'>{taskStats.inProgress}</div>
-                      <div className='text-xs text-blue-600 font-medium'>{texts.inProgress}</div>
+                    <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {taskStats.inProgress}
+                      </div>
+                      <div className="text-xs text-blue-600 font-medium">
+                        {texts.inProgress}
+                      </div>
                     </div>
-                    <div className='text-center p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg'>
-                      <div className='text-2xl font-bold text-gray-600'>{taskStats.todo}</div>
-                      <div className='text-xs text-gray-600 font-medium'>{texts.todo}</div>
+                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-gray-600">
+                        {taskStats.todo}
+                      </div>
+                      <div className="text-xs text-gray-600 font-medium">
+                        {texts.todo}
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Project Meta */}
-              <div className='flex items-center justify-between text-sm text-muted-foreground mt-4 pt-4 border-t'>
-                <div className='flex items-center gap-1'>
-                  <Calendar className='h-4 w-4' />
-                  <span>{texts.createdOn} {formatDate(project.created_at)}</span>
+              <div className="flex items-center justify-between text-sm text-muted-foreground mt-4 pt-4 border-t">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  <span>
+                    {texts.createdOn} {formatDate(project.created_at)}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Actions Bar */}
-            <div className='flex items-center justify-between mb-6'>
-              <h2 className='text-xl font-semibold'>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">
                 {language === 'no' ? 'Oppgaver' : 'Tasks'}
               </h2>
-              <div className='flex items-center gap-2'>
+              <div className="flex items-center gap-2">
                 <Button
-                  variant='outline'
-                  size='sm'
+                  variant="outline"
+                  size="sm"
                   onClick={() => setShowCompleted(!showCompleted)}
                 >
                   {showCompleted ? (
                     <>
-                      <EyeOff className='mr-2 h-4 w-4' />
+                      <EyeOff className="mr-2 h-4 w-4" />
                       {texts.hideCompleted}
                     </>
                   ) : (
                     <>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <Eye className="mr-2 h-4 w-4" />
                       {texts.showCompleted}
                     </>
                   )}
@@ -496,31 +545,33 @@ export default function ProjectDetailPage() {
           </div>
 
           {error && (
-            <Alert className='mb-6'>
-              <AlertTriangle className='h-4 w-4' />
+            <Alert className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {/* Tasks Grid */}
           {loading ? (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
                 <TaskSkeleton key={i} />
               ))}
             </div>
           ) : sortedTasks.length === 0 ? (
-            <div className='text-center py-12'>
-              <Target className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
-              <h3 className='text-xl font-semibold mb-2'>{texts.noTasks}</h3>
-              <p className='text-muted-foreground mb-6'>{texts.createFirstTask}</p>
+            <div className="text-center py-12">
+              <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">{texts.noTasks}</h3>
+              <p className="text-muted-foreground mb-6">
+                {texts.createFirstTask}
+              </p>
               <Button onClick={handleNewTask}>
-                <Plus className='mr-2 h-4 w-4' />
+                <Plus className="mr-2 h-4 w-4" />
                 {texts.newTask}
               </Button>
             </div>
           ) : (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sortedTasks.map((task) => (
                 <TaskCard
                   key={task.id}
@@ -536,7 +587,7 @@ export default function ProjectDetailPage() {
 
           {/* Task Form Dialog */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className='sm:max-w-[500px]'>
+            <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>
                   {editingTask
@@ -544,8 +595,8 @@ export default function ProjectDetailPage() {
                       ? 'Rediger oppgave'
                       : 'Edit task'
                     : language === 'no'
-                    ? 'Ny oppgave'
-                    : 'New task'}
+                      ? 'Ny oppgave'
+                      : 'New task'}
                 </DialogTitle>
                 <DialogDescription>
                   {editingTask
@@ -553,8 +604,8 @@ export default function ProjectDetailPage() {
                       ? 'Rediger detaljene for oppgaven'
                       : 'Edit the task details'
                     : language === 'no'
-                    ? 'Opprett en ny oppgave for dette prosjektet'
-                    : 'Create a new task for this project'}
+                      ? 'Opprett en ny oppgave for dette prosjektet'
+                      : 'Create a new task for this project'}
                 </DialogDescription>
               </DialogHeader>
               <TaskForm

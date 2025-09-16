@@ -1,14 +1,43 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-
-// API base URL
-const API_BASE_URL = 'https://api.nxfs.no';
-
-// N8N chatbot URL
-const N8N_CHATBOT_URL = 'https://n8n.nxfs.no/webhook/nxfs';
+import { handleApiError, showSuccessToast } from './error-handler';
+import { env } from './env';
+import type {
+  LoginResponse,
+  RefreshTokenResponse,
+  GetCurrentUserResponse,
+  UpdateUserResponse,
+  GetTasksResponse,
+  GetTaskResponse,
+  CreateTaskResponse,
+  UpdateTaskResponse,
+  DeleteTaskResponse,
+  GetCategoriesResponse,
+  GetCategoryResponse,
+  CreateCategoryResponse,
+  UpdateCategoryResponse,
+  DeleteCategoryResponse,
+  GetProjectsResponse,
+  GetProjectResponse,
+  CreateProjectResponse,
+  UpdateProjectResponse,
+  DeleteProjectResponse,
+  GetPostsResponse,
+  GetPublicPostsResponse,
+  GetPostResponse,
+  CreatePostResponse,
+  UpdatePostResponse,
+  DeletePostResponse,
+  SendChatMessageResponse,
+  Task,
+  Category,
+  Project,
+  CreateTaskPayload,
+  UpdateTaskPayload,
+} from '@/types/api';
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,8 +62,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.log('API error:', error.response.data);
     const originalRequest = error.config;
+
+    // Don't show toast for auth refresh attempts
+    if (!originalRequest.url?.includes('/token/refresh/')) {
+      handleApiError(
+        error,
+        `API ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`
+      );
+    }
 
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
@@ -47,7 +83,7 @@ api.interceptors.response.use(
         if (refreshToken) {
           // Use a separate axios instance for refresh to avoid circular interceptor calls
           const refreshResponse = await axios.post(
-            `${API_BASE_URL}/token/refresh/`,
+            `${env.NEXT_PUBLIC_API_URL}/token/refresh/`,
             { refresh: refreshToken },
             {
               headers: {
@@ -87,42 +123,45 @@ api.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-    console.log('Request error:', error.response?.data);
+
     return Promise.reject(error);
   }
 );
 
 // Authentication API
 export const authAPI = {
-  login: async (email: string, password: string) => {
-    const response = await axios.post(`${API_BASE_URL}/token/`, {
+  login: async (email: string, password: string): Promise<LoginResponse> => {
+    const response = await axios.post(`${env.NEXT_PUBLIC_API_URL}/token/`, {
       email,
       password,
     });
     return response.data;
   },
 
-  refreshToken: async (refreshToken: string) => {
-    const response = await axios.post(`${API_BASE_URL}/token/refresh/`, {
-      refresh: refreshToken,
-    });
+  refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
+    const response = await axios.post(
+      `${env.NEXT_PUBLIC_API_URL}/token/refresh/`,
+      {
+        refresh: refreshToken,
+      }
+    );
     return response.data;
   },
 };
 
 // Users API
 export const usersAPI = {
-  getCurrentUser: async () => {
+  getCurrentUser: async (): Promise<GetCurrentUserResponse> => {
     const response = await api.get('/user/');
     return response.data;
   },
 
-  updateUser: async (userId: string, userData: any) => {
+  updateUser: async (userId: string, userData: Partial<UpdateUserResponse>): Promise<UpdateUserResponse> => {
     const response = await api.put(`/user/${userId}/`, userData);
     return response.data;
   },
 
-  deleteUser: async (userId: string) => {
+  deleteUser: async (userId: string): Promise<void> => {
     const response = await api.delete(`/user/${userId}/`);
     return response.data;
   },
@@ -130,32 +169,32 @@ export const usersAPI = {
 
 // Posts API
 export const postsAPI = {
-  getPublicPosts: async () => {
+  getPublicPosts: async (): Promise<GetPublicPostsResponse> => {
     const response = await api.get('/api/posts/public/');
     return response.data;
   },
 
-  getPosts: async () => {
+  getPosts: async (): Promise<GetPostsResponse> => {
     const response = await api.get('/api/posts/');
     return response.data;
   },
 
-  getPost: async (postId: string) => {
+  getPost: async (postId: string): Promise<GetPostResponse> => {
     const response = await api.get(`/api/posts/${postId}/`);
     return response.data;
   },
 
-  createPost: async (postData: any) => {
+  createPost: async (postData: Partial<CreatePostResponse>): Promise<CreatePostResponse> => {
     const response = await api.post('/api/posts/', postData);
     return response.data;
   },
 
-  updatePost: async (postId: string, postData: any) => {
+  updatePost: async (postId: string, postData: Partial<UpdatePostResponse>): Promise<UpdatePostResponse> => {
     const response = await api.put(`/api/posts/${postId}/`, postData);
     return response.data;
   },
 
-  deletePost: async (postId: string) => {
+  deletePost: async (postId: string): Promise<DeletePostResponse> => {
     const response = await api.delete(`/api/posts/${postId}/`);
     return response.data;
   },
@@ -167,9 +206,9 @@ export const chatbotAPI = {
     sessionId: string,
     chatInput: string,
     secretKey: string
-  ) => {
+  ): Promise<SendChatMessageResponse> => {
     const response = await axios.post(
-      N8N_CHATBOT_URL,
+      env.NEXT_PUBLIC_N8N_URL,
       {
         sessionId,
         action: 'sendMessage',
@@ -188,59 +227,83 @@ export const chatbotAPI = {
 
 // Tasks API
 export const tasksAPI = {
-  getTasks: async () => {
+  getTasks: async (): Promise<GetTasksResponse> => {
     const response = await api.get('/app/tasks/');
     return response.data;
   },
 
-  getTask: async (taskId: string) => {
+  getTask: async (taskId: string): Promise<GetTaskResponse> => {
     const response = await api.get(`/app/tasks/${taskId}/`);
     return response.data;
   },
 
-  createTask: async (taskData: any) => {
-    const response = await api.post('/app/tasks/', taskData);
-    return response.data;
+  createTask: async (taskData: CreateTaskPayload): Promise<CreateTaskResponse> => {
+    try {
+      const response = await api.post('/app/tasks/', taskData);
+      showSuccessToast('Task created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating task');
+      throw error;
+    }
   },
 
-  updateTask: async (taskId: string, taskData: any) => {
-    const response = await api.put(`/app/tasks/${taskId}/`, taskData);
-    return response.data;
+  updateTask: async (taskId: string, taskData: UpdateTaskPayload): Promise<UpdateTaskResponse> => {
+    try {
+      const response = await api.put(`/app/tasks/${taskId}/`, taskData);
+      showSuccessToast('Task updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating task');
+      throw error;
+    }
   },
 
-  patchTask: async (taskId: string, taskData: any) => {
-    const response = await api.patch(`/app/tasks/${taskId}/`, taskData);
-    return response.data;
+  patchTask: async (taskId: string, taskData: UpdateTaskPayload): Promise<UpdateTaskResponse> => {
+    try {
+      const response = await api.patch(`/app/tasks/${taskId}/`, taskData);
+      showSuccessToast('Task updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating task');
+      throw error;
+    }
   },
 
-  deleteTask: async (taskId: string) => {
-    const response = await api.delete(`/app/tasks/${taskId}/`);
-    return response.data;
+  deleteTask: async (taskId: string): Promise<DeleteTaskResponse> => {
+    try {
+      const response = await api.delete(`/app/tasks/${taskId}/`);
+      showSuccessToast('Task deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting task');
+      throw error;
+    }
   },
 };
 
 // Categories API
 export const categoriesAPI = {
-  getCategories: async () => {
+  getCategories: async (): Promise<GetCategoriesResponse> => {
     const response = await api.get('/app/tasks/categories/');
     return response.data;
   },
-  getCategory: async (categoryId: string) => {
+  getCategory: async (categoryId: string): Promise<GetCategoryResponse> => {
     const response = await api.get(`/app/tasks/categories/${categoryId}/`);
     return response.data;
   },
-  createCategory: async (categoryData: any) => {
+  createCategory: async (categoryData: Partial<Category>): Promise<CreateCategoryResponse> => {
     const response = await api.post('/app/tasks/categories/', categoryData);
     return response.data;
   },
-  updateCategory: async (categoryId: string, categoryData: any) => {
+  updateCategory: async (categoryId: string, categoryData: Partial<Category>): Promise<UpdateCategoryResponse> => {
     const response = await api.put(
       `/app/tasks/categories/${categoryId}/`,
       categoryData
     );
     return response.data;
   },
-  deleteCategory: async (categoryId: string) => {
+  deleteCategory: async (categoryId: string): Promise<DeleteCategoryResponse> => {
     const response = await api.delete(`/app/tasks/categories/${categoryId}/`);
     return response.data;
   },
@@ -248,23 +311,23 @@ export const categoriesAPI = {
 
 // Projects API
 export const projectsAPI = {
-  getProjects: async () => {
+  getProjects: async (): Promise<GetProjectsResponse> => {
     const response = await api.get('/app/projects/');
     return response.data;
   },
-  getProject: async (projectId: string) => {
+  getProject: async (projectId: string): Promise<GetProjectResponse> => {
     const response = await api.get(`/app/projects/${projectId}/`);
     return response.data;
   },
-  createProject: async (projectData: any) => {
+  createProject: async (projectData: Partial<Project>): Promise<CreateProjectResponse> => {
     const response = await api.post('/app/projects/', projectData);
     return response.data;
   },
-  updateProject: async (projectId: string, projectData: any) => {
+  updateProject: async (projectId: string, projectData: Partial<Project>): Promise<UpdateProjectResponse> => {
     const response = await api.put(`/app/projects/${projectId}/`, projectData);
     return response.data;
   },
-  deleteProject: async (projectId: string) => {
+  deleteProject: async (projectId: string): Promise<DeleteProjectResponse> => {
     const response = await api.delete(`/app/projects/${projectId}/`);
     return response.data;
   },

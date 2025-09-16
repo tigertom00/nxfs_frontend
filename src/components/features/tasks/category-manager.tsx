@@ -39,28 +39,48 @@ interface CategoryFormData {
   name_nb?: string;
 }
 
-export function CategoryManager({ categories, onCategoriesChange }: CategoryManagerProps) {
+export function CategoryManager({
+  categories,
+  onCategoriesChange,
+}: CategoryManagerProps) {
   const { language } = useUIStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | undefined>();
+  const [editingCategory, setEditingCategory] = useState<
+    Category | undefined
+  >();
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<CategoryFormData>({ name: '', name_nb: '' });
+  const [formData, setFormData] = useState<CategoryFormData>({
+    name: '',
+    name_nb: '',
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const texts = {
-    manageCategories: language === 'no' ? 'Administrer Kategorier' : 'Manage Categories',
+    manageCategories:
+      language === 'no' ? 'Administrer Kategorier' : 'Manage Categories',
     newCategory: language === 'no' ? 'Ny Kategori' : 'New Category',
     editCategory: language === 'no' ? 'Rediger Kategori' : 'Edit Category',
     categoryName: language === 'no' ? 'Kategorinavn' : 'Category Name',
-    categoryNameNorwegian: language === 'no' ? 'Kategorinavn (Norsk)' : 'Category Name (Norwegian)',
+    categoryNameNorwegian:
+      language === 'no' ? 'Kategorinavn (Norsk)' : 'Category Name (Norwegian)',
     save: language === 'no' ? 'Lagre' : 'Save',
     cancel: language === 'no' ? 'Avbryt' : 'Cancel',
     delete: language === 'no' ? 'Slett' : 'Delete',
-    deleteConfirm: language === 'no' ? 'Er du sikker på at du vil slette denne kategorien?' : 'Are you sure you want to delete this category?',
-    deleteDescription: language === 'no' ? 'Denne handlingen kan ikke angres.' : 'This action cannot be undone.',
-    noCategories: language === 'no' ? 'Ingen kategorier ennå' : 'No categories yet',
-    createFirst: language === 'no' ? 'Opprett din første kategori' : 'Create your first category',
+    deleteConfirm:
+      language === 'no'
+        ? 'Er du sikker på at du vil slette denne kategorien?'
+        : 'Are you sure you want to delete this category?',
+    deleteDescription:
+      language === 'no'
+        ? 'Denne handlingen kan ikke angres.'
+        : 'This action cannot be undone.',
+    noCategories:
+      language === 'no' ? 'Ingen kategorier ennå' : 'No categories yet',
+    createFirst:
+      language === 'no'
+        ? 'Opprett din første kategori'
+        : 'Create your first category',
     saving: language === 'no' ? 'Lagrer...' : 'Saving...',
   };
 
@@ -74,12 +94,19 @@ export function CategoryManager({ categories, onCategoriesChange }: CategoryMana
     try {
       const categoryData = {
         name: formData.name.trim(),
-        slug: formData.name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, ''),
+        slug: formData.name
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^\w\-]/g, ''),
         ...(formData.name_nb?.trim() && { name_nb: formData.name_nb.trim() }),
       };
 
       if (editingCategory) {
-        await categoriesAPI.updateCategory(editingCategory.id.toString(), categoryData);
+        await categoriesAPI.updateCategory(
+          editingCategory.id.toString(),
+          categoryData
+        );
       } else {
         await categoriesAPI.createCategory(categoryData);
       }
@@ -143,8 +170,7 @@ export function CategoryManager({ categories, onCategoriesChange }: CategoryMana
           <DialogDescription>
             {language === 'no'
               ? 'Opprett, rediger eller slett kategorier for oppgavene dine.'
-              : 'Create, edit, or delete categories for your tasks.'
-            }
+              : 'Create, edit, or delete categories for your tasks.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -153,7 +179,9 @@ export function CategoryManager({ categories, onCategoriesChange }: CategoryMana
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">
-                {language === 'no' ? 'Eksisterende Kategorier' : 'Existing Categories'}
+                {language === 'no'
+                  ? 'Eksisterende Kategorier'
+                  : 'Existing Categories'}
               </h4>
               <Button onClick={handleNew} size="sm">
                 <Plus className="mr-2 h-4 w-4" />
@@ -169,10 +197,15 @@ export function CategoryManager({ categories, onCategoriesChange }: CategoryMana
             ) : (
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {categories.map((category) => (
-                  <div key={category.id} className="flex items-center justify-between p-2 border rounded">
+                  <div
+                    key={category.id}
+                    className="flex items-center justify-between p-2 border rounded"
+                  >
                     <div className="flex-1">
                       <Badge variant="outline">
-                        {language === 'no' && category.name_nb ? category.name_nb : category.name}
+                        {language === 'no' && category.name_nb
+                          ? category.name_nb
+                          : category.name}
                       </Badge>
                       {category.name_nb && (
                         <span className="ml-2 text-xs text-muted-foreground">
@@ -202,13 +235,17 @@ export function CategoryManager({ categories, onCategoriesChange }: CategoryMana
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>{texts.deleteConfirm}</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              {texts.deleteConfirm}
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
                               {texts.deleteDescription}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>{texts.cancel}</AlertDialogCancel>
+                            <AlertDialogCancel>
+                              {texts.cancel}
+                            </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDelete(category.id)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -237,7 +274,9 @@ export function CategoryManager({ categories, onCategoriesChange }: CategoryMana
                 <Input
                   id="category-name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   disabled={loading}
                   placeholder="Work, Personal, etc."
@@ -245,25 +284,35 @@ export function CategoryManager({ categories, onCategoriesChange }: CategoryMana
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category-name-nb">{texts.categoryNameNorwegian}</Label>
+                <Label htmlFor="category-name-nb">
+                  {texts.categoryNameNorwegian}
+                </Label>
                 <Input
                   id="category-name-nb"
                   value={formData.name_nb}
-                  onChange={(e) => setFormData({ ...formData, name_nb: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name_nb: e.target.value })
+                  }
                   disabled={loading}
                   placeholder="Arbeid, Personlig, etc."
                 />
               </div>
 
-              {error && (
-                <div className="text-sm text-destructive">{error}</div>
-              )}
+              {error && <div className="text-sm text-destructive">{error}</div>}
 
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={handleCloseDialog} disabled={loading}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseDialog}
+                  disabled={loading}
+                >
                   {texts.cancel}
                 </Button>
-                <Button type="submit" disabled={loading || !formData.name.trim()}>
+                <Button
+                  type="submit"
+                  disabled={loading || !formData.name.trim()}
+                >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

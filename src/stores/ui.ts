@@ -6,7 +6,7 @@ interface UIState {
   language: 'en' | 'no';
   sidebarOpen: boolean;
   chatOpen: boolean;
-  
+
   // Actions
   setTheme: (theme: 'light' | 'dark' | 'purple') => void;
   setLanguage: (language: 'en' | 'no') => void;

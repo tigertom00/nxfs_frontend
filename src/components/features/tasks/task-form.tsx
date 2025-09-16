@@ -24,7 +24,13 @@ interface TaskFormProps {
   onCancel: () => void;
 }
 
-export function TaskForm({ task, categories, projects, onSubmit, onCancel }: TaskFormProps) {
+export function TaskForm({
+  task,
+  categories,
+  projects,
+  onSubmit,
+  onCancel,
+}: TaskFormProps) {
   const { language } = useUIStore();
   const [formData, setFormData] = useState<TaskFormData>({
     title: task?.title || '',
@@ -55,8 +61,8 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
         ? 'Rediger Oppgave'
         : 'Edit Task'
       : language === 'no'
-      ? 'Ny Oppgave'
-      : 'New Task',
+        ? 'Ny Oppgave'
+        : 'New Task',
     description: language === 'no' ? 'Beskrivelse' : 'Description',
     status: language === 'no' ? 'Status' : 'Status',
     priority: language === 'no' ? 'Prioritet' : 'Priority',
@@ -78,18 +84,24 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
 
   const handleCategoryChange = (categoryId: number, checked: boolean) => {
     if (checked) {
-      setFormData({ ...formData, category: [...(formData.category || []), categoryId] });
+      setFormData({
+        ...formData,
+        category: [...(formData.category || []), categoryId],
+      });
     } else {
-      setFormData({ ...formData, category: (formData.category || []).filter(id => id !== categoryId) });
+      setFormData({
+        ...formData,
+        category: (formData.category || []).filter((id) => id !== categoryId),
+      });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      <div className='space-y-2'>
-        <Label htmlFor='title'>{texts.title}</Label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="title">{texts.title}</Label>
         <Input
-          id='title'
+          id="title"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           required
@@ -97,10 +109,10 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
         />
       </div>
 
-      <div className='space-y-2'>
-        <Label htmlFor='description'>{texts.description}</Label>
+      <div className="space-y-2">
+        <Label htmlFor="description">{texts.description}</Label>
         <Textarea
-          id='description'
+          id="description"
           value={formData.description}
           onChange={(e) =>
             setFormData({ ...formData, description: e.target.value })
@@ -110,9 +122,9 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
         />
       </div>
 
-      <div className='grid grid-cols-2 gap-4'>
-        <div className='space-y-2'>
-          <Label htmlFor='status'>{texts.status}</Label>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="status">{texts.status}</Label>
           <Select
             value={formData.status}
             onValueChange={(value: 'todo' | 'in_progress' | 'completed') =>
@@ -124,15 +136,15 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value='todo'>{texts.todo}</SelectItem>
-              <SelectItem value='in_progress'>{texts.inProgress}</SelectItem>
-              <SelectItem value='completed'>{texts.completed}</SelectItem>
+              <SelectItem value="todo">{texts.todo}</SelectItem>
+              <SelectItem value="in_progress">{texts.inProgress}</SelectItem>
+              <SelectItem value="completed">{texts.completed}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <div className='space-y-2'>
-          <Label htmlFor='priority'>{texts.priority}</Label>
+        <div className="space-y-2">
+          <Label htmlFor="priority">{texts.priority}</Label>
           <Select
             value={formData.priority}
             onValueChange={(value: 'low' | 'medium' | 'high') =>
@@ -144,20 +156,20 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value='low'>{texts.low}</SelectItem>
-              <SelectItem value='medium'>{texts.medium}</SelectItem>
-              <SelectItem value='high'>{texts.high}</SelectItem>
+              <SelectItem value="low">{texts.low}</SelectItem>
+              <SelectItem value="medium">{texts.medium}</SelectItem>
+              <SelectItem value="high">{texts.high}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      <div className='grid grid-cols-2 gap-4'>
-        <div className='space-y-2'>
-          <Label htmlFor='due_date'>{texts.dueDate}</Label>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="due_date">{texts.dueDate}</Label>
           <Input
-            id='due_date'
-            type='date'
+            id="due_date"
+            type="date"
             value={formData.due_date}
             onChange={(e) =>
               setFormData({ ...formData, due_date: e.target.value })
@@ -166,13 +178,13 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
           />
         </div>
 
-        <div className='space-y-2'>
-          <Label htmlFor='estimated_time'>{texts.estimatedTime}</Label>
+        <div className="space-y-2">
+          <Label htmlFor="estimated_time">{texts.estimatedTime}</Label>
           <Input
-            id='estimated_time'
-            type='number'
-            step='0.5'
-            min='0'
+            id="estimated_time"
+            type="number"
+            step="0.5"
+            min="0"
             value={formData.estimated_time}
             onChange={(e) =>
               setFormData({ ...formData, estimated_time: e.target.value })
@@ -183,19 +195,26 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
       </div>
 
       {categories.length > 0 && (
-        <div className='space-y-2'>
+        <div className="space-y-2">
           <Label>{texts.categories}</Label>
-          <div className='grid grid-cols-2 gap-2 max-h-32 overflow-y-auto'>
+          <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
             {categories.map((category) => (
-              <div key={category.id} className='flex items-center space-x-2'>
+              <div key={category.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`category-${category.id}`}
                   checked={formData.category?.includes(category.id) || false}
-                  onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleCategoryChange(category.id, checked as boolean)
+                  }
                   disabled={loading}
                 />
-                <Label htmlFor={`category-${category.id}`} className='text-sm cursor-pointer'>
-                  {language === 'no' && category.name_nb ? category.name_nb : category.name}
+                <Label
+                  htmlFor={`category-${category.id}`}
+                  className="text-sm cursor-pointer"
+                >
+                  {language === 'no' && category.name_nb
+                    ? category.name_nb
+                    : category.name}
                 </Label>
               </div>
             ))}
@@ -204,12 +223,15 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
       )}
 
       {projects.length > 0 && (
-        <div className='space-y-2'>
-          <Label htmlFor='project'>{texts.project}</Label>
+        <div className="space-y-2">
+          <Label htmlFor="project">{texts.project}</Label>
           <Select
             value={formData.project?.toString() || '0'}
             onValueChange={(value) =>
-              setFormData({ ...formData, project: value === '0' ? undefined : parseInt(value) })
+              setFormData({
+                ...formData,
+                project: value === '0' ? undefined : parseInt(value),
+              })
             }
             disabled={loading}
           >
@@ -217,10 +239,12 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
               <SelectValue placeholder={texts.noProject} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value='0'>{texts.noProject}</SelectItem>
+              <SelectItem value="0">{texts.noProject}</SelectItem>
               {projects.map((project) => (
                 <SelectItem key={project.id} value={project.id.toString()}>
-                  {language === 'no' && project.name_nb ? project.name_nb : project.name}
+                  {language === 'no' && project.name_nb
+                    ? project.name_nb
+                    : project.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -228,16 +252,16 @@ export function TaskForm({ task, categories, projects, onSubmit, onCancel }: Tas
         </div>
       )}
 
-      <div className='flex justify-end space-x-2 pt-4'>
+      <div className="flex justify-end space-x-2 pt-4">
         <Button
-          type='button'
-          variant='outline'
+          type="button"
+          variant="outline"
           onClick={onCancel}
           disabled={loading}
         >
           {texts.cancel}
         </Button>
-        <Button type='submit' disabled={loading}>
+        <Button type="submit" disabled={loading}>
           {loading
             ? language === 'no'
               ? 'Lagrer...'

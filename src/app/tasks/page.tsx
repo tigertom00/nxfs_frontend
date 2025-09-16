@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/layout/navbar';
-import ChatBot from '@/components/chat/chatbot';
+import Navbar from '@/components/layouts/navbar';
+import ChatBot from '@/components/features/chat/chatbot';
 import {
   TaskCard,
   TaskForm,
@@ -11,7 +11,7 @@ import {
   CategoryManager,
   ProjectManager,
   ProjectCard,
-} from '@/components/tasks';
+} from '@/components/features/tasks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -23,10 +23,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuthStore } from '@/stores/auth';
-import { useUIStore } from '@/stores/ui';
+import { useAuthStore, useUIStore } from '@/stores';
 import { tasksAPI, categoriesAPI, projectsAPI } from '@/lib/api';
-import { Task, Category, Project, TaskFormData } from '@/types/task';
+import { Task, Category, Project } from '@/types/api';
+import { TaskFormData } from '@/types/task';
 import {
   Plus,
   AlertTriangle,
@@ -96,8 +96,8 @@ export default function TasksPage() {
         errorMessages.length > 0
           ? errorMessages.join('\n')
           : language === 'no'
-          ? 'Kunne ikke laste oppgaver'
-          : 'Failed to load tasks'
+            ? 'Kunne ikke laste oppgaver'
+            : 'Failed to load tasks'
       );
     } finally {
       setLoading(false);
@@ -150,8 +150,8 @@ export default function TasksPage() {
         errorMessages.length > 0
           ? errorMessages.join('\n')
           : language === 'no'
-          ? 'Kunne ikke opprette oppgave'
-          : 'Failed to create task'
+            ? 'Kunne ikke opprette oppgave'
+            : 'Failed to create task'
       );
     } finally {
       setActionLoading(false);
@@ -188,8 +188,8 @@ export default function TasksPage() {
         errorMessages.length > 0
           ? errorMessages.join('\n')
           : language === 'no'
-          ? 'Kunne ikke oppdatere oppgave'
-          : 'Failed to update task'
+            ? 'Kunne ikke oppdatere oppgave'
+            : 'Failed to update task'
       );
     } finally {
       setActionLoading(false);
@@ -218,8 +218,8 @@ export default function TasksPage() {
         errorMessages.length > 0
           ? errorMessages.join('\n')
           : language === 'no'
-          ? 'Kunne ikke slette oppgave'
-          : 'Failed to delete task'
+            ? 'Kunne ikke slette oppgave'
+            : 'Failed to delete task'
       );
     } finally {
       setActionLoading(false);
@@ -356,10 +356,10 @@ export default function TasksPage() {
 
   if (!isInitialized || isLoading) {
     return (
-      <div className='min-h-screen bg-background flex items-center justify-center'>
-        <div className='text-center'>
-          <Loader2 className='h-8 w-8 animate-spin mx-auto mb-4' />
-          <p className='text-muted-foreground'>{texts.loading}</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">{texts.loading}</p>
         </div>
       </div>
     );
@@ -370,17 +370,17 @@ export default function TasksPage() {
   }
 
   return (
-    <div className='min-h-screen bg-background'>
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <main className='container mx-auto px-4 py-8'>
-        <div className='max-w-7xl mx-auto'>
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className='flex items-center justify-between mb-8'>
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className='text-3xl font-bold mb-2'>{texts.title}</h1>
-              <p className='text-muted-foreground'>{texts.subtitle}</p>
+              <h1 className="text-3xl font-bold mb-2">{texts.title}</h1>
+              <p className="text-muted-foreground">{texts.subtitle}</p>
             </div>
-            <div className='flex items-center gap-2 flex-wrap'>
+            <div className="flex items-center gap-2 flex-wrap">
               <ProjectManager
                 projects={projects}
                 onProjectsChange={fetchProjects}
@@ -395,18 +395,18 @@ export default function TasksPage() {
               />
 
               <Button
-                variant='outline'
-                size='sm'
+                variant="outline"
+                size="sm"
                 onClick={() => setShowCompleted(!showCompleted)}
               >
                 {showCompleted ? (
                   <>
-                    <EyeOff className='mr-2 h-4 w-4' />
+                    <EyeOff className="mr-2 h-4 w-4" />
                     {texts.hideCompleted}
                   </>
                 ) : (
                   <>
-                    <Eye className='mr-2 h-4 w-4' />
+                    <Eye className="mr-2 h-4 w-4" />
                     {texts.showCompleted}
                   </>
                 )}
@@ -414,11 +414,11 @@ export default function TasksPage() {
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button onClick={handleNewTask}>
-                    <Plus className='mr-2 h-4 w-4' />
+                    <Plus className="mr-2 h-4 w-4" />
                     {texts.newTask}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className='sm:max-w-[500px]'>
+                <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
                     <DialogTitle>
                       {editingTask
@@ -426,8 +426,8 @@ export default function TasksPage() {
                           ? 'Rediger Oppgave'
                           : 'Edit Task'
                         : language === 'no'
-                        ? 'Ny Oppgave'
-                        : 'New Task'}
+                          ? 'Ny Oppgave'
+                          : 'New Task'}
                     </DialogTitle>
                     <DialogDescription>
                       {editingTask
@@ -435,8 +435,8 @@ export default function TasksPage() {
                           ? 'Rediger detaljene for oppgaven'
                           : 'Edit the task details'
                         : language === 'no'
-                        ? 'Opprett en ny oppgave'
-                        : 'Create a new task'}
+                          ? 'Opprett en ny oppgave'
+                          : 'Create a new task'}
                     </DialogDescription>
                   </DialogHeader>
                   <TaskForm
@@ -453,21 +453,21 @@ export default function TasksPage() {
 
           {/* Filters */}
           {(projects.length > 0 || categories.length > 0) && (
-            <div className='space-y-4'>
-              <div className='flex items-center justify-between'>
-                <h3 className='text-sm font-medium flex items-center gap-2'>
-                  <Filter className='h-4 w-4' />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
                   Filters
                 </h3>
                 {(selectedCategories.length > 0 ||
                   selectedProject !== null) && (
                   <Button
-                    variant='ghost'
-                    size='sm'
+                    variant="ghost"
+                    size="sm"
                     onClick={clearAllFilters}
-                    className='text-muted-foreground hover:text-foreground'
+                    className="text-muted-foreground hover:text-foreground"
                   >
-                    <X className='mr-1 h-3 w-3' />
+                    <X className="mr-1 h-3 w-3" />
                     {texts.clearAllFilters}
                   </Button>
                 )}
@@ -475,21 +475,21 @@ export default function TasksPage() {
 
               {/* Project Filter */}
               {projects.length > 0 && (
-                <div className='space-y-2'>
-                  <h4 className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     {texts.filterByProject}
                   </h4>
-                  <div className='flex flex-wrap gap-2'>
+                  <div className="flex flex-wrap gap-2">
                     <Badge
                       variant={selectedProject === null ? 'default' : 'outline'}
-                      className='cursor-pointer hover:bg-primary/20'
+                      className="cursor-pointer hover:bg-primary/20"
                       onClick={() => setSelectedProject(null)}
                     >
                       {texts.allProjects}
                     </Badge>
                     <Badge
                       variant={selectedProject === 0 ? 'default' : 'outline'}
-                      className='cursor-pointer hover:bg-primary/20'
+                      className="cursor-pointer hover:bg-primary/20"
                       onClick={() => setSelectedProject(0)}
                     >
                       {texts.noProject}
@@ -500,7 +500,7 @@ export default function TasksPage() {
                         <Badge
                           key={project.id}
                           variant={isSelected ? 'default' : 'outline'}
-                          className='cursor-pointer hover:bg-primary/20'
+                          className="cursor-pointer hover:bg-primary/20"
                           onClick={() =>
                             setSelectedProject(isSelected ? null : project.id)
                           }
@@ -517,11 +517,11 @@ export default function TasksPage() {
 
               {/* Category Filter */}
               {categories.length > 0 && (
-                <div className='space-y-2'>
-                  <h4 className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     {texts.filterByCategory}
                   </h4>
-                  <div className='flex flex-wrap gap-2'>
+                  <div className="flex flex-wrap gap-2">
                     {categories.map((category) => {
                       const isSelected = selectedCategories.includes(
                         category.id
@@ -530,7 +530,7 @@ export default function TasksPage() {
                         <Badge
                           key={category.id}
                           variant={isSelected ? 'default' : 'outline'}
-                          className='cursor-pointer hover:bg-primary/20'
+                          className="cursor-pointer hover:bg-primary/20"
                           onClick={() => toggleCategoryFilter(category.id)}
                         >
                           {language === 'no' && category.name_nb
@@ -541,7 +541,7 @@ export default function TasksPage() {
                     })}
                   </div>
                   {selectedCategories.length > 0 && (
-                    <p className='text-xs text-muted-foreground'>
+                    <p className="text-xs text-muted-foreground">
                       {selectedCategories.length} {texts.categoriesSelected}
                     </p>
                   )}
@@ -551,35 +551,35 @@ export default function TasksPage() {
           )}
 
           {error && (
-            <Alert className='mb-6'>
-              <AlertTriangle className='h-4 w-4' />
+            <Alert className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {/* Tasks Grid */}
           {loading ? (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
                 <TaskSkeleton key={i} />
               ))}
             </div>
           ) : sortedProjects.length === 0 &&
             sortedStandaloneTasks.length === 0 ? (
-            <div className='text-center py-12'>
-              <Target className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
-              <h2 className='text-2xl font-semibold mb-2'>{texts.noTasks}</h2>
-              <p className='text-muted-foreground mb-6'>
+            <div className="text-center py-12">
+              <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h2 className="text-2xl font-semibold mb-2">{texts.noTasks}</h2>
+              <p className="text-muted-foreground mb-6">
                 {texts.createFirstTask}
               </p>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button onClick={handleNewTask}>
-                    <Plus className='mr-2 h-4 w-4' />
+                    <Plus className="mr-2 h-4 w-4" />
                     {texts.newTask}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className='sm:max-w-[500px]'>
+                <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
                     <DialogTitle>
                       {language === 'no' ? 'Ny Oppgave' : 'New Task'}
@@ -600,15 +600,15 @@ export default function TasksPage() {
               </Dialog>
             </div>
           ) : (
-            <div className='space-y-8'>
+            <div className="space-y-8">
               {/* Projects Section */}
               {sortedProjects.length > 0 && (
                 <div>
-                  <h2 className='text-xl font-semibold mb-4 flex items-center gap-2'>
-                    <FolderKanban className='h-5 w-5' />
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <FolderKanban className="h-5 w-5" />
                     {texts.projects}
                   </h2>
-                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {sortedProjects.map((project) => (
                       <ProjectCard
                         key={project.id}
@@ -625,11 +625,11 @@ export default function TasksPage() {
               {/* Standalone Tasks Section */}
               {sortedStandaloneTasks.length > 0 && (
                 <div>
-                  <h2 className='text-xl font-semibold mb-4 flex items-center gap-2'>
-                    <Target className='h-5 w-5' />
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <Target className="h-5 w-5" />
                     {texts.standaloneTasks}
                   </h2>
-                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {sortedStandaloneTasks.map((task) => (
                       <TaskCard
                         key={task.id}

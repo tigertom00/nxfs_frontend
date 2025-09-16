@@ -17,7 +17,7 @@ type TranslationKey = NestedKeyOf<Messages>;
 
 const messages = {
   en,
-  no
+  no,
 } as const;
 
 // Helper function to get nested value from object using dot notation
@@ -35,8 +35,11 @@ export function useIntl() {
 
       // Simple interpolation for values
       if (values && typeof message === 'string') {
-        Object.keys(values).forEach(valueKey => {
-          message = message.replace(new RegExp(`{${valueKey}}`, 'g'), values[valueKey]);
+        Object.keys(values).forEach((valueKey) => {
+          message = message.replace(
+            new RegExp(`{${valueKey}}`, 'g'),
+            values[valueKey]
+          );
         });
       }
 
