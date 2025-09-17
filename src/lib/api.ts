@@ -253,7 +253,7 @@ export const chatbotAPI = {
 
     const response = await axios.post(env.NEXT_PUBLIC_N8N_URL, formData, {
       headers: {
-        nxfs_blog: env.NEXT_PUBLIC_N8N_SECRET_KEY,
+        Authorization: env.NEXT_PUBLIC_N8N_SECRET_KEY,
         'Content-Type': 'multipart/form-data',
       },
     });
