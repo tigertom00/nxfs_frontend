@@ -40,9 +40,28 @@ mkdir -p public
 if [ ! -f .env.production ]; then
     echo -e "${YELLOW}📝 Creating .env.production file...${NC}"
     cp .env.production.example .env.production
-    echo -e "${RED}⚠️  Please edit .env.production with your actual values before continuing${NC}"
-    echo -e "${YELLOW}   Especially set NEXT_PUBLIC_N8N_SECRET_KEY${NC}"
-    read -p "Press Enter after editing .env.production..."
+    echo -e "${RED}⚠️  IMPORTANT: Edit .env.production with your actual production values!${NC}"
+    echo -e "${YELLOW}   Required changes:${NC}"
+    echo -e "${YELLOW}   • Set NEXT_PUBLIC_N8N_SECRET_KEY to your actual secret key${NC}"
+    echo -e "${YELLOW}   • Verify API URLs are correct for production${NC}"
+    echo -e "${YELLOW}   • Never commit .env.production to git (it's ignored)${NC}"
+    echo ""
+    echo -e "${YELLOW}   Opening .env.production for editing...${NC}"
+
+    # Try to open with available editors
+    if command -v nano &> /dev/null; then
+        nano .env.production
+    elif command -v vim &> /dev/null; then
+        vim .env.production
+    elif command -v vi &> /dev/null; then
+        vi .env.production
+    else
+        echo -e "${RED}   No text editor found. Please edit .env.production manually.${NC}"
+        read -p "   Press Enter after editing .env.production..."
+    fi
+
+    echo ""
+    echo -e "${GREEN}✅ .env.production configured. Continuing with deployment...${NC}"
 fi
 
 # Build and start services

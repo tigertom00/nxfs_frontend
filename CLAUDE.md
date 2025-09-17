@@ -46,6 +46,8 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
 - **Authentication flow**: Auto-initialization on app start, token refresh on 401/403
 - **Environment Configuration**: Zod-validated environment variables via `src/lib/env.ts`
   - `NEXT_PUBLIC_N8N_SECRET_KEY`: Authentication key for N8N chatbot integration
+  - **Development**: Uses `.env` (ignored by git, copy from `.env.example`)
+  - **Production**: Uses `.env.production` (created from `.env.production.example` by deploy script)
 
 ### Database & Backend
 - **Local Database**: SQLite with Prisma ORM (basic User/Post models)
@@ -237,3 +239,28 @@ npm run format   # Format all code with Prettier
 - **Validation**: Zod schema validation for environment variables
 - **Location**: `src/lib/env.ts`
 - **Type Safety**: Compile-time validation of required environment variables
+
+#### Environment Files
+- **`.env.example`**: Template for development environment (tracked in git)
+- **`.env`**: Local development environment (ignored by git, copy from `.env.example`)
+- **`.env.production.example`**: Template for production environment (tracked in git)
+- **`.env.production`**: Production environment (ignored by git, created by deploy script)
+
+#### Required Variables
+- `NEXT_PUBLIC_API_URL`: Backend API URL (default: https://api.nxfs.no)
+- `NEXT_PUBLIC_N8N_URL`: N8N webhook URL (default: https://n8n.nxfs.no/webhook/nxfs)
+- `NEXT_PUBLIC_N8N_SECRET_KEY`: Authentication key for N8N integration
+- `NODE_ENV`: Environment mode (development/production/test)
+
+#### Setup Instructions
+**Development:**
+```bash
+cp .env.example .env
+# Edit .env with your development values
+```
+
+**Production:**
+The `deploy.sh` script automatically:
+1. Creates `.env.production` from `.env.production.example`
+2. Opens editor to set production values
+3. Reminds to never commit environment files
