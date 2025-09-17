@@ -160,7 +160,10 @@ export const usersAPI = {
     return response.data;
   },
 
-  updateUser: async (userId: string, userData: Partial<UpdateUserResponse>): Promise<UpdateUserResponse> => {
+  updateUser: async (
+    userId: string,
+    userData: Partial<UpdateUserResponse>
+  ): Promise<UpdateUserResponse> => {
     const response = await api.put(`/user/${userId}/`, userData);
     return response.data;
   },
@@ -188,12 +191,17 @@ export const postsAPI = {
     return response.data;
   },
 
-  createPost: async (postData: Partial<CreatePostResponse>): Promise<CreatePostResponse> => {
+  createPost: async (
+    postData: Partial<CreatePostResponse>
+  ): Promise<CreatePostResponse> => {
     const response = await api.post('/api/posts/', postData);
     return response.data;
   },
 
-  updatePost: async (postId: string, postData: Partial<UpdatePostResponse>): Promise<UpdatePostResponse> => {
+  updatePost: async (
+    postId: string,
+    postData: Partial<UpdatePostResponse>
+  ): Promise<UpdatePostResponse> => {
     const response = await api.put(`/api/posts/${postId}/`, postData);
     return response.data;
   },
@@ -219,7 +227,7 @@ export const chatbotAPI = {
       },
       {
         headers: {
-          nxfs_blog: env.NEXT_PUBLIC_N8N_SECRET_KEY,
+          Authorization: env.NEXT_PUBLIC_N8N_SECRET_KEY,
           'Content-Type': 'application/json',
         },
       }
@@ -265,7 +273,9 @@ export const tasksAPI = {
     return response.data;
   },
 
-  createTask: async (taskData: CreateTaskPayload): Promise<CreateTaskResponse> => {
+  createTask: async (
+    taskData: CreateTaskPayload
+  ): Promise<CreateTaskResponse> => {
     try {
       const response = await api.post('/app/tasks/', taskData);
       showSuccessToast('Task created successfully');
@@ -276,7 +286,10 @@ export const tasksAPI = {
     }
   },
 
-  updateTask: async (taskId: string, taskData: UpdateTaskPayload): Promise<UpdateTaskResponse> => {
+  updateTask: async (
+    taskId: string,
+    taskData: UpdateTaskPayload
+  ): Promise<UpdateTaskResponse> => {
     try {
       const response = await api.put(`/app/tasks/${taskId}/`, taskData);
       showSuccessToast('Task updated successfully');
@@ -287,7 +300,10 @@ export const tasksAPI = {
     }
   },
 
-  patchTask: async (taskId: string, taskData: UpdateTaskPayload): Promise<UpdateTaskResponse> => {
+  patchTask: async (
+    taskId: string,
+    taskData: UpdateTaskPayload
+  ): Promise<UpdateTaskResponse> => {
     try {
       const response = await api.patch(`/app/tasks/${taskId}/`, taskData);
       showSuccessToast('Task updated successfully');
@@ -320,18 +336,25 @@ export const categoriesAPI = {
     const response = await api.get(`/app/tasks/categories/${categoryId}/`);
     return response.data;
   },
-  createCategory: async (categoryData: Partial<Category>): Promise<CreateCategoryResponse> => {
+  createCategory: async (
+    categoryData: Partial<Category>
+  ): Promise<CreateCategoryResponse> => {
     const response = await api.post('/app/tasks/categories/', categoryData);
     return response.data;
   },
-  updateCategory: async (categoryId: string, categoryData: Partial<Category>): Promise<UpdateCategoryResponse> => {
+  updateCategory: async (
+    categoryId: string,
+    categoryData: Partial<Category>
+  ): Promise<UpdateCategoryResponse> => {
     const response = await api.put(
       `/app/tasks/categories/${categoryId}/`,
       categoryData
     );
     return response.data;
   },
-  deleteCategory: async (categoryId: string): Promise<DeleteCategoryResponse> => {
+  deleteCategory: async (
+    categoryId: string
+  ): Promise<DeleteCategoryResponse> => {
     const response = await api.delete(`/app/tasks/categories/${categoryId}/`);
     return response.data;
   },
@@ -347,11 +370,16 @@ export const projectsAPI = {
     const response = await api.get(`/app/projects/${projectId}/`);
     return response.data;
   },
-  createProject: async (projectData: Partial<Project>): Promise<CreateProjectResponse> => {
+  createProject: async (
+    projectData: Partial<Project>
+  ): Promise<CreateProjectResponse> => {
     const response = await api.post('/app/projects/', projectData);
     return response.data;
   },
-  updateProject: async (projectId: string, projectData: Partial<Project>): Promise<UpdateProjectResponse> => {
+  updateProject: async (
+    projectId: string,
+    projectData: Partial<Project>
+  ): Promise<UpdateProjectResponse> => {
     const response = await api.put(`/app/projects/${projectId}/`, projectData);
     return response.data;
   },
