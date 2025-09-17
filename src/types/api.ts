@@ -64,12 +64,21 @@ export interface User {
   last_login?: string;
   language: 'en' | 'no';
   dark_mode: boolean;
+  session_id?: string; // For chatbot session management
 }
 
 /**
  * Task-related types - matching your existing API structure
  * Using the same types as defined in types/task.ts for consistency
  */
+export interface TaskImage {
+  id: string;
+  image: string;
+  upload_date: string;
+  file_size?: number;
+  file_name?: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -84,6 +93,7 @@ export interface Task {
   updated_at: string;
   category: number[]; // Array of Category IDs (ManyToMany)
   project?: number; // Foreign key to Project (can be null)
+  images?: TaskImage[]; // Array of uploaded images
 }
 
 export interface Category {
@@ -91,6 +101,14 @@ export interface Category {
   slug: string;
   name: string;
   name_nb?: string;
+}
+
+export interface ProjectImage {
+  id: string;
+  image: string;
+  upload_date: string;
+  file_size?: number;
+  file_name?: string;
 }
 
 export interface Project {
@@ -107,11 +125,29 @@ export interface Project {
   tasks: number[]; // Array of Task IDs
   status: 'todo' | 'in_progress' | 'completed';
   status_nb: 'å gjøre' | 'pågående' | 'fullført';
+  images?: ProjectImage[]; // Array of uploaded images
 }
 
 /**
  * Post types for blog functionality
  */
+export interface PostAudio {
+  id: string;
+  audio: string;
+  upload_date: string;
+  file_size?: number;
+  file_name?: string;
+  duration?: number;
+}
+
+export interface PostImage {
+  id: string;
+  image: string;
+  upload_date: string;
+  file_size?: number;
+  file_name?: string;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -130,6 +166,8 @@ export interface Post {
   published_at?: string;
   tags?: string[];
   meta_description?: string;
+  audio?: PostAudio[]; // Array of uploaded audio files
+  images?: PostImage[]; // Array of uploaded images
 }
 
 /**
@@ -164,6 +202,8 @@ export type GetTaskResponse = Task;
 export type CreateTaskResponse = Task;
 export type UpdateTaskResponse = Task;
 export type DeleteTaskResponse = void;
+export type UploadTaskImageResponse = TaskImage;
+export type DeleteTaskImageResponse = void;
 
 // Categories API responses
 export type GetCategoriesResponse = Category[];
@@ -178,6 +218,8 @@ export type GetProjectResponse = Project;
 export type CreateProjectResponse = Project;
 export type UpdateProjectResponse = Project;
 export type DeleteProjectResponse = void;
+export type UploadProjectImageResponse = ProjectImage;
+export type DeleteProjectImageResponse = void;
 
 // Posts API responses
 export type GetPostsResponse = Post[] | PaginatedResponse<Post>;
@@ -186,6 +228,10 @@ export type GetPostResponse = Post;
 export type CreatePostResponse = Post;
 export type UpdatePostResponse = Post;
 export type DeletePostResponse = void;
+export type UploadPostAudioResponse = PostAudio;
+export type DeletePostAudioResponse = void;
+export type UploadPostImageResponse = PostImage;
+export type DeletePostImageResponse = void;
 
 // Chatbot API responses
 export interface ChatbotResponse {

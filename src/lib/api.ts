@@ -11,6 +11,8 @@ import type {
   CreateTaskResponse,
   UpdateTaskResponse,
   DeleteTaskResponse,
+  UploadTaskImageResponse,
+  DeleteTaskImageResponse,
   GetCategoriesResponse,
   GetCategoryResponse,
   CreateCategoryResponse,
@@ -21,12 +23,18 @@ import type {
   CreateProjectResponse,
   UpdateProjectResponse,
   DeleteProjectResponse,
+  UploadProjectImageResponse,
+  DeleteProjectImageResponse,
   GetPostsResponse,
   GetPublicPostsResponse,
   GetPostResponse,
   CreatePostResponse,
   UpdatePostResponse,
   DeletePostResponse,
+  UploadPostAudioResponse,
+  DeletePostAudioResponse,
+  UploadPostImageResponse,
+  DeletePostImageResponse,
   SendChatMessageResponse,
   Task,
   Category,
@@ -210,6 +218,64 @@ export const postsAPI = {
     const response = await api.delete(`/api/posts/${postId}/`);
     return response.data;
   },
+
+  uploadAudio: async (postId: string, audio: File): Promise<UploadPostAudioResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('audio', audio);
+
+      const response = await api.post(`/api/posts/${postId}/audio/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Audio uploaded successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Uploading post audio');
+      throw error;
+    }
+  },
+
+  deleteAudio: async (postId: string, audioId: string): Promise<DeletePostAudioResponse> => {
+    try {
+      const response = await api.delete(`/api/posts/${postId}/audio/${audioId}/`);
+      showSuccessToast('Audio deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting post audio');
+      throw error;
+    }
+  },
+
+  uploadImage: async (postId: string, image: File): Promise<UploadPostImageResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('image', image);
+
+      const response = await api.post(`/api/posts/${postId}/upload_image/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Image uploaded successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Uploading post image');
+      throw error;
+    }
+  },
+
+  deleteImage: async (postId: string, imageId: string): Promise<DeletePostImageResponse> => {
+    try {
+      const response = await api.delete(`/api/posts/${postId}/images/${imageId}/`);
+      showSuccessToast('Image deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting post image');
+      throw error;
+    }
+  },
 };
 
 // N8N Chatbot API
@@ -324,6 +390,35 @@ export const tasksAPI = {
       throw error;
     }
   },
+
+  uploadImage: async (taskId: string, image: File): Promise<UploadTaskImageResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('image', image);
+
+      const response = await api.post(`/app/tasks/${taskId}/upload_image/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Image uploaded successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Uploading task image');
+      throw error;
+    }
+  },
+
+  deleteImage: async (taskId: string, imageId: string): Promise<DeleteTaskImageResponse> => {
+    try {
+      const response = await api.delete(`/app/tasks/${taskId}/images/${imageId}/`);
+      showSuccessToast('Image deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting task image');
+      throw error;
+    }
+  },
 };
 
 // Categories API
@@ -386,6 +481,35 @@ export const projectsAPI = {
   deleteProject: async (projectId: string): Promise<DeleteProjectResponse> => {
     const response = await api.delete(`/app/projects/${projectId}/`);
     return response.data;
+  },
+
+  uploadImage: async (projectId: string, image: File): Promise<UploadProjectImageResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('image', image);
+
+      const response = await api.post(`/app/projects/${projectId}/upload_image/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Image uploaded successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Uploading project image');
+      throw error;
+    }
+  },
+
+  deleteImage: async (projectId: string, imageId: string): Promise<DeleteProjectImageResponse> => {
+    try {
+      const response = await api.delete(`/app/projects/${projectId}/images/${imageId}/`);
+      showSuccessToast('Image deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting project image');
+      throw error;
+    }
   },
 };
 
