@@ -278,7 +278,7 @@ export function ProjectManager({
           {texts.manageProjects}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{texts.manageProjects}</DialogTitle>
           <DialogDescription>
