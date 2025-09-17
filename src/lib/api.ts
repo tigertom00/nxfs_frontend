@@ -343,7 +343,27 @@ export const tasksAPI = {
     taskData: CreateTaskPayload
   ): Promise<CreateTaskResponse> => {
     try {
-      const response = await api.post('/app/tasks/', taskData);
+      const formData = new FormData();
+
+      // Convert task data to FormData for multipart/form-data submission
+      Object.entries(taskData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            // Handle array fields like category
+            value.forEach((item, index) => {
+              formData.append(`${key}[${index}]`, item.toString());
+            });
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.post('/app/tasks/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       showSuccessToast('Task created successfully');
       return response.data;
     } catch (error) {
@@ -357,7 +377,27 @@ export const tasksAPI = {
     taskData: UpdateTaskPayload
   ): Promise<UpdateTaskResponse> => {
     try {
-      const response = await api.put(`/app/tasks/${taskId}/`, taskData);
+      const formData = new FormData();
+
+      // Convert task data to FormData for multipart/form-data submission
+      Object.entries(taskData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            // Handle array fields like category
+            value.forEach((item, index) => {
+              formData.append(`${key}[${index}]`, item.toString());
+            });
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.put(`/app/tasks/${taskId}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       showSuccessToast('Task updated successfully');
       return response.data;
     } catch (error) {
@@ -371,7 +411,27 @@ export const tasksAPI = {
     taskData: UpdateTaskPayload
   ): Promise<UpdateTaskResponse> => {
     try {
-      const response = await api.patch(`/app/tasks/${taskId}/`, taskData);
+      const formData = new FormData();
+
+      // Convert task data to FormData for multipart/form-data submission
+      Object.entries(taskData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            // Handle array fields like category
+            value.forEach((item, index) => {
+              formData.append(`${key}[${index}]`, item.toString());
+            });
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.patch(`/app/tasks/${taskId}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       showSuccessToast('Task updated successfully');
       return response.data;
     } catch (error) {
@@ -468,15 +528,67 @@ export const projectsAPI = {
   createProject: async (
     projectData: Partial<Project>
   ): Promise<CreateProjectResponse> => {
-    const response = await api.post('/app/projects/', projectData);
-    return response.data;
+    try {
+      const formData = new FormData();
+
+      // Convert project data to FormData for multipart/form-data submission
+      Object.entries(projectData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            // Handle array fields like tasks
+            value.forEach((item, index) => {
+              formData.append(`${key}[${index}]`, item.toString());
+            });
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.post('/app/projects/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Project created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating project');
+      throw error;
+    }
   },
   updateProject: async (
     projectId: string,
     projectData: Partial<Project>
   ): Promise<UpdateProjectResponse> => {
-    const response = await api.put(`/app/projects/${projectId}/`, projectData);
-    return response.data;
+    try {
+      const formData = new FormData();
+
+      // Convert project data to FormData for multipart/form-data submission
+      Object.entries(projectData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            // Handle array fields like tasks
+            value.forEach((item, index) => {
+              formData.append(`${key}[${index}]`, item.toString());
+            });
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.put(`/app/projects/${projectId}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Project updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating project');
+      throw error;
+    }
   },
   deleteProject: async (projectId: string): Promise<DeleteProjectResponse> => {
     const response = await api.delete(`/app/projects/${projectId}/`);
