@@ -64,14 +64,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Don't show toast for auth refresh attempts
-    if (!originalRequest.url?.includes('/token/refresh/')) {
-      handleApiError(
-        error,
-        `API ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`
-      );
-    }
-
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
       !originalRequest._retry
@@ -122,6 +114,18 @@ api.interceptors.response.use(
         window.location.href = '/';
         return Promise.reject(refreshError);
       }
+    }
+
+    // Only show error toast if it's not a 401/403 that we just handled with token refresh
+    // or if it's a token refresh request itself that failed
+    if (
+      !originalRequest.url?.includes('/token/refresh/') &&
+      !(error.response?.status === 401 || error.response?.status === 403)
+    ) {
+      handleApiError(
+        error,
+        `API ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`
+      );
     }
 
     return Promise.reject(error);
@@ -204,8 +208,7 @@ export const postsAPI = {
 export const chatbotAPI = {
   sendMessage: async (
     sessionId: string,
-    chatInput: string,
-    secretKey: string
+    chatInput: string
   ): Promise<SendChatMessageResponse> => {
     const response = await axios.post(
       env.NEXT_PUBLIC_N8N_URL,
@@ -216,11 +219,36 @@ export const chatbotAPI = {
       },
       {
         headers: {
-          nxfs_blog: secretKey,
+          nxfs_blog: env.NEXT_PUBLIC_N8N_SECRET_KEY,
           'Content-Type': 'application/json',
         },
       }
     );
+    return response.data;
+  },
+
+  sendMessageWithFiles: async (
+    sessionId: string,
+    chatInput: string,
+    files?: File[]
+  ): Promise<SendChatMessageResponse> => {
+    const formData = new FormData();
+    formData.append('sessionId', sessionId);
+    formData.append('action', 'sendMessage');
+    formData.append('chatInput', chatInput);
+
+    if (files && files.length > 0) {
+      files.forEach((file, index) => {
+        formData.append(`file_${index}`, file);
+      });
+    }
+
+    const response = await axios.post(env.NEXT_PUBLIC_N8N_URL, formData, {
+      headers: {
+        nxfs_blog: env.NEXT_PUBLIC_N8N_SECRET_KEY,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 };

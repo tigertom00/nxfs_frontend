@@ -33,6 +33,7 @@ interface ChatMessage {
     type: 'image' | 'file' | 'voice';
     name: string;
     url: string;
+    file?: File;
   }>;
 }
 
@@ -44,8 +45,10 @@ export default function ChatBot() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const texts = {
     title: language === 'no' ? 'Chat med AI' : 'Chat with AI',
@@ -70,12 +73,11 @@ export default function ChatBot() {
       language === 'no'
         ? 'Start en samtale med AI-assistenten'
         : 'Start a conversation with the AI assistant',
+    fileSizeLimit: language === 'no' ? 'Fil for stor (maks 10MB)' : 'File too large (max 10MB)',
+    fileTypeNotSupported: language === 'no' ? 'Filtype ikke støttet' : 'File type not supported',
+    maxFiles: language === 'no' ? 'Maks 5 filer per melding' : 'Maximum 5 files per message',
   };
 
-  const secretKey =
-    process.env.NEXT_PUBLIC_N8N_SECRET_KEY ||
-    process.env.N8N_SECRET_KEY ||
-    'your-secret-key';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -92,7 +94,7 @@ export default function ChatBot() {
   }, [chatOpen, isMinimized]);
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading || !isAuthenticated || !user) {
+    if ((!inputValue.trim() && attachedFiles.length === 0) || isLoading || !isAuthenticated || !user) {
       return;
     }
 
@@ -101,19 +103,28 @@ export default function ChatBot() {
       content: inputValue.trim(),
       sender: 'user',
       timestamp: new Date(),
+      attachments: attachedFiles.length > 0 ? attachedFiles.map(file => ({
+        type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
+        name: file.name,
+        url: '',
+        file
+      })) : undefined,
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const messageText = inputValue.trim();
     setInputValue('');
+    setAttachedFiles([]);
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await chatbotAPI.sendMessage(
-        user.id,
-        inputValue.trim(),
-        secretKey
-      );
+      // Use session_id from user data, fallback to user.id
+      const sessionId = (user as any).session_id || user.id;
+
+      const response = attachedFiles.length > 0
+        ? await chatbotAPI.sendMessageWithFiles(sessionId, messageText, attachedFiles)
+        : await chatbotAPI.sendMessage(sessionId, messageText);
 
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -146,7 +157,61 @@ export default function ChatBot() {
 
   const handleClearChat = () => {
     setMessages([]);
+    setAttachedFiles([]);
     setError(null);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_FILES = 5;
+
+    if (files.length === 0) return;
+
+    // Check total file limit
+    if (attachedFiles.length + files.length > MAX_FILES) {
+      setError(texts.maxFiles);
+      return;
+    }
+
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        setError(`${file.name}: ${texts.fileSizeLimit}`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > 0) {
+      setAttachedFiles((prev) => [...prev, ...validFiles]);
+    }
+
+    // Reset the input so the same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleImageUpload = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.accept = 'image/*';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileAttach = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.accept = '*/*';
+      fileInputRef.current.click();
+    }
+  };
+
+  const removeAttachedFile = (index: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const formatTime = (date: Date) => {
@@ -322,12 +387,48 @@ export default function ChatBot() {
               </ScrollArea>
 
               <div className="border-t p-4">
+                {/* Attached files preview */}
+                {attachedFiles.length > 0 && (
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {attachedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center space-x-1 bg-muted rounded px-2 py-1 text-xs"
+                      >
+                        {file.type.startsWith('image/') ? (
+                          <ImageIcon className="h-3 w-3" />
+                        ) : (
+                          <File className="h-3 w-3" />
+                        )}
+                        <span className="max-w-20 truncate">{file.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => removeAttachedFile(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="flex space-x-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    multiple
+                  />
                   <Button
                     variant="ghost"
                     size="sm"
                     className="p-2"
                     title={texts.attachment}
+                    onClick={handleFileAttach}
+                    disabled={isLoading}
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>
@@ -336,6 +437,7 @@ export default function ChatBot() {
                     size="sm"
                     className="p-2"
                     title={texts.voiceMessage}
+                    disabled={isLoading}
                   >
                     <Mic className="h-4 w-4" />
                   </Button>
@@ -344,6 +446,8 @@ export default function ChatBot() {
                     size="sm"
                     className="p-2"
                     title={texts.image}
+                    onClick={handleImageUpload}
+                    disabled={isLoading}
                   >
                     <ImageIcon className="h-4 w-4" />
                   </Button>
@@ -358,7 +462,7 @@ export default function ChatBot() {
                   />
                   <Button
                     onClick={handleSendMessage}
-                    disabled={!inputValue.trim() || isLoading}
+                    disabled={(!inputValue.trim() && attachedFiles.length === 0) || isLoading}
                     size="sm"
                     className="p-2"
                   >

@@ -33,7 +33,7 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
 
 ### API Integration
 - **External API**: `https://api.nxfs.no` - Main backend API with JWT authentication
-- **N8N Chatbot**: `https://n8n.nxfs.no/webhook/nxfs` - AI chatbot integration
+- **N8N Chatbot**: `https://n8n.nxfs.no/webhook/nxfs` - AI chatbot integration with file upload support
 - **Authentication**: JWT tokens with automatic refresh via Axios interceptors
 - **API Structure**: All API calls go through centralized API client in `src/lib/api.ts`
 - **Type Safety**: Comprehensive TypeScript interfaces for all API requests/responses
@@ -45,6 +45,7 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
   - `useUIStore`: Theme (light/dark/purple), language (en/no), UI state
 - **Authentication flow**: Auto-initialization on app start, token refresh on 401/403
 - **Environment Configuration**: Zod-validated environment variables via `src/lib/env.ts`
+  - `NEXT_PUBLIC_N8N_SECRET_KEY`: Authentication key for N8N chatbot integration
 
 ### Database & Backend
 - **Local Database**: SQLite with Prisma ORM (basic User/Post models)
@@ -74,7 +75,7 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
 - **Pages**: Next.js 15 App Router structure in `src/app/`
 - **Feature Components**: Feature-specific components in `src/components/features/`
   - `features/blog/`: Blog post components
-  - `features/chat/`: Chatbot components
+  - `features/chat/`: Chatbot components with file upload, session management, and N8N integration
   - `features/tasks/`: Task management components
 - **Shared Components**: Reusable components in `src/components/shared/`
   - `ErrorBoundary`: React error boundary for component-level error handling
@@ -100,6 +101,18 @@ useEffect(() => {
 - **Type Safety**: All API responses use TypeScript interfaces from `src/types/api.ts`
 - **Error Handling**: Global error handler (`src/lib/error-handler.ts`) with toast notifications
 - **Payload Types**: Separate request/response types (e.g., `CreateTaskPayload` vs `Task`)
+
+### Chatbot Integration
+- **N8N Webhook**: Direct integration with N8N workflow automation at `https://n8n.nxfs.no/webhook/nxfs`
+- **File Upload Support**: Multi-file upload with FormData (images, documents, max 10MB per file, 5 files per message)
+- **Session Management**: Uses `session_id` from user model for conversation persistence
+- **Authentication**: Secured with `NEXT_PUBLIC_N8N_SECRET_KEY` environment variable
+- **Real-time UI**: Loading states, typing indicators, file previews, and error handling
+- **Multilingual**: Full Norwegian/English translation support
+- **API Methods**:
+  - `chatbotAPI.sendMessage(sessionId, text)`: Text-only messages
+  - `chatbotAPI.sendMessageWithFiles(sessionId, text, files)`: Messages with file attachments
+- **File Validation**: Size limits, type checking, and user-friendly error messages
 
 ### Styling System
 - **Tailwind CSS 4**: Utility-first styling
