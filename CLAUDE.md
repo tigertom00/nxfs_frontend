@@ -31,6 +31,8 @@ npm run db:reset     # Reset database and run migrations
 ### Custom Server Setup
 This project uses a custom Node.js server (`server.ts`) that combines Next.js with Socket.IO for real-time features. The server runs on port 3000 and handles both HTTP requests and WebSocket connections at `/api/socketio`.
 
+**Development URL**: Use `http://10.20.30.202:3000` when testing the development server to avoid CORS issues with the external API.
+
 ### API Integration
 - **External API**: `https://api.nxfs.no` - Main backend API with JWT authentication
 - **N8N Chatbot**: `https://n8n.nxfs.no/webhook/nxfs` - AI chatbot integration with file upload support
@@ -72,6 +74,7 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
 - **Sonner**: Toast notifications with enhanced UX and error handling
 - **Prettier**: Code formatting with `.prettierrc` configuration
 - **Bundle Analyzer**: Performance monitoring and optimization insights
+- **Playwright**: Browser automation and testing via MCP server integration
 
 ### Component Architecture
 - **Pages**: Next.js 15 App Router structure in `src/app/`
@@ -234,6 +237,14 @@ npm run analyze  # Generate bundle analysis report
 ```bash
 npm run format   # Format all code with Prettier
 ```
+
+### Browser Testing with Playwright
+The project includes Playwright MCP server integration for browser automation and testing:
+
+- **Setup**: Playwright MCP server configured with `npx @playwright/mcp@latest --caps vision`
+- **Browser Access**: Use `http://10.20.30.202:3000` when testing the development server
+- **Capabilities**: Screenshot capture, page interaction, form filling, navigation testing
+- **Usage**: Available through Claude Code's MCP integration for automated testing and UI verification
 
 ### Environment Configuration
 - **Validation**: Zod schema validation for environment variables
