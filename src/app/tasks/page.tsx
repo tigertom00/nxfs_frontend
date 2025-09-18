@@ -6,25 +6,17 @@ import Navbar from '@/components/layouts/navbar';
 import ChatBot from '@/components/features/chat/chatbot';
 import {
   TaskCard,
-  TaskForm,
   TaskSkeleton,
   ProjectCard,
+  CreationModal,
 } from '@/components/features/tasks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore, useUIStore } from '@/stores';
 import { tasksAPI, categoriesAPI, projectsAPI } from '@/lib/api';
 import { Task, Category, Project } from '@/types/api';
-import { TaskFormData } from '@/types/task';
+import { TaskFormData, ProjectFormData } from '@/types/task';
 import {
   Plus,
   AlertTriangle,
@@ -120,7 +112,7 @@ export default function TasksPage() {
     }
   };
 
-  const handleCreateTask = async (taskData: TaskFormData) => {
+  const handleCreateTask = async (taskData: TaskFormData, files?: File[]) => {
     try {
       setActionLoading(true);
       if (!user) {
@@ -137,7 +129,21 @@ export default function TasksPage() {
         delete payload.estimated_time;
       }
 
-      await tasksAPI.createTask(payload);
+      // Create the task first
+      const createdTask = await tasksAPI.createTask(payload);
+
+      // Upload images if any
+      if (files && files.length > 0) {
+        for (const file of files) {
+          try {
+            await tasksAPI.uploadImage(createdTask.id, file);
+          } catch (uploadError) {
+            console.error('Failed to upload image:', uploadError);
+            // Continue with other images even if one fails
+          }
+        }
+      }
+
       await fetchTasks();
       setIsDialogOpen(false);
       setEditingTask(undefined);
@@ -156,7 +162,7 @@ export default function TasksPage() {
     }
   };
 
-  const handleUpdateTask = async (taskData: TaskFormData) => {
+  const handleUpdateTask = async (taskData: TaskFormData, files?: File[]) => {
     if (!editingTask) return;
 
     try {
@@ -175,7 +181,21 @@ export default function TasksPage() {
         delete payload.estimated_time;
       }
 
+      // Update the task first
       await tasksAPI.updateTask(editingTask.id, payload);
+
+      // Upload new images if any
+      if (files && files.length > 0) {
+        for (const file of files) {
+          try {
+            await tasksAPI.uploadImage(editingTask.id, file);
+          } catch (uploadError) {
+            console.error('Failed to upload image:', uploadError);
+            // Continue with other images even if one fails
+          }
+        }
+      }
+
       await fetchTasks();
       setIsDialogOpen(false);
       setEditingTask(undefined);
@@ -188,6 +208,54 @@ export default function TasksPage() {
           : language === 'no'
             ? 'Kunne ikke oppdatere oppgave'
             : 'Failed to update task'
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCreateProject = async (projectData: ProjectFormData) => {
+    try {
+      setActionLoading(true);
+      if (!user) {
+        setError(language === 'no' ? 'Bruker ikke funnet' : 'User not found');
+        setActionLoading(false);
+        return;
+      }
+
+      // Map status to Norwegian equivalent
+      const statusMapping = {
+        todo: 'å gjøre' as const,
+        in_progress: 'pågående' as const,
+        completed: 'fullført' as const,
+      };
+
+      const payload: any = {
+        name: projectData.name.trim(),
+        status: projectData.status,
+        status_nb: statusMapping[projectData.status as keyof typeof statusMapping],
+        user_id: parseInt(user.id),
+        ...(projectData.name_nb?.trim() && { name_nb: projectData.name_nb.trim() }),
+        ...(projectData.description?.trim() && {
+          description: projectData.description.trim(),
+        }),
+        ...(projectData.description_nb?.trim() && {
+          description_nb: projectData.description_nb.trim(),
+        }),
+      };
+
+      await projectsAPI.createProject(payload);
+      await fetchProjects();
+      setIsDialogOpen(false);
+    } catch (err: any) {
+      console.log(err.response?.data);
+      const errorMessages = Object.values(err.response?.data ?? {}).flat();
+      setError(
+        errorMessages.length > 0
+          ? errorMessages.join('\n')
+          : language === 'no'
+            ? 'Kunne ikke opprette prosjekt'
+            : 'Failed to create project'
       );
     } finally {
       setActionLoading(false);
@@ -397,43 +465,10 @@ export default function TasksPage() {
                   </>
                 )}
               </Button>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={handleNewTask}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {texts.newTask}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingTask
-                        ? language === 'no'
-                          ? 'Rediger Oppgave'
-                          : 'Edit Task'
-                        : language === 'no'
-                          ? 'Ny Oppgave'
-                          : 'New Task'}
-                    </DialogTitle>
-                    <DialogDescription>
-                      {editingTask
-                        ? language === 'no'
-                          ? 'Rediger detaljene for oppgaven'
-                          : 'Edit the task details'
-                        : language === 'no'
-                          ? 'Opprett en ny oppgave'
-                          : 'Create a new task'}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <TaskForm
-                    task={editingTask}
-                    categories={categories}
-                    projects={projects}
-                    onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
-                    onCancel={handleCloseDialog}
-                  />
-                </DialogContent>
-              </Dialog>
+              <Button onClick={handleNewTask}>
+                <Plus className="mr-2 h-4 w-4" />
+                {texts.newTask}
+              </Button>
             </div>
           </div>
 
@@ -558,32 +593,10 @@ export default function TasksPage() {
               <p className="text-muted-foreground mb-6">
                 {texts.createFirstTask}
               </p>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={handleNewTask}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {texts.newTask}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {language === 'no' ? 'Ny Oppgave' : 'New Task'}
-                    </DialogTitle>
-                    <DialogDescription>
-                      {language === 'no'
-                        ? 'Opprett en ny oppgave'
-                        : 'Create a new task'}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <TaskForm
-                    categories={categories}
-                    projects={projects}
-                    onSubmit={handleCreateTask}
-                    onCancel={handleCloseDialog}
-                  />
-                </DialogContent>
-              </Dialog>
+              <Button onClick={handleNewTask}>
+                <Plus className="mr-2 h-4 w-4" />
+                {texts.newTask}
+              </Button>
             </div>
           ) : (
             <div className="space-y-8">
@@ -634,6 +647,21 @@ export default function TasksPage() {
         </div>
       </main>
       <ChatBot />
+
+      {/* Creation Modal */}
+      <CreationModal
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        editingTask={editingTask}
+        categories={categories}
+        projects={projects}
+        userId={parseInt(user.id)}
+        onTaskSubmit={editingTask ? handleUpdateTask : handleCreateTask}
+        onTaskCancel={handleCloseDialog}
+        onProjectSubmit={handleCreateProject}
+        onProjectsChange={fetchProjects}
+        onCategoriesChange={fetchCategories}
+      />
     </div>
   );
 }

@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { FileUpload } from '@/components/ui/file-upload';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useUIStore } from '@/stores/ui';
 import { Task, Category, Project, TaskFormData } from '@/types/task';
 
@@ -20,7 +22,7 @@ interface TaskFormProps {
   task?: Task;
   categories: Category[];
   projects: Project[];
-  onSubmit: (data: TaskFormData) => void;
+  onSubmit: (data: TaskFormData, files?: File[]) => void;
   onCancel: () => void;
 }
 
@@ -43,13 +45,14 @@ export function TaskForm({
     project: task?.project || undefined,
   });
   const [loading, setLoading] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await onSubmit(formData);
+      await onSubmit(formData, attachedFiles);
     } finally {
       setLoading(false);
     }
@@ -80,6 +83,10 @@ export function TaskForm({
     categories: language === 'no' ? 'Kategorier' : 'Categories',
     project: language === 'no' ? 'Prosjekt' : 'Project',
     noProject: language === 'no' ? 'Ingen prosjekt' : 'No project',
+    attachments: language === 'no' ? 'Vedlegg' : 'Attachments',
+    attachmentsDescription: language === 'no'
+      ? 'Last opp bilder eller ta bilder relatert til oppgaven'
+      : 'Upload images or take photos related to the task',
   };
 
   const handleCategoryChange = (categoryId: number, checked: boolean) => {
@@ -167,13 +174,12 @@ export function TaskForm({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="due_date">{texts.dueDate}</Label>
-          <Input
-            id="due_date"
-            type="date"
+          <DatePicker
             value={formData.due_date}
-            onChange={(e) =>
-              setFormData({ ...formData, due_date: e.target.value })
+            onChange={(date) =>
+              setFormData({ ...formData, due_date: date })
             }
+            placeholder={texts.dueDate}
             disabled={loading}
           />
         </div>
@@ -251,6 +257,20 @@ export function TaskForm({
           </Select>
         </div>
       )}
+
+      {/* File Upload Section */}
+      <div className="space-y-2">
+        <FileUpload
+          label={texts.attachments}
+          description={texts.attachmentsDescription}
+          onFilesChange={setAttachedFiles}
+          value={attachedFiles}
+          acceptedTypes="image/*"
+          maxFiles={5}
+          maxFileSize={10}
+          showCamera={true}
+        />
+      </div>
 
       <div className="flex justify-end space-x-2 pt-4">
         <Button

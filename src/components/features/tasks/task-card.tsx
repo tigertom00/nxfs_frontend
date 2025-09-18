@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores/ui';
 import { Task, Category, Project } from '@/types/task';
+import { ImageViewer } from './image-viewer';
 import {
   Edit3,
   Trash2,
@@ -22,6 +23,7 @@ import {
   Timer,
   Tag,
   FolderKanban,
+  ImageIcon,
 } from 'lucide-react';
 
 interface TaskCardProps {
@@ -40,6 +42,7 @@ export function TaskCard({
   onDelete,
 }: TaskCardProps) {
   const { language } = useUIStore();
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -108,6 +111,25 @@ export function TaskCard({
             <CardTitle className="text-lg line-clamp-2">{task.title}</CardTitle>
           </div>
           <div className="flex items-center space-x-1 ml-2">
+            {task.images && task.images.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsImageViewerOpen(true)}
+                className="h-8 w-8 p-0 relative"
+                title={`${language === 'no' ? 'Se bilder' : 'View images'} (${task.images.length})`}
+              >
+                <ImageIcon className="h-4 w-4" />
+                {task.images.length > 1 && (
+                  <Badge
+                    variant="secondary"
+                    className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs flex items-center justify-center rounded-full"
+                  >
+                    {task.images.length}
+                  </Badge>
+                )}
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -190,8 +212,26 @@ export function TaskCard({
               </div>
             </div>
           )}
+          {task.images && task.images.length > 0 && (
+            <div className="flex items-center space-x-1">
+              <ImageIcon className="h-3 w-3" />
+              <span className="text-xs">
+                {task.images.length} {language === 'no' ? 'bilde(r)' : 'image(s)'}
+              </span>
+            </div>
+          )}
         </div>
       </CardContent>
+
+      {/* Image Viewer Modal */}
+      {task.images && task.images.length > 0 && (
+        <ImageViewer
+          isOpen={isImageViewerOpen}
+          onOpenChange={setIsImageViewerOpen}
+          images={task.images}
+          taskTitle={task.title}
+        />
+      )}
     </Card>
   );
 }

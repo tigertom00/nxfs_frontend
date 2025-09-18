@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 PROJECT_NAME="nxfs_frontend"
 APP_NAME="nxfs_frontend"
 DOMAIN="https://www.nxfs.no" # Change this to your actual domain
-EMAIL="nxfs.xtz@gmail.com" # Change this to your email
+EMAIL="nxfs.xyz@gmail.com" # Change this to your email
 
 echo -e "${GREEN}🚀 Starting deployment of $PROJECT_NAME...${NC}"
 
@@ -49,10 +49,10 @@ if [ ! -f .env.production ]; then
     echo -e "${YELLOW}   Opening .env.production for editing...${NC}"
 
     # Try to open with available editors
-    if command -v nano &> /dev/null; then
+    if command -v micro &> /dev/null; then
+        micro .env.production
+    elif command -v nano &> /dev/null; then
         nano .env.production
-    elif command -v vim &> /dev/null; then
-        vim .env.production
     elif command -v vi &> /dev/null; then
         vi .env.production
     else
@@ -87,7 +87,7 @@ if docker-compose ps | grep -q "Up"; then
     docker-compose logs --tail=20 nxfs_frontend
     
     echo -e "${GREEN}🎉 Deployment completed successfully!${NC}"
-    echo -e "${GREEN}🌐 Your application should be available at: http://localhost:3000${NC}"
+    echo -e "${GREEN}🌐 Your application should be available at: https://api.nxfs.no:3000${NC}"
     
     if [ "$DOMAIN" != "your-domain.com" ]; then
         echo -e "${YELLOW}🔐 For HTTPS setup, make sure to:${NC}"

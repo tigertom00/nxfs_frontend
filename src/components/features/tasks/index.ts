@@ -4,3 +4,6 @@ export { TaskSkeleton } from './task-skeleton';
 export { CategoryManager } from './category-manager';
 export { ProjectManager } from './project-manager';
 export { ProjectCard } from './project-card';
+export { ProjectForm } from './project-form';
+export { CreationModal } from './creation-modal';
+export { ImageViewer } from './image-viewer';
