@@ -240,7 +240,7 @@ export default function ChatBot() {
   return (
     <div
       className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
-        isMinimized ? 'w-80' : 'w-96 md:w-[440px]'
+        isMinimized ? 'w-80' : 'w-[calc(100vw-3rem)] max-w-96 md:w-[440px]'
       }`}
     >
       <Card className="shadow-xl border-0">
