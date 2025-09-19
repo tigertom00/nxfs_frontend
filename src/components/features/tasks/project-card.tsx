@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores/ui';
-import { Project, Task } from '@/types/task';
+import { Project, Task } from '@/types/api';
 import {
   FolderKanban,
   CheckCircle2,

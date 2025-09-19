@@ -24,7 +24,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/auth';
 import { useUIStore } from '@/stores/ui';
 import { tasksAPI, categoriesAPI, projectsAPI } from '@/lib/api';
-import { Task, Category, Project, TaskFormData } from '@/types/task';
+import { Task, Category, Project } from '@/types/api';
+import { TaskFormData } from '@/types/task';
 import {
   ArrowLeft,
   Plus,
@@ -222,6 +223,38 @@ export default function ProjectDetailPage() {
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
     setIsDialogOpen(true);
+  };
+
+  const handleStatusChange = async (taskId: string, newStatus: 'todo' | 'in_progress' | 'completed') => {
+    try {
+      setActionLoading(true);
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !user) return;
+
+      const payload = {
+        title: task.title,
+        description: task.description,
+        status: newStatus,
+        priority: task.priority,
+        due_date: task.due_date || undefined,
+        estimated_time: task.estimated_time?.toString() || undefined,
+        category: task.category,
+        project: task.project || undefined,
+        user_id: user.id,
+      };
+
+      await tasksAPI.updateTask(taskId, payload);
+      const updatedTasks = await tasksAPI.getTasks();
+      setTasks(updatedTasks);
+    } catch (error) {
+      setError(
+        language === 'no'
+          ? 'Kunne ikke oppdatere oppgavestatus'
+          : 'Failed to update task status'
+      );
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleNewTask = () => {
@@ -580,6 +613,7 @@ export default function ProjectDetailPage() {
                   projects={projects}
                   onEdit={handleEditTask}
                   onDelete={handleDeleteTask}
+                  onStatusChange={handleStatusChange}
                 />
               ))}
             </div>

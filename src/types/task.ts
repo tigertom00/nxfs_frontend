@@ -35,6 +35,7 @@ export interface Task {
   updated_at: string;
   category: number[]; // Array of Category IDs (ManyToMany)
   project?: number; // Foreign key to Project (can be null)
+  images?: string[]; // Array of image URLs
 }
 
 export interface TaskFormData {

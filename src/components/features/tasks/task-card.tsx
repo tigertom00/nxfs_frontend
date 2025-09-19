@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores/ui';
-import { Task, Category, Project } from '@/types/task';
+import { Task, Category, Project } from '@/types/api';
 import { ImageViewer } from './image-viewer';
 import {
   Edit3,
@@ -32,6 +32,7 @@ interface TaskCardProps {
   projects: Project[];
   onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;
+  onStatusChange: (taskId: string, newStatus: 'todo' | 'in_progress' | 'completed') => void;
 }
 
 export function TaskCard({
@@ -39,9 +40,18 @@ export function TaskCard({
   categories,
   projects,
   onEdit,
+  onStatusChange,
 }: TaskCardProps) {
   const { language } = useUIStore();
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+
+  const cycleStatus = () => {
+    const statusOrder: ('todo' | 'in_progress' | 'completed')[] = ['todo', 'in_progress', 'completed'];
+    const currentIndex = statusOrder.indexOf(task.status);
+    const nextIndex = (currentIndex + 1) % statusOrder.length;
+    const nextStatus = statusOrder[nextIndex];
+    onStatusChange(task.id, nextStatus);
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -129,7 +139,15 @@ export function TaskCard({
         {/* Status Banner */}
         <div className={`flex items-center justify-between p-2 -mx-6 -mt-6 mb-4 rounded-t-lg border-b ${getStatusBadgeStyle(task.status)}`}>
           <div className="flex items-center space-x-2">
-            {getStatusIcon(task.status)}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={cycleStatus}
+              className="h-auto w-auto p-1 hover:bg-transparent"
+              title={language === 'no' ? 'Klikk for å endre status' : 'Click to change status'}
+            >
+              {getStatusIcon(task.status)}
+            </Button>
             <span className="font-medium text-sm">{getStatusText(task.status)}</span>
           </div>
           <Badge className={getPriorityColor(task.priority)} variant="secondary">
@@ -246,7 +264,7 @@ export function TaskCard({
         <ImageViewer
           isOpen={isImageViewerOpen}
           onOpenChange={setIsImageViewerOpen}
-          images={task.images}
+          images={task.images || []}
           taskTitle={task.title}
         />
       )}

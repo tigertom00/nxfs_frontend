@@ -297,6 +297,37 @@ export default function TasksPage() {
     setIsDialogOpen(true);
   };
 
+  const handleStatusChange = async (taskId: string, newStatus: 'todo' | 'in_progress' | 'completed') => {
+    try {
+      setActionLoading(true);
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !user) return;
+
+      const payload = {
+        title: task.title,
+        description: task.description,
+        status: newStatus,
+        priority: task.priority,
+        due_date: task.due_date || undefined,
+        estimated_time: task.estimated_time?.toString() || undefined,
+        category: task.category,
+        project: task.project || undefined,
+        user_id: user.id,
+      };
+
+      await tasksAPI.updateTask(taskId, payload);
+      await fetchTasks();
+    } catch (error) {
+      setError(
+        language === 'no'
+          ? 'Kunne ikke oppdatere oppgavestatus'
+          : 'Failed to update task status'
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleNewTask = () => {
     setEditingTask(undefined);
     setIsDialogOpen(true);
@@ -558,6 +589,8 @@ export default function TasksPage() {
                         categories={categories}
                         projects={projects}
                         onEdit={handleEditTask}
+                        onDelete={handleDeleteTask}
+                        onStatusChange={handleStatusChange}
                       />
                     ))}
                   </div>
