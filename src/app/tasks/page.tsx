@@ -400,29 +400,55 @@ export default function TasksPage() {
     fetchProjects(); // Refresh projects after edit
   };
 
-  // Sort standalone tasks: incomplete tasks first, then completed tasks
+  // Sort standalone tasks: Priority → Status → Date → Title
   const sortedStandaloneTasks = [...standaloneTasks].sort((a, b) => {
-    // Completed tasks go to the end
-    if (a.status === 'completed' && b.status !== 'completed') return 1;
-    if (a.status !== 'completed' && b.status === 'completed') return -1;
-
-    // For tasks of same completion status, sort by priority
+    // 1. Sort by priority (high → medium → low)
     const priorityOrder: Record<'high' | 'medium' | 'low', number> = {
       high: 3,
       medium: 2,
       low: 1,
     };
-    return priorityOrder[b.priority] - priorityOrder[a.priority];
+    const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+    if (priorityDiff !== 0) return priorityDiff;
+
+    // 2. Sort by status (in_progress → todo → completed)
+    const statusOrder: Record<'in_progress' | 'todo' | 'completed', number> = {
+      in_progress: 3,
+      todo: 2,
+      completed: 1,
+    };
+    const statusDiff = statusOrder[b.status] - statusOrder[a.status];
+    if (statusDiff !== 0) return statusDiff;
+
+    // 3. Sort by updated date (newest first)
+    const dateA = new Date(a.updated_at);
+    const dateB = new Date(b.updated_at);
+    const dateDiff = dateB.getTime() - dateA.getTime();
+    if (dateDiff !== 0) return dateDiff;
+
+    // 4. Sort by title alphabetically
+    return a.title.localeCompare(b.title);
   });
 
-  // Sort projects by status and creation date
+  // Sort projects: Status → Date → Name
   const sortedProjects = [...filteredProjects].sort((a, b) => {
-    // Completed projects go to the end
-    if (a.status === 'completed' && b.status !== 'completed') return 1;
-    if (a.status !== 'completed' && b.status === 'completed') return -1;
+    // 1. Sort by status (in_progress → todo → completed)
+    const statusOrder: Record<'in_progress' | 'todo' | 'completed', number> = {
+      in_progress: 3,
+      todo: 2,
+      completed: 1,
+    };
+    const statusDiff = statusOrder[b.status] - statusOrder[a.status];
+    if (statusDiff !== 0) return statusDiff;
 
-    // Sort by creation date (newest first)
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    // 2. Sort by updated date (newest first)
+    const dateA = new Date(a.updated_at);
+    const dateB = new Date(b.updated_at);
+    const dateDiff = dateB.getTime() - dateA.getTime();
+    if (dateDiff !== 0) return dateDiff;
+
+    // 3. Sort by name alphabetically
+    return a.name.localeCompare(b.name);
   });
 
   const texts = {
