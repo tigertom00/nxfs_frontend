@@ -43,7 +43,7 @@ export default function TasksPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
   const [actionLoading, setActionLoading] = useState(false);
-  const [showCompleted, setShowCompleted] = useState(true);
+  const [showCompleted, setShowCompleted] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
@@ -326,6 +326,12 @@ export default function TasksPage() {
     return true;
   });
 
+  // Filter projects by completion status
+  const filteredProjects = projects.filter((project) => {
+    if (!showCompleted && project.status === 'completed') return false;
+    return true;
+  });
+
   // Get tasks for a specific project
   const getProjectTasks = (projectId: number) => {
     return tasks.filter((task) => task.project === projectId);
@@ -379,7 +385,7 @@ export default function TasksPage() {
   });
 
   // Sort projects by status and creation date
-  const sortedProjects = [...projects].sort((a, b) => {
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
     // Completed projects go to the end
     if (a.status === 'completed' && b.status !== 'completed') return 1;
     if (a.status !== 'completed' && b.status === 'completed') return -1;
@@ -447,24 +453,6 @@ export default function TasksPage() {
               <p className="text-muted-foreground">{texts.subtitle}</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCompleted(!showCompleted)}
-              >
-                {showCompleted ? (
-                  <>
-                    <EyeOff className="mr-2 h-4 w-4" />
-                    {texts.hideCompleted}
-                  </>
-                ) : (
-                  <>
-                    <Eye className="mr-2 h-4 w-4" />
-                    {texts.showCompleted}
-                  </>
-                )}
-              </Button>
               <Button onClick={handleNewTask}>
                 <Plus className="mr-2 h-4 w-4" />
                 {texts.newTask}
@@ -473,101 +461,56 @@ export default function TasksPage() {
           </div>
 
           {/* Filters */}
-          {(projects.length > 0 || categories.length > 0) && (
+          {categories.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <Filter className="h-4 w-4" />
                   Filters
                 </h3>
-                {(selectedCategories.length > 0 ||
-                  selectedProject !== null) && (
+                {selectedCategories.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={clearAllFilters}
+                    onClick={clearCategoryFilters}
                     className="text-muted-foreground hover:text-foreground"
                   >
                     <X className="mr-1 h-3 w-3" />
-                    {texts.clearAllFilters}
+                    {texts.clearFilters}
                   </Button>
                 )}
               </div>
 
-              {/* Project Filter */}
-              {projects.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {texts.filterByProject}
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant={selectedProject === null ? 'default' : 'outline'}
-                      className="cursor-pointer hover:bg-primary/20"
-                      onClick={() => setSelectedProject(null)}
-                    >
-                      {texts.allProjects}
-                    </Badge>
-                    <Badge
-                      variant={selectedProject === 0 ? 'default' : 'outline'}
-                      className="cursor-pointer hover:bg-primary/20"
-                      onClick={() => setSelectedProject(0)}
-                    >
-                      {texts.noProject}
-                    </Badge>
-                    {projects.map((project) => {
-                      const isSelected = selectedProject === project.id;
-                      return (
-                        <Badge
-                          key={project.id}
-                          variant={isSelected ? 'default' : 'outline'}
-                          className="cursor-pointer hover:bg-primary/20"
-                          onClick={() =>
-                            setSelectedProject(isSelected ? null : project.id)
-                          }
-                        >
-                          {language === 'no' && project.name_nb
-                            ? project.name_nb
-                            : project.name}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
               {/* Category Filter */}
-              {categories.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {texts.filterByCategory}
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((category) => {
-                      const isSelected = selectedCategories.includes(
-                        category.id
-                      );
-                      return (
-                        <Badge
-                          key={category.id}
-                          variant={isSelected ? 'default' : 'outline'}
-                          className="cursor-pointer hover:bg-primary/20"
-                          onClick={() => toggleCategoryFilter(category.id)}
-                        >
-                          {language === 'no' && category.name_nb
-                            ? category.name_nb
-                            : category.name}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                  {selectedCategories.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      {selectedCategories.length} {texts.categoriesSelected}
-                    </p>
-                  )}
+              <div className="space-y-2">
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {texts.filterByCategory}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((category) => {
+                    const isSelected = selectedCategories.includes(
+                      category.id
+                    );
+                    return (
+                      <Badge
+                        key={category.id}
+                        variant={isSelected ? 'default' : 'outline'}
+                        className="cursor-pointer hover:bg-primary/20"
+                        onClick={() => toggleCategoryFilter(category.id)}
+                      >
+                        {language === 'no' && category.name_nb
+                          ? category.name_nb
+                          : category.name}
+                      </Badge>
+                    );
+                  })}
                 </div>
-              )}
+                {selectedCategories.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {selectedCategories.length} {texts.categoriesSelected}
+                  </p>
+                )}
+              </div>
             </div>
           )}
 
@@ -600,6 +543,28 @@ export default function TasksPage() {
             </div>
           ) : (
             <div className="space-y-8">
+              {/* Standalone Tasks Section */}
+              {sortedStandaloneTasks.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    {texts.standaloneTasks}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {sortedStandaloneTasks.map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        categories={categories}
+                        projects={projects}
+                        onEdit={handleEditTask}
+                        onDelete={handleDeleteTask}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Projects Section */}
               {sortedProjects.length > 0 && (
                 <div>
@@ -621,25 +586,26 @@ export default function TasksPage() {
                 </div>
               )}
 
-              {/* Standalone Tasks Section */}
-              {sortedStandaloneTasks.length > 0 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    {texts.standaloneTasks}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {sortedStandaloneTasks.map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        categories={categories}
-                        projects={projects}
-                        onEdit={handleEditTask}
-                        onDelete={handleDeleteTask}
-                      />
-                    ))}
-                  </div>
+              {/* Show/Hide Completed Button */}
+              {(sortedStandaloneTasks.length > 0 || sortedProjects.length > 0) && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCompleted(!showCompleted)}
+                  >
+                    {showCompleted ? (
+                      <>
+                        <EyeOff className="mr-2 h-4 w-4" />
+                        {texts.hideCompleted}
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="mr-2 h-4 w-4" />
+                        {texts.showCompleted}
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
             </div>
