@@ -87,7 +87,7 @@ if docker-compose ps | grep -q "Up"; then
     docker-compose logs --tail=20 nxfs_frontend
     
     echo -e "${GREEN}🎉 Deployment completed successfully!${NC}"
-    echo -e "${GREEN}🌐 Your application should be available at: https://api.nxfs.no:3000${NC}"
+    echo -e "${GREEN}🌐 Your application should be available at: https://www.nxfs.no${NC}"
     
     if [ "$DOMAIN" != "your-domain.com" ]; then
         echo -e "${YELLOW}🔐 For HTTPS setup, make sure to:${NC}"

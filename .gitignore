@@ -49,3 +49,4 @@ test
 prompt
 
 server.log
+.claude-memory.txt

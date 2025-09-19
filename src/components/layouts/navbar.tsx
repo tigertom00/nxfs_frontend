@@ -117,6 +117,11 @@ export default function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
+                  <Link href="/docker" className="w-full">
+                    {language === 'no' ? 'Docker' : 'Docker'}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
                   <Link href="/profile" className="w-full">
                     {language === 'no' ? 'Profil' : 'Profile'}
                   </Link>

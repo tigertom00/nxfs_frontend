@@ -36,6 +36,14 @@ import type {
   UploadPostImageResponse,
   DeletePostImageResponse,
   SendChatMessageResponse,
+  GetDockerHostsResponse,
+  GetDockerHostResponse,
+  GetDockerContainersResponse,
+  GetDockerContainerResponse,
+  GetRunningContainersResponse,
+  GetContainerStatsResponse,
+  SyncContainersResponse,
+  RefreshStatsResponse,
   Task,
   Category,
   Project,
@@ -620,6 +628,82 @@ export const projectsAPI = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Deleting project image');
+      throw error;
+    }
+  },
+};
+
+// Docker API
+export const dockerAPI = {
+  // Host management
+  getHosts: async (): Promise<GetDockerHostsResponse> => {
+    const response = await api.get('/api/docker/hosts/');
+    return response.data;
+  },
+
+  getHost: async (hostId: number): Promise<GetDockerHostResponse> => {
+    const response = await api.get(`/api/docker/hosts/${hostId}/`);
+    return response.data;
+  },
+
+
+  syncContainers: async (hostId: number): Promise<SyncContainersResponse> => {
+    try {
+      const response = await api.post(`/api/docker/hosts/${hostId}/sync_containers/`);
+      showSuccessToast('Container sync initiated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Syncing containers');
+      throw error;
+    }
+  },
+
+  // Container management
+  getContainers: async (params?: {
+    host_id?: number;
+    status?: string;
+    running_only?: boolean;
+  }): Promise<GetDockerContainersResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.host_id) queryParams.append('host_id', params.host_id.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.running_only) queryParams.append('running_only', 'true');
+
+    const response = await api.get(`/api/docker/containers/?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  getContainer: async (containerId: string): Promise<GetDockerContainerResponse> => {
+    const response = await api.get(`/api/docker/containers/${containerId}/`);
+    return response.data;
+  },
+
+  getRunningContainers: async (): Promise<GetRunningContainersResponse> => {
+    const response = await api.get('/api/docker/containers/running/');
+    return response.data;
+  },
+
+  getContainerStats: async (
+    containerId: string,
+    params?: { hours?: number; limit?: number }
+  ): Promise<GetContainerStatsResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.hours) queryParams.append('hours', params.hours.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const response = await api.get(
+      `/api/docker/containers/${containerId}/stats/?${queryParams.toString()}`
+    );
+    return response.data;
+  },
+
+  refreshStats: async (): Promise<RefreshStatsResponse> => {
+    try {
+      const response = await api.post('/api/docker/containers/refresh_stats/');
+      showSuccessToast('Stats refresh initiated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Refreshing container stats');
       throw error;
     }
   },
