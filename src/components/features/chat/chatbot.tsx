@@ -239,11 +239,11 @@ export default function ChatBot() {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
+      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 max-h-[calc(100vh-3rem)] ${
         isMinimized ? 'w-80' : 'w-[calc(100vw-3rem)] max-w-96 md:w-[440px]'
       }`}
     >
-      <Card className="shadow-xl border-0">
+      <Card className="shadow-xl border-0 flex flex-col h-full">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -280,8 +280,8 @@ export default function ChatBot() {
 
         {!isMinimized && (
           <>
-            <CardContent className="p-0">
-              <ScrollArea className="h-96 px-4 pb-4">
+            <CardContent className="p-0 flex-1 flex flex-col">
+              <ScrollArea className="flex-1 px-4 pb-4">
                 {messages.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-center">
                     <div className="space-y-2">
