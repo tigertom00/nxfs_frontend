@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'nxfs.no',
     description: 'Modern platform for sharing ideas and knowledge',
-    url: 'https://nxfs.no',
+    url: 'https://www.nxfs.no',
     siteName: 'nxfs.no',
     type: 'website',
   },
