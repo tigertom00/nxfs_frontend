@@ -27,6 +27,7 @@ interface CreationModalProps {
   userId: number;
   onTaskSubmit: (data: TaskFormData, files?: File[]) => void;
   onTaskCancel: () => void;
+  onTaskDelete?: (taskId: string) => void;
   onProjectSubmit?: (data: ProjectFormData) => void;
   onProjectsChange: () => void;
   onCategoriesChange: () => void;
@@ -41,6 +42,7 @@ export function CreationModal({
   userId,
   onTaskSubmit,
   onTaskCancel,
+  onTaskDelete,
   onProjectSubmit,
   onProjectsChange,
   onCategoriesChange,
@@ -127,6 +129,7 @@ export function CreationModal({
               projects={projects}
               onSubmit={onTaskSubmit}
               onCancel={handleClose}
+              onDelete={onTaskDelete}
             />
           </TabsContent>
 

@@ -558,7 +558,6 @@ export default function TasksPage() {
                         categories={categories}
                         projects={projects}
                         onEdit={handleEditTask}
-                        onDelete={handleDeleteTask}
                       />
                     ))}
                   </div>
@@ -624,6 +623,7 @@ export default function TasksPage() {
         userId={parseInt(user.id)}
         onTaskSubmit={editingTask ? handleUpdateTask : handleCreateTask}
         onTaskCancel={handleCloseDialog}
+        onTaskDelete={handleDeleteTask}
         onProjectSubmit={handleCreateProject}
         onProjectsChange={fetchProjects}
         onCategoriesChange={fetchCategories}

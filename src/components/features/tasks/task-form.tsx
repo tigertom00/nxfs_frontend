@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ interface TaskFormProps {
   projects: Project[];
   onSubmit: (data: TaskFormData, files?: File[]) => void;
   onCancel: () => void;
+  onDelete?: (taskId: string) => void;
 }
 
 export function TaskForm({
@@ -32,6 +34,7 @@ export function TaskForm({
   projects,
   onSubmit,
   onCancel,
+  onDelete,
 }: TaskFormProps) {
   const { language } = useUIStore();
   const [formData, setFormData] = useState<TaskFormData>({
@@ -74,6 +77,8 @@ export function TaskForm({
       language === 'no' ? 'Estimert Tid (timer)' : 'Estimated Time (hours)',
     save: language === 'no' ? 'Lagre' : 'Save',
     cancel: language === 'no' ? 'Avbryt' : 'Cancel',
+    delete: language === 'no' ? 'Slett Oppgave' : 'Delete Task',
+    deleteConfirm: language === 'no' ? 'Er du sikker på at du vil slette denne oppgaven?' : 'Are you sure you want to delete this task?',
     todo: language === 'no' ? 'To Do' : 'To Do',
     inProgress: language === 'no' ? 'Pågår' : 'In Progress',
     completed: language === 'no' ? 'Fullført' : 'Completed',
@@ -100,6 +105,12 @@ export function TaskForm({
         ...formData,
         category: (formData.category || []).filter((id) => id !== categoryId),
       });
+    }
+  };
+
+  const handleDelete = () => {
+    if (task && onDelete && confirm(texts.deleteConfirm)) {
+      onDelete(task.id);
     }
   };
 
@@ -272,22 +283,36 @@ export function TaskForm({
         />
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          {texts.cancel}
-        </Button>
-        <Button type="submit" disabled={loading}>
-          {loading
-            ? language === 'no'
-              ? 'Lagrer...'
-              : 'Saving...'
-            : texts.save}
-        </Button>
+      <div className="flex justify-between pt-4">
+        {task && onDelete ? (
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            {texts.delete}
+          </Button>
+        ) : (
+          <div></div>
+        )}
+        <div className="flex space-x-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            {texts.cancel}
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading
+              ? language === 'no'
+                ? 'Lagrer...'
+                : 'Saving...'
+              : texts.save}
+          </Button>
+        </div>
       </div>
     </form>
   );

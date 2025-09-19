@@ -39,7 +39,6 @@ export function TaskCard({
   categories,
   projects,
   onEdit,
-  onDelete,
 }: TaskCardProps) {
   const { language } = useUIStore();
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
@@ -47,11 +46,33 @@ export function TaskCard({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
       case 'in_progress':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <Clock className="h-5 w-5 text-blue-600" />;
       default:
-        return <Circle className="h-4 w-4 text-gray-400" />;
+        return <Circle className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  const getStatusBadgeStyle = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600';
+    }
+  };
+
+  const getCardBorderStyle = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'border-l-4 border-l-green-500';
+      case 'in_progress':
+        return 'border-l-4 border-l-blue-500';
+      default:
+        return 'border-l-4 border-l-gray-300';
     }
   };
 
@@ -103,13 +124,23 @@ export function TaskCard({
   };
 
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow">
+    <Card className={`h-full hover:shadow-lg transition-all duration-200 ${getCardBorderStyle(task.status)} ${task.status === 'completed' ? 'opacity-80' : ''}`}>
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-2 flex-1">
+        {/* Status Banner */}
+        <div className={`flex items-center justify-between p-2 -mx-6 -mt-6 mb-4 rounded-t-lg border-b ${getStatusBadgeStyle(task.status)}`}>
+          <div className="flex items-center space-x-2">
             {getStatusIcon(task.status)}
-            <CardTitle className="text-lg line-clamp-2">{task.title}</CardTitle>
+            <span className="font-medium text-sm">{getStatusText(task.status)}</span>
           </div>
+          <Badge className={getPriorityColor(task.priority)} variant="secondary">
+            {getPriorityText(task.priority)}
+          </Badge>
+        </div>
+
+        <div className="flex items-start justify-between">
+          <CardTitle className={`text-lg line-clamp-2 flex-1 ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+            {task.title}
+          </CardTitle>
           <div className="flex items-center space-x-1 ml-2">
             {task.images && task.images.length > 0 && (
               <Button
@@ -135,24 +166,11 @@ export function TaskCard({
               size="sm"
               onClick={() => onEdit(task)}
               className="h-8 w-8 p-0"
+              title={language === 'no' ? 'Rediger oppgave' : 'Edit task'}
             >
               <Edit3 className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(task.id)}
-              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
           </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Badge className={getPriorityColor(task.priority)}>
-            {getPriorityText(task.priority)}
-          </Badge>
-          <Badge variant="outline">{getStatusText(task.status)}</Badge>
         </div>
       </CardHeader>
       <CardContent className="pt-0">
