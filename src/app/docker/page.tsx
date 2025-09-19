@@ -46,12 +46,25 @@ function formatUptime(createdAt: string, startedAt?: string): string {
 }
 
 function formatPort(port: { container_port: number; host_ip?: string; host_port?: number }): string {
-  if (port.host_port && port.host_ip) {
-    return `${port.host_ip}:${port.host_port}→${port.container_port}`;
-  } else if (port.host_port) {
-    return `${port.host_port}→${port.container_port}`;
+  if (port.host_port) {
+    return `${port.host_port}:${port.container_port}`;
   }
   return `${port.container_port}`;
+}
+
+function getPortUrl(port: { container_port: number; host_ip?: string; host_port?: number }, hostName?: string): string | null {
+  if (!port.host_port) return null;
+
+  let baseUrl = '';
+  if (hostName === 'nuk') {
+    baseUrl = 'http://10.20.30.203';
+  } else if (hostName === 'zero') {
+    baseUrl = 'http://10.20.30.202';
+  } else {
+    return null; // Unknown host
+  }
+
+  return `${baseUrl}:${port.host_port}`;
 }
 
 function ContainerCard({ container }: { container: DockerContainer }) {
@@ -59,9 +72,59 @@ function ContainerCard({ container }: { container: DockerContainer }) {
   const statusInfo = statusConfig[container.status] || statusConfig.stopped;
   const StatusIcon = statusInfo.icon;
 
+  // Enhanced status-based styling with improved depth and visual effects
+  const statusStyles = {
+    running: {
+      border: 'border-l-4 border-l-green-500',
+      shadow: 'shadow-xl shadow-green-500/25 hover:shadow-2xl hover:shadow-green-500/40',
+      gradient: 'bg-gradient-to-br from-green-50/50 via-card to-green-50/30 dark:from-green-950/20 dark:via-card dark:to-green-950/10',
+      ring: 'hover:ring-2 hover:ring-green-500/20',
+    },
+    stopped: {
+      border: 'border-l-4 border-l-red-500',
+      shadow: 'shadow-xl shadow-red-500/25 hover:shadow-2xl hover:shadow-red-500/40',
+      gradient: 'bg-gradient-to-br from-red-50/50 via-card to-red-50/30 dark:from-red-950/20 dark:via-card dark:to-red-950/10',
+      ring: 'hover:ring-2 hover:ring-red-500/20',
+    },
+    paused: {
+      border: 'border-l-4 border-l-yellow-500',
+      shadow: 'shadow-xl shadow-yellow-500/25 hover:shadow-2xl hover:shadow-yellow-500/40',
+      gradient: 'bg-gradient-to-br from-yellow-50/50 via-card to-yellow-50/30 dark:from-yellow-950/20 dark:via-card dark:to-yellow-950/10',
+      ring: 'hover:ring-2 hover:ring-yellow-500/20',
+    },
+    restarting: {
+      border: 'border-l-4 border-l-blue-500',
+      shadow: 'shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-500/40',
+      gradient: 'bg-gradient-to-br from-blue-50/50 via-card to-blue-50/30 dark:from-blue-950/20 dark:via-card dark:to-blue-950/10',
+      ring: 'hover:ring-2 hover:ring-blue-500/20',
+    },
+    exited: {
+      border: 'border-l-4 border-l-gray-500',
+      shadow: 'shadow-xl shadow-gray-500/25 hover:shadow-2xl hover:shadow-gray-500/40',
+      gradient: 'bg-gradient-to-br from-gray-50/50 via-card to-gray-50/30 dark:from-gray-950/20 dark:via-card dark:to-gray-950/10',
+      ring: 'hover:ring-2 hover:ring-gray-500/20',
+    },
+    created: {
+      border: 'border-l-4 border-l-purple-500',
+      shadow: 'shadow-xl shadow-purple-500/25 hover:shadow-2xl hover:shadow-purple-500/40',
+      gradient: 'bg-gradient-to-br from-purple-50/50 via-card to-purple-50/30 dark:from-purple-950/20 dark:via-card dark:to-purple-950/10',
+      ring: 'hover:ring-2 hover:ring-purple-500/20',
+    },
+  };
+
+  const cardStyle = statusStyles[container.status] || statusStyles.stopped;
+
   return (
     <Card
-      className="hover:shadow-lg transition-shadow cursor-pointer"
+      className={cn(
+        "transition-all duration-500 cursor-pointer transform hover:-translate-y-2 hover:scale-[1.02]",
+        "border border-border/60 backdrop-blur-sm relative overflow-hidden",
+        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:to-transparent before:pointer-events-none",
+        cardStyle.border,
+        cardStyle.shadow,
+        cardStyle.gradient,
+        cardStyle.ring
+      )}
       onClick={() => router.push(`/docker/${container.id}`)}
     >
       <CardHeader className="pb-3">
@@ -115,16 +178,49 @@ function ContainerCard({ container }: { container: DockerContainer }) {
           <div>
             <div className="text-sm font-medium text-muted-foreground mb-1">Ports</div>
             <div className="flex flex-wrap gap-1">
-              {container.ports.slice(0, 3).map((port, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {formatPort(port)}
-                </Badge>
-              ))}
-              {container.ports.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{container.ports.length - 3}
-                </Badge>
-              )}
+              {(() => {
+                // Deduplicate ports by unique host_port:container_port combination
+                const uniquePorts = container.ports.filter((port, index, arr) => {
+                  return arr.findIndex(p =>
+                    p.host_port === port.host_port &&
+                    p.container_port === port.container_port
+                  ) === index;
+                });
+
+                return uniquePorts.slice(0, 3).map((port, index) => {
+                  const url = getPortUrl(port, container.host_name);
+                  return url ? (
+                    <Badge
+                      key={`${port.host_port}-${port.container_port}`}
+                      variant="outline"
+                      className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(url, '_blank');
+                      }}
+                    >
+                      {formatPort(port)}
+                    </Badge>
+                  ) : (
+                    <Badge key={`${port.host_port}-${port.container_port}`} variant="outline" className="text-xs">
+                      {formatPort(port)}
+                    </Badge>
+                  );
+                });
+              })()}
+              {(() => {
+                const uniquePorts = container.ports.filter((port, index, arr) => {
+                  return arr.findIndex(p =>
+                    p.host_port === port.host_port &&
+                    p.container_port === port.container_port
+                  ) === index;
+                });
+                return uniquePorts.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{uniquePorts.length - 3}
+                  </Badge>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -199,6 +295,7 @@ export default function DockerPage() {
   const [overview, setOverview] = useState<DockerOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'running' | 'stopped'>('all');
+  const [hostFilter, setHostFilter] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -261,28 +358,47 @@ export default function DockerPage() {
     }
   }, [isAuthenticated]);
 
-  const filteredContainers = containers.filter(container => {
-    if (filter === 'running') return container.status === 'running';
-    if (filter === 'stopped') return container.status !== 'running';
-    return true;
-  });
+  const filteredAndSortedContainers = containers
+    .filter(container => {
+      // Status filter
+      if (filter === 'running' && container.status !== 'running') return false;
+      if (filter === 'stopped' && container.status === 'running') return false;
+
+      // Host filter
+      if (hostFilter && container.host_name !== hostFilter) return false;
+
+      return true;
+    })
+    .sort((a, b) => {
+      // First sort by host name
+      const hostCompare = (a.host_name || '').localeCompare(b.host_name || '');
+      if (hostCompare !== 0) return hostCompare;
+
+      // Then sort by container name within the same host
+      return a.name.localeCompare(b.name);
+    });
+
+  // Get unique host names for filter buttons
+  const availableHosts = Array.from(new Set(containers.map(c => c.host_name).filter(Boolean))) as string[];
 
   if (!isInitialized || loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
+        <main className="container mx-auto px-4 py-4 sm:py-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-24" />
+              ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-48" />
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-48" />
-            ))}
-          </div>
-        </div>
+        </main>
         <ChatBot />
       </div>
     );
@@ -295,7 +411,8 @@ export default function DockerPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Docker Containers</h1>
@@ -311,48 +428,74 @@ export default function DockerPage() {
 
       {overview && <OverviewCard overview={overview} />}
 
-      <div className="flex gap-2 mb-6">
-        <Button
-          variant={filter === 'all' ? 'default' : 'outline'}
-          onClick={() => setFilter('all')}
-        >
-          All ({containers.length})
-        </Button>
-        <Button
-          variant={filter === 'running' ? 'default' : 'outline'}
-          onClick={() => setFilter('running')}
-        >
-          <PlayCircle className="w-4 h-4 mr-1" />
-          Running ({containers.filter(c => c.status === 'running').length})
-        </Button>
-        <Button
-          variant={filter === 'stopped' ? 'default' : 'outline'}
-          onClick={() => setFilter('stopped')}
-        >
-          <StopCircle className="w-4 h-4 mr-1" />
-          Stopped ({containers.filter(c => c.status !== 'running').length})
-        </Button>
+      <div className="space-y-4 mb-6">
+        {/* Status Filters */}
+        <div className="flex gap-2">
+          <Button
+            variant={filter === 'all' ? 'default' : 'outline'}
+            onClick={() => setFilter('all')}
+          >
+            All ({containers.length})
+          </Button>
+          <Button
+            variant={filter === 'running' ? 'default' : 'outline'}
+            onClick={() => setFilter('running')}
+          >
+            <PlayCircle className="w-4 h-4 mr-1" />
+            Running ({containers.filter(c => c.status === 'running').length})
+          </Button>
+          <Button
+            variant={filter === 'stopped' ? 'default' : 'outline'}
+            onClick={() => setFilter('stopped')}
+          >
+            <StopCircle className="w-4 h-4 mr-1" />
+            Stopped ({containers.filter(c => c.status !== 'running').length})
+          </Button>
+        </div>
+
+        {/* Host Filters */}
+        {availableHosts.length > 1 && (
+          <div className="flex gap-2">
+            <Button
+              variant={hostFilter === null ? 'default' : 'outline'}
+              onClick={() => setHostFilter(null)}
+            >
+              All Hosts
+            </Button>
+            {availableHosts.map((host) => (
+              <Button
+                key={host}
+                variant={hostFilter === host ? 'default' : 'outline'}
+                onClick={() => setHostFilter(host)}
+              >
+                <Server className="w-4 h-4 mr-1" />
+                {host} ({containers.filter(c => c.host_name === host).length})
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {filteredContainers.length === 0 ? (
+      {filteredAndSortedContainers.length === 0 ? (
         <Card className="p-8 text-center">
           <Activity className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No containers found</h3>
           <p className="text-muted-foreground">
-            {filter === 'all'
+            {filter === 'all' && !hostFilter
               ? 'No containers are available. Try syncing your hosts.'
-              : `No ${filter} containers found.`
+              : `No containers found matching the current filters.`
             }
           </p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredContainers.map((container) => (
+          {filteredAndSortedContainers.map((container) => (
             <ContainerCard key={container.id} container={container} />
           ))}
         </div>
       )}
-      </div>
+        </div>
+      </main>
       <ChatBot />
     </div>
   );

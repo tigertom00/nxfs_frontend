@@ -68,12 +68,25 @@ function formatDate(dateString: string): string {
 }
 
 function formatPort(port: { container_port: number; host_ip?: string; host_port?: number }): string {
-  if (port.host_port && port.host_ip) {
-    return `${port.host_ip}:${port.host_port}→${port.container_port}`;
-  } else if (port.host_port) {
-    return `${port.host_port}→${port.container_port}`;
+  if (port.host_port) {
+    return `${port.host_port}:${port.container_port}`;
   }
   return `${port.container_port}`;
+}
+
+function getPortUrl(port: { container_port: number; host_ip?: string; host_port?: number }, hostName?: string): string | null {
+  if (!port.host_port) return null;
+
+  let baseUrl = '';
+  if (hostName === 'nuk') {
+    baseUrl = 'http://10.20.30.203';
+  } else if (hostName === 'zero') {
+    baseUrl = 'http://10.20.30.202';
+  } else {
+    return null; // Unknown host
+  }
+
+  return `${baseUrl}:${port.host_port}`;
 }
 
 function StatsCard({ stats }: { stats: DockerStats }) {
@@ -284,15 +297,17 @@ export default function ContainerDetailPage({ params }: { params: Promise<{ id: 
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-8 w-64 mb-6" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
+        <main className="container mx-auto px-4 py-4 sm:py-8">
+          <div className="max-w-7xl mx-auto">
+            <Skeleton className="h-8 w-64 mb-6" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-24" />
+              ))}
+            </div>
+            <Skeleton className="h-96" />
           </div>
-          <Skeleton className="h-96" />
-        </div>
+        </main>
         <ChatBot />
       </div>
     );
@@ -308,7 +323,8 @@ export default function ContainerDetailPage({ params }: { params: Promise<{ id: 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="max-w-7xl mx-auto">
       <div className="flex items-center gap-4 mb-6">
         <Button variant="outline" size="sm" onClick={() => router.back()}>
           <ArrowLeft className="w-4 h-4" />
@@ -511,11 +527,33 @@ export default function ContainerDetailPage({ params }: { params: Promise<{ id: 
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {container.ports.map((port, index) => (
-                      <Badge key={index} variant="outline" className="mr-2 mb-2">
-                        {formatPort(port)}
-                      </Badge>
-                    ))}
+                    {(() => {
+                      // Deduplicate ports by unique host_port:container_port combination
+                      const uniquePorts = container.ports.filter((port, index, arr) => {
+                        return arr.findIndex(p =>
+                          p.host_port === port.host_port &&
+                          p.container_port === port.container_port
+                        ) === index;
+                      });
+
+                      return uniquePorts.map((port, index) => {
+                        const url = getPortUrl(port, container.host_name);
+                        return url ? (
+                          <Badge
+                            key={`${port.host_port}-${port.container_port}`}
+                            variant="outline"
+                            className="mr-2 mb-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                            onClick={() => window.open(url, '_blank')}
+                          >
+                            {formatPort(port)}
+                          </Badge>
+                        ) : (
+                          <Badge key={`${port.host_port}-${port.container_port}`} variant="outline" className="mr-2 mb-2">
+                            {formatPort(port)}
+                          </Badge>
+                        );
+                      });
+                    })()}
                   </div>
                 </CardContent>
               </Card>
@@ -550,7 +588,8 @@ export default function ContainerDetailPage({ params }: { params: Promise<{ id: 
           </div>
         </TabsContent>
       </Tabs>
-      </div>
+        </div>
+      </main>
       <ChatBot />
     </div>
   );
