@@ -173,7 +173,19 @@ export default function TasksPage() {
         return;
       }
 
-      const payload = { ...taskData, user_id: user.id };
+      const payload = {
+        title: taskData.title,
+        description: taskData.description,
+        status: taskData.status,
+        priority: taskData.priority,
+        due_date: taskData.due_date || undefined,
+        estimated_time: taskData.estimated_time || undefined,
+        category: taskData.category || [],
+        project: taskData.project || undefined,
+        user_id: user.id,
+      };
+
+      // Remove undefined fields to avoid sending them
       if (!payload.due_date) {
         delete payload.due_date;
       }
@@ -504,11 +516,7 @@ export default function TasksPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{texts.title}</h1>
-              <p className="text-muted-foreground">{texts.subtitle}</p>
-            </div>
+          <div className="flex items-center justify-end mb-8">
             <div className="flex items-center gap-2 flex-wrap">
               <Button onClick={handleNewTask}>
                 <Plus className="mr-2 h-4 w-4" />
