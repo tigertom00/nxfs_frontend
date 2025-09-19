@@ -349,9 +349,9 @@ export const tasksAPI = {
       Object.entries(taskData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            // Handle array fields like category
-            value.forEach((item, index) => {
-              formData.append(`${key}[${index}]`, item.toString());
+            // Handle array fields like category - Django expects repeated field names
+            value.forEach((item) => {
+              formData.append(key, item.toString());
             });
           } else {
             formData.append(key, value.toString());
@@ -383,9 +383,9 @@ export const tasksAPI = {
       Object.entries(taskData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            // Handle array fields like category
-            value.forEach((item, index) => {
-              formData.append(`${key}[${index}]`, item.toString());
+            // Handle array fields like category - Django expects repeated field names
+            value.forEach((item) => {
+              formData.append(key, item.toString());
             });
           } else {
             formData.append(key, value.toString());
@@ -417,9 +417,9 @@ export const tasksAPI = {
       Object.entries(taskData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            // Handle array fields like category
-            value.forEach((item, index) => {
-              formData.append(`${key}[${index}]`, item.toString());
+            // Handle array fields like category - Django expects repeated field names
+            value.forEach((item) => {
+              formData.append(key, item.toString());
             });
           } else {
             formData.append(key, value.toString());

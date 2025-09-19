@@ -121,7 +121,19 @@ export default function TasksPage() {
         return;
       }
 
-      const payload = { ...taskData, user_id: user.id };
+      const payload = {
+        title: taskData.title,
+        description: taskData.description,
+        status: taskData.status,
+        priority: taskData.priority,
+        due_date: taskData.due_date || undefined,
+        estimated_time: taskData.estimated_time || undefined,
+        category: taskData.category || [],
+        project: taskData.project || undefined,
+        user_id: user.id,
+      };
+
+      // Remove undefined fields to avoid sending them
       if (!payload.due_date) {
         delete payload.due_date;
       }
@@ -516,13 +528,8 @@ export default function TasksPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-end mb-8">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button onClick={handleNewTask}>
-                <Plus className="mr-2 h-4 w-4" />
-                {texts.newTask}
-              </Button>
-            </div>
+          <div className="mb-8">
+            {/* Header content removed - button moved to floating position */}
           </div>
 
           {/* Filters */}
@@ -695,6 +702,16 @@ export default function TasksPage() {
         onProjectsChange={fetchProjects}
         onCategoriesChange={fetchCategories}
       />
+
+      {/* Floating New Task Button */}
+      <Button
+        onClick={handleNewTask}
+        size="lg"
+        className="fixed bottom-6 left-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
+        aria-label={texts.newTask}
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
     </div>
   );
 }
