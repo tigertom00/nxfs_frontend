@@ -33,6 +33,7 @@ interface TaskCardProps {
   onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;
   onStatusChange: (taskId: string, newStatus: 'todo' | 'in_progress' | 'completed') => void;
+  onPriorityChange: (taskId: string, newPriority: 'low' | 'medium' | 'high') => void;
 }
 
 export function TaskCard({
@@ -41,6 +42,7 @@ export function TaskCard({
   projects,
   onEdit,
   onStatusChange,
+  onPriorityChange,
 }: TaskCardProps) {
   const { language } = useUIStore();
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
@@ -51,6 +53,14 @@ export function TaskCard({
     const nextIndex = (currentIndex + 1) % statusOrder.length;
     const nextStatus = statusOrder[nextIndex];
     onStatusChange(task.id, nextStatus);
+  };
+
+  const cyclePriority = () => {
+    const priorityOrder: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
+    const currentIndex = priorityOrder.indexOf(task.priority);
+    const nextIndex = (currentIndex + 1) % priorityOrder.length;
+    const nextPriority = priorityOrder[nextIndex];
+    onPriorityChange(task.id, nextPriority);
   };
 
   const getStatusIcon = (status: string) => {
@@ -150,9 +160,17 @@ export function TaskCard({
             </Button>
             <span className="font-medium text-sm">{getStatusText(task.status)}</span>
           </div>
-          <Badge className={getPriorityColor(task.priority)} variant="secondary">
-            {getPriorityText(task.priority)}
-          </Badge>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={cyclePriority}
+            className="h-auto w-auto p-0 hover:bg-transparent"
+            title={language === 'no' ? 'Klikk for å endre prioritet' : 'Click to change priority'}
+          >
+            <Badge className={getPriorityColor(task.priority)} variant="secondary">
+              {getPriorityText(task.priority)}
+            </Badge>
+          </Button>
         </div>
 
         <div className="flex items-start justify-between">

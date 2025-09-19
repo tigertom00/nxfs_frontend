@@ -9,6 +9,7 @@ import {
   TaskSkeleton,
   ProjectCard,
   CreationModal,
+  ProjectManager,
 } from '@/components/features/tasks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +25,6 @@ import {
   Loader2,
   EyeOff,
   Eye,
-  Filter,
   X,
   FolderKanban,
 } from 'lucide-react';
@@ -286,6 +286,56 @@ export default function TasksPage() {
     }
   };
 
+  const handleUpdateProject = async (projectData: ProjectFormData) => {
+    try {
+      setActionLoading(true);
+      if (!user || !editingProject) {
+        setError(language === 'no' ? 'Bruker eller prosjekt ikke funnet' : 'User or project not found');
+        setActionLoading(false);
+        return;
+      }
+
+      // Map status to Norwegian equivalent
+      const statusMapping = {
+        todo: 'å gjøre' as const,
+        in_progress: 'pågående' as const,
+        completed: 'fullført' as const,
+      };
+
+      const payload: any = {
+        name: projectData.name.trim(),
+        status: projectData.status,
+        status_nb: statusMapping[projectData.status as keyof typeof statusMapping],
+        completed: projectData.status === 'completed',
+        ...(projectData.status === 'completed' && { completed_at: new Date().toISOString() }),
+        ...(projectData.name_nb?.trim() && { name_nb: projectData.name_nb.trim() }),
+        ...(projectData.description?.trim() && {
+          description: projectData.description.trim(),
+        }),
+        ...(projectData.description_nb?.trim() && {
+          description_nb: projectData.description_nb.trim(),
+        }),
+      };
+
+      await projectsAPI.updateProject(editingProject.id.toString(), payload);
+      await fetchProjects();
+      setIsDialogOpen(false);
+      setEditingProject(null);
+    } catch (err: any) {
+      console.log(err.response?.data);
+      const errorMessages = Object.values(err.response?.data ?? {}).flat();
+      setError(
+        errorMessages.length > 0
+          ? errorMessages.join('\n')
+          : language === 'no'
+            ? 'Kunne ikke oppdatere prosjekt'
+            : 'Failed to update project'
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleDeleteTask = async (taskId: string) => {
     if (
       !confirm(
@@ -352,6 +402,77 @@ export default function TasksPage() {
     }
   };
 
+  const handlePriorityChange = async (taskId: string, newPriority: 'low' | 'medium' | 'high') => {
+    try {
+      setActionLoading(true);
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !user) return;
+
+      const payload = {
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: newPriority,
+        due_date: task.due_date || undefined,
+        estimated_time: task.estimated_time?.toString() || undefined,
+        category: task.category,
+        project: task.project || undefined,
+        user_id: user.id,
+      };
+
+      await tasksAPI.updateTask(taskId, payload);
+      await fetchTasks();
+    } catch (error) {
+      setError(
+        language === 'no'
+          ? 'Kunne ikke oppdatere oppgaveprioritet'
+          : 'Failed to update task priority'
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleProjectStatusChange = async (projectId: number, newStatus: 'todo' | 'in_progress' | 'completed') => {
+    try {
+      setActionLoading(true);
+      const project = projects.find(p => p.id === projectId);
+      if (!project || !user) return;
+
+      // Map status to Norwegian equivalent
+      const statusMapping = {
+        todo: 'å gjøre' as const,
+        in_progress: 'pågående' as const,
+        completed: 'fullført' as const,
+      };
+
+      const payload: any = {
+        name: project.name.trim(),
+        status: newStatus,
+        status_nb: statusMapping[newStatus as keyof typeof statusMapping],
+        user_id: parseInt(user.id),
+        ...(project.name_nb?.trim() && { name_nb: project.name_nb.trim() }),
+        ...(project.description?.trim() && {
+          description: project.description.trim(),
+        }),
+        ...(project.description_nb?.trim() && {
+          description_nb: project.description_nb.trim(),
+        }),
+      };
+
+      await projectsAPI.updateProject(projectId.toString(), payload);
+      await fetchProjects();
+    } catch (error) {
+      setError(
+        language === 'no'
+          ? 'Kunne ikke oppdatere prosjektstatus'
+          : 'Failed to update project status'
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleNewTask = () => {
     setEditingTask(undefined);
     setIsDialogOpen(true);
@@ -360,6 +481,7 @@ export default function TasksPage() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingTask(undefined);
+    setEditingProject(null);
   };
 
   // Filter tasks - show only standalone tasks (no project assigned) on main page
@@ -415,8 +537,8 @@ export default function TasksPage() {
   };
 
   const handleEditProject = (project: Project) => {
-    console.log('Edit project:', project);
     setEditingProject(project);
+    // Don't open isDialogOpen since ProjectManager handles its own dialog
   };
 
   const handleEditComplete = () => {
@@ -525,65 +647,45 @@ export default function TasksPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4 sm:py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            {/* Header content removed - button moved to floating position */}
-          </div>
-
-          {/* Filters */}
-          {categories.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  Filters
-                </h3>
+          {/* Header with Filters */}
+          {categories.length > 0 ? (
+            <div className="flex flex-col items-end gap-2 mb-6">
+              <span className="text-sm font-medium text-muted-foreground">
+                {texts.filterByCategory}:
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {categories.map((category) => {
+                  const isSelected = selectedCategories.includes(category.id);
+                  return (
+                    <Badge
+                      key={category.id}
+                      variant={isSelected ? 'default' : 'outline'}
+                      className="cursor-pointer hover:bg-primary/20"
+                      onClick={() => toggleCategoryFilter(category.id)}
+                    >
+                      {language === 'no' && category.name_nb
+                        ? category.name_nb
+                        : category.name}
+                    </Badge>
+                  );
+                })}
                 {selectedCategories.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={clearCategoryFilters}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground ml-2"
                   >
                     <X className="mr-1 h-3 w-3" />
                     {texts.clearFilters}
                   </Button>
                 )}
               </div>
-
-              {/* Category Filter */}
-              <div className="space-y-2">
-                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  {texts.filterByCategory}
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((category) => {
-                    const isSelected = selectedCategories.includes(
-                      category.id
-                    );
-                    return (
-                      <Badge
-                        key={category.id}
-                        variant={isSelected ? 'default' : 'outline'}
-                        className="cursor-pointer hover:bg-primary/20"
-                        onClick={() => toggleCategoryFilter(category.id)}
-                      >
-                        {language === 'no' && category.name_nb
-                          ? category.name_nb
-                          : category.name}
-                      </Badge>
-                    );
-                  })}
-                </div>
-                {selectedCategories.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {selectedCategories.length} {texts.categoriesSelected}
-                  </p>
-                )}
-              </div>
             </div>
+          ) : (
+            <div className="mb-6"></div>
           )}
 
           {error && (
@@ -632,6 +734,7 @@ export default function TasksPage() {
                         onEdit={handleEditTask}
                         onDelete={handleDeleteTask}
                         onStatusChange={handleStatusChange}
+                        onPriorityChange={handlePriorityChange}
                       />
                     ))}
                   </div>
@@ -653,6 +756,7 @@ export default function TasksPage() {
                         projectTasks={getProjectTasks(project.id)}
                         onEdit={handleEditProject}
                         onClick={handleProjectClick}
+                        onStatusChange={handleProjectStatusChange}
                       />
                     ))}
                   </div>
@@ -702,6 +806,20 @@ export default function TasksPage() {
         onProjectsChange={fetchProjects}
         onCategoriesChange={fetchCategories}
       />
+
+      {/* Project Edit Manager */}
+      {editingProject && (
+        <ProjectManager
+          projects={projects}
+          onProjectsChange={fetchProjects}
+          userId={parseInt(user.id)}
+          editProject={editingProject}
+          onEditComplete={() => {
+            setEditingProject(null);
+            setIsDialogOpen(false);
+          }}
+        />
+      )}
 
       {/* Floating New Task Button */}
       <Button

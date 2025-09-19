@@ -13,9 +13,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FileUpload } from '@/components/ui/file-upload';
+import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores/ui';
-import { Project } from '@/types/api';
+import { Project, ProjectImage } from '@/types/api';
 import { ProjectFormData } from '@/types/task';
+import { ImageIcon, X } from 'lucide-react';
 
 interface ProjectFormProps {
   project?: Project;
@@ -38,6 +40,7 @@ export function ProjectForm({
   });
   const [loading, setLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<ProjectImage[]>(project?.images || []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +50,19 @@ export function ProjectForm({
       await onSubmit(formData);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteImage = async (imageId: string) => {
+    if (!project) return;
+
+    try {
+      // Note: You'll need to implement the delete image API call
+      // await projectsAPI.deleteImage(project.id.toString(), imageId);
+      setExistingImages(prev => prev.filter(img => img.id !== imageId));
+      console.log('Delete image:', imageId);
+    } catch (error) {
+      console.error('Failed to delete image:', error);
     }
   };
 
@@ -76,6 +92,8 @@ export function ProjectForm({
       ? 'Last opp bilder relatert til prosjektet'
       : 'Upload images related to the project',
     nameRequired: language === 'no' ? 'Prosjektnavn er påkrevd' : 'Project name is required',
+    existingImages: language === 'no' ? 'Eksisterende Bilder' : 'Existing Images',
+    deleteImage: language === 'no' ? 'Slett bilde' : 'Delete image',
   };
 
   return (
@@ -163,6 +181,43 @@ export function ProjectForm({
           placeholder="Kort beskrivelse av prosjektet..."
         />
       </div>
+
+      {/* Existing Images Section */}
+      {project && existingImages.length > 0 && (
+        <div className="space-y-2">
+          <Label>{texts.existingImages}</Label>
+          <div className="flex flex-wrap gap-3">
+            {existingImages.map((image) => (
+              <div key={image.id} className="relative group">
+                <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                  <img
+                    src={image.image}
+                    alt="Project image"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteImage(image.id)}
+                  className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  title={texts.deleteImage}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+                {image.file_name && (
+                  <div className="mt-1">
+                    <Badge variant="secondary" className="text-xs">
+                      {image.file_name}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* File Upload Section */}
       <div className="space-y-2">

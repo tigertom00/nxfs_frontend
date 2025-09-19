@@ -27,6 +27,7 @@ interface ProjectCardProps {
   projectTasks: Task[];
   onEdit: (project: Project) => void;
   onClick: (project: Project) => void;
+  onStatusChange: (projectId: number, newStatus: 'todo' | 'in_progress' | 'completed') => void;
 }
 
 export function ProjectCard({
@@ -34,28 +35,48 @@ export function ProjectCard({
   projectTasks,
   onEdit,
   onClick,
+  onStatusChange,
 }: ProjectCardProps) {
   const { language } = useUIStore();
+
+  const cycleStatus = () => {
+    const statusOrder: ('todo' | 'in_progress' | 'completed')[] = ['todo', 'in_progress', 'completed'];
+    const currentIndex = statusOrder.indexOf(project.status);
+    const nextIndex = (currentIndex + 1) % statusOrder.length;
+    const nextStatus = statusOrder[nextIndex];
+    onStatusChange(project.id, nextStatus);
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
       case 'in_progress':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <Clock className="h-5 w-5 text-purple-600" />;
       default:
-        return <Circle className="h-4 w-4 text-gray-400" />;
+        return <Circle className="h-5 w-5 text-amber-600" />;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeStyle = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700';
       case 'in_progress':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700';
+    }
+  };
+
+  const getCardBorderStyle = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'border-l-4 border-l-green-500';
+      case 'in_progress':
+        return 'border-l-4 border-l-purple-500';
+      default:
+        return 'border-l-4 border-l-amber-500';
     }
   };
 
@@ -102,31 +123,38 @@ export function ProjectCard({
     todo: language === 'no' ? 'gjenstår' : 'to do',
     createdOn: language === 'no' ? 'Opprettet' : 'Created',
     progress: language === 'no' ? 'Fremdrift' : 'Progress',
-    viewDetails: language === 'no' ? 'Se detaljer' : 'View details',
   };
 
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
+    <Card className={`h-full hover:shadow-lg transition-all duration-200 ${getCardBorderStyle(project.status)} ${project.status === 'completed' ? 'opacity-80' : ''}`}>
       <CardHeader className="pb-3">
+        {/* Status Banner */}
+        <div className={`flex items-center justify-between p-2 -mx-6 -mt-6 mb-4 rounded-t-lg border-b ${getStatusBadgeStyle(project.status)}`}>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={cycleStatus}
+              className="h-auto w-auto p-1 hover:bg-transparent"
+              title={language === 'no' ? 'Klikk for å endre status' : 'Click to change status'}
+            >
+              {getStatusIcon(project.status)}
+            </Button>
+            <span className="font-medium text-sm">{getStatusText(project.status)}</span>
+          </div>
+          <Badge variant="outline" className="bg-white/50 dark:bg-black/50">
+            {taskStats.total} {texts.tasks}
+          </Badge>
+        </div>
+
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2 flex-1">
-            <FolderKanban className="h-5 w-5 text-primary" />
-            <div className="flex-1">
-              <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                {language === 'no' && project.name_nb
-                  ? project.name_nb
-                  : project.name}
-              </CardTitle>
-              <div className="flex items-center space-x-2 mt-1">
-                {getStatusIcon(project.status)}
-                <Badge className={getStatusColor(project.status)}>
-                  {getStatusText(project.status)}
-                </Badge>
-                <Badge variant="outline">
-                  {taskStats.total} {texts.tasks}
-                </Badge>
-              </div>
-            </div>
+            <FolderKanban className="h-5 w-5 text-purple-600" />
+            <CardTitle className={`text-lg line-clamp-2 flex-1 ${project.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+              {language === 'no' && project.name_nb
+                ? project.name_nb
+                : project.name}
+            </CardTitle>
           </div>
           <div className="flex items-center space-x-1 ml-2">
             <Button
@@ -136,7 +164,8 @@ export function ProjectCard({
                 e.stopPropagation();
                 onEdit(project);
               }}
-              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-8 w-8 p-0"
+              title={language === 'no' ? 'Rediger prosjekt' : 'Edit project'}
             >
               <Edit3 className="h-4 w-4" />
             </Button>
@@ -145,6 +174,7 @@ export function ProjectCard({
               size="sm"
               onClick={() => onClick(project)}
               className="h-8 w-8 p-0"
+              title={language === 'no' ? 'Se detaljer' : 'View details'}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -206,16 +236,13 @@ export function ProjectCard({
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center text-sm text-muted-foreground">
           <div className="flex items-center space-x-1">
             <Calendar className="h-3 w-3" />
             <span>
               {texts.createdOn} {formatDate(project.created_at)}
             </span>
           </div>
-          <span className="text-primary font-medium group-hover:underline">
-            {texts.viewDetails}
-          </span>
         </div>
       </CardContent>
     </Card>

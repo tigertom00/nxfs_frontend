@@ -32,8 +32,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { FileUpload } from '@/components/ui/file-upload';
 import { useUIStore } from '@/stores/ui';
-import { Project } from '@/types/api';
+import { Project, ProjectImage } from '@/types/api';
 import { ProjectFormData } from '@/types/task';
 import { projectsAPI } from '@/lib/api';
 import {
@@ -45,6 +46,8 @@ import {
   CheckCircle2,
   Clock,
   Circle,
+  ImageIcon,
+  X,
 } from 'lucide-react';
 
 interface ProjectManagerProps {
@@ -77,6 +80,10 @@ export function ProjectManager({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<ProjectImage[]>(
+    editProject?.images || []
+  );
 
   // Handle external edit project
   useEffect(() => {
@@ -89,6 +96,7 @@ export function ProjectManager({
         description_nb: editProject.description_nb || '',
         status: editProject.status,
       });
+      setExistingImages(editProject.images || []);
       setShowForm(true);
       setIsDialogOpen(true);
     }
@@ -127,6 +135,12 @@ export function ProjectManager({
     inProgress: language === 'no' ? 'Pågår' : 'In Progress',
     completed: language === 'no' ? 'Fullført' : 'Completed',
     tasksCount: language === 'no' ? 'oppgaver' : 'tasks',
+    attachments: language === 'no' ? 'Vedlegg' : 'Attachments',
+    attachmentsDescription: language === 'no'
+      ? 'Last opp bilder relatert til prosjektet'
+      : 'Upload images related to the project',
+    existingImages: language === 'no' ? 'Eksisterende Bilder' : 'Existing Images',
+    deleteImage: language === 'no' ? 'Slett bilde' : 'Delete image',
   };
 
   const getStatusIcon = (status: string) => {
@@ -251,6 +265,19 @@ export function ProjectManager({
     setShowForm(true);
   };
 
+  const handleDeleteImage = async (imageId: string) => {
+    if (!editingProject) return;
+
+    try {
+      // Note: You'll need to implement the delete image API call
+      // await projectsAPI.deleteImage(editingProject.id.toString(), imageId);
+      setExistingImages(prev => prev.filter(img => img.id !== imageId));
+      console.log('Delete image:', imageId);
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+    }
+  };
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProject(undefined);
@@ -263,6 +290,8 @@ export function ProjectManager({
       status: 'todo',
     });
     setError(null);
+    setAttachedFiles([]);
+    setExistingImages([]);
 
     // Call completion callback if provided (for external edits)
     if (onEditComplete) {
@@ -474,6 +503,57 @@ export function ProjectManager({
                   disabled={loading}
                   rows={2}
                   placeholder="Kort beskrivelse av prosjektet..."
+                />
+              </div>
+
+              {/* Existing Images Section */}
+              {editingProject && existingImages.length > 0 && (
+                <div className="space-y-2">
+                  <Label>{texts.existingImages}</Label>
+                  <div className="flex flex-wrap gap-3">
+                    {existingImages.map((image) => (
+                      <div key={image.id} className="relative group">
+                        <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                          <img
+                            src={image.image}
+                            alt="Project image"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteImage(image.id)}
+                          className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          title={texts.deleteImage}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                        {image.file_name && (
+                          <div className="mt-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {image.file_name}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* File Upload Section */}
+              <div className="space-y-2">
+                <FileUpload
+                  label={texts.attachments}
+                  description={texts.attachmentsDescription}
+                  onFilesChange={setAttachedFiles}
+                  value={attachedFiles}
+                  acceptedTypes="image/*"
+                  maxFiles={5}
+                  maxFileSize={10}
+                  showCamera={true}
                 />
               </div>
 

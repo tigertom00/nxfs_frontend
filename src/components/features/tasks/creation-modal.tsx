@@ -22,6 +22,7 @@ interface CreationModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   editingTask?: Task;
+  editingProject?: Project;
   categories: Category[];
   projects: Project[];
   userId: number;
@@ -37,6 +38,7 @@ export function CreationModal({
   isOpen,
   onOpenChange,
   editingTask,
+  editingProject,
   categories,
   projects,
   userId,
@@ -48,7 +50,7 @@ export function CreationModal({
   onCategoriesChange,
 }: CreationModalProps) {
   const { language } = useUIStore();
-  const [activeTab, setActiveTab] = useState('tasks');
+  const [activeTab, setActiveTab] = useState(editingProject ? 'projects' : 'tasks');
 
   const texts = {
     tasks: language === 'no' ? 'Oppgaver' : 'Tasks',
@@ -57,6 +59,7 @@ export function CreationModal({
     createTask: language === 'no' ? 'Opprett Oppgave' : 'Create Task',
     editTask: language === 'no' ? 'Rediger Oppgave' : 'Edit Task',
     createProject: language === 'no' ? 'Opprett Prosjekt' : 'Create Project',
+    editProject: language === 'no' ? 'Rediger Prosjekt' : 'Edit Project',
     manageCategories: language === 'no' ? 'Administrer Kategorier' : 'Manage Categories',
     taskDescription: editingTask
       ? language === 'no'
@@ -65,8 +68,11 @@ export function CreationModal({
       : language === 'no'
         ? 'Opprett en ny oppgave'
         : 'Create a new task',
-    projectDescription:
-      language === 'no'
+    projectDescription: editingProject
+      ? language === 'no'
+        ? 'Rediger prosjektdetaljene'
+        : 'Edit the project details'
+      : language === 'no'
         ? 'Opprett nye prosjekter for å organisere oppgavene dine'
         : 'Create new projects to organize your tasks',
     settingsDescription:
@@ -91,11 +97,13 @@ export function CreationModal({
           <DialogTitle>
             {editingTask
               ? texts.editTask
-              : activeTab === 'tasks'
-                ? texts.createTask
-                : activeTab === 'projects'
-                  ? texts.createProject
-                  : texts.settings}
+              : editingProject
+                ? texts.editProject
+                : activeTab === 'tasks'
+                  ? texts.createTask
+                  : activeTab === 'projects'
+                    ? texts.createProject
+                    : texts.settings}
           </DialogTitle>
           <DialogDescription>
             {activeTab === 'tasks'
@@ -138,9 +146,12 @@ export function CreationModal({
               {/* Project Creation Form */}
               <div className="border rounded-lg p-4">
                 <h3 className="text-lg font-medium mb-4">
-                  {language === 'no' ? 'Opprett Nytt Prosjekt' : 'Create New Project'}
+                  {editingProject
+                    ? language === 'no' ? 'Rediger Prosjekt' : 'Edit Project'
+                    : language === 'no' ? 'Opprett Nytt Prosjekt' : 'Create New Project'}
                 </h3>
                 <ProjectForm
+                  project={editingProject}
                   onSubmit={onProjectSubmit || (() => {})}
                   onCancel={handleClose}
                 />
