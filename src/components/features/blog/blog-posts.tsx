@@ -59,6 +59,11 @@ function BlogPostCard({ post }: { post: BlogPost }) {
         <CardTitle className="text-3xl">
           {language === 'no' ? post.title_nb : post.title}
         </CardTitle>
+        {(post.excerpt || post.excerpt_nb) && (
+          <p className="text-lg text-muted-foreground mt-2">
+            {language === 'no' ? post.excerpt_nb : post.excerpt}
+          </p>
+        )}
         {post.audio_files && post.audio_files.length > 0 && (
           <audio controls className="h-8">
             <source
@@ -251,30 +256,6 @@ export default function BlogPosts() {
         // Fetch real posts from API
         const response = await postsAPI.getPublicPosts();
 
-        // Add a sample translated post to demonstrate Next Intl capabilities
-        const samplePost: BlogPost = {
-          id: 'sample-intl-post',
-          title: t('blog.samplePost.title'),
-          content: t('blog.samplePost.content', {
-            author: 'Next Intl Demo',
-            date: new Date().toLocaleDateString(),
-          }),
-          body_markdown: t('blog.samplePost.content', {
-            author: 'Next Intl Demo',
-            date: new Date().toLocaleDateString(),
-          }),
-          body_html: '', // Optional field
-          slug: 'sample-intl-post',
-          status: 'published' as const,
-          author_id: 'demo-author',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          author: {
-            id: 'demo-author',
-            email: 'demo@nxfs.no',
-            display_name: 'Next Intl Demo',
-          },
-        };
 
         // Handle both array and paginated response formats
         const postsArray = Array.isArray(response) ? response : response.results || [];
@@ -286,7 +267,7 @@ export default function BlogPosts() {
           body_html: post.body_markdown, // Use markdown as html fallback if needed
         }));
 
-        setPosts([samplePost, ...transformedPosts]);
+        setPosts(transformedPosts);
       } catch (err: any) {
         setError(err.response?.data?.message || t('blog.errorLoading'));
       } finally {

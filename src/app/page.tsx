@@ -36,14 +36,6 @@ export default function Home() {
             <p className="text-xl text-muted-foreground">
               {t('home.subtitle')}
             </p>
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-              <h2 className="text-lg font-semibold mb-2">
-                {t('home.blogTranslation')}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {t('home.blogTranslationDesc')}
-              </p>
-            </div>
           </div>
           <BlogPosts />
         </div>
