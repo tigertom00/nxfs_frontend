@@ -29,14 +29,22 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   // Helper function to normalize URLs
   const normalizeUrl = (url: string | undefined | null) => {
     if (!url) {
+      console.log('normalizeUrl: URL is null/undefined');
       return ''; // Return empty string for null/undefined URLs
     }
+
+    console.log('normalizeUrl input:', url);
+
     if (url.startsWith('http://') || url.startsWith('https://')) {
+      console.log('normalizeUrl: Already absolute URL');
       return url;
     }
+
     // If it's a relative URL, prepend the API base URL
     const baseUrl = env.NEXT_PUBLIC_API_URL || 'https://api.nxfs.no';
-    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+    const normalizedUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+    console.log('normalizeUrl output:', normalizedUrl);
+    return normalizedUrl;
   };
 
   useEffect(() => {
@@ -51,6 +59,9 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
         postsAPI.getImages(postId),
         postsAPI.getAudio(postId)
       ]);
+
+      console.log('Images response:', imagesResponse);
+      console.log('Audio response:', audioResponse);
 
       setImages(imagesResponse || []);
       setAudio(audioResponse || []);
@@ -80,6 +91,8 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
     try {
       setUploading(true);
       const response = await postsAPI.uploadImage(postId, file);
+      console.log('Upload response:', response);
+
       // Refresh the media list to get updated URLs
       await fetchMedia();
       toast.success(t('blog.media.imageUploaded'));
@@ -88,6 +101,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
         imageInputRef.current.value = '';
       }
     } catch (err: any) {
+      console.error('Upload error:', err);
       toast.error(err.response?.data?.message || t('blog.media.uploadError'));
     } finally {
       setUploading(false);
@@ -227,14 +241,17 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
                     <div className="space-y-2">
                       <p className="text-sm font-medium truncate">
-                        {image.file_name || 'Unknown file'}
+                        {image.file_name || image.image?.split('/').pop() || 'Unknown file'}
                       </p>
 
-                      {image.file_size && (
-                        <p className="text-xs text-muted-foreground">
-                          {formatFileSize(image.file_size)}
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        {image.file_size && (
+                          <p>{formatFileSize(image.file_size)}</p>
+                        )}
+                        <p className="font-mono text-xs bg-muted/50 p-1 rounded truncate">
+                          {normalizeUrl(image.image) || 'No URL'}
                         </p>
-                      )}
+                      </div>
 
                       <div className="flex gap-1">
                         <Button
