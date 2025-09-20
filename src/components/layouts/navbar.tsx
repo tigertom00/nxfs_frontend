@@ -127,6 +127,12 @@ export default function Navbar() {
                     {language === 'no' ? 'Docker' : 'Docker'}
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href="/blog/admin" className="w-full">
+                    {language === 'no' ? 'Blogg Admin' : 'Blog Admin'}
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link href="/profile" className="w-full">
                     {language === 'no' ? 'Profil' : 'Profile'}

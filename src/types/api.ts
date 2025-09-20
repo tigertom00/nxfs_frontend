@@ -187,6 +187,24 @@ export interface CreateTaskPayload {
 
 export type UpdateTaskPayload = Partial<CreateTaskPayload>;
 
+export interface CreatePostPayload {
+  title: string;
+  title_nb?: string;
+  slug: string;
+  excerpt?: string;
+  excerpt_nb?: string;
+  body_markdown?: string;
+  body_markdown_nb?: string;
+  content?: string;
+  content_nb?: string;
+  status: 'draft' | 'published' | 'archived';
+  tags?: string[];
+  meta_description?: string;
+  author_id?: string;
+}
+
+export type UpdatePostPayload = Partial<CreatePostPayload>;
+
 /**
  * API endpoint response types
  * These match your actual API responses

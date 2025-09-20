@@ -11,6 +11,8 @@ import type {
   CreateTaskResponse,
   UpdateTaskResponse,
   DeleteTaskResponse,
+  CreateTaskPayload,
+  UpdateTaskPayload,
   UploadTaskImageResponse,
   DeleteTaskImageResponse,
   GetCategoriesResponse,
@@ -31,6 +33,8 @@ import type {
   CreatePostResponse,
   UpdatePostResponse,
   DeletePostResponse,
+  CreatePostPayload,
+  UpdatePostPayload,
   UploadPostAudioResponse,
   DeletePostAudioResponse,
   UploadPostImageResponse,
@@ -208,7 +212,7 @@ export const postsAPI = {
   },
 
   createPost: async (
-    postData: Partial<CreatePostResponse>
+    postData: CreatePostPayload
   ): Promise<CreatePostResponse> => {
     const response = await api.post('/app/blog/posts/', postData);
     return response.data;
@@ -216,7 +220,7 @@ export const postsAPI = {
 
   updatePost: async (
     postId: string,
-    postData: Partial<UpdatePostResponse>
+    postData: UpdatePostPayload
   ): Promise<UpdatePostResponse> => {
     const response = await api.put(`/app/blog/posts/${postId}/`, postData);
     return response.data;
