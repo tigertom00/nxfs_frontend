@@ -338,12 +338,16 @@ export const chatbotAPI = {
 // Tasks API
 export const tasksAPI = {
   getTasks: async (): Promise<GetTasksResponse> => {
-    const response = await api.get('/app/tasks/');
-    return response.data;
+    const response = await api.get('/app/tasks/tasks/');
+    // Handle both paginated and array responses
+    if (response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   getTask: async (taskId: string): Promise<GetTaskResponse> => {
-    const response = await api.get(`/app/tasks/${taskId}/`);
+    const response = await api.get(`/app/tasks/tasks/${taskId}/`);
     return response.data;
   },
 
@@ -367,7 +371,7 @@ export const tasksAPI = {
         }
       });
 
-      const response = await api.post('/app/tasks/', formData, {
+      const response = await api.post('/app/tasks/tasks/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -401,7 +405,7 @@ export const tasksAPI = {
         }
       });
 
-      const response = await api.put(`/app/tasks/${taskId}/`, formData, {
+      const response = await api.put(`/app/tasks/tasks/${taskId}/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -435,7 +439,7 @@ export const tasksAPI = {
         }
       });
 
-      const response = await api.patch(`/app/tasks/${taskId}/`, formData, {
+      const response = await api.patch(`/app/tasks/tasks/${taskId}/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -450,7 +454,7 @@ export const tasksAPI = {
 
   deleteTask: async (taskId: string): Promise<DeleteTaskResponse> => {
     try {
-      const response = await api.delete(`/app/tasks/${taskId}/`);
+      const response = await api.delete(`/app/tasks/tasks/${taskId}/`);
       showSuccessToast('Task deleted successfully');
       return response.data;
     } catch (error) {
@@ -464,7 +468,7 @@ export const tasksAPI = {
       const formData = new FormData();
       formData.append('image', image);
 
-      const response = await api.post(`/app/tasks/${taskId}/upload_image/`, formData, {
+      const response = await api.post(`/app/tasks/tasks/${taskId}/upload_image/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -479,7 +483,7 @@ export const tasksAPI = {
 
   deleteImage: async (taskId: string, imageId: string): Promise<DeleteTaskImageResponse> => {
     try {
-      const response = await api.delete(`/app/tasks/${taskId}/images/${imageId}/`);
+      const response = await api.delete(`/app/tasks/tasks/${taskId}/images/${imageId}/`);
       showSuccessToast('Image deleted successfully');
       return response.data;
     } catch (error) {
@@ -493,7 +497,11 @@ export const tasksAPI = {
 export const categoriesAPI = {
   getCategories: async (): Promise<GetCategoriesResponse> => {
     const response = await api.get('/app/tasks/categories/');
-    return response.data;
+    // Handle both paginated and array responses
+    if (response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
+    return Array.isArray(response.data) ? response.data : [];
   },
   getCategory: async (categoryId: string): Promise<GetCategoryResponse> => {
     const response = await api.get(`/app/tasks/categories/${categoryId}/`);
@@ -527,7 +535,11 @@ export const categoriesAPI = {
 export const projectsAPI = {
   getProjects: async (): Promise<GetProjectsResponse> => {
     const response = await api.get('/app/tasks/projects/');
-    return response.data;
+    // Handle both paginated and array responses
+    if (response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
+    return Array.isArray(response.data) ? response.data : [];
   },
   getProject: async (projectId: string): Promise<GetProjectResponse> => {
     const response = await api.get(`/app/tasks/projects/${projectId}/`);
