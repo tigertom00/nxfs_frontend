@@ -103,6 +103,12 @@ export interface Category {
   name_nb?: string;
 }
 
+export interface Tag {
+  id: number;
+  slug: string;
+  name: string;
+}
+
 export interface ProjectImage {
   id: string;
   image: string;
@@ -198,7 +204,7 @@ export interface CreatePostPayload {
   content?: string;
   content_nb?: string;
   status: 'draft' | 'published' | 'archived';
-  tags?: string[];
+  tags?: number[]; // Array of tag IDs, like categories in tasks
   meta_description?: string;
   author_id?: string;
 }
@@ -229,6 +235,13 @@ export type GetCategoryResponse = Category;
 export type CreateCategoryResponse = Category;
 export type UpdateCategoryResponse = Category;
 export type DeleteCategoryResponse = void;
+
+// Tags API responses
+export type GetTagsResponse = Tag[];
+export type GetTagResponse = Tag;
+export type CreateTagResponse = Tag;
+export type UpdateTagResponse = Tag;
+export type DeleteTagResponse = void;
 
 // Projects API responses
 export type GetProjectsResponse = Project[];

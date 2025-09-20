@@ -10,13 +10,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Save, X, Upload, Image, Music } from 'lucide-react';
 import MDEditor from '@uiw/react-md-editor';
-import { postsAPI } from '@/lib/api';
+import { postsAPI, tagsAPI } from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
 import { useUIStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
-import { Post } from '@/types/api';
+import { Post, Tag } from '@/types/api';
 import { MediaLibrary } from './media-library';
 import { TagInput } from './tag-input';
+import { TagManager } from './tag-manager';
 import { toast } from 'sonner';
 
 interface BlogEditorProps {
@@ -41,8 +42,24 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
   const [content, setContent] = useState('');
   const [contentNb, setContentNb] = useState('');
   const [status, setStatus] = useState<'draft' | 'published' | 'archived'>('draft');
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<number[]>([]);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [metaDescription, setMetaDescription] = useState('');
+
+  // Fetch available tags
+  const fetchTags = useCallback(async () => {
+    try {
+      const tagsData = await tagsAPI.getTags();
+      setAvailableTags(tagsData);
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+    }
+  }, []);
+
+  // Initialize tags on component mount
+  useEffect(() => {
+    fetchTags();
+  }, [fetchTags]);
 
   // Initialize form with post data
   useEffect(() => {
@@ -275,10 +292,14 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                 </Select>
               </div>
               <div>
+                <div className="flex items-center justify-between">
+                  <Label>{t('blog.editor.tags')}</Label>
+                  <TagManager tags={availableTags} onTagsChange={fetchTags} />
+                </div>
                 <TagInput
                   value={tags}
                   onChange={setTags}
-                  label={t('blog.editor.tags')}
+                  availableTags={availableTags}
                   placeholder={t('blog.editor.tagsPlaceholder')}
                 />
               </div>

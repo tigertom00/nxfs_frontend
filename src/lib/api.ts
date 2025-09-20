@@ -291,21 +291,6 @@ export const postsAPI = {
     return response.data;
   },
 
-  getTags: async (): Promise<string[]> => {
-    try {
-      // Try to get all posts and extract unique tags
-      const response = await api.get('/app/blog/posts/');
-      const posts = Array.isArray(response.data) ? response.data : response.data.results || [];
-
-      const allTags = posts.flatMap((post: any) => post.tags || []);
-      const uniqueTags = Array.from(new Set(allTags)).filter(Boolean);
-
-      return uniqueTags as string[];
-    } catch (error) {
-      console.error('Error fetching tags:', error);
-      return [];
-    }
-  },
 
   uploadAudio: async (postId: string, audio: File): Promise<UploadPostAudioResponse> => {
     try {
@@ -808,6 +793,59 @@ export const dockerAPI = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Refreshing container stats');
+      throw error;
+    }
+  },
+};
+
+// Tags API - for blog tags management
+export const tagsAPI = {
+  getTags: async (): Promise<GetTagsResponse> => {
+    const response = await api.get('/app/blog/tags/');
+    // Handle both paginated and array responses
+    if (response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getTag: async (tagId: string): Promise<GetTagResponse> => {
+    const response = await api.get(`/app/blog/tags/${tagId}/`);
+    return response.data;
+  },
+
+  createTag: async (tagData: Partial<Tag>): Promise<CreateTagResponse> => {
+    try {
+      const response = await api.post('/app/blog/tags/', tagData);
+      showSuccessToast('Tag created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating tag');
+      throw error;
+    }
+  },
+
+  updateTag: async (
+    tagId: string,
+    tagData: Partial<Tag>
+  ): Promise<UpdateTagResponse> => {
+    try {
+      const response = await api.put(`/app/blog/tags/${tagId}/`, tagData);
+      showSuccessToast('Tag updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating tag');
+      throw error;
+    }
+  },
+
+  deleteTag: async (tagId: string): Promise<DeleteTagResponse> => {
+    try {
+      const response = await api.delete(`/app/blog/tags/${tagId}/`);
+      showSuccessToast('Tag deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting tag');
       throw error;
     }
   },
