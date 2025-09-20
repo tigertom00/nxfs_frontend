@@ -121,10 +121,12 @@ export default function ChatBot() {
     try {
       // Use session_id from user data, fallback to user.id
       const sessionId = (user as any).session_id || user.id;
+      // Get user's preferred name (first_name or display_name as fallback)
+      const userName = user.first_name || user.display_name || user.username;
 
       const response = attachedFiles.length > 0
-        ? await chatbotAPI.sendMessageWithFiles(sessionId, messageText, attachedFiles)
-        : await chatbotAPI.sendMessage(sessionId, messageText);
+        ? await chatbotAPI.sendMessageWithFiles(sessionId, messageText, attachedFiles, userName)
+        : await chatbotAPI.sendMessage(sessionId, messageText, userName);
 
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),

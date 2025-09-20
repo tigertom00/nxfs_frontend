@@ -290,14 +290,18 @@ export const postsAPI = {
 export const chatbotAPI = {
   sendMessage: async (
     sessionId: string,
-    chatInput: string
+    chatInput: string,
+    userName?: string
   ): Promise<SendChatMessageResponse> => {
+    const accessToken = getAccessToken();
     const response = await axios.post(
       env.NEXT_PUBLIC_N8N_URL,
       {
         sessionId,
         action: 'sendMessage',
         chatInput,
+        accessToken,
+        userName,
       },
       {
         headers: {
@@ -312,12 +316,20 @@ export const chatbotAPI = {
   sendMessageWithFiles: async (
     sessionId: string,
     chatInput: string,
-    files?: File[]
+    files?: File[],
+    userName?: string
   ): Promise<SendChatMessageResponse> => {
+    const accessToken = getAccessToken();
     const formData = new FormData();
     formData.append('sessionId', sessionId);
     formData.append('action', 'sendMessage');
     formData.append('chatInput', chatInput);
+    if (accessToken) {
+      formData.append('accessToken', accessToken);
+    }
+    if (userName) {
+      formData.append('userName', userName);
+    }
 
     if (files && files.length > 0) {
       files.forEach((file, index) => {
