@@ -27,7 +27,10 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   const audioInputRef = useRef<HTMLInputElement>(null);
 
   // Helper function to normalize URLs
-  const normalizeUrl = (url: string) => {
+  const normalizeUrl = (url: string | undefined | null) => {
+    if (!url) {
+      return ''; // Return empty string for null/undefined URLs
+    }
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
@@ -197,12 +200,20 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
               {images.map((image) => (
                 <Card key={image.id}>
                   <CardContent className="p-3">
-                    <div className="aspect-video mb-3 bg-muted rounded overflow-hidden">
-                      <img
-                        src={normalizeUrl(image.image)}
-                        alt={image.file_name || 'Uploaded image'}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="aspect-video mb-3 bg-muted rounded overflow-hidden flex items-center justify-center">
+                      {normalizeUrl(image.image) ? (
+                        <img
+                          src={normalizeUrl(image.image)}
+                          alt={image.file_name || 'Uploaded image'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement!.innerHTML = '<div class="text-muted-foreground text-sm">Image not found</div>';
+                          }}
+                        />
+                      ) : (
+                        <div className="text-muted-foreground text-sm">No image URL</div>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -220,8 +231,12 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => onInsert(normalizeUrl(image.image), 'image')}
+                          onClick={() => {
+                            const url = normalizeUrl(image.image);
+                            if (url) onInsert(url, 'image');
+                          }}
                           className="flex-1"
+                          disabled={!normalizeUrl(image.image)}
                         >
                           {t('blog.media.insert')}
                         </Button>
@@ -229,7 +244,11 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => copyToClipboard(normalizeUrl(image.image))}
+                          onClick={() => {
+                            const url = normalizeUrl(image.image);
+                            if (url) copyToClipboard(url);
+                          }}
+                          disabled={!normalizeUrl(image.image)}
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -299,17 +318,27 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                         </div>
                       </div>
 
-                      <audio controls className="w-full h-8">
-                        <source src={normalizeUrl(audioFile.audio)} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                      </audio>
+                      {normalizeUrl(audioFile.audio) ? (
+                        <audio controls className="w-full h-8">
+                          <source src={normalizeUrl(audioFile.audio)} type="audio/mpeg" />
+                          Your browser does not support the audio element.
+                        </audio>
+                      ) : (
+                        <div className="w-full h-8 bg-muted rounded flex items-center justify-center text-muted-foreground text-sm">
+                          No audio URL
+                        </div>
+                      )}
 
                       <div className="flex gap-1">
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => onInsert(normalizeUrl(audioFile.audio), 'audio')}
+                          onClick={() => {
+                            const url = normalizeUrl(audioFile.audio);
+                            if (url) onInsert(url, 'audio');
+                          }}
                           className="flex-1"
+                          disabled={!normalizeUrl(audioFile.audio)}
                         >
                           {t('blog.media.insert')}
                         </Button>
@@ -317,7 +346,11 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => copyToClipboard(normalizeUrl(audioFile.audio))}
+                          onClick={() => {
+                            const url = normalizeUrl(audioFile.audio);
+                            if (url) copyToClipboard(url);
+                          }}
+                          disabled={!normalizeUrl(audioFile.audio)}
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
