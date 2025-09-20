@@ -127,7 +127,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
 
       onSave();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || t('blog.editor.saveError'));
+      toast.error(t('blog.editor.saveError'));
     } finally {
       setSaving(false);
     }

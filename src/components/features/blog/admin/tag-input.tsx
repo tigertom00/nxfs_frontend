@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useRef, KeyboardEvent } from 'react';
+import { useState, useRef, KeyboardEvent, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { X, Plus } from 'lucide-react';
 import { useIntl } from '@/hooks/use-intl';
+import { postsAPI } from '@/lib/api';
 
 interface TagInputProps {
   value: string[];
@@ -17,7 +19,29 @@ interface TagInputProps {
 export function TagInput({ value, onChange, placeholder, label }: TagInputProps) {
   const { t } = useIntl();
   const [inputValue, setInputValue] = useState('');
+  const [existingTags, setExistingTags] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchExistingTags = async () => {
+      try {
+        const tags = await postsAPI.getTags();
+        setExistingTags(tags);
+      } catch (error) {
+        console.error('Error fetching existing tags:', error);
+      }
+    };
+
+    fetchExistingTags();
+  }, []);
+
+  const filteredSuggestions = existingTags
+    .filter(tag =>
+      tag.toLowerCase().includes(inputValue.toLowerCase()) &&
+      !value.includes(tag)
+    )
+    .slice(0, 5);
 
   const addTag = (tag: string) => {
     const trimmedTag = tag.trim();
@@ -25,6 +49,7 @@ export function TagInput({ value, onChange, placeholder, label }: TagInputProps)
       onChange([...value, trimmedTag]);
     }
     setInputValue('');
+    setShowSuggestions(false);
   };
 
   const removeTag = (tagToRemove: string) => {

@@ -214,16 +214,66 @@ export const postsAPI = {
   createPost: async (
     postData: CreatePostPayload
   ): Promise<CreatePostResponse> => {
-    const response = await api.post('/app/blog/posts/', postData);
-    return response.data;
+    try {
+      const formData = new FormData();
+      // Convert post data to FormData for multipart/form-data submission
+      Object.entries(postData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            // Handle array fields like tags - Django expects repeated field names
+            value.forEach((item) => {
+              formData.append(key, item.toString());
+            });
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.post('/app/blog/posts/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Post created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating post');
+      throw error;
+    }
   },
 
   updatePost: async (
     postId: string,
     postData: UpdatePostPayload
   ): Promise<UpdatePostResponse> => {
-    const response = await api.put(`/app/blog/posts/${postId}/`, postData);
-    return response.data;
+    try {
+      const formData = new FormData();
+      // Convert post data to FormData for multipart/form-data submission
+      Object.entries(postData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            // Handle array fields like tags - Django expects repeated field names
+            value.forEach((item) => {
+              formData.append(key, item.toString());
+            });
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.put(`/app/blog/posts/${postId}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Post updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating post');
+      throw error;
+    }
   },
 
   deletePost: async (postId: string): Promise<DeletePostResponse> => {
@@ -239,6 +289,22 @@ export const postsAPI = {
   getAudio: async (postId: string): Promise<UploadPostAudioResponse[]> => {
     const response = await api.get(`/app/blog/posts/${postId}/audio/`);
     return response.data;
+  },
+
+  getTags: async (): Promise<string[]> => {
+    try {
+      // Try to get all posts and extract unique tags
+      const response = await api.get('/app/blog/posts/');
+      const posts = Array.isArray(response.data) ? response.data : response.data.results || [];
+
+      const allTags = posts.flatMap((post: any) => post.tags || []);
+      const uniqueTags = Array.from(new Set(allTags)).filter(Boolean);
+
+      return uniqueTags as string[];
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+      return [];
+    }
   },
 
   uploadAudio: async (postId: string, audio: File): Promise<UploadPostAudioResponse> => {
