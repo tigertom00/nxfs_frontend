@@ -99,6 +99,7 @@
       "status": "Status",
       "tags": "Tagger",
       "tagsPlaceholder": "tag1, tag2, tag3",
+      "tagHelp": "Trykk Enter eller komma for å legge til tagger. Klikk X for å fjerne tagger.",
       "metaDescription": "Meta Beskrivelse",
       "metaDescriptionPlaceholder": "SEO beskrivelse for søkemotorer...",
       "savePostForMedia": "Lagre innlegget først for å laste opp mediefiler",

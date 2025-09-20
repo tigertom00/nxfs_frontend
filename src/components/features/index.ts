@@ -9,6 +9,7 @@ export { BlogAdminDashboard } from './blog/admin/blog-admin-dashboard';
 export { BlogEditor } from './blog/admin/blog-editor';
 export { BlogPostList } from './blog/admin/blog-post-list';
 export { MediaLibrary } from './blog/admin/media-library';
+export { TagInput } from './blog/admin/tag-input';
 
 // Chat feature
 export { default as ChatBot } from './chat/chatbot';

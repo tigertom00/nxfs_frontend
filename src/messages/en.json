@@ -99,6 +99,7 @@
       "status": "Status",
       "tags": "Tags",
       "tagsPlaceholder": "tag1, tag2, tag3",
+      "tagHelp": "Press Enter or comma to add tags. Click X to remove tags.",
       "metaDescription": "Meta Description",
       "metaDescriptionPlaceholder": "SEO description for search engines...",
       "savePostForMedia": "Save the post first to upload media files",

@@ -16,6 +16,7 @@ import { useUIStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { Post } from '@/types/api';
 import { MediaLibrary } from './media-library';
+import { TagInput } from './tag-input';
 import { toast } from 'sonner';
 
 interface BlogEditorProps {
@@ -40,7 +41,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
   const [content, setContent] = useState('');
   const [contentNb, setContentNb] = useState('');
   const [status, setStatus] = useState<'draft' | 'published' | 'archived'>('draft');
-  const [tags, setTags] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [metaDescription, setMetaDescription] = useState('');
 
   // Initialize form with post data
@@ -54,7 +55,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
       setContent(post.body_markdown || '');
       setContentNb(post.body_markdown_nb || '');
       setStatus(post.status);
-      setTags(post.tags?.join(', ') || '');
+      setTags(post.tags || []);
       setMetaDescription(post.meta_description || '');
     } else {
       // Reset form for new post
@@ -66,7 +67,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
       setContent('');
       setContentNb('');
       setStatus('draft');
-      setTags('');
+      setTags([]);
       setMetaDescription('');
     }
   }, [post]);
@@ -111,7 +112,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         body_markdown: content,
         body_markdown_nb: contentNb || undefined,
         status,
-        tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        tags: tags,
         meta_description: metaDescription.trim() || undefined,
         author_id: user?.id,
       };
@@ -274,11 +275,10 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="tags">{t('blog.editor.tags')}</Label>
-                <Input
-                  id="tags"
+                <TagInput
                   value={tags}
-                  onChange={(e) => setTags(e.target.value)}
+                  onChange={setTags}
+                  label={t('blog.editor.tags')}
                   placeholder={t('blog.editor.tagsPlaceholder')}
                 />
               </div>

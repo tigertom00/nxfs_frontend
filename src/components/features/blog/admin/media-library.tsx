@@ -10,6 +10,7 @@ import { postsAPI } from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
 import { PostImage, PostAudio } from '@/types/api';
 import { toast } from 'sonner';
+import { env } from '@/lib/env';
 
 interface MediaLibraryProps {
   postId: string;
@@ -24,6 +25,16 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   const [error, setError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper function to normalize URLs
+  const normalizeUrl = (url: string) => {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // If it's a relative URL, prepend the API base URL
+    const baseUrl = env.NEXT_PUBLIC_API_URL || 'https://api.nxfs.no';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  };
 
   useEffect(() => {
     fetchMedia();
@@ -188,7 +199,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                   <CardContent className="p-3">
                     <div className="aspect-video mb-3 bg-muted rounded overflow-hidden">
                       <img
-                        src={image.image}
+                        src={normalizeUrl(image.image)}
                         alt={image.file_name || 'Uploaded image'}
                         className="w-full h-full object-cover"
                       />
@@ -209,7 +220,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => onInsert(image.image, 'image')}
+                          onClick={() => onInsert(normalizeUrl(image.image), 'image')}
                           className="flex-1"
                         >
                           {t('blog.media.insert')}
@@ -218,7 +229,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => copyToClipboard(image.image)}
+                          onClick={() => copyToClipboard(normalizeUrl(image.image))}
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -289,7 +300,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                       </div>
 
                       <audio controls className="w-full h-8">
-                        <source src={audioFile.audio} type="audio/mpeg" />
+                        <source src={normalizeUrl(audioFile.audio)} type="audio/mpeg" />
                         Your browser does not support the audio element.
                       </audio>
 
@@ -297,7 +308,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => onInsert(audioFile.audio, 'audio')}
+                          onClick={() => onInsert(normalizeUrl(audioFile.audio), 'audio')}
                           className="flex-1"
                         >
                           {t('blog.media.insert')}
@@ -306,7 +317,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => copyToClipboard(audioFile.audio)}
+                          onClick={() => copyToClipboard(normalizeUrl(audioFile.audio))}
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
