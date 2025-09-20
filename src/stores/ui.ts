@@ -19,7 +19,7 @@ interface UIState {
 export const useUIStore = create<UIState>()(
   persist(
     (set, get) => ({
-      theme: 'light',
+      theme: 'dark',
       language: 'en',
       sidebarOpen: false,
       chatOpen: false,
