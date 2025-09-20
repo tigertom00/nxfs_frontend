@@ -18,6 +18,53 @@ import { useUIStore } from '@/stores/ui';
 import { useIntl } from '@/hooks/use-intl';
 import { Post } from '@/types/api';
 
+// YouTube Video Card Component
+function YouTubeVideoCard() {
+  const { language } = useUIStore();
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language === 'no' ? 'nb-NO' : 'en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-3xl">
+          {language === 'no' ? 'Velkommen til nxfs.no - Introduksjonsvideo' : 'Welcome to nxfs.no - Introduction Video'}
+        </CardTitle>
+        <p className="text-lg text-muted-foreground mt-2">
+          {language === 'no'
+            ? 'Se denne videoen for å lære mer om plattformen og hva vi tilbyr'
+            : 'Watch this video to learn more about our platform and what we offer'
+          }
+        </p>
+        <CardDescription>
+          {formatDate('2025-09-20')}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="w-full">
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+            <iframe
+              className="absolute top-0 left-0 w-full h-full rounded-lg"
+              src="https://www.youtube.com/embed/C9j0eJsA7-8"
+              title="nxfs.no Introduction Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 interface Author {
   id: string;
   email: string;
@@ -307,6 +354,7 @@ export default function BlogPosts() {
 
   return (
     <div className="space-y-6">
+      <YouTubeVideoCard />
       {posts.map((post) => (
         <BlogPostCard key={post.id} post={post} />
       ))}
