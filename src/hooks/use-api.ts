@@ -84,7 +84,7 @@ export function useApi<T = any>(
 
         // Only show error toast if not already handled by API interceptor
         // and if showErrorToast is true
-        if (showErrorToast && !error?.config?.url?.includes('/token/refresh/')) {
+        if (showErrorToast && !error?.config?.url?.includes('/auth/token/refresh/')) {
           handleApiError(error, 'API call');
         }
 

@@ -50,7 +50,7 @@ POST /token/
 #### 2. Refresh Token
 
 ```
-POST /token/refresh/
+POST /auth/token/refresh/
 ```
 
 **Request Body:**

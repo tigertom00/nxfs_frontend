@@ -112,7 +112,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Don't show toast for auth refresh attempts
-    if (!originalRequest.url?.includes('/token/refresh/')) {
+    if (!originalRequest.url?.includes('/auth/token/refresh/')) {
       handleApiError(error, `API ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`);
     }
 

@@ -91,7 +91,7 @@ api.interceptors.response.use(
         if (refreshToken) {
           // Use a separate axios instance for refresh to avoid circular interceptor calls
           const refreshResponse = await axios.post(
-            `${env.NEXT_PUBLIC_API_URL}/token/refresh/`,
+            `${env.NEXT_PUBLIC_API_URL}/auth/token/refresh/`,
             { refresh: refreshToken },
             {
               headers: {
@@ -135,7 +135,7 @@ api.interceptors.response.use(
     // Only show error toast if it's not a 401/403 that we just handled with token refresh
     // or if it's a token refresh request itself that failed
     if (
-      !originalRequest.url?.includes('/token/refresh/') &&
+      !originalRequest.url?.includes('/auth/token/refresh/') &&
       !(error.response?.status === 401 || error.response?.status === 403)
     ) {
       handleApiError(
@@ -151,7 +151,7 @@ api.interceptors.response.use(
 // Authentication API
 export const authAPI = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await axios.post(`${env.NEXT_PUBLIC_API_URL}/token/`, {
+    const response = await axios.post(`${env.NEXT_PUBLIC_API_URL}/auth/token/`, {
       email,
       password,
     });
@@ -160,7 +160,7 @@ export const authAPI = {
 
   refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
     const response = await axios.post(
-      `${env.NEXT_PUBLIC_API_URL}/token/refresh/`,
+      `${env.NEXT_PUBLIC_API_URL}/auth/token/refresh/`,
       {
         refresh: refreshToken,
       }
@@ -172,7 +172,7 @@ export const authAPI = {
 // Users API
 export const usersAPI = {
   getCurrentUser: async (): Promise<GetCurrentUserResponse> => {
-    const response = await api.get('/user/');
+    const response = await api.get('/api/user/');
     return response.data;
   },
 
@@ -180,12 +180,12 @@ export const usersAPI = {
     userId: string,
     userData: Partial<UpdateUserResponse>
   ): Promise<UpdateUserResponse> => {
-    const response = await api.put(`/user/${userId}/`, userData);
+    const response = await api.put(`/api/user/${userId}/`, userData);
     return response.data;
   },
 
   deleteUser: async (userId: string): Promise<void> => {
-    const response = await api.delete(`/user/${userId}/`);
+    const response = await api.delete(`/api/user/${userId}/`);
     return response.data;
   },
 };
@@ -193,24 +193,24 @@ export const usersAPI = {
 // Posts API
 export const postsAPI = {
   getPublicPosts: async (): Promise<GetPublicPostsResponse> => {
-    const response = await api.get('/api/posts/public/');
+    const response = await api.get('/app/blog/posts/public/');
     return response.data;
   },
 
   getPosts: async (): Promise<GetPostsResponse> => {
-    const response = await api.get('/api/posts/');
+    const response = await api.get('/app/blog/posts/');
     return response.data;
   },
 
   getPost: async (postId: string): Promise<GetPostResponse> => {
-    const response = await api.get(`/api/posts/${postId}/`);
+    const response = await api.get(`/app/blog/posts/${postId}/`);
     return response.data;
   },
 
   createPost: async (
     postData: Partial<CreatePostResponse>
   ): Promise<CreatePostResponse> => {
-    const response = await api.post('/api/posts/', postData);
+    const response = await api.post('/app/blog/posts/', postData);
     return response.data;
   },
 
@@ -218,12 +218,12 @@ export const postsAPI = {
     postId: string,
     postData: Partial<UpdatePostResponse>
   ): Promise<UpdatePostResponse> => {
-    const response = await api.put(`/api/posts/${postId}/`, postData);
+    const response = await api.put(`/app/blog/posts/${postId}/`, postData);
     return response.data;
   },
 
   deletePost: async (postId: string): Promise<DeletePostResponse> => {
-    const response = await api.delete(`/api/posts/${postId}/`);
+    const response = await api.delete(`/app/blog/posts/${postId}/`);
     return response.data;
   },
 
@@ -232,7 +232,7 @@ export const postsAPI = {
       const formData = new FormData();
       formData.append('audio', audio);
 
-      const response = await api.post(`/api/posts/${postId}/audio/`, formData, {
+      const response = await api.post(`/app/blog/posts/${postId}/audio/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -247,7 +247,7 @@ export const postsAPI = {
 
   deleteAudio: async (postId: string, audioId: string): Promise<DeletePostAudioResponse> => {
     try {
-      const response = await api.delete(`/api/posts/${postId}/audio/${audioId}/`);
+      const response = await api.delete(`/app/blog/posts/${postId}/audio/${audioId}/`);
       showSuccessToast('Audio deleted successfully');
       return response.data;
     } catch (error) {
@@ -261,7 +261,7 @@ export const postsAPI = {
       const formData = new FormData();
       formData.append('image', image);
 
-      const response = await api.post(`/api/posts/${postId}/upload_image/`, formData, {
+      const response = await api.post(`/app/blog/posts/${postId}/images/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -276,7 +276,7 @@ export const postsAPI = {
 
   deleteImage: async (postId: string, imageId: string): Promise<DeletePostImageResponse> => {
     try {
-      const response = await api.delete(`/api/posts/${postId}/images/${imageId}/`);
+      const response = await api.delete(`/app/blog/posts/${postId}/images/${imageId}/`);
       showSuccessToast('Image deleted successfully');
       return response.data;
     } catch (error) {
@@ -526,11 +526,11 @@ export const categoriesAPI = {
 // Projects API
 export const projectsAPI = {
   getProjects: async (): Promise<GetProjectsResponse> => {
-    const response = await api.get('/app/projects/');
+    const response = await api.get('/app/tasks/projects/');
     return response.data;
   },
   getProject: async (projectId: string): Promise<GetProjectResponse> => {
-    const response = await api.get(`/app/projects/${projectId}/`);
+    const response = await api.get(`/app/tasks/projects/${projectId}/`);
     return response.data;
   },
   createProject: async (
@@ -553,7 +553,7 @@ export const projectsAPI = {
         }
       });
 
-      const response = await api.post('/app/projects/', formData, {
+      const response = await api.post('/app/tasks/projects/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -586,7 +586,7 @@ export const projectsAPI = {
         }
       });
 
-      const response = await api.put(`/app/projects/${projectId}/`, formData, {
+      const response = await api.put(`/app/tasks/projects/${projectId}/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -599,7 +599,7 @@ export const projectsAPI = {
     }
   },
   deleteProject: async (projectId: string): Promise<DeleteProjectResponse> => {
-    const response = await api.delete(`/app/projects/${projectId}/`);
+    const response = await api.delete(`/app/tasks/projects/${projectId}/`);
     return response.data;
   },
 
@@ -608,7 +608,7 @@ export const projectsAPI = {
       const formData = new FormData();
       formData.append('image', image);
 
-      const response = await api.post(`/app/projects/${projectId}/upload_image/`, formData, {
+      const response = await api.post(`/app/tasks/projects/${projectId}/upload_image/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -623,7 +623,7 @@ export const projectsAPI = {
 
   deleteImage: async (projectId: string, imageId: string): Promise<DeleteProjectImageResponse> => {
     try {
-      const response = await api.delete(`/app/projects/${projectId}/images/${imageId}/`);
+      const response = await api.delete(`/app/tasks/projects/${projectId}/images/${imageId}/`);
       showSuccessToast('Image deleted successfully');
       return response.data;
     } catch (error) {
