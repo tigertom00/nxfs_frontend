@@ -231,6 +231,16 @@ export const postsAPI = {
     return response.data;
   },
 
+  getImages: async (postId: string): Promise<UploadPostImageResponse[]> => {
+    const response = await api.get(`/app/blog/posts/${postId}/images/`);
+    return response.data;
+  },
+
+  getAudio: async (postId: string): Promise<UploadPostAudioResponse[]> => {
+    const response = await api.get(`/app/blog/posts/${postId}/audio/`);
+    return response.data;
+  },
+
   uploadAudio: async (postId: string, audio: File): Promise<UploadPostAudioResponse> => {
     try {
       const formData = new FormData();

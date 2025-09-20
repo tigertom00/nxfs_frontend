@@ -45,12 +45,17 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
   const fetchMedia = async () => {
     try {
-      // Note: We'll need to implement these endpoints if they don't exist
-      // For now, we'll use the post data to get media
-      const post = await postsAPI.getPost(postId);
-      setImages(post.images || []);
-      setAudio(post.audio || []);
+      setError(null);
+      // Fetch images and audio separately using dedicated endpoints
+      const [imagesResponse, audioResponse] = await Promise.all([
+        postsAPI.getImages(postId),
+        postsAPI.getAudio(postId)
+      ]);
+
+      setImages(imagesResponse || []);
+      setAudio(audioResponse || []);
     } catch (err: any) {
+      console.error('Error fetching media:', err);
       setError(t('blog.media.errorLoadingMedia'));
     }
   };
@@ -75,7 +80,8 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
     try {
       setUploading(true);
       const response = await postsAPI.uploadImage(postId, file);
-      setImages(prev => [...prev, response]);
+      // Refresh the media list to get updated URLs
+      await fetchMedia();
       toast.success(t('blog.media.imageUploaded'));
 
       if (imageInputRef.current) {
@@ -108,7 +114,8 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
     try {
       setUploading(true);
       const response = await postsAPI.uploadAudio(postId, file);
-      setAudio(prev => [...prev, response]);
+      // Refresh the media list to get updated URLs
+      await fetchMedia();
       toast.success(t('blog.media.audioUploaded'));
 
       if (audioInputRef.current) {
@@ -124,7 +131,8 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   const handleDeleteImage = async (imageId: string) => {
     try {
       await postsAPI.deleteImage(postId, imageId);
-      setImages(prev => prev.filter(img => img.id !== imageId));
+      // Refresh the media list
+      await fetchMedia();
       toast.success(t('blog.media.imageDeleted'));
     } catch (err: any) {
       toast.error(err.response?.data?.message || t('blog.media.deleteError'));
@@ -134,7 +142,8 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   const handleDeleteAudio = async (audioId: string) => {
     try {
       await postsAPI.deleteAudio(postId, audioId);
-      setAudio(prev => prev.filter(aud => aud.id !== audioId));
+      // Refresh the media list
+      await fetchMedia();
       toast.success(t('blog.media.audioDeleted'));
     } catch (err: any) {
       toast.error(err.response?.data?.message || t('blog.media.deleteError'));
