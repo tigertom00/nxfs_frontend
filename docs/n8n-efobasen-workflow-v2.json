@@ -1,0 +1,149 @@
+{
+  "name": "EFObasen Scraper v2 - SPA Compatible",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "efobasen-lookup",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.el_number }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2",
+      "name": "Check EL Number",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced mock data with more realistic Norwegian electrical products\nconst mockEFOProducts = [\n  {\n    el_nr: 123456,\n    title: \"LED-pære E27 9W 2700K dimbar\",\n    manufacturer: \"Philips\",\n    supplier: \"Elektro Grossist AS\",\n    description: \"LED-pære med E27 sokkel, 9W effekt, varmhvitt lys 2700K, dimbar\",\n    category: \"Belysning - LED pærer\",\n    price: 89.90,\n    availability: \"På lager\",\n    image_url: \"https://example.com/led-bulb.jpg\",\n    specifications: {\n      \"Effekt\": \"9W\",\n      \"Sokkel\": \"E27\",\n      \"Lumen\": \"806 lm\",\n      \"Fargetemp\": \"2700K\",\n      \"Dimbar\": \"Ja\"\n    }\n  },\n  {\n    el_nr: 234567,\n    title: \"Jordfeilbryter 2-pol 16A 30mA Type A\",\n    manufacturer: \"Schneider Electric\",\n    supplier: \"El-Grossisten\",\n    description: \"Jordfeilbryter 2-polet 16A 30mA Type A for boliger\",\n    category: \"Sikkerhetsutstyr - Jordfeilbrytere\",\n    price: 245.00,\n    availability: \"På lager\",\n    specifications: {\n      \"Strøm\": \"16A\",\n      \"Utløsestrøm\": \"30mA\",\n      \"Type\": \"A\",\n      \"Poler\": \"2\"\n    }\n  },\n  {\n    el_nr: 345678,\n    title: \"Kabel NYM-J 3x1.5mm² 100m\",\n    manufacturer: \"Nexans\",\n    supplier: \"Kabel Norge AS\",\n    description: \"Installasjonskabel NYM-J 3x1.5mm² på 100m trommel, grå\",\n    category: \"Kabler - Installasjon\",\n    price: 1250.00,\n    availability: \"Bestillingsvare\",\n    specifications: {\n      \"Tverrsnitt\": \"3x1.5mm²\",\n      \"Type\": \"NYM-J\",\n      \"Lengde\": \"100m\",\n      \"Farge\": \"Grå\"\n    }\n  },\n  {\n    el_nr: 456789,\n    title: \"Stikkontakt 1-fas med jord hvit\",\n    manufacturer: \"Gira\",\n    supplier: \"Elektro Partner\",\n    description: \"Stikkontakt 1-fas med jord, hvit, for standard veggboks\",\n    category: \"Stikkontakter - Standard\",\n    price: 45.00,\n    availability: \"På lager\",\n    specifications: {\n      \"Faser\": \"1\",\n      \"Jording\": \"Ja\",\n      \"Farge\": \"Hvit\",\n      \"IP-klasse\": \"IP20\"\n    }\n  },\n  {\n    el_nr: 567890,\n    title: \"Lysbryter 1-pol hvit\",\n    manufacturer: \"ABB\",\n    supplier: \"ABB Norge\",\n    description: \"Lysbryter 1-polet, hvit, for standard veggboks\",\n    category: \"Brytere - Standard\",\n    price: 35.00,\n    availability: \"På lager\",\n    specifications: {\n      \"Poler\": \"1\",\n      \"Farge\": \"Hvit\",\n      \"Type\": \"Veksler\",\n      \"IP-klasse\": \"IP20\"\n    }\n  },\n  {\n    el_nr: 678901,\n    title: \"Automatsikring C16 1-pol\",\n    manufacturer: \"Schneider Electric\",\n    supplier: \"El-Grossisten\",\n    description: \"Automatsikring C16 1-polet for fordelertavle\",\n    category: \"Sikringer - Automat\",\n    price: 85.00,\n    availability: \"På lager\",\n    specifications: {\n      \"Strøm\": \"16A\",\n      \"Type\": \"C\",\n      \"Poler\": \"1\",\n      \"Utløsekarakteristikk\": \"C\"\n    }\n  }\n];\n\nconst elNumber = parseInt($input.first().json.el_number);\nconst product = mockEFOProducts.find(p => p.el_nr === elNumber);\n\nif (product) {\n  return [{\n    json: {\n      ...product,\n      scraped_at: new Date().toISOString(),\n      source: \"mock_data\",\n      note: \"Demo data - Real EFObasen scraping requires browser automation\"\n    }\n  }];\n} else {\n  return [{\n    json: {\n      error: \"Product not found\",\n      el_number: elNumber,\n      available_demo_numbers: mockEFOProducts.map(p => p.el_nr),\n      note: \"Try demo EL-numbers: 123456, 234567, 345678, 456789, 567890, 678901\"\n    }\n  }];\n}"
+      },
+      "id": "3",
+      "name": "Mock EFObasen Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "4",
+      "name": "Return Product Data",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{{ { \"error\": \"Invalid EL number\", \"message\": \"Please provide a valid el_number parameter\" } }}"
+      },
+      "id": "5",
+      "name": "Return Invalid Request",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Optional: Try to explore EFObasen structure for future development\n// This node can be enabled to investigate the SPA structure\n\nconst elNumber = $input.first().json.el_number;\n\n// For now, we'll document what we know about EFObasen:\nconst efobasenInfo = {\n  discovered: {\n    structure: \"Angular SPA\",\n    baseUrl: \"https://efobasen.no\",\n    searchUrl: `https://efobasen.no/søk?q=${elNumber}`,\n    apiPattern: \"Dynamic loading via Angular\",\n    requirements: \"Browser automation needed\"\n  },\n  nextSteps: [\n    \"Set up Puppeteer in N8N\",\n    \"Intercept network requests\",\n    \"Identify API endpoints\",\n    \"Extract real product data\"\n  ]\n};\n\n// Pass through to mock data for now\nreturn $input.all();"
+      },
+      "id": "6",
+      "name": "EFObasen Research (Optional)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 200],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check EL Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check EL Number": {
+      "main": [
+        [
+          {
+            "node": "Mock EFObasen Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Invalid Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock EFObasen Data": {
+      "main": [
+        [
+          {
+            "node": "Return Product Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "id": "1",
+      "name": "scraping"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "2"
+}

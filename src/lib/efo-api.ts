@@ -230,44 +230,108 @@ class EFOService {
   }
 
   /**
-   * Demo/fallback search using mock data
-   * Remove this when real API is available
+   * Demo/fallback search using enhanced mock data
+   * This matches the N8N workflow mock data
    */
   async mockSearchByElNumber(elNumber: string | number): Promise<EFOProduct | null> {
-    // Mock EFO data for demonstration
+    // Enhanced mock EFO data for demonstration
     const mockProducts: EFOProduct[] = [
       {
         el_nr: 123456,
-        productName: "LED-pære E27 9W 2700K",
+        productName: "LED-pære E27 9W 2700K dimbar",
         manufacturer: "Philips",
         supplierName: "Elektro Grossist AS",
-        description: "LED-pære med E27 sokkel, 9W effekt, varmhvitt lys 2700K",
-        category: "Belysning",
+        description: "LED-pære med E27 sokkel, 9W effekt, varmhvitt lys 2700K, dimbar",
+        category: "Belysning - LED pærer",
         price: 89.90,
         availability: "På lager",
-        etimClass: "EC000123",
+        specifications: {
+          "Effekt": "9W",
+          "Sokkel": "E27",
+          "Lumen": "806 lm",
+          "Fargetemp": "2700K",
+          "Dimbar": "Ja"
+        },
       },
       {
         el_nr: 234567,
-        productName: "Jordfeilbryter 16A 30mA",
+        productName: "Jordfeilbryter 2-pol 16A 30mA Type A",
         manufacturer: "Schneider Electric",
         supplierName: "El-Grossisten",
-        description: "Jordfeilbryter 2-polet 16A 30mA Type A",
-        category: "Sikkerhetsutstyr",
+        description: "Jordfeilbryter 2-polet 16A 30mA Type A for boliger",
+        category: "Sikkerhetsutstyr - Jordfeilbrytere",
         price: 245.00,
         availability: "På lager",
-        etimClass: "EC000456",
+        specifications: {
+          "Strøm": "16A",
+          "Utløsestrøm": "30mA",
+          "Type": "A",
+          "Poler": "2"
+        },
       },
       {
         el_nr: 345678,
         productName: "Kabel NYM-J 3x1.5mm² 100m",
         manufacturer: "Nexans",
         supplierName: "Kabel Norge AS",
-        description: "Installasjonskabel NYM-J 3x1.5mm² på 100m trommel",
-        category: "Kabler",
+        description: "Installasjonskabel NYM-J 3x1.5mm² på 100m trommel, grå",
+        category: "Kabler - Installasjon",
         price: 1250.00,
         availability: "Bestillingsvare",
-        etimClass: "EC000789",
+        specifications: {
+          "Tverrsnitt": "3x1.5mm²",
+          "Type": "NYM-J",
+          "Lengde": "100m",
+          "Farge": "Grå"
+        },
+      },
+      {
+        el_nr: 456789,
+        productName: "Stikkontakt 1-fas med jord hvit",
+        manufacturer: "Gira",
+        supplierName: "Elektro Partner",
+        description: "Stikkontakt 1-fas med jord, hvit, for standard veggboks",
+        category: "Stikkontakter - Standard",
+        price: 45.00,
+        availability: "På lager",
+        specifications: {
+          "Faser": "1",
+          "Jording": "Ja",
+          "Farge": "Hvit",
+          "IP-klasse": "IP20"
+        },
+      },
+      {
+        el_nr: 567890,
+        productName: "Lysbryter 1-pol hvit",
+        manufacturer: "ABB",
+        supplierName: "ABB Norge",
+        description: "Lysbryter 1-polet, hvit, for standard veggboks",
+        category: "Brytere - Standard",
+        price: 35.00,
+        availability: "På lager",
+        specifications: {
+          "Poler": "1",
+          "Farge": "Hvit",
+          "Type": "Veksler",
+          "IP-klasse": "IP20"
+        },
+      },
+      {
+        el_nr: 678901,
+        productName: "Automatsikring C16 1-pol",
+        manufacturer: "Schneider Electric",
+        supplierName: "El-Grossisten",
+        description: "Automatsikring C16 1-polet for fordelertavle",
+        category: "Sikringer - Automat",
+        price: 85.00,
+        availability: "På lager",
+        specifications: {
+          "Strøm": "16A",
+          "Type": "C",
+          "Poler": "1",
+          "Utløsekarakteristikk": "C"
+        },
       },
     ];
 

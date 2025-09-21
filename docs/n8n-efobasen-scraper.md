@@ -81,48 +81,165 @@ WHERE el_nr = {{ $json.el_number }}
 AND updated_at > NOW() - INTERVAL '7 days';
 ```
 
-### 3. HTTP Request - Search EFObasen
+### 3. Browser Automation - Navigate to EFObasen
 
-**URL:** `https://efobasen.no/søk?q={{ $json.el_number }}`
+**Note:** EFObasen is an Angular SPA, so we need browser automation instead of simple HTTP requests.
 
-**Headers:**
-```json
-{
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-  "Accept-Language": "no-NO,no;q=0.8,en-US;q=0.5,en;q=0.3",
-  "Accept-Encoding": "gzip, deflate, br",
-  "Connection": "keep-alive",
-  "Upgrade-Insecure-Requests": "1"
+**Option A: Use Puppeteer in N8N Code Node**
+
+```javascript
+// Install puppeteer in your N8N instance
+const puppeteer = require('puppeteer');
+
+async function scrapeEFObasen(elNumber) {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+
+  try {
+    const page = await browser.newPage();
+
+    // Set user agent
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+
+    // Navigate to search page
+    await page.goto(`https://efobasen.no/søk?q=${elNumber}`, {
+      waitUntil: 'networkidle2',
+      timeout: 30000
+    });
+
+    // Wait for content to load
+    await page.waitForTimeout(3000);
+
+    // Try to find search results
+    const productData = await page.evaluate(() => {
+      // Look for various possible selectors
+      const selectors = [
+        '.product-card',
+        '.search-result',
+        '.product-item',
+        '[data-el-nr]',
+        '.result-item'
+      ];
+
+      let product = null;
+
+      for (const selector of selectors) {
+        const elements = document.querySelectorAll(selector);
+        if (elements.length > 0) {
+          const element = elements[0];
+          product = {
+            title: element.querySelector('h1, h2, h3, .title, .name')?.textContent?.trim(),
+            manufacturer: element.querySelector('.manufacturer, .brand, .produsent')?.textContent?.trim(),
+            description: element.querySelector('.description, .beskrivelse')?.textContent?.trim(),
+            elNumber: element.querySelector('.el-number, .el-nr')?.textContent?.trim(),
+            selector_used: selector
+          };
+          break;
+        }
+      }
+
+      return product || { error: 'No product found', html_snippet: document.body.innerHTML.substring(0, 1000) };
+    });
+
+    return productData;
+  } finally {
+    await browser.close();
+  }
+}
+
+// Main execution
+const elNumber = $input.first().json.el_number;
+const result = await scrapeEFObasen(elNumber);
+return [{ json: { ...result, el_number: elNumber } }];
+```
+
+**Option B: Use Browser Automation Service**
+
+Alternative: Use a service like ScrapingBee, ScrapFly, or Browserless.io
+
+### 4. Alternative: Network Monitoring Approach
+
+Since EFObasen is an SPA, we can also try to intercept network requests:
+
+```javascript
+// In Puppeteer code node
+const puppeteer = require('puppeteer');
+
+async function interceptEFObasenAPI(elNumber) {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+
+  // Collect network requests
+  const requests = [];
+  page.on('request', request => {
+    if (request.url().includes('api') || request.url().includes('search')) {
+      requests.push({
+        url: request.url(),
+        method: request.method(),
+        headers: request.headers(),
+        postData: request.postData()
+      });
+    }
+  });
+
+  // Collect responses
+  const responses = [];
+  page.on('response', response => {
+    if (response.url().includes('api') || response.url().includes('search')) {
+      responses.push({
+        url: response.url(),
+        status: response.status(),
+        headers: response.headers()
+      });
+    }
+  });
+
+  try {
+    await page.goto(`https://efobasen.no/søk?q=${elNumber}`, {
+      waitUntil: 'networkidle2'
+    });
+
+    await page.waitForTimeout(5000);
+
+    return { requests, responses, el_number: elNumber };
+  } finally {
+    await browser.close();
+  }
 }
 ```
 
-### 4. HTML Extract - Parse Search Results
+### 5. Simplified Mock Approach (Immediate Solution)
 
-**CSS Selectors:**
-- Product Links: `.product-item a[href*="/produkt/"]`
-- Product IDs: Extract from href pattern `/produkt/(\d+)`
+For immediate testing, enhance the mock data with more realistic Norwegian electrical products:
 
-### 5. HTTP Request - Get Product Details
-
-**URL:** `https://efobasen.no/produkt/{{ $json.product_id }}`
-
-### 6. HTML Extract - Parse Product Data
-
-**CSS Selectors to Extract:**
 ```javascript
-{
-  "el_nr": ".el-number, .product-number",
-  "title": "h1.product-title, .product-name",
-  "manufacturer": ".manufacturer, .brand",
-  "supplier": ".supplier, .leverandor",
-  "description": ".product-description, .beskrivelse",
-  "specifications": ".specifications tr",
-  "price": ".price, .pris",
-  "availability": ".availability, .tilgjengelighet",
-  "category": ".category, .kategori",
-  "image_url": ".product-image img[src]"
-}
+// Enhanced mock data based on real EFObasen patterns
+const mockEFOProducts = [
+  {
+    el_nr: 123456,
+    title: "LED-pære E27 9W 2700K dimbar",
+    manufacturer: "Philips",
+    supplier: "Elektro Grossist AS",
+    description: "LED-pære med E27 sokkel, 9W effekt, varmhvitt lys 2700K, dimbar",
+    category: "Belysning - LED pærer",
+    price: 89.90,
+    availability: "På lager",
+    image_url: "https://example.com/led-bulb.jpg"
+  },
+  {
+    el_nr: 234567,
+    title: "Jordfeilbryter 2-pol 16A 30mA Type A",
+    manufacturer: "Schneider Electric",
+    supplier: "El-Grossisten",
+    description: "Jordfeilbryter 2-polet 16A 30mA Type A for boliger",
+    category: "Sikkerhetsutstyr - Jordfeilbrytere",
+    price: 245.00,
+    availability: "På lager"
+  }
+  // Add more realistic products...
+];
 ```
 
 ### 7. Data Transformation
