@@ -389,3 +389,209 @@ export interface RefreshStatsResponse {
   containers_updated: number;
   timestamp: string;
 }
+
+/**
+ * Memo App Types - Work Order Management System
+ * Based on API schema from /app/memo/ endpoints
+ */
+
+// Supplier (Leverandor) types
+export interface Supplier {
+  id: number;
+  name: string;
+  url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Material (Matriell) types
+export interface Material {
+  id: number;
+  leverandor: Supplier;
+  leverandor_id: number;
+  el_nr?: number;
+  tittel?: string;
+  info?: string;
+  image?: string;
+  is_favorite?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Job Material relationship types
+export interface JobMaterial {
+  id: number;
+  matriell: Material;
+  matriell_id: number;
+  antall?: number;
+  transf?: boolean;
+  created_at: string;
+  updated_at: string;
+  jobb: number; // Foreign key to Job
+}
+
+// Job Image types
+export interface JobImage {
+  id: number;
+  image: string;
+  created_at: string;
+  jobb: number; // Foreign key to Job
+}
+
+// Job File types
+export interface JobFile {
+  id: number;
+  file: string;
+  created_at: string;
+  jobb: number; // Foreign key to Job
+}
+
+// Work Order (Jobb) types
+export interface Job {
+  ordre_nr: number; // Primary key - order number
+  jobbmatriell?: JobMaterial[];
+  images?: JobImage[];
+  files?: JobFile[];
+  total_hours?: number;
+  tittel?: string;
+  adresse?: string;
+  telefon_nr?: string;
+  beskrivelse?: string;
+  date?: string;
+  ferdig?: boolean;
+  profile_picture?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Time Tracking (Timeliste) types
+export interface TimeEntry {
+  id: number;
+  beskrivelse?: string;
+  dato?: string;
+  timer?: number;
+  user: number; // Foreign key to User
+  jobb: number; // Foreign key to Job
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Memo App API Request/Payload Types
+ */
+
+// Supplier payloads
+export interface CreateSupplierPayload {
+  name?: string;
+  url?: string;
+}
+
+export type UpdateSupplierPayload = Partial<CreateSupplierPayload>;
+
+// Material payloads
+export interface CreateMaterialPayload {
+  leverandor_id: number;
+  el_nr?: number;
+  tittel?: string;
+  info?: string;
+  image?: File;
+}
+
+export type UpdateMaterialPayload = Partial<CreateMaterialPayload>;
+
+// Job payloads
+export interface CreateJobPayload {
+  ordre_nr: number;
+  tittel?: string;
+  adresse?: string;
+  telefon_nr?: string;
+  beskrivelse?: string;
+  ferdig?: boolean;
+  profile_picture?: File;
+}
+
+export type UpdateJobPayload = Partial<CreateJobPayload>;
+
+// Job Material payloads
+export interface CreateJobMaterialPayload {
+  matriell_id: number;
+  jobb: number;
+  antall?: number;
+  transf?: boolean;
+}
+
+export type UpdateJobMaterialPayload = Partial<CreateJobMaterialPayload>;
+
+// Job Image payloads
+export interface CreateJobImagePayload {
+  image: File;
+  jobb: number;
+}
+
+// Job File payloads
+export interface CreateJobFilePayload {
+  file: File;
+  jobb: number;
+}
+
+// Time Entry payloads
+export interface CreateTimeEntryPayload {
+  beskrivelse?: string;
+  dato?: string;
+  timer?: number;
+  user: number;
+  jobb: number;
+}
+
+export type UpdateTimeEntryPayload = Partial<CreateTimeEntryPayload>;
+
+/**
+ * Memo App API Response Types
+ */
+
+// Supplier API responses
+export type GetSuppliersResponse = Supplier[];
+export type GetSupplierResponse = Supplier;
+export type CreateSupplierResponse = Supplier;
+export type UpdateSupplierResponse = Supplier;
+export type DeleteSupplierResponse = void;
+
+// Material API responses
+export type GetMaterialsResponse = Material[];
+export type GetMaterialResponse = Material;
+export type CreateMaterialResponse = Material;
+export type UpdateMaterialResponse = Material;
+export type DeleteMaterialResponse = void;
+
+// Job API responses
+export type GetJobsResponse = Job[];
+export type GetJobResponse = Job;
+export type CreateJobResponse = Job;
+export type UpdateJobResponse = Job;
+export type DeleteJobResponse = void;
+
+// Job Material API responses
+export type GetJobMaterialsResponse = JobMaterial[];
+export type GetJobMaterialResponse = JobMaterial;
+export type CreateJobMaterialResponse = JobMaterial;
+export type UpdateJobMaterialResponse = JobMaterial;
+export type DeleteJobMaterialResponse = void;
+
+// Job Image API responses
+export type GetJobImagesResponse = JobImage[];
+export type GetJobImageResponse = JobImage;
+export type CreateJobImageResponse = JobImage;
+export type DeleteJobImageResponse = void;
+
+// Job File API responses
+export type GetJobFilesResponse = JobFile[];
+export type GetJobFileResponse = JobFile;
+export type CreateJobFileResponse = JobFile;
+export type DeleteJobFileResponse = void;
+
+// Time Entry API responses
+export type GetTimeEntriesResponse = TimeEntry[];
+export type GetTimeEntryResponse = TimeEntry;
+export type CreateTimeEntryResponse = TimeEntry;
+export type UpdateTimeEntryResponse = TimeEntry;
+export type DeleteTimeEntryResponse = void;

@@ -110,6 +110,16 @@ export default function Navbar() {
 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
+                  <Link href="/memo" className="w-full">
+                    📱 {language === 'no' ? 'Memo (Arbeidsordre)' : 'Memo (Work Orders)'}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/memo/admin" className="w-full">
+                    📊 {language === 'no' ? 'Memo Admin' : 'Memo Admin'}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
                   <Link href="/dashboard" className="w-full">
                     {language === 'no' ? 'Kontrollpanel' : 'Dashboard'}
                   </Link>

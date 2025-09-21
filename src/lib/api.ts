@@ -53,6 +53,59 @@ import type {
   Project,
   CreateTaskPayload,
   UpdateTaskPayload,
+  // Memo app types
+  Supplier,
+  Material,
+  Job,
+  JobMaterial,
+  JobImage,
+  JobFile,
+  TimeEntry,
+  CreateSupplierPayload,
+  UpdateSupplierPayload,
+  CreateMaterialPayload,
+  UpdateMaterialPayload,
+  CreateJobPayload,
+  UpdateJobPayload,
+  CreateJobMaterialPayload,
+  UpdateJobMaterialPayload,
+  CreateJobImagePayload,
+  CreateJobFilePayload,
+  CreateTimeEntryPayload,
+  UpdateTimeEntryPayload,
+  GetSuppliersResponse,
+  GetSupplierResponse,
+  CreateSupplierResponse,
+  UpdateSupplierResponse,
+  DeleteSupplierResponse,
+  GetMaterialsResponse,
+  GetMaterialResponse,
+  CreateMaterialResponse,
+  UpdateMaterialResponse,
+  DeleteMaterialResponse,
+  GetJobsResponse,
+  GetJobResponse,
+  CreateJobResponse,
+  UpdateJobResponse,
+  DeleteJobResponse,
+  GetJobMaterialsResponse,
+  GetJobMaterialResponse,
+  CreateJobMaterialResponse,
+  UpdateJobMaterialResponse,
+  DeleteJobMaterialResponse,
+  GetJobImagesResponse,
+  GetJobImageResponse,
+  CreateJobImageResponse,
+  DeleteJobImageResponse,
+  GetJobFilesResponse,
+  GetJobFileResponse,
+  CreateJobFileResponse,
+  DeleteJobFileResponse,
+  GetTimeEntriesResponse,
+  GetTimeEntryResponse,
+  CreateTimeEntryResponse,
+  UpdateTimeEntryResponse,
+  DeleteTimeEntryResponse,
 } from '@/types/api';
 
 // Create axios instance
@@ -951,6 +1004,447 @@ export const getAccessToken = () => {
 
 export const getRefreshToken = () => {
   return localStorage.getItem('refreshToken');
+};
+
+// Memo App APIs - Work Order Management System
+
+// Suppliers API (Leverandorer)
+export const suppliersAPI = {
+  getSuppliers: async (): Promise<GetSuppliersResponse> => {
+    const response = await api.get('/app/memo/leverandorer/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getSupplier: async (supplierId: number): Promise<GetSupplierResponse> => {
+    const response = await api.get(`/app/memo/leverandorer/${supplierId}/`);
+    return response.data;
+  },
+
+  createSupplier: async (supplierData: CreateSupplierPayload): Promise<CreateSupplierResponse> => {
+    try {
+      const response = await api.post('/app/memo/leverandorer/', supplierData);
+      showSuccessToast('Supplier created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating supplier');
+      throw error;
+    }
+  },
+
+  updateSupplier: async (
+    supplierId: number,
+    supplierData: UpdateSupplierPayload
+  ): Promise<UpdateSupplierResponse> => {
+    try {
+      const response = await api.put(`/app/memo/leverandorer/${supplierId}/`, supplierData);
+      showSuccessToast('Supplier updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating supplier');
+      throw error;
+    }
+  },
+
+  deleteSupplier: async (supplierId: number): Promise<DeleteSupplierResponse> => {
+    try {
+      const response = await api.delete(`/app/memo/leverandorer/${supplierId}/`);
+      showSuccessToast('Supplier deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting supplier');
+      throw error;
+    }
+  },
+};
+
+// Materials API (Matriell)
+export const materialsAPI = {
+  getMaterials: async (): Promise<GetMaterialsResponse> => {
+    const response = await api.get('/app/memo/matriell/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getMaterial: async (materialId: number): Promise<GetMaterialResponse> => {
+    const response = await api.get(`/app/memo/matriell/${materialId}/`);
+    return response.data;
+  },
+
+  createMaterial: async (materialData: CreateMaterialPayload): Promise<CreateMaterialResponse> => {
+    try {
+      const formData = new FormData();
+      Object.entries(materialData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (value instanceof File) {
+            formData.append(key, value);
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.post('/app/memo/matriell/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Material created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating material');
+      throw error;
+    }
+  },
+
+  updateMaterial: async (
+    materialId: number,
+    materialData: UpdateMaterialPayload
+  ): Promise<UpdateMaterialResponse> => {
+    try {
+      const formData = new FormData();
+      Object.entries(materialData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (value instanceof File) {
+            formData.append(key, value);
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const response = await api.put(`/app/memo/matriell/${materialId}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Material updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating material');
+      throw error;
+    }
+  },
+
+  deleteMaterial: async (materialId: number): Promise<DeleteMaterialResponse> => {
+    try {
+      const response = await api.delete(`/app/memo/matriell/${materialId}/`);
+      showSuccessToast('Material deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting material');
+      throw error;
+    }
+  },
+  toggleFavorite: async (materialId: number): Promise<UpdateMaterialResponse> => {
+    try {
+      const response = await api.patch(`/app/memo/matriell/${materialId}/favorite/`);
+      showSuccessToast('Material favorite status updated');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating material favorite status');
+      throw error;
+    }
+  },
+};
+
+// Jobs API (Jobber)
+export const jobsAPI = {
+  getJobs: async (): Promise<GetJobsResponse> => {
+    const response = await api.get('/app/memo/jobber/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getJob: async (orderNumber: number): Promise<GetJobResponse> => {
+    const response = await api.get(`/app/memo/jobber/${orderNumber}/`);
+    return response.data;
+  },
+
+  createJob: async (jobData: CreateJobPayload): Promise<CreateJobResponse> => {
+    try {
+      // Try JSON first for simple data
+      const response = await api.post('/app/memo/jobber/', jobData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      showSuccessToast('Job created successfully');
+      return response.data;
+    } catch (jsonError: any) {
+      console.log('JSON create failed, trying FormData:', jsonError);
+
+      // If JSON fails and we have files, try FormData
+      if (jsonError.response?.status === 400 && jobData.profile_picture instanceof File) {
+        try {
+          const formData = new FormData();
+          Object.entries(jobData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              if (value instanceof File) {
+                formData.append(key, value);
+              } else {
+                formData.append(key, value.toString());
+              }
+            }
+          });
+
+          const response = await api.post('/app/memo/jobber/', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          showSuccessToast('Job created successfully');
+          return response.data;
+        } catch (error) {
+          handleApiError(error, 'Creating job');
+          throw error;
+        }
+      } else {
+        handleApiError(jsonError, 'Creating job');
+        throw jsonError;
+      }
+    }
+  },
+
+  updateJob: async (
+    orderNumber: number,
+    jobData: UpdateJobPayload
+  ): Promise<UpdateJobResponse> => {
+    try {
+      // Try JSON first for simple data
+      const response = await api.put(`/app/memo/jobber/${orderNumber}/`, jobData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      showSuccessToast('Job updated successfully');
+      return response.data;
+    } catch (jsonError: any) {
+      console.log('JSON update failed, trying FormData:', jsonError);
+
+      // If JSON fails and we have files, try FormData
+      if (jsonError.response?.status === 400 && jobData.profile_picture instanceof File) {
+        try {
+          const formData = new FormData();
+          Object.entries(jobData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              if (value instanceof File) {
+                formData.append(key, value);
+              } else {
+                formData.append(key, value.toString());
+              }
+            }
+          });
+
+          const response = await api.put(`/app/memo/jobber/${orderNumber}/`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          showSuccessToast('Job updated successfully');
+          return response.data;
+        } catch (error) {
+          handleApiError(error, 'Updating job');
+          throw error;
+        }
+      } else {
+        handleApiError(jsonError, 'Updating job');
+        throw jsonError;
+      }
+    }
+  },
+
+  deleteJob: async (orderNumber: number): Promise<DeleteJobResponse> => {
+    try {
+      const response = await api.delete(`/app/memo/jobber/${orderNumber}/`);
+      showSuccessToast('Job deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting job');
+      throw error;
+    }
+  },
+};
+
+// Job Materials API (Jobbmatriell)
+export const jobMaterialsAPI = {
+  getJobMaterials: async (): Promise<GetJobMaterialsResponse> => {
+    const response = await api.get('/app/memo/jobbmatriell/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getJobMaterial: async (jobMaterialId: number): Promise<GetJobMaterialResponse> => {
+    const response = await api.get(`/app/memo/jobbmatriell/${jobMaterialId}/`);
+    return response.data;
+  },
+
+  createJobMaterial: async (jobMaterialData: CreateJobMaterialPayload): Promise<CreateJobMaterialResponse> => {
+    try {
+      const response = await api.post('/app/memo/jobbmatriell/', jobMaterialData);
+      showSuccessToast('Job material created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating job material');
+      throw error;
+    }
+  },
+
+  updateJobMaterial: async (
+    jobMaterialId: number,
+    jobMaterialData: UpdateJobMaterialPayload
+  ): Promise<UpdateJobMaterialResponse> => {
+    try {
+      const response = await api.put(`/app/memo/jobbmatriell/${jobMaterialId}/`, jobMaterialData);
+      showSuccessToast('Job material updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating job material');
+      throw error;
+    }
+  },
+
+  deleteJobMaterial: async (jobMaterialId: number): Promise<DeleteJobMaterialResponse> => {
+    try {
+      const response = await api.delete(`/app/memo/jobbmatriell/${jobMaterialId}/`);
+      showSuccessToast('Job material deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting job material');
+      throw error;
+    }
+  },
+};
+
+// Job Images API
+export const jobImagesAPI = {
+  getJobImages: async (): Promise<GetJobImagesResponse> => {
+    const response = await api.get('/app/memo/jobb-images/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getJobImage: async (imageId: number): Promise<GetJobImageResponse> => {
+    const response = await api.get(`/app/memo/jobb-images/${imageId}/`);
+    return response.data;
+  },
+
+  uploadJobImage: async (imageData: CreateJobImagePayload): Promise<CreateJobImageResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('image', imageData.image);
+      formData.append('jobb', imageData.jobb.toString());
+
+      const response = await api.post('/app/memo/jobb-images/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('Image uploaded successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Uploading job image');
+      throw error;
+    }
+  },
+
+  deleteJobImage: async (imageId: number): Promise<DeleteJobImageResponse> => {
+    try {
+      const response = await api.delete(`/app/memo/jobb-images/${imageId}/`);
+      showSuccessToast('Image deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting job image');
+      throw error;
+    }
+  },
+};
+
+// Job Files API
+export const jobFilesAPI = {
+  getJobFiles: async (): Promise<GetJobFilesResponse> => {
+    const response = await api.get('/app/memo/jobb-files/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getJobFile: async (fileId: number): Promise<GetJobFileResponse> => {
+    const response = await api.get(`/app/memo/jobb-files/${fileId}/`);
+    return response.data;
+  },
+
+  uploadJobFile: async (fileData: CreateJobFilePayload): Promise<CreateJobFileResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', fileData.file);
+      formData.append('jobb', fileData.jobb.toString());
+
+      const response = await api.post('/app/memo/jobb-files/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('File uploaded successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Uploading job file');
+      throw error;
+    }
+  },
+
+  deleteJobFile: async (fileId: number): Promise<DeleteJobFileResponse> => {
+    try {
+      const response = await api.delete(`/app/memo/jobb-files/${fileId}/`);
+      showSuccessToast('File deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting job file');
+      throw error;
+    }
+  },
+};
+
+// Time Entries API (Timeliste)
+export const timeEntriesAPI = {
+  getTimeEntries: async (): Promise<GetTimeEntriesResponse> => {
+    const response = await api.get('/app/memo/timeliste/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getTimeEntry: async (timeEntryId: number): Promise<GetTimeEntryResponse> => {
+    const response = await api.get(`/app/memo/timeliste/${timeEntryId}/`);
+    return response.data;
+  },
+
+  createTimeEntry: async (timeEntryData: CreateTimeEntryPayload): Promise<CreateTimeEntryResponse> => {
+    try {
+      const response = await api.post('/app/memo/timeliste/', timeEntryData);
+      showSuccessToast('Time entry created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating time entry');
+      throw error;
+    }
+  },
+
+  updateTimeEntry: async (
+    timeEntryId: number,
+    timeEntryData: UpdateTimeEntryPayload
+  ): Promise<UpdateTimeEntryResponse> => {
+    try {
+      const response = await api.put(`/app/memo/timeliste/${timeEntryId}/`, timeEntryData);
+      showSuccessToast('Time entry updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating time entry');
+      throw error;
+    }
+  },
+
+  deleteTimeEntry: async (timeEntryId: number): Promise<DeleteTimeEntryResponse> => {
+    try {
+      const response = await api.delete(`/app/memo/timeliste/${timeEntryId}/`);
+      showSuccessToast('Time entry deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting time entry');
+      throw error;
+    }
+  },
 };
 
 export default api;
