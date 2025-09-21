@@ -35,7 +35,17 @@ export default function BlogPostPage() {
         setLoading(true);
         setError(null);
 
-        // Get all public posts and find by slug
+        // First try the efficient slug endpoint
+        try {
+          const directPost = await postsAPI.getPostBySlug(slug as string);
+          setPost(directPost);
+          return;
+        } catch (directError: any) {
+          // If slug endpoint fails, fall back to public posts list
+          console.log('Direct slug lookup failed, trying public posts list:', directError);
+        }
+
+        // Fallback: Get all public posts and find by slug
         const response = await postsAPI.getPublicPosts();
         const postsArray = Array.isArray(response) ? response : response.results || [];
         // Only show published posts to public users
