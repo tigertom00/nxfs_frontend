@@ -14,9 +14,10 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { materialsAPI, jobMaterialsAPI } from '@/lib/api';
-import { Material, JobMaterial } from '@/types/api';
+import { materialsAPI, jobMaterialsAPI, suppliersAPI } from '@/lib/api';
+import { Material, JobMaterial, Supplier } from '@/types/api';
 import { BarcodeScanner } from '@/components/features/memo/shared/barcode-scanner';
+import { efoService, parseElNumber } from '@/lib/efo-api';
 import { useToast } from '@/hooks/use-toast';
 import {
   Package,
@@ -51,12 +52,14 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   const [loading, setLoading] = useState(false);
   const [recentMaterials, setRecentMaterials] = useState<Material[]>([]);
   const [favoriteMaterials, setFavoriteMaterials] = useState<Material[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   // Load materials and job materials
   useEffect(() => {
     loadMaterials();
     loadJobMaterials();
     loadRecentMaterials();
+    loadSuppliers();
   }, [jobId]);
 
   const loadMaterials = async () => {
@@ -79,6 +82,15 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       setJobMaterials(jobSpecificMaterials);
     } catch (error) {
       console.error('Failed to load job materials:', error);
+    }
+  };
+
+  const loadSuppliers = async () => {
+    try {
+      const suppliersData = await suppliersAPI.getSuppliers();
+      setSuppliers(suppliersData);
+    } catch (error) {
+      console.error('Failed to load suppliers:', error);
     }
   };
 
@@ -134,44 +146,97 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     setShowScanner(true);
   };
 
-  const handleELNumberScanned = (elNumber: string) => {
-    // Parse EL-number and find matching material
-    const parsedELNumber = parseELNumber(elNumber);
-    const material = allMaterials.find(m => m.el_nr === parsedELNumber);
+  const handleELNumberScanned = async (elNumber: string) => {
+    // Parse EL-number
+    const parsedELNumber = parseElNumber(elNumber);
 
-    if (material) {
-      addMaterialToSelection(material);
+    if (!parsedELNumber) {
       toast({
-        title: 'Material Found',
-        description: `Added ${material.tittel || 'Untitled'} to selection`,
-      });
-    } else {
-      toast({
-        title: 'Material Not Found',
-        description: `No material found with EL-number: ${elNumber}`,
+        title: 'Invalid EL-Number',
+        description: `Could not parse EL-number from: ${elNumber}`,
         variant: 'destructive',
       });
+      return;
     }
-  };
 
-  const parseELNumber = (scanResult: string): number | null => {
-    // Extract EL-number from scan result
-    const patterns = [
-      /(?:EL|el)[:\s-]*(\d{6,8})/i,
-      /(\d{6,8})/,
-    ];
+    // First, check if material already exists locally
+    const existingMaterial = allMaterials.find(m => m.el_nr === parsedELNumber);
 
-    for (const pattern of patterns) {
-      const match = scanResult.match(pattern);
-      if (match) {
-        const number = parseInt(match[1]);
-        if (number >= 100000 && number <= 99999999) {
-          return number;
-        }
+    if (existingMaterial) {
+      addMaterialToSelection(existingMaterial);
+      toast({
+        title: 'Material Found',
+        description: `Added ${existingMaterial.tittel || 'Untitled'} to selection`,
+      });
+      return;
+    }
+
+    // If not found locally, try EFO database
+    try {
+      setLoading(true);
+      toast({
+        title: 'Searching EFO Database',
+        description: `Looking up EL-number: ${parsedELNumber}`,
+      });
+
+      // Try EFO API first (will fallback to mock if not configured)
+      let efoProduct = null;
+      if (efoService.isEnabled()) {
+        efoProduct = await efoService.searchByElNumber(parsedELNumber);
+      } else {
+        // Use mock data for demonstration
+        efoProduct = await efoService.mockSearchByElNumber(parsedELNumber);
       }
+
+      if (efoProduct) {
+        // Found in EFO database, import it
+        const defaultSupplier = suppliers.find(s =>
+          s.name.toLowerCase().includes('efo') ||
+          s.name.toLowerCase().includes('elektro')
+        ) || suppliers[0];
+
+        if (!defaultSupplier) {
+          toast({
+            title: 'No Supplier Available',
+            description: 'Please add suppliers before importing materials',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        const newMaterial = await efoService.lookupAndImportMaterial(
+          parsedELNumber,
+          defaultSupplier.id
+        );
+
+        if (newMaterial) {
+          // Reload materials and add to selection
+          await loadMaterials();
+          addMaterialToSelection(newMaterial);
+          toast({
+            title: 'Material Imported from EFO',
+            description: `Added ${newMaterial.tittel || 'Untitled'} to selection`,
+          });
+        }
+      } else {
+        toast({
+          title: 'Material Not Found',
+          description: `No material found with EL-number: ${parsedELNumber}`,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to lookup EL-number:', error);
+      toast({
+        title: 'Lookup Failed',
+        description: 'Failed to search for material. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
     }
-    return null;
   };
+
 
   const addMaterialToSelection = (material: Material) => {
     setSelectedMaterials(prev => {
@@ -455,6 +520,22 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                 </div>
               </TabsContent>
             </Tabs>
+
+            {/* EFO Integration Info */}
+            <div className="text-xs text-muted-foreground text-center border-t pt-3 mt-4">
+              {efoService.isEnabled() ? (
+                <div className="space-y-1">
+                  <p>✅ EFO Database Integration Active</p>
+                  <p>Scan EL-numbers to import materials from EFObasen (250,000+ products)</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <p>📱 EL-number scanning with demo data available</p>
+                  <p>Contact EFO (elektroforeningen@efo.no) for live database access</p>
+                  <p>API: 24,000 NOK/year for business systems</p>
+                </div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>
