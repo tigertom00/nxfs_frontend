@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { postsAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -20,9 +21,19 @@ export function BlogAdminDashboard() {
     setIsCreating(true);
   };
 
-  const handleEditPost = (post: Post) => {
-    setSelectedPost(post);
-    setIsCreating(false);
+  const handleEditPost = async (post: Post) => {
+    try {
+      // Fetch the complete post data including tags
+      const fullPost = await postsAPI.getPost(post.id);
+      console.log('Fetched full post data for editing:', fullPost);
+      setSelectedPost(fullPost);
+      setIsCreating(false);
+    } catch (error) {
+      console.error('Error fetching post for editing:', error);
+      // Fallback to the post from the list if API call fails
+      setSelectedPost(post);
+      setIsCreating(false);
+    }
   };
 
   const handleSaveComplete = () => {
@@ -37,7 +48,7 @@ export function BlogAdminDashboard() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{t('blog.admin.title')}</h1>
         <p className="text-muted-foreground mt-2">{t('blog.admin.description')}</p>

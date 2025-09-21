@@ -68,51 +68,76 @@ export function TagInput({ value, onChange, availableTags, placeholder }: TagInp
 
   return (
     <div className="space-y-2 relative">
-      <div className="min-h-[42px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-        <div className="flex flex-wrap gap-1.5">
-          {selectedTags.map((tag) => (
-            <Badge key={tag.id} variant="secondary" className="gap-1">
-              {tag.name}
-              <button
-                type="button"
-                onClick={() => removeTag(tag.id)}
-                className="ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-
-          <div className="flex-1 min-w-[120px]">
-            <Input
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              placeholder={value.length === 0 ? placeholder : undefined}
-              className="border-0 p-0 h-6 focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
+      {/* Selected Tags Display */}
+      {selectedTags.length > 0 && (
+        <div className="mb-2">
+          <p className="text-sm font-medium mb-2">{t('blog.editor.selectedTags')}:</p>
+          <div className="flex flex-wrap gap-1.5">
+            {selectedTags.map((tag) => (
+              <Badge key={tag.id} variant="default" className="gap-1">
+                {tag.name}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag.id)}
+                  className="ml-1 hover:bg-primary/20 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
           </div>
         </div>
-      </div>
-
-      {/* Tag Suggestions */}
-      {showSuggestions && inputValue && filteredSuggestions.length > 0 && (
-        <div className="absolute z-10 w-full bg-popover border border-border rounded-md shadow-md max-h-48 overflow-y-auto">
-          {filteredSuggestions.map((tag) => (
-            <button
-              key={tag.id}
-              type="button"
-              onClick={() => addTag(tag)}
-              className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground text-sm"
-            >
-              {tag.name}
-            </button>
-          ))}
-        </div>
       )}
+
+      {/* Tag Input with Dropdown */}
+      <div className="relative">
+        <Input
+          ref={inputRef}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
+          placeholder={placeholder || t('blog.editor.searchTags')}
+          className="w-full"
+        />
+
+        {/* All Available Tags Dropdown */}
+        {showSuggestions && (
+          <div className="absolute z-10 w-full bg-popover border border-border rounded-md shadow-md max-h-48 overflow-y-auto mt-1">
+            {inputValue && filteredSuggestions.length > 0 ? (
+              filteredSuggestions.map((tag) => (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => addTag(tag)}
+                  className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground text-sm"
+                >
+                  {tag.name}
+                </button>
+              ))
+            ) : !inputValue ? (
+              availableTags
+                .filter(tag => !value.includes(tag.id))
+                .slice(0, 10)
+                .map((tag) => (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => addTag(tag)}
+                    className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground text-sm"
+                  >
+                    {tag.name}
+                  </button>
+                ))
+            ) : (
+              <div className="px-3 py-2 text-sm text-muted-foreground">
+                {t('blog.editor.noTagsFound')}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <p className="text-xs text-muted-foreground">
         {t('blog.editor.tagHelp')}

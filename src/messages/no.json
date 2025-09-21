@@ -100,11 +100,15 @@
       "tags": "Tagger",
       "tagsPlaceholder": "tag1, tag2, tag3",
       "tagHelp": "Trykk Enter eller komma for å legge til tagger. Klikk X for å fjerne tagger.",
+      "selectedTags": "Valgte Tagger",
+      "searchTags": "Søk eller legg til tagger...",
+      "noTagsFound": "Ingen tagger funnet",
       "metaDescription": "Meta Beskrivelse",
       "metaDescriptionPlaceholder": "SEO beskrivelse for søkemotorer...",
       "savePostForMedia": "Lagre innlegget først for å laste opp mediefiler",
       "postCreated": "Innlegg opprettet",
       "postUpdated": "Innlegg oppdatert",
+      "autoSaved": "Auto-lagret",
       "saveError": "Kunne ikke lagre innlegg"
     },
     "status": {
@@ -115,6 +119,7 @@
     "media": {
       "images": "Bilder",
       "audio": "Lyd",
+      "youtube": "YouTube",
       "uploadImage": "Last opp Bilde",
       "uploadAudio": "Last opp Lyd",
       "insert": "Sett inn",
@@ -131,7 +136,17 @@
       "imageDeleted": "Bilde slettet",
       "audioDeleted": "Lyd slettet",
       "deleteError": "Kunne ikke slette fil",
-      "urlCopied": "URL kopiert til utklippstavle"
+      "urlCopied": "URL kopiert til utklippstavle",
+      "youtubeUrl": "YouTube URL",
+      "uploadYoutube": "Last opp YouTube Video",
+      "insertYoutube": "Sett inn YouTube Video",
+      "youtubeUrlRequired": "YouTube URL er påkrevd",
+      "invalidYoutubeUrl": "Ugyldig YouTube URL",
+      "youtubeUploaded": "YouTube video lastet opp",
+      "youtubeDeleted": "YouTube video slettet",
+      "youtubeInserted": "YouTube video satt inn",
+      "savedYoutubeVideos": "Lagrede YouTube Videoer",
+      "youtubeHelp": "Lim inn hvilken som helst YouTube URL format:"
     },
     "samplePost": {
       "title": "Introduksjon til Next.js og Internasjonalisering",

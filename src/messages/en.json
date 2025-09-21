@@ -100,11 +100,15 @@
       "tags": "Tags",
       "tagsPlaceholder": "tag1, tag2, tag3",
       "tagHelp": "Press Enter or comma to add tags. Click X to remove tags.",
+      "selectedTags": "Selected Tags",
+      "searchTags": "Search or add tags...",
+      "noTagsFound": "No tags found",
       "metaDescription": "Meta Description",
       "metaDescriptionPlaceholder": "SEO description for search engines...",
       "savePostForMedia": "Save the post first to upload media files",
       "postCreated": "Post created successfully",
       "postUpdated": "Post updated successfully",
+      "autoSaved": "Auto-saved",
       "saveError": "Failed to save post"
     },
     "status": {
@@ -115,6 +119,7 @@
     "media": {
       "images": "Images",
       "audio": "Audio",
+      "youtube": "YouTube",
       "uploadImage": "Upload Image",
       "uploadAudio": "Upload Audio",
       "insert": "Insert",
@@ -131,7 +136,17 @@
       "imageDeleted": "Image deleted successfully",
       "audioDeleted": "Audio deleted successfully",
       "deleteError": "Failed to delete file",
-      "urlCopied": "URL copied to clipboard"
+      "urlCopied": "URL copied to clipboard",
+      "youtubeUrl": "YouTube URL",
+      "uploadYoutube": "Upload YouTube Video",
+      "insertYoutube": "Insert YouTube Video",
+      "youtubeUrlRequired": "YouTube URL is required",
+      "invalidYoutubeUrl": "Invalid YouTube URL",
+      "youtubeUploaded": "YouTube video uploaded successfully",
+      "youtubeDeleted": "YouTube video deleted successfully",
+      "youtubeInserted": "YouTube video inserted successfully",
+      "savedYoutubeVideos": "Saved YouTube Videos",
+      "youtubeHelp": "Paste any YouTube URL format:"
     },
     "samplePost": {
       "title": "Introduction to Next.js and Internationalization",

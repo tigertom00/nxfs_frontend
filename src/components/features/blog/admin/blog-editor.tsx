@@ -32,6 +32,8 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
   const { user } = useAuthStore();
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('content');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
 
   // Form state
   const [title, setTitle] = useState('');
@@ -64,6 +66,12 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
   // Initialize form with post data
   useEffect(() => {
     if (post) {
+      console.log('=== LOADING POST DATA ===');
+      console.log('Full post object:', post);
+      console.log('Post tags structure:', post.tags);
+      console.log('Post tags type:', typeof post.tags);
+      console.log('Post tags length:', post.tags?.length);
+
       setTitle(post.title || '');
       setTitleNb(post.title_nb || '');
       setSlug(post.slug || '');
@@ -72,7 +80,46 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
       setContent(post.body_markdown || '');
       setContentNb(post.body_markdown_nb || '');
       setStatus(post.status);
-      setTags(post.tags || []);
+
+      // Handle tags - they might be objects {id, name, slug}, tag IDs, or tag names
+      const postTags = (post.tags || [])
+        .map(tag => {
+          console.log('Processing tag:', tag, 'type:', typeof tag);
+
+          // If it's a tag object with an ID
+          if (typeof tag === 'object' && tag !== null && 'id' in tag) {
+            console.log('Extracting ID from tag object:', tag.id);
+            return tag.id;
+          }
+
+          // If it's already a number (tag ID)
+          if (typeof tag === 'number') {
+            console.log('Tag is already a number ID:', tag);
+            return tag;
+          }
+
+          // If it's a string, try to find the corresponding tag ID from availableTags
+          if (typeof tag === 'string') {
+            console.log('Tag is a string name, looking up ID for:', tag);
+            const matchingTag = availableTags.find(t => t.name === tag);
+            if (matchingTag) {
+              console.log('Found matching tag ID:', matchingTag.id, 'for name:', tag);
+              return matchingTag.id;
+            } else {
+              console.log('No matching tag found for name:', tag);
+              return null;
+            }
+          }
+
+          // Try to convert to number as fallback
+          const numericTag = Number(tag);
+          console.log('Converting tag to number:', numericTag);
+          return isNaN(numericTag) ? null : numericTag;
+        })
+        .filter(id => id !== null && id !== undefined && id > 0); // Filter out invalid IDs
+
+      console.log('Final processed tags:', postTags);
+      setTags(postTags);
       setMetaDescription(post.meta_description || '');
     } else {
       // Reset form for new post
@@ -87,7 +134,40 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
       setTags([]);
       setMetaDescription('');
     }
-  }, [post]);
+    setHasUnsavedChanges(false);
+    setErrors({}); // Clear errors when switching posts
+  }, [post, availableTags]); // Include availableTags in dependencies
+
+  // Track unsaved changes
+  useEffect(() => {
+    if (post) {
+      const hasChanges =
+        title !== (post.title || '') ||
+        titleNb !== (post.title_nb || '') ||
+        slug !== (post.slug || '') ||
+        excerpt !== (post.excerpt || '') ||
+        excerptNb !== (post.excerpt_nb || '') ||
+        content !== (post.body_markdown || '') ||
+        contentNb !== (post.body_markdown_nb || '') ||
+        status !== post.status ||
+        JSON.stringify(tags) !== JSON.stringify(post.tags || []) ||
+        metaDescription !== (post.meta_description || '');
+      setHasUnsavedChanges(hasChanges);
+    } else {
+      // For new posts, check if any field has content
+      const hasContent =
+        title.trim() !== '' ||
+        titleNb.trim() !== '' ||
+        slug.trim() !== '' ||
+        excerpt.trim() !== '' ||
+        excerptNb.trim() !== '' ||
+        content.trim() !== '' ||
+        contentNb.trim() !== '' ||
+        tags.length > 0 ||
+        metaDescription.trim() !== '';
+      setHasUnsavedChanges(hasContent);
+    }
+  }, [title, titleNb, slug, excerpt, excerptNb, content, contentNb, status, tags, metaDescription, post]);
 
   // Auto-generate slug from title
   const generateSlug = (title: string) => {
@@ -101,24 +181,35 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    if (!post && !slug) {
+    // Always auto-generate slug from title unless user has manually edited it
+    if (!post || slug === generateSlug(title)) {
       setSlug(generateSlug(value));
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (silent = false) => {
+    // Clear previous errors
+    setErrors({});
+
     if (!title.trim()) {
-      toast.error(t('blog.editor.titleRequired'));
-      return;
+      if (!silent) toast.error(t('blog.editor.titleRequired'));
+      setErrors({ title: [t('blog.editor.titleRequired')] });
+      return false;
     }
 
     if (!slug.trim()) {
-      toast.error(t('blog.editor.slugRequired'));
-      return;
+      if (!silent) toast.error(t('blog.editor.slugRequired'));
+      setErrors({ slug: [t('blog.editor.slugRequired')] });
+      return false;
     }
 
     try {
       setSaving(true);
+
+      // Process tags - filter out any null/undefined/NaN values
+      const processedTags = tags
+        .map(id => Number(id))
+        .filter(id => !isNaN(id) && id !== null && id !== undefined && id > 0);
 
       const postData = {
         title: title.trim(),
@@ -129,25 +220,68 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         body_markdown: content,
         body_markdown_nb: contentNb || undefined,
         status,
-        tags: tags,
+        tags: processedTags, // Clean, validated tag IDs
         meta_description: metaDescription.trim() || undefined,
         author_id: user?.id,
       };
 
+      console.log('Sending post data:', postData);
+      console.log('Raw tags before processing:', tags);
+      console.log('Processed tags being sent:', processedTags);
+
       if (post) {
         await postsAPI.updatePost(post.id, postData);
-        toast.success(t('blog.editor.postUpdated'));
+        if (!silent) toast.success(t('blog.editor.postUpdated'));
       } else {
         await postsAPI.createPost(postData);
-        toast.success(t('blog.editor.postCreated'));
+        if (!silent) toast.success(t('blog.editor.postCreated'));
       }
 
-      onSave();
+      setHasUnsavedChanges(false);
+      setErrors({}); // Clear errors on successful save
+
+      // Only trigger refresh for new posts, keep form open for updates
+      if (!silent && !post) {
+        onSave(); // Close form and refresh list for new posts
+      }
+      return true;
     } catch (error: any) {
-      toast.error(t('blog.editor.saveError'));
+      console.error('Save error:', error);
+
+      // Handle validation errors from Django REST Framework
+      if (error.response?.status === 400 && error.response?.data) {
+        const errorData = error.response.data;
+        setErrors(errorData);
+
+        // Show field-specific errors in toast
+        if (!silent) {
+          const fieldErrors = Object.entries(errorData)
+            .filter(([key]) => key !== 'non_field_errors')
+            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages[0] : messages}`)
+            .join(', ');
+
+          const nonFieldErrors = errorData.non_field_errors
+            ? Array.isArray(errorData.non_field_errors)
+              ? errorData.non_field_errors[0]
+              : errorData.non_field_errors
+            : '';
+
+          const errorMessage = nonFieldErrors || fieldErrors || t('blog.editor.saveError');
+          toast.error(errorMessage);
+        }
+      } else {
+        // Generic error handling
+        if (!silent) toast.error(t('blog.editor.saveError'));
+      }
+      return false;
     } finally {
       setSaving(false);
     }
+  };
+
+  // Simple tab change without auto-save
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
   };
 
   const handleMediaInsert = useCallback((url: string, type: 'image' | 'audio') => {
@@ -156,7 +290,12 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
 
     let insertText = '';
     if (type === 'image') {
-      insertText = `![Image](${url})`;
+      // Check if it's HTML (like YouTube embed) or a regular image URL
+      if (url.includes('<iframe') || url.includes('<')) {
+        insertText = url; // Raw HTML for embeds
+      } else {
+        insertText = `![Image](${url})`; // Markdown for images
+      }
     } else if (type === 'audio') {
       insertText = `<audio controls><source src="${url}" type="audio/mpeg"></audio>`;
     }
@@ -164,6 +303,20 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
     const newContent = currentContent + '\n\n' + insertText + '\n';
     setCurrentContent(newContent);
   }, [language, content, contentNb]);
+
+  // Helper component for displaying field errors
+  const FieldError = ({ fieldName }: { fieldName: string }) => {
+    const fieldErrors = errors[fieldName];
+    if (!fieldErrors || fieldErrors.length === 0) return null;
+
+    return (
+      <div className="text-sm text-destructive mt-1">
+        {fieldErrors.map((error, index) => (
+          <div key={index}>{error}</div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <Card>
@@ -176,15 +329,53 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
             <X className="h-4 w-4 mr-2" />
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button onClick={() => handleSave()} disabled={saving}>
             <Save className="h-4 w-4 mr-2" />
             {saving ? t('common.saving') : t('common.save')}
+            {hasUnsavedChanges && !saving && <span className="ml-1">*</span>}
           </Button>
         </div>
       </CardHeader>
 
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {/* Display non-field errors */}
+        {errors.non_field_errors && (
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+            <div className="text-sm text-destructive">
+              {Array.isArray(errors.non_field_errors)
+                ? errors.non_field_errors.map((error, index) => (
+                    <div key={index}>{error}</div>
+                  ))
+                : <div>{errors.non_field_errors}</div>
+              }
+            </div>
+          </div>
+        )}
+
+        {/* Display general errors that don't have specific field mapping */}
+        {Object.entries(errors).some(([key, value]) =>
+          !['non_field_errors', 'title', 'title_nb', 'slug', 'excerpt', 'excerpt_nb',
+           'body_markdown', 'body_markdown_nb', 'status', 'tags', 'meta_description'].includes(key)
+        ) && (
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+            <div className="text-sm text-destructive">
+              <div className="font-medium mb-1">Additional validation errors:</div>
+              {Object.entries(errors)
+                .filter(([key]) =>
+                  !['non_field_errors', 'title', 'title_nb', 'slug', 'excerpt', 'excerpt_nb',
+                   'body_markdown', 'body_markdown_nb', 'status', 'tags', 'meta_description'].includes(key)
+                )
+                .map(([field, messages]) => (
+                  <div key={field}>
+                    <strong>{field}:</strong> {Array.isArray(messages) ? messages[0] : messages}
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        )}
+
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="content">{t('blog.editor.content')}</TabsTrigger>
             <TabsTrigger value="settings">{t('blog.editor.settings')}</TabsTrigger>
@@ -201,7 +392,9 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   placeholder={t('blog.editor.titlePlaceholder')}
+                  className={errors.title ? 'border-destructive' : ''}
                 />
+                <FieldError fieldName="title" />
               </div>
               <div>
                 <Label htmlFor="title-nb">{t('blog.editor.titleNo')}</Label>
@@ -210,7 +403,9 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   value={titleNb}
                   onChange={(e) => setTitleNb(e.target.value)}
                   placeholder={t('blog.editor.titlePlaceholder')}
+                  className={errors.title_nb ? 'border-destructive' : ''}
                 />
+                <FieldError fieldName="title_nb" />
               </div>
             </div>
 
@@ -221,7 +416,9 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
                 placeholder="post-slug"
+                className={errors.slug ? 'border-destructive' : ''}
               />
+              <FieldError fieldName="slug" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -233,7 +430,9 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   onChange={(e) => setExcerpt(e.target.value)}
                   placeholder={t('blog.editor.excerptPlaceholder')}
                   rows={3}
+                  className={errors.excerpt ? 'border-destructive' : ''}
                 />
+                <FieldError fieldName="excerpt" />
               </div>
               <div>
                 <Label htmlFor="excerpt-nb">{t('blog.editor.excerptNo')}</Label>
@@ -243,7 +442,9 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   onChange={(e) => setExcerptNb(e.target.value)}
                   placeholder={t('blog.editor.excerptPlaceholder')}
                   rows={3}
+                  className={errors.excerpt_nb ? 'border-destructive' : ''}
                 />
+                <FieldError fieldName="excerpt_nb" />
               </div>
             </div>
 
@@ -255,10 +456,11 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   onChange={(val) => setContent(val || '')}
                   preview="edit"
                   hideToolbar={false}
-                  visibleDragBar={false}
                   height={400}
+                  data-color-mode={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
                 />
               </div>
+              <FieldError fieldName="body_markdown" />
             </div>
 
             <div>
@@ -269,10 +471,11 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   onChange={(val) => setContentNb(val || '')}
                   preview="edit"
                   hideToolbar={false}
-                  visibleDragBar={false}
                   height={400}
+                  data-color-mode={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
                 />
               </div>
+              <FieldError fieldName="body_markdown_nb" />
             </div>
           </TabsContent>
 
@@ -281,7 +484,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
               <div>
                 <Label htmlFor="status">{t('blog.editor.status')}</Label>
                 <Select value={status} onValueChange={(value) => setStatus(value as any)}>
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.status ? 'border-destructive' : ''}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -290,6 +493,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                     <SelectItem value="archived">{t('blog.status.archived')}</SelectItem>
                   </SelectContent>
                 </Select>
+                <FieldError fieldName="status" />
               </div>
               <div>
                 <div className="flex items-center justify-between">
@@ -302,6 +506,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   availableTags={availableTags}
                   placeholder={t('blog.editor.tagsPlaceholder')}
                 />
+                <FieldError fieldName="tags" />
               </div>
             </div>
 
@@ -313,7 +518,9 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                 onChange={(e) => setMetaDescription(e.target.value)}
                 placeholder={t('blog.editor.metaDescriptionPlaceholder')}
                 rows={3}
+                className={errors.meta_description ? 'border-destructive' : ''}
               />
+              <FieldError fieldName="meta_description" />
             </div>
           </TabsContent>
 

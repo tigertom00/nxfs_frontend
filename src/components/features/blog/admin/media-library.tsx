@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, Image, Music, Trash2, Copy } from 'lucide-react';
+import { Upload, Image, Music, Trash2, Copy, Youtube } from 'lucide-react';
 import { postsAPI } from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
-import { PostImage, PostAudio } from '@/types/api';
+import { PostImage, PostAudio, PostYouTube } from '@/types/api';
 import { toast } from 'sonner';
 import { env } from '@/lib/env';
 
@@ -21,8 +23,10 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   const { t } = useIntl();
   const [images, setImages] = useState<PostImage[]>([]);
   const [audio, setAudio] = useState<PostAudio[]>([]);
+  const [youtubeVideos, setYoutubeVideos] = useState<PostYouTube[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,17 +58,20 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   const fetchMedia = async () => {
     try {
       setError(null);
-      // Fetch images and audio separately using dedicated endpoints
-      const [imagesResponse, audioResponse] = await Promise.all([
+      // Fetch images, audio, and YouTube videos separately using dedicated endpoints
+      const [imagesResponse, audioResponse, youtubeResponse] = await Promise.all([
         postsAPI.getImages(postId),
-        postsAPI.getAudio(postId)
+        postsAPI.getAudio(postId),
+        postsAPI.getYouTubeVideos(postId)
       ]);
 
       console.log('Images response:', imagesResponse);
       console.log('Audio response:', audioResponse);
+      console.log('YouTube response:', youtubeResponse);
 
       setImages(imagesResponse || []);
       setAudio(audioResponse || []);
+      setYoutubeVideos(youtubeResponse || []);
     } catch (err: any) {
       console.error('Error fetching media:', err);
       setError(t('blog.media.errorLoadingMedia'));
@@ -177,6 +184,53 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Extract YouTube video ID from URL
+  const extractYouTubeId = (url: string) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const handleYouTubeUpload = async () => {
+    if (!youtubeUrl.trim()) {
+      toast.error(t('blog.media.youtubeUrlRequired'));
+      return;
+    }
+
+    const videoId = extractYouTubeId(youtubeUrl);
+    if (!videoId) {
+      toast.error(t('blog.media.invalidYoutubeUrl'));
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const response = await postsAPI.uploadYouTube(postId, youtubeUrl);
+      console.log('YouTube upload response:', response);
+
+      // Refresh the media list to get updated URLs
+      await fetchMedia();
+      setYoutubeUrl('');
+      toast.success(t('blog.media.youtubeUploaded'));
+    } catch (err: any) {
+      console.error('YouTube upload error:', err);
+      toast.error(err.response?.data?.message || t('blog.media.uploadError'));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteYouTube = async (youtubeId: string) => {
+    try {
+      await postsAPI.deleteYouTube(postId, youtubeId);
+      // Refresh the media list
+      await fetchMedia();
+      toast.success(t('blog.media.youtubeDeleted'));
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || t('blog.media.deleteError'));
+    }
+  };
+
   if (error) {
     return (
       <Alert>
@@ -188,7 +242,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   return (
     <div className="space-y-4">
       <Tabs defaultValue="images">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="images" className="flex items-center gap-2">
             <Image className="h-4 w-4" />
             {t('blog.media.images')} ({images.length})
@@ -196,6 +250,10 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
           <TabsTrigger value="audio" className="flex items-center gap-2">
             <Music className="h-4 w-4" />
             {t('blog.media.audio')} ({audio.length})
+          </TabsTrigger>
+          <TabsTrigger value="youtube" className="flex items-center gap-2">
+            <Youtube className="h-4 w-4" />
+            {t('blog.media.youtube')}
           </TabsTrigger>
         </TabsList>
 
@@ -401,6 +459,112 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                 {t('blog.media.noAudio')}
               </div>
             )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="youtube">
+          <div className="space-y-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="youtube-url">{t('blog.media.youtubeUrl')}</Label>
+                    <Input
+                      id="youtube-url"
+                      value={youtubeUrl}
+                      onChange={(e) => setYoutubeUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                      className="w-full"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleYouTubeUpload}
+                    disabled={!youtubeUrl.trim() || uploading}
+                    className="w-full"
+                  >
+                    <Youtube className="h-4 w-4 mr-2" />
+                    {uploading ? t('common.uploading') : t('blog.media.uploadYoutube')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Saved YouTube Videos */}
+            {youtubeVideos.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium">{t('blog.media.savedYoutubeVideos')}</h3>
+                {youtubeVideos.map((video) => (
+                  <Card key={video.id}>
+                    <CardContent className="p-3">
+                      <div className="space-y-3">
+                        <div className="aspect-video bg-muted rounded overflow-hidden">
+                          <iframe
+                            src={`https://www.youtube.com/embed/${video.video_id}`}
+                            title={video.title || 'YouTube video'}
+                            className="w-full h-full"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium truncate">
+                            {video.title || video.video_id}
+                          </p>
+
+                          <div className="text-xs text-muted-foreground">
+                            <p className="font-mono text-xs bg-muted/50 p-1 rounded truncate">
+                              {video.url}
+                            </p>
+                          </div>
+
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const embedCode = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${video.video_id}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+                                onInsert(embedCode, 'image');
+                              }}
+                              className="flex-1"
+                            >
+                              {t('blog.media.insert')}
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => copyToClipboard(video.url)}
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteYouTube(video.id)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            <div className="text-sm text-muted-foreground">
+              <p>{t('blog.media.youtubeHelp')}</p>
+              <ul className="mt-2 list-disc list-inside space-y-1">
+                <li>https://www.youtube.com/watch?v=VIDEO_ID</li>
+                <li>https://youtu.be/VIDEO_ID</li>
+                <li>https://www.youtube.com/embed/VIDEO_ID</li>
+              </ul>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

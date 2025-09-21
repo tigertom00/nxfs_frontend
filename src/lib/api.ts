@@ -211,35 +211,60 @@ export const postsAPI = {
     return response.data;
   },
 
+  getPostBySlug: async (slug: string): Promise<GetPostResponse> => {
+    const response = await api.get(`/app/blog/posts/slug/${slug}/`);
+    return response.data;
+  },
+
   createPost: async (
     postData: CreatePostPayload
   ): Promise<CreatePostResponse> => {
     try {
-      const formData = new FormData();
-      // Convert post data to FormData for multipart/form-data submission
-      Object.entries(postData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (Array.isArray(value)) {
-            // Handle array fields like tags - Django expects repeated field names
-            value.forEach((item) => {
-              formData.append(key, item.toString());
-            });
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
-
-      const response = await api.post('/app/blog/posts/', formData, {
+      // First try JSON payload for better compatibility with HTML content
+      const response = await api.post('/app/blog/posts/', postData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
       showSuccessToast('Post created successfully');
       return response.data;
-    } catch (error) {
-      handleApiError(error, 'Creating post');
-      throw error;
+    } catch (jsonError: any) {
+      console.log('JSON create failed, trying FormData:', jsonError);
+
+      // If it's a validation error, don't try FormData fallback - just throw the error
+      if (jsonError.response?.status === 400) {
+        console.log('Validation error from JSON request:', jsonError.response.data);
+        throw jsonError;
+      }
+
+      // Fallback to FormData if JSON fails for other reasons
+      try {
+        const formData = new FormData();
+        // Convert post data to FormData for multipart/form-data submission
+        Object.entries(postData).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (Array.isArray(value)) {
+              // Handle array fields like tags - Django expects repeated field names
+              value.forEach((item) => {
+                formData.append(key, item.toString());
+              });
+            } else {
+              formData.append(key, value.toString());
+            }
+          }
+        });
+
+        const response = await api.post('/app/blog/posts/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showSuccessToast('Post created successfully');
+        return response.data;
+      } catch (error) {
+        console.log('FormData create error:', error);
+        throw error;
+      }
     }
   },
 
@@ -248,31 +273,51 @@ export const postsAPI = {
     postData: UpdatePostPayload
   ): Promise<UpdatePostResponse> => {
     try {
-      const formData = new FormData();
-      // Convert post data to FormData for multipart/form-data submission
-      Object.entries(postData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (Array.isArray(value)) {
-            // Handle array fields like tags - Django expects repeated field names
-            value.forEach((item) => {
-              formData.append(key, item.toString());
-            });
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
-
-      const response = await api.put(`/app/blog/posts/${postId}/`, formData, {
+      // First try JSON payload for better compatibility with HTML content
+      const response = await api.put(`/app/blog/posts/${postId}/`, postData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
       showSuccessToast('Post updated successfully');
       return response.data;
-    } catch (error) {
-      handleApiError(error, 'Updating post');
-      throw error;
+    } catch (jsonError: any) {
+      console.log('JSON update failed, trying FormData:', jsonError);
+
+      // If it's a validation error, don't try FormData fallback - just throw the error
+      if (jsonError.response?.status === 400) {
+        console.log('Validation error from JSON request:', jsonError.response.data);
+        throw jsonError;
+      }
+
+      // Fallback to FormData if JSON fails for other reasons
+      try {
+        const formData = new FormData();
+        // Convert post data to FormData for multipart/form-data submission
+        Object.entries(postData).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (Array.isArray(value)) {
+              // Handle array fields like tags - Django expects repeated field names
+              value.forEach((item) => {
+                formData.append(key, item.toString());
+              });
+            } else {
+              formData.append(key, value.toString());
+            }
+          }
+        });
+
+        const response = await api.put(`/app/blog/posts/${postId}/`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showSuccessToast('Post updated successfully');
+        return response.data;
+      } catch (error) {
+        console.log('FormData update error:', error);
+        throw error;
+      }
     }
   },
 
@@ -346,6 +391,43 @@ export const postsAPI = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Deleting post image');
+      throw error;
+    }
+  },
+
+  getYouTubeVideos: async (postId: string): Promise<PostYouTubeResponse[]> => {
+    const response = await api.get(`/app/blog/posts/${postId}/youtube/`);
+    return response.data;
+  },
+
+  uploadYouTube: async (postId: string, url: string, title?: string): Promise<PostYouTubeResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('url', url);
+      if (title) {
+        formData.append('title', title);
+      }
+
+      const response = await api.post(`/app/blog/posts/${postId}/youtube/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      showSuccessToast('YouTube video added successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Adding YouTube video');
+      throw error;
+    }
+  },
+
+  deleteYouTube: async (postId: string, youtubeId: string): Promise<void> => {
+    try {
+      const response = await api.delete(`/app/blog/posts/${postId}/youtube/${youtubeId}/`);
+      showSuccessToast('YouTube video deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting YouTube video');
       throw error;
     }
   },

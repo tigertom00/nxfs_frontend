@@ -146,6 +146,14 @@ export interface PostAudio {
   duration?: number;
 }
 
+export interface PostYouTube {
+  id: string;
+  url: string;
+  video_id: string;
+  title?: string;
+  order: number;
+}
+
 export interface PostImage {
   id: string;
   image: string;
@@ -163,6 +171,7 @@ export interface Post {
   body_markdown?: string;
   body_markdown_nb?: string;
   excerpt?: string;
+  excerpt_nb?: string;
   slug: string;
   status: 'draft' | 'published' | 'archived';
   featured_image?: string;
@@ -170,10 +179,11 @@ export interface Post {
   created_at: string;
   updated_at: string;
   published_at?: string;
-  tags?: string[];
+  tags?: number[] | Tag[]; // Can be either tag IDs or full tag objects
   meta_description?: string;
   audio?: PostAudio[]; // Array of uploaded audio files
   images?: PostImage[]; // Array of uploaded images
+  youtube_videos?: PostYouTube[]; // Array of YouTube videos
 }
 
 /**
@@ -263,6 +273,8 @@ export type UploadPostAudioResponse = PostAudio;
 export type DeletePostAudioResponse = void;
 export type UploadPostImageResponse = PostImage;
 export type DeletePostImageResponse = void;
+export type PostYouTubeResponse = PostYouTube;
+export type UploadPostYouTubeResponse = PostYouTube;
 
 // Chatbot API responses
 export interface ChatbotResponse {
