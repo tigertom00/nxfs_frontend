@@ -25,7 +25,6 @@ export function BlogAdminDashboard() {
     try {
       // Fetch the complete post data including tags
       const fullPost = await postsAPI.getPost(post.id);
-      console.log('Fetched full post data for editing:', fullPost);
       setSelectedPost(fullPost);
       setIsCreating(false);
     } catch (error) {

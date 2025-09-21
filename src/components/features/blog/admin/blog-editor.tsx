@@ -66,12 +66,6 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
   // Initialize form with post data
   useEffect(() => {
     if (post) {
-      console.log('=== LOADING POST DATA ===');
-      console.log('Full post object:', post);
-      console.log('Post tags structure:', post.tags);
-      console.log('Post tags type:', typeof post.tags);
-      console.log('Post tags length:', post.tags?.length);
-
       setTitle(post.title || '');
       setTitleNb(post.title_nb || '');
       setSlug(post.slug || '');
@@ -84,41 +78,32 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
       // Handle tags - they might be objects {id, name, slug}, tag IDs, or tag names
       const postTags = (post.tags || [])
         .map(tag => {
-          console.log('Processing tag:', tag, 'type:', typeof tag);
-
           // If it's a tag object with an ID
           if (typeof tag === 'object' && tag !== null && 'id' in tag) {
-            console.log('Extracting ID from tag object:', tag.id);
             return tag.id;
           }
 
           // If it's already a number (tag ID)
           if (typeof tag === 'number') {
-            console.log('Tag is already a number ID:', tag);
             return tag;
           }
 
           // If it's a string, try to find the corresponding tag ID from availableTags
           if (typeof tag === 'string') {
-            console.log('Tag is a string name, looking up ID for:', tag);
             const matchingTag = availableTags.find(t => t.name === tag);
             if (matchingTag) {
-              console.log('Found matching tag ID:', matchingTag.id, 'for name:', tag);
               return matchingTag.id;
             } else {
-              console.log('No matching tag found for name:', tag);
               return null;
             }
           }
 
           // Try to convert to number as fallback
           const numericTag = Number(tag);
-          console.log('Converting tag to number:', numericTag);
           return isNaN(numericTag) ? null : numericTag;
         })
         .filter(id => id !== null && id !== undefined && id > 0); // Filter out invalid IDs
 
-      console.log('Final processed tags:', postTags);
       setTags(postTags);
       setMetaDescription(post.meta_description || '');
     } else {
@@ -225,9 +210,6 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         author_id: user?.id,
       };
 
-      console.log('Sending post data:', postData);
-      console.log('Raw tags before processing:', tags);
-      console.log('Processed tags being sent:', processedTags);
 
       if (post) {
         await postsAPI.updatePost(post.id, postData);

@@ -33,21 +33,16 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   // Helper function to normalize URLs
   const normalizeUrl = (url: string | undefined | null) => {
     if (!url) {
-      console.log('normalizeUrl: URL is null/undefined');
       return ''; // Return empty string for null/undefined URLs
     }
 
-    console.log('normalizeUrl input:', url);
-
     if (url.startsWith('http://') || url.startsWith('https://')) {
-      console.log('normalizeUrl: Already absolute URL');
       return url;
     }
 
     // If it's a relative URL, prepend the API base URL
     const baseUrl = env.NEXT_PUBLIC_API_URL || 'https://api.nxfs.no';
     const normalizedUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
-    console.log('normalizeUrl output:', normalizedUrl);
     return normalizedUrl;
   };
 
@@ -65,9 +60,6 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
         postsAPI.getYouTubeVideos(postId)
       ]);
 
-      console.log('Images response:', imagesResponse);
-      console.log('Audio response:', audioResponse);
-      console.log('YouTube response:', youtubeResponse);
 
       setImages(imagesResponse || []);
       setAudio(audioResponse || []);
@@ -97,8 +89,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
     try {
       setUploading(true);
-      const response = await postsAPI.uploadImage(postId, file);
-      console.log('Upload response:', response);
+      await postsAPI.uploadImage(postId, file);
 
       // Refresh the media list to get updated URLs
       await fetchMedia();
@@ -134,7 +125,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
     try {
       setUploading(true);
-      const response = await postsAPI.uploadAudio(postId, file);
+      await postsAPI.uploadAudio(postId, file);
       // Refresh the media list to get updated URLs
       await fetchMedia();
       toast.success(t('blog.media.audioUploaded'));
@@ -205,8 +196,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
     try {
       setUploading(true);
-      const response = await postsAPI.uploadYouTube(postId, youtubeUrl);
-      console.log('YouTube upload response:', response);
+      await postsAPI.uploadYouTube(postId, youtubeUrl);
 
       // Refresh the media list to get updated URLs
       await fetchMedia();
