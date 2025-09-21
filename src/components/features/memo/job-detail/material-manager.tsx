@@ -530,9 +530,10 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                 </div>
               ) : efoService.isScraperEnabled() ? (
                 <div className="space-y-1">
-                  <p>🕸️ N8N Web Scraper Mode</p>
-                  <p>Free EFObasen integration via n8n.nxfs.no</p>
+                  <p>🤖 N8N Puppeteer Scraper Mode</p>
+                  <p>Free EFObasen integration via n8n-nodes-puppeteer</p>
                   <p>💰 Saves 24,000 NOK/year vs official API</p>
+                  <p className="text-xs">Requires: n8n community node installation</p>
                 </div>
               ) : (
                 <div className="space-y-1">
