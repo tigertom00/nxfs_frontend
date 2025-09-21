@@ -1,0 +1,278 @@
+{
+  "name": "EFObasen Scraper",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "efobasen-lookup",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.el_number }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2",
+      "name": "Check EL Number",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://efobasen.no/søk?q={{ $json.el_number }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "3",
+      "name": "Search EFObasen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse search results to find product links\nconst html = $input.first().json.body;\nconst productLinkRegex = /\\/produkt\\/(\\d+)/g;\nconst matches = [...html.matchAll(productLinkRegex)];\n\nif (matches.length > 0) {\n  const productId = matches[0][1];\n  return [{ json: { product_id: productId, el_number: $input.first().json.el_number } }];\n} else {\n  return [{ json: { error: 'No product found', el_number: $input.first().json.el_number } }];\n}"
+      },
+      "id": "4",
+      "name": "Extract Product ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.product_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5",
+      "name": "Product Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://efobasen.no/produkt/{{ $json.product_id }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "6",
+      "name": "Get Product Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse product page HTML\nconst html = $input.first().json.body;\nconst productId = $input.first().json.product_id;\nconst elNumber = $input.first().json.el_number;\n\n// Extract product information using regex patterns\n// Note: These patterns may need adjustment based on actual site structure\nconst titleMatch = html.match(/<h1[^>]*>([^<]+)<\\/h1>/i);\nconst manufacturerMatch = html.match(/(?:produsent|manufacturer)[^>]*>([^<]+)</i);\nconst supplierMatch = html.match(/(?:leverandør|supplier)[^>]*>([^<]+)</i);\nconst descriptionMatch = html.match(/(?:beskrivelse|description)[^>]*>([^<]+)</i);\nconst categoryMatch = html.match(/(?:kategori|category)[^>]*>([^<]+)</i);\nconst priceMatch = html.match(/(?:pris|price)[^>]*>([\\d,\\.]+)</i);\n\n// Clean extracted data\nconst cleanText = (text) => text ? text.trim().replace(/\\s+/g, ' ') : '';\nconst cleanPrice = (price) => price ? parseFloat(price.replace(/[^\\d,\\.]/g, '').replace(',', '.')) : null;\n\nconst productData = {\n  el_nr: parseInt(elNumber),\n  title: cleanText(titleMatch?.[1] || ''),\n  manufacturer: cleanText(manufacturerMatch?.[1] || ''),\n  supplier: cleanText(supplierMatch?.[1] || ''),\n  description: cleanText(descriptionMatch?.[1] || ''),\n  category: cleanText(categoryMatch?.[1] || ''),\n  price: cleanPrice(priceMatch?.[1]),\n  availability: 'Unknown',\n  scraped_at: new Date().toISOString(),\n  source_url: `https://efobasen.no/produkt/${productId}`,\n  raw_html: html.length > 10000 ? html.substring(0, 10000) + '...' : html\n};\n\nreturn [{ json: productData }];"
+      },
+      "id": "7",
+      "name": "Parse Product Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "8",
+      "name": "Return Product Data",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1780, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{{ { \"error\": \"Product not found\", \"el_number\": $json.el_number } }}"
+      },
+      "id": "9",
+      "name": "Return Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{{ { \"error\": \"Invalid EL number\", \"message\": \"Please provide a valid el_number parameter\" } }}"
+      },
+      "id": "10",
+      "name": "Return Invalid Request",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check EL Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check EL Number": {
+      "main": [
+        [
+          {
+            "node": "Search EFObasen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Invalid Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search EFObasen": {
+      "main": [
+        [
+          {
+            "node": "Extract Product ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Product ID": {
+      "main": [
+        [
+          {
+            "node": "Product Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Found?": {
+      "main": [
+        [
+          {
+            "node": "Get Product Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Product Details": {
+      "main": [
+        [
+          {
+            "node": "Parse Product Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Product Data": {
+      "main": [
+        [
+          {
+            "node": "Return Product Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "id": "1",
+      "name": "scraping"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

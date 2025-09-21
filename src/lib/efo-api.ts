@@ -46,11 +46,15 @@ class EFOService {
   private readonly baseUrl: string;
   private readonly apiKey: string;
   private readonly enabled: boolean;
+  private readonly scraperUrl: string;
+  private readonly scraperEnabled: boolean;
 
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_EFO_API_URL || '';
     this.apiKey = process.env.NEXT_PUBLIC_EFO_API_KEY || '';
     this.enabled = process.env.NEXT_PUBLIC_EFO_API_ENABLED === 'true';
+    this.scraperUrl = process.env.NEXT_PUBLIC_N8N_URL?.replace('/webhook/nxfs', '/webhook/efobasen-lookup') || 'https://n8n.nxfs.no/webhook/efobasen-lookup';
+    this.scraperEnabled = process.env.NEXT_PUBLIC_EFO_SCRAPER_ENABLED === 'true';
   }
 
   /**
@@ -61,36 +65,93 @@ class EFOService {
   }
 
   /**
-   * Search for products by EL-number
+   * Check if N8N scraper is enabled
    */
-  async searchByElNumber(elNumber: string | number): Promise<EFOProduct | null> {
-    if (!this.isEnabled()) {
-      console.warn('EFO API not enabled or configured');
-      return null;
-    }
+  isScraperEnabled(): boolean {
+    return this.scraperEnabled || !this.isEnabled();
+  }
 
+  /**
+   * Search for products by EL-number using N8N scraper
+   */
+  async searchByElNumberScraper(elNumber: string | number): Promise<EFOProduct | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/products/search`, {
+      const response = await fetch(this.scraperUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          el_nr: typeof elNumber === 'string' ? parseInt(elNumber) : elNumber,
+          el_number: typeof elNumber === 'string' ? parseInt(elNumber) : elNumber,
+          force_update: false,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`EFO API error: ${response.status}`);
+        throw new Error(`EFO scraper error: ${response.status}`);
       }
 
-      const data: EFOSearchResponse = await response.json();
-      return data.products.length > 0 ? data.products[0] : null;
+      const data = await response.json();
+
+      // Convert scraped data to EFOProduct format
+      if (data && data.el_nr) {
+        return {
+          el_nr: data.el_nr,
+          productName: data.title || '',
+          manufacturer: data.manufacturer || '',
+          supplierName: data.supplier || '',
+          description: data.description || '',
+          category: data.category || '',
+          price: data.price || undefined,
+          availability: data.availability || undefined,
+          specifications: data.specifications || {},
+        };
+      }
+
+      return null;
     } catch (error) {
-      console.error('EFO API search failed:', error);
+      console.error('EFO scraper failed:', error);
       return null;
     }
+  }
+
+  /**
+   * Search for products by EL-number (tries scraper first, then API, then mock)
+   */
+  async searchByElNumber(elNumber: string | number): Promise<EFOProduct | null> {
+    // Try N8N scraper first (if enabled)
+    if (this.isScraperEnabled()) {
+      const scraperResult = await this.searchByElNumberScraper(elNumber);
+      if (scraperResult) {
+        return scraperResult;
+      }
+    }
+
+    // Fall back to official API if available
+    if (this.isEnabled()) {
+      try {
+        const response = await fetch(`${this.baseUrl}/products/search`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.apiKey}`,
+          },
+          body: JSON.stringify({
+            el_nr: typeof elNumber === 'string' ? parseInt(elNumber) : elNumber,
+          }),
+        });
+
+        if (response.ok) {
+          const data: EFOSearchResponse = await response.json();
+          return data.products.length > 0 ? data.products[0] : null;
+        }
+      } catch (error) {
+        console.error('EFO API search failed:', error);
+      }
+    }
+
+    // Final fallback to mock data
+    return await this.mockSearchByElNumber(elNumber);
   }
 
   /**

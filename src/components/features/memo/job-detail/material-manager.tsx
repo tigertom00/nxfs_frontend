@@ -525,14 +525,19 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
             <div className="text-xs text-muted-foreground text-center border-t pt-3 mt-4">
               {efoService.isEnabled() ? (
                 <div className="space-y-1">
-                  <p>✅ EFO Database Integration Active</p>
+                  <p>✅ EFO Official API Active</p>
                   <p>Scan EL-numbers to import materials from EFObasen (250,000+ products)</p>
+                </div>
+              ) : efoService.isScraperEnabled() ? (
+                <div className="space-y-1">
+                  <p>🕸️ N8N Web Scraper Mode</p>
+                  <p>Free EFObasen integration via n8n.nxfs.no</p>
+                  <p>💰 Saves 24,000 NOK/year vs official API</p>
                 </div>
               ) : (
                 <div className="space-y-1">
-                  <p>📱 EL-number scanning with demo data available</p>
-                  <p>Contact EFO (elektroforeningen@efo.no) for live database access</p>
-                  <p>API: 24,000 NOK/year for business systems</p>
+                  <p>📱 Demo Mode - Mock EL-number data</p>
+                  <p>Options: N8N scraper (free) or EFO API (24,000 NOK/year)</p>
                 </div>
               )}
             </div>
