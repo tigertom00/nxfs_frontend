@@ -35,19 +35,11 @@ export default function BlogPostPage() {
         setLoading(true);
         setError(null);
 
-        // First try to get the post directly by slug
-        try {
-          const directPost = await postsAPI.getPostBySlug(slug as string);
-          setPost(directPost);
-          return;
-        } catch (directError) {
-          console.log('Direct slug lookup failed, trying public posts list:', directError);
-        }
-
-        // Fallback to getting all public posts and find by slug
+        // Get all public posts and find by slug
         const response = await postsAPI.getPublicPosts();
         const postsArray = Array.isArray(response) ? response : response.results || [];
-        const foundPost = postsArray.find((p: Post) => p.slug === slug);
+        // Only show published posts to public users
+        const foundPost = postsArray.find((p: Post) => p.slug === slug && p.status === 'published');
 
         if (!foundPost) {
           setError('Post not found');

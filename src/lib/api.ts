@@ -211,10 +211,6 @@ export const postsAPI = {
     return response.data;
   },
 
-  getPostBySlug: async (slug: string): Promise<GetPostResponse> => {
-    const response = await api.get(`/app/blog/posts/slug/${slug}/`);
-    return response.data;
-  },
 
   createPost: async (
     postData: CreatePostPayload
