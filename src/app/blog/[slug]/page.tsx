@@ -10,6 +10,7 @@ import { Post } from '@/types/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
+import rehypeRaw from 'rehype-raw';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -120,8 +121,8 @@ export default function BlogPostPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
-        <article className="max-w-4xl mx-auto">
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <article>
           <Card>
             <CardHeader>
               <CardTitle className="text-3xl">
@@ -164,6 +165,7 @@ export default function BlogPostPage() {
               <div className="prose max-w-none dark:prose-invert">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkBreaks]}
+                  rehypePlugins={[rehypeRaw]}
                   components={{
                     img: ({ src, alt }) => (
                       <img
@@ -171,6 +173,24 @@ export default function BlogPostPage() {
                         alt={alt}
                         className="max-w-full h-auto rounded-lg my-4"
                       />
+                    ),
+                    audio: ({ children, ...props }) => (
+                      <audio controls className="w-full my-4" {...props}>
+                        {children}
+                      </audio>
+                    ),
+                    iframe: ({ src, title, ...props }) => (
+                      <div className="my-4 aspect-video">
+                        <iframe
+                          src={src}
+                          title={title}
+                          className="w-full h-full rounded-lg"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          {...props}
+                        />
+                      </div>
                     ),
                   }}
                 >
