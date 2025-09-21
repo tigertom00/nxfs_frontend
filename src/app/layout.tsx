@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     'A modern platform for sharing ideas and knowledge with AI-powered features',
   keywords: ['nxfs', 'blog', 'AI', 'chat', 'platform', 'knowledge sharing'],
   authors: [{ name: 'nxfs.no Team' }],
+  icons: {
+    icon: '/logo_dark.svg',
+    shortcut: '/logo_dark.svg',
+    apple: '/logo_dark.svg',
+  },
   openGraph: {
     title: 'nxfs.no',
     description: 'Modern platform for sharing ideas and knowledge',

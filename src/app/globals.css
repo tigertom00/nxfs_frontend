@@ -209,3 +209,101 @@
 .shadow-purple-lg {
   box-shadow: 0 10px 25px -3px oklch(0.72 0.25 280 / 0.1), 0 4px 6px -2px oklch(0.72 0.25 280 / 0.05);
 }
+
+/* API Tester Styles */
+.api-gradient {
+  background: linear-gradient(135deg, oklch(0.646 0.222 41.116) 0%, oklch(0.488 0.243 264.376) 100%);
+}
+
+.api-accent-border {
+  border-color: oklch(0.646 0.222 41.116);
+}
+
+.api-accent-bg {
+  background-color: oklch(0.646 0.222 41.116 / 0.1);
+}
+
+.api-success {
+  color: oklch(0.646 0.222 41.116);
+}
+
+.api-error {
+  color: oklch(0.577 0.245 27.325);
+}
+
+.method-get {
+  background-color: oklch(0.646 0.222 41.116);
+  color: white;
+}
+
+.method-post {
+  background-color: oklch(0.696 0.17 162.48);
+  color: white;
+}
+
+.method-put {
+  background-color: oklch(0.769 0.188 70.08);
+  color: white;
+}
+
+.method-delete {
+  background-color: oklch(0.577 0.245 27.325);
+  color: white;
+}
+
+.method-patch {
+  background-color: oklch(0.627 0.265 303.9);
+  color: white;
+}
+
+.method-head {
+  background-color: oklch(0.645 0.246 16.439);
+  color: white;
+}
+
+.method-options {
+  background-color: oklch(0.488 0.243 264.376);
+  color: white;
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px oklch(0.646 0.222 41.116 / 0.15);
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: oklch(0.269 0 0);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(0.646 0.222 41.116);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.646 0.222 41.116 / 0.8);
+}
+
+/* Animated gradient background */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, oklch(0.646 0.222 41.116), oklch(0.488 0.243 264.376), oklch(0.696 0.17 162.48), oklch(0.769 0.188 70.08));
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}

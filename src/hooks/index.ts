@@ -8,3 +8,7 @@ export { useAsync } from './use-async';
 export { useIntl } from './use-intl';
 export { useIsMobile } from './use-mobile';
 export { useToast, toast } from './use-toast';
+
+// API Tester hooks
+export { useSavedRequests } from './use-saved-requests';
+export { useEnvironmentVariables } from './use-environment-variables';

@@ -48,10 +48,12 @@ export default function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="p-2 h-auto">
                   <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <span className="text-primary-foreground font-bold text-sm">
-                        NX
-                      </span>
+                    <div className="w-8 h-8 flex items-center justify-center">
+                      <img
+                        src={theme === 'dark' ? '/logo_dark.svg' : '/logo_light.svg'}
+                        alt="NXFS Logo"
+                        className="w-8 h-8"
+                      />
                     </div>
                     <ChevronDown className="h-4 w-4" />
                   </div>
@@ -118,6 +120,11 @@ export default function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
+                  <Link href="/api-tester" className="w-full">
+                    {language === 'no' ? 'API Tester' : 'API Tester'}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
                   <Link href="/llm-providers" className="w-full">
                     {language === 'no' ? 'LLM-leverandører' : 'LLM Providers'}
                   </Link>
@@ -150,10 +157,12 @@ export default function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="p-2 h-auto">
                   <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <span className="text-primary-foreground font-bold text-sm">
-                        NX
-                      </span>
+                    <div className="w-8 h-8 flex items-center justify-center">
+                      <img
+                        src={theme === 'dark' ? '/logo_dark.svg' : '/logo_light.svg'}
+                        alt="NXFS Logo"
+                        className="w-8 h-8"
+                      />
                     </div>
                     <ChevronDown className="h-4 w-4" />
                   </div>
