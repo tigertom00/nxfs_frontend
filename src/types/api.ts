@@ -401,25 +401,59 @@ export interface RefreshStatsResponse {
  * Based on API schema from /app/memo/ endpoints
  */
 
-// Supplier (Leverandor) types
+// Supplier (Leverandor) types - Enhanced for electrical manufacturers
 export interface Supplier {
   id: number;
   name: string;
+  manufacturer_code?: string; // Manufacturer short code (e.g., "WAGO", "ABB")
   url?: string;
   created_at: string;
   updated_at: string;
 }
 
-// Material (Matriell) types
+// Material (Matriell) types - Enhanced with electrical components data
 export interface Material {
   id: number;
   leverandor: Supplier;
   leverandor_id: number;
-  el_nr?: number;
+  el_nr?: string; // EL-number (electrical component number)
   tittel?: string;
   info?: string;
   image?: string;
-  is_favorite?: boolean;
+  favorites?: boolean; // Updated field name from API
+
+  // Enhanced electrical component fields
+  ean_number?: string; // EAN barcode
+  article_number?: string; // Manufacturer article number
+  order_number?: string; // Supplier order number
+  type_designation?: string; // Component type designation
+
+  // Multilingual descriptions
+  norwegian_description?: string;
+  english_description?: string;
+  german_description?: string;
+
+  // Technical specifications
+  category?: string; // Component category
+  datasheet_url?: string; // Link to technical datasheet
+
+  // Pricing and business data
+  list_price?: number | null;
+  net_price?: number | null;
+  discount_factor?: string;
+  vat?: string;
+
+  // Physical specifications
+  weight?: string;
+  unit_per_package?: string;
+  height?: string;
+  width?: string;
+  depth?: string;
+
+  // Status flags
+  approved?: boolean; // Quality control approval
+  discontinued?: boolean; // Product lifecycle status
+
   created_at: string;
   updated_at: string;
 }
@@ -494,13 +528,46 @@ export interface CreateSupplierPayload {
 
 export type UpdateSupplierPayload = Partial<CreateSupplierPayload>;
 
-// Material payloads
+// Material payloads - Enhanced for electrical components
 export interface CreateMaterialPayload {
   leverandor_id: number;
-  el_nr?: number;
+  el_nr?: string;
   tittel?: string;
   info?: string;
   image?: File;
+  favorites?: boolean;
+
+  // Enhanced electrical component fields
+  ean_number?: string;
+  article_number?: string;
+  order_number?: string;
+  type_designation?: string;
+
+  // Multilingual descriptions
+  norwegian_description?: string;
+  english_description?: string;
+  german_description?: string;
+
+  // Technical specifications
+  category?: string;
+  datasheet_url?: string;
+
+  // Pricing and business data
+  list_price?: number | null;
+  net_price?: number | null;
+  discount_factor?: string;
+  vat?: string;
+
+  // Physical specifications
+  weight?: string;
+  unit_per_package?: string;
+  height?: string;
+  width?: string;
+  depth?: string;
+
+  // Status flags
+  approved?: boolean;
+  discontinued?: boolean;
 }
 
 export type UpdateMaterialPayload = Partial<CreateMaterialPayload>;

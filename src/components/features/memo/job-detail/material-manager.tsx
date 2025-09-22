@@ -17,6 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { materialsAPI, jobMaterialsAPI, suppliersAPI } from '@/lib/api';
 import { Material, JobMaterial, Supplier } from '@/types/api';
 import { BarcodeScanner } from '@/components/features/memo/shared/barcode-scanner';
+import { MaterialDetailModal } from '@/components/features/memo/shared/material-detail-modal';
+import { AdvancedMaterialSearch } from '@/components/features/memo/shared/advanced-material-search';
 import { efoService, parseElNumber } from '@/lib/efo-api';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -31,6 +33,7 @@ import {
   Clock,
   Loader2,
   Trash2,
+  Info,
 } from 'lucide-react';
 
 interface MaterialManagerProps {
@@ -55,6 +58,9 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   const [recentMaterials, setRecentMaterials] = useState<Material[]>([]);
   const [favoriteMaterials, setFavoriteMaterials] = useState<Material[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [selectedMaterialForDetail, setSelectedMaterialForDetail] =
+    useState<Material | null>(null);
+  const [displayMaterials, setDisplayMaterials] = useState<Material[]>([]);
 
   // Load materials and job materials
   useEffect(() => {
@@ -68,9 +74,10 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     try {
       const materials = await materialsAPI.getMaterials();
       setAllMaterials(materials);
+      setDisplayMaterials(materials); // Initialize display materials
 
       // Filter favorites
-      const favorites = materials.filter((m) => m.is_favorite);
+      const favorites = materials.filter((m) => m.favorites);
       setFavoriteMaterials(favorites);
     } catch (error) {
       console.error('Failed to load materials:', error);
@@ -281,11 +288,22 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     setSelectedMaterials((prev) => prev.filter((sm) => sm.id !== materialId));
   };
 
-  const filteredMaterials = allMaterials.filter(
+  const filteredMaterials = displayMaterials.filter(
     (material) =>
       !searchQuery ||
       material.tittel?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      material.el_nr?.toString().includes(searchQuery) ||
+      material.el_nr?.includes(searchQuery) ||
+      material.ean_number?.includes(searchQuery) ||
+      material.article_number?.includes(searchQuery) ||
+      material.norwegian_description
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      material.english_description
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      material.type_designation
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       material.leverandor.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -386,24 +404,37 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
             </DialogHeader>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <Button
-                onClick={handleScanELNumber}
-                variant="outline"
-                className="h-12 justify-start"
-              >
-                <Scan className="h-4 w-4 mr-2" />
-                Scan EL-Number
-              </Button>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search materials..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+            <div className="space-y-3 mb-4">
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={handleScanELNumber}
+                  variant="outline"
+                  className="h-12 justify-start"
+                >
+                  <Scan className="h-4 w-4 mr-2" />
+                  Scan EL-Number
+                </Button>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Quick search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
+              <AdvancedMaterialSearch
+                materials={allMaterials}
+                suppliers={suppliers}
+                onResults={setDisplayMaterials}
+                trigger={
+                  <Button variant="outline" className="w-full">
+                    <Search className="h-4 w-4 mr-2" />
+                    Advanced Search ({allMaterials.length} components)
+                  </Button>
+                }
+              />
             </div>
 
             {/* Selection Summary */}
@@ -425,7 +456,10 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                           {material.tittel || 'Untitled'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {material.leverandor.name} • EL: {material.el_nr}
+                          {material.leverandor.name}
+                          {material.el_nr && ` • EL: ${material.el_nr}`}
+                          {material.ean_number &&
+                            ` • EAN: ${material.ean_number}`}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -506,6 +540,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                         material={material}
                         onSelect={addMaterialToSelection}
                         onToggleFavorite={handleToggleFavorite}
+                        onShowDetail={setSelectedMaterialForDetail}
                         isSelected={selectedMaterials.some(
                           (sm) => sm.id === material.id
                         )}
@@ -532,6 +567,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                         material={material}
                         onSelect={addMaterialToSelection}
                         onToggleFavorite={handleToggleFavorite}
+                        onShowDetail={setSelectedMaterialForDetail}
                         isSelected={selectedMaterials.some(
                           (sm) => sm.id === material.id
                         )}
@@ -549,6 +585,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                       material={material}
                       onSelect={addMaterialToSelection}
                       onToggleFavorite={handleToggleFavorite}
+                      onShowDetail={setSelectedMaterialForDetail}
                       isSelected={selectedMaterials.some(
                         (sm) => sm.id === material.id
                       )}
@@ -603,9 +640,22 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                   {jobMaterial.matriell.tittel || 'Untitled'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {jobMaterial.matriell.leverandor.name} • EL:{' '}
-                  {jobMaterial.matriell.el_nr}
+                  {jobMaterial.matriell.leverandor.name}
+                  {jobMaterial.matriell.el_nr &&
+                    ` • EL: ${jobMaterial.matriell.el_nr}`}
+                  {jobMaterial.matriell.ean_number &&
+                    ` • EAN: ${jobMaterial.matriell.ean_number}`}
                 </p>
+                {jobMaterial.matriell.type_designation && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {jobMaterial.matriell.type_designation}
+                  </p>
+                )}
+                {jobMaterial.matriell.norwegian_description && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {jobMaterial.matriell.norwegian_description}
+                  </p>
+                )}
                 {jobMaterial.antall && (
                   <Badge variant="secondary" className="text-xs mt-1">
                     Qty: {jobMaterial.antall}
@@ -637,6 +687,15 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
         onScan={handleELNumberScanned}
         title="Scan EL-Number"
       />
+
+      {/* Material Detail Modal */}
+      <MaterialDetailModal
+        material={selectedMaterialForDetail}
+        isOpen={!!selectedMaterialForDetail}
+        onClose={() => setSelectedMaterialForDetail(null)}
+        onToggleFavorite={handleToggleFavorite}
+        onSelect={addMaterialToSelection}
+      />
     </div>
   );
 }
@@ -645,6 +704,7 @@ interface MaterialCardProps {
   material: Material;
   onSelect: (material: Material) => void;
   onToggleFavorite?: (material: Material) => void;
+  onShowDetail?: (material: Material) => void;
   isSelected: boolean;
 }
 
@@ -652,11 +712,17 @@ function MaterialCard({
   material,
   onSelect,
   onToggleFavorite,
+  onShowDetail,
   isSelected,
 }: MaterialCardProps) {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFavorite?.(material);
+  };
+
+  const handleDetailClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onShowDetail?.(material);
   };
 
   return (
@@ -674,36 +740,70 @@ function MaterialCard({
             <p className="font-medium text-sm">
               {material.tittel || 'Untitled'}
             </p>
-            {onToggleFavorite && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleFavoriteClick}
-                className="h-6 w-6 p-0"
-              >
-                <Heart
-                  className={`h-3 w-3 ${
-                    material.is_favorite
-                      ? 'fill-red-500 text-red-500'
-                      : 'text-muted-foreground hover:text-red-500'
-                  }`}
-                />
-              </Button>
-            )}
+            <div className="flex items-center gap-1">
+              {onShowDetail && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleDetailClick}
+                  className="h-6 w-6 p-0"
+                  title="View details"
+                >
+                  <Info className="h-3 w-3 text-muted-foreground hover:text-primary" />
+                </Button>
+              )}
+              {onToggleFavorite && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleFavoriteClick}
+                  className="h-6 w-6 p-0"
+                  title="Toggle favorite"
+                >
+                  <Heart
+                    className={`h-3 w-3 ${
+                      material.favorites
+                        ? 'fill-red-500 text-red-500'
+                        : 'text-muted-foreground hover:text-red-500'
+                    }`}
+                  />
+                </Button>
+              )}
+            </div>
           </div>
           <p className="text-xs text-muted-foreground">
             {material.leverandor.name}
           </p>
-          <div className="flex gap-2 mt-1">
+          <div className="flex gap-2 mt-1 flex-wrap">
             {material.el_nr && (
               <Badge variant="outline" className="text-xs">
                 EL: {material.el_nr}
               </Badge>
             )}
-            {material.is_favorite && (
+            {material.ean_number && (
+              <Badge variant="outline" className="text-xs">
+                EAN: {material.ean_number}
+              </Badge>
+            )}
+            {material.article_number && (
+              <Badge variant="outline" className="text-xs">
+                Art: {material.article_number}
+              </Badge>
+            )}
+            {material.type_designation && (
+              <Badge variant="secondary" className="text-xs">
+                {material.type_designation}
+              </Badge>
+            )}
+            {material.favorites && (
               <Badge variant="secondary" className="text-xs">
                 <Star className="h-3 w-3 mr-1" />
                 Favorite
+              </Badge>
+            )}
+            {material.discontinued && (
+              <Badge variant="destructive" className="text-xs">
+                Discontinued
               </Badge>
             )}
           </div>
