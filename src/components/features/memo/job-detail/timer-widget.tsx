@@ -43,7 +43,7 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
         if (parsed.isRunning && parsed.startTime) {
           const now = Date.now();
           const additionalElapsed = Math.floor((now - parsed.startTime) / 1000);
-          setTimer(prev => ({
+          setTimer((prev) => ({
             ...prev,
             elapsed: prev.elapsed + additionalElapsed,
             startTime: now,
@@ -64,7 +64,7 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
   useEffect(() => {
     if (timer.isRunning && timer.startTime) {
       intervalRef.current = setInterval(() => {
-        setTimer(prev => ({
+        setTimer((prev) => ({
           ...prev,
           elapsed: prev.elapsed + 1,
         }));
@@ -237,11 +237,9 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
 
       {/* Auto-save Status */}
       <div className="text-center text-xs text-muted-foreground">
-        {timer.isRunning ? (
-          'Timer will auto-save when stopped'
-        ) : (
-          'Click start to begin tracking time'
-        )}
+        {timer.isRunning
+          ? 'Timer will auto-save when stopped'
+          : 'Click start to begin tracking time'}
       </div>
     </div>
   );

@@ -78,7 +78,10 @@ export function TaskForm({
     save: language === 'no' ? 'Lagre' : 'Save',
     cancel: language === 'no' ? 'Avbryt' : 'Cancel',
     delete: language === 'no' ? 'Slett Oppgave' : 'Delete Task',
-    deleteConfirm: language === 'no' ? 'Er du sikker på at du vil slette denne oppgaven?' : 'Are you sure you want to delete this task?',
+    deleteConfirm:
+      language === 'no'
+        ? 'Er du sikker på at du vil slette denne oppgaven?'
+        : 'Are you sure you want to delete this task?',
     todo: language === 'no' ? 'To Do' : 'To Do',
     inProgress: language === 'no' ? 'Pågår' : 'In Progress',
     completed: language === 'no' ? 'Fullført' : 'Completed',
@@ -89,9 +92,10 @@ export function TaskForm({
     project: language === 'no' ? 'Prosjekt' : 'Project',
     noProject: language === 'no' ? 'Ingen prosjekt' : 'No project',
     attachments: language === 'no' ? 'Vedlegg' : 'Attachments',
-    attachmentsDescription: language === 'no'
-      ? 'Last opp bilder eller ta bilder relatert til oppgaven'
-      : 'Upload images or take photos related to the task',
+    attachmentsDescription:
+      language === 'no'
+        ? 'Last opp bilder eller ta bilder relatert til oppgaven'
+        : 'Upload images or take photos related to the task',
   };
 
   const handleCategoryChange = (categoryId: number, checked: boolean) => {
@@ -187,9 +191,7 @@ export function TaskForm({
           <Label htmlFor="due_date">{texts.dueDate}</Label>
           <DatePicker
             value={formData.due_date}
-            onChange={(date) =>
-              setFormData({ ...formData, due_date: date })
-            }
+            onChange={(date) => setFormData({ ...formData, due_date: date })}
             placeholder={texts.dueDate}
             disabled={loading}
           />

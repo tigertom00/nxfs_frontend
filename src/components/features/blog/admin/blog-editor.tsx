@@ -5,7 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Save, X, Upload, Image, Music } from 'lucide-react';
@@ -43,7 +49,9 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
   const [excerptNb, setExcerptNb] = useState('');
   const [content, setContent] = useState('');
   const [contentNb, setContentNb] = useState('');
-  const [status, setStatus] = useState<'draft' | 'published' | 'archived'>('draft');
+  const [status, setStatus] = useState<'draft' | 'published' | 'archived'>(
+    'draft'
+  );
   const [tags, setTags] = useState<number[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [metaDescription, setMetaDescription] = useState('');
@@ -77,7 +85,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
 
       // Handle tags - they might be objects {id, name, slug}, tag IDs, or tag names
       const postTags = (post.tags || [])
-        .map(tag => {
+        .map((tag) => {
           // If it's a tag object with an ID
           if (typeof tag === 'object' && tag !== null && 'id' in tag) {
             return tag.id;
@@ -90,7 +98,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
 
           // If it's a string, try to find the corresponding tag ID from availableTags
           if (typeof tag === 'string') {
-            const matchingTag = availableTags.find(t => t.name === tag);
+            const matchingTag = availableTags.find((t) => t.name === tag);
             if (matchingTag) {
               return matchingTag.id;
             } else {
@@ -102,7 +110,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
           const numericTag = Number(tag);
           return isNaN(numericTag) ? null : numericTag;
         })
-        .filter(id => id !== null && id !== undefined && id > 0); // Filter out invalid IDs
+        .filter((id) => id !== null && id !== undefined && id > 0); // Filter out invalid IDs
 
       setTags(postTags);
       setMetaDescription(post.meta_description || '');
@@ -152,7 +160,19 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         metaDescription.trim() !== '';
       setHasUnsavedChanges(hasContent);
     }
-  }, [title, titleNb, slug, excerpt, excerptNb, content, contentNb, status, tags, metaDescription, post]);
+  }, [
+    title,
+    titleNb,
+    slug,
+    excerpt,
+    excerptNb,
+    content,
+    contentNb,
+    status,
+    tags,
+    metaDescription,
+    post,
+  ]);
 
   // Auto-generate slug from title
   const generateSlug = (title: string) => {
@@ -193,8 +213,10 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
 
       // Process tags - filter out any null/undefined/NaN values
       const processedTags = tags
-        .map(id => Number(id))
-        .filter(id => !isNaN(id) && id !== null && id !== undefined && id > 0);
+        .map((id) => Number(id))
+        .filter(
+          (id) => !isNaN(id) && id !== null && id !== undefined && id > 0
+        );
 
       const postData = {
         title: title.trim(),
@@ -209,7 +231,6 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         meta_description: metaDescription.trim() || undefined,
         author_id: user?.id,
       };
-
 
       if (post) {
         await postsAPI.updatePost(post.id, postData);
@@ -239,7 +260,10 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         if (!silent) {
           const fieldErrors = Object.entries(errorData)
             .filter(([key]) => key !== 'non_field_errors')
-            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages[0] : messages}`)
+            .map(
+              ([field, messages]) =>
+                `${field}: ${Array.isArray(messages) ? messages[0] : messages}`
+            )
             .join(', ');
 
           const nonFieldErrors = errorData.non_field_errors
@@ -248,7 +272,8 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
               : errorData.non_field_errors
             : '';
 
-          const errorMessage = nonFieldErrors || fieldErrors || t('blog.editor.saveError');
+          const errorMessage =
+            nonFieldErrors || fieldErrors || t('blog.editor.saveError');
           toast.error(errorMessage);
         }
       } else {
@@ -266,25 +291,28 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
     setActiveTab(newTab);
   };
 
-  const handleMediaInsert = useCallback((url: string, type: 'image' | 'audio') => {
-    const currentContent = language === 'no' ? contentNb : content;
-    const setCurrentContent = language === 'no' ? setContentNb : setContent;
+  const handleMediaInsert = useCallback(
+    (url: string, type: 'image' | 'audio') => {
+      const currentContent = language === 'no' ? contentNb : content;
+      const setCurrentContent = language === 'no' ? setContentNb : setContent;
 
-    let insertText = '';
-    if (type === 'image') {
-      // Check if it's HTML (like YouTube embed) or a regular image URL
-      if (url.includes('<iframe') || url.includes('<')) {
-        insertText = url; // Raw HTML for embeds
-      } else {
-        insertText = `![Image](${url})`; // Markdown for images
+      let insertText = '';
+      if (type === 'image') {
+        // Check if it's HTML (like YouTube embed) or a regular image URL
+        if (url.includes('<iframe') || url.includes('<')) {
+          insertText = url; // Raw HTML for embeds
+        } else {
+          insertText = `![Image](${url})`; // Markdown for images
+        }
+      } else if (type === 'audio') {
+        insertText = `<audio controls><source src="${url}" type="audio/mpeg"></audio>`;
       }
-    } else if (type === 'audio') {
-      insertText = `<audio controls><source src="${url}" type="audio/mpeg"></audio>`;
-    }
 
-    const newContent = currentContent + '\n\n' + insertText + '\n';
-    setCurrentContent(newContent);
-  }, [language, content, contentNb]);
+      const newContent = currentContent + '\n\n' + insertText + '\n';
+      setCurrentContent(newContent);
+    },
+    [language, content, contentNb]
+  );
 
   // Helper component for displaying field errors
   const FieldError = ({ fieldName }: { fieldName: string }) => {
@@ -324,45 +352,78 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         {errors.non_field_errors && (
           <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
             <div className="text-sm text-destructive">
-              {Array.isArray(errors.non_field_errors)
-                ? errors.non_field_errors.map((error, index) => (
-                    <div key={index}>{error}</div>
-                  ))
-                : <div>{errors.non_field_errors}</div>
-              }
+              {Array.isArray(errors.non_field_errors) ? (
+                errors.non_field_errors.map((error, index) => (
+                  <div key={index}>{error}</div>
+                ))
+              ) : (
+                <div>{errors.non_field_errors}</div>
+              )}
             </div>
           </div>
         )}
 
         {/* Display general errors that don't have specific field mapping */}
-        {Object.entries(errors).some(([key, value]) =>
-          !['non_field_errors', 'title', 'title_nb', 'slug', 'excerpt', 'excerpt_nb',
-           'body_markdown', 'body_markdown_nb', 'status', 'tags', 'meta_description'].includes(key)
+        {Object.entries(errors).some(
+          ([key, value]) =>
+            ![
+              'non_field_errors',
+              'title',
+              'title_nb',
+              'slug',
+              'excerpt',
+              'excerpt_nb',
+              'body_markdown',
+              'body_markdown_nb',
+              'status',
+              'tags',
+              'meta_description',
+            ].includes(key)
         ) && (
           <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
             <div className="text-sm text-destructive">
-              <div className="font-medium mb-1">Additional validation errors:</div>
+              <div className="font-medium mb-1">
+                Additional validation errors:
+              </div>
               {Object.entries(errors)
-                .filter(([key]) =>
-                  !['non_field_errors', 'title', 'title_nb', 'slug', 'excerpt', 'excerpt_nb',
-                   'body_markdown', 'body_markdown_nb', 'status', 'tags', 'meta_description'].includes(key)
+                .filter(
+                  ([key]) =>
+                    ![
+                      'non_field_errors',
+                      'title',
+                      'title_nb',
+                      'slug',
+                      'excerpt',
+                      'excerpt_nb',
+                      'body_markdown',
+                      'body_markdown_nb',
+                      'status',
+                      'tags',
+                      'meta_description',
+                    ].includes(key)
                 )
                 .map(([field, messages]) => (
                   <div key={field}>
-                    <strong>{field}:</strong> {Array.isArray(messages) ? messages[0] : messages}
+                    <strong>{field}:</strong>{' '}
+                    {Array.isArray(messages) ? messages[0] : messages}
                   </div>
-                ))
-              }
+                ))}
             </div>
           </div>
         )}
 
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="content">{t('blog.editor.content')}</TabsTrigger>
-            <TabsTrigger value="settings">{t('blog.editor.settings')}</TabsTrigger>
+            <TabsTrigger value="content">
+              {t('blog.editor.content')}
+            </TabsTrigger>
+            <TabsTrigger value="settings">
+              {t('blog.editor.settings')}
+            </TabsTrigger>
             <TabsTrigger value="media">{t('blog.editor.media')}</TabsTrigger>
-            <TabsTrigger value="preview">{t('blog.editor.preview')}</TabsTrigger>
+            <TabsTrigger value="preview">
+              {t('blog.editor.preview')}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="content" className="space-y-4">
@@ -439,7 +500,11 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   preview="edit"
                   hideToolbar={false}
                   height={400}
-                  data-color-mode={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+                  data-color-mode={
+                    document.documentElement.classList.contains('dark')
+                      ? 'dark'
+                      : 'light'
+                  }
                 />
               </div>
               <FieldError fieldName="body_markdown" />
@@ -454,7 +519,11 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                   preview="edit"
                   hideToolbar={false}
                   height={400}
-                  data-color-mode={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+                  data-color-mode={
+                    document.documentElement.classList.contains('dark')
+                      ? 'dark'
+                      : 'light'
+                  }
                 />
               </div>
               <FieldError fieldName="body_markdown_nb" />
@@ -465,14 +534,25 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="status">{t('blog.editor.status')}</Label>
-                <Select value={status} onValueChange={(value) => setStatus(value as any)}>
-                  <SelectTrigger className={errors.status ? 'border-destructive' : ''}>
+                <Select
+                  value={status}
+                  onValueChange={(value) => setStatus(value as any)}
+                >
+                  <SelectTrigger
+                    className={errors.status ? 'border-destructive' : ''}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="draft">{t('blog.status.draft')}</SelectItem>
-                    <SelectItem value="published">{t('blog.status.published')}</SelectItem>
-                    <SelectItem value="archived">{t('blog.status.archived')}</SelectItem>
+                    <SelectItem value="draft">
+                      {t('blog.status.draft')}
+                    </SelectItem>
+                    <SelectItem value="published">
+                      {t('blog.status.published')}
+                    </SelectItem>
+                    <SelectItem value="archived">
+                      {t('blog.status.archived')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FieldError fieldName="status" />
@@ -493,7 +573,9 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
             </div>
 
             <div>
-              <Label htmlFor="meta-description">{t('blog.editor.metaDescription')}</Label>
+              <Label htmlFor="meta-description">
+                {t('blog.editor.metaDescription')}
+              </Label>
               <Textarea
                 id="meta-description"
                 value={metaDescription}
@@ -508,10 +590,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
 
           <TabsContent value="media">
             {post ? (
-              <MediaLibrary
-                postId={post.id}
-                onInsert={handleMediaInsert}
-              />
+              <MediaLibrary postId={post.id} onInsert={handleMediaInsert} />
             ) : (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">

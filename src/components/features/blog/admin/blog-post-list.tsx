@@ -27,7 +27,10 @@ interface BlogPostListProps {
   selectedPostId?: string;
 }
 
-export function BlogPostList({ onEditPost, selectedPostId }: BlogPostListProps) {
+export function BlogPostList({
+  onEditPost,
+  selectedPostId,
+}: BlogPostListProps) {
   const { t } = useIntl();
   const { language } = useUIStore();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -40,10 +43,14 @@ export function BlogPostList({ onEditPost, selectedPostId }: BlogPostListProps) 
       setLoading(true);
       setError(null);
       const response = await postsAPI.getPosts();
-      const postsArray = Array.isArray(response) ? response : response.results || [];
+      const postsArray = Array.isArray(response)
+        ? response
+        : response.results || [];
       setPosts(postsArray);
     } catch (err: any) {
-      setError(err.response?.data?.message || t('blog.admin.errorLoadingPosts'));
+      setError(
+        err.response?.data?.message || t('blog.admin.errorLoadingPosts')
+      );
     } finally {
       setLoading(false);
     }
@@ -57,9 +64,11 @@ export function BlogPostList({ onEditPost, selectedPostId }: BlogPostListProps) 
     try {
       setDeletingId(postId);
       await postsAPI.deletePost(postId);
-      setPosts(posts.filter(post => post.id !== postId));
+      setPosts(posts.filter((post) => post.id !== postId));
     } catch (err: any) {
-      setError(err.response?.data?.message || t('blog.admin.errorDeletingPost'));
+      setError(
+        err.response?.data?.message || t('blog.admin.errorDeletingPost')
+      );
     } finally {
       setDeletingId(null);
     }
@@ -77,11 +86,18 @@ export function BlogPostList({ onEditPost, selectedPostId }: BlogPostListProps) 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       draft: { label: t('blog.status.draft'), variant: 'secondary' as const },
-      published: { label: t('blog.status.published'), variant: 'default' as const },
-      archived: { label: t('blog.status.archived'), variant: 'outline' as const },
+      published: {
+        label: t('blog.status.published'),
+        variant: 'default' as const,
+      },
+      archived: {
+        label: t('blog.status.archived'),
+        variant: 'outline' as const,
+      },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+    const config =
+      statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -169,11 +185,19 @@ export function BlogPostList({ onEditPost, selectedPostId }: BlogPostListProps) 
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t('blog.admin.deleteConfirmTitle')}</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {t('blog.admin.deleteConfirmTitle')}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
                     {t('blog.admin.deleteConfirmDescription')}
                     <br />
-                    <strong>"{language === 'no' ? post.title_nb || post.title : post.title}"</strong>
+                    <strong>
+                      "
+                      {language === 'no'
+                        ? post.title_nb || post.title
+                        : post.title}
+                      "
+                    </strong>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

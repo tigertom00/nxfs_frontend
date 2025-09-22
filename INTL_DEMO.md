@@ -7,22 +7,26 @@ This demonstrates how to use Next Intl for internationalization in your Next.js 
 ## What's Implemented
 
 ### 1. Custom Translation Hook (`src/hooks/use-intl.ts`)
+
 - Bridges Next Intl with your existing UI store language system
 - Provides type-safe translation keys
 - Supports interpolation for dynamic values
 - Compatible with your current language switching logic
 
 ### 2. Updated Main Page (`src/app/page.tsx`)
+
 - Welcome text now uses `t('home.title')` and `t('home.subtitle')`
 - Added demonstration section explaining translation capabilities
 - Automatically switches between English/Norwegian based on UI store
 
 ### 3. Enhanced Blog Posts (`src/components/blog-posts.tsx`)
+
 - Static UI text uses translation keys (`t('blog.author')`, etc.)
 - Added sample translated blog post to demonstrate capabilities
 - Shows how API responses can be translated client-side
 
 ### 4. Translation Files
+
 - **English**: `src/messages/en.json`
 - **Norwegian**: `src/messages/no.json`
 - Added `home.*` keys for homepage content
@@ -31,6 +35,7 @@ This demonstrates how to use Next Intl for internationalization in your Next.js 
 ## Language Switching
 
 The system works with your existing language toggle in the navbar:
+
 1. User clicks language toggle in navbar
 2. UI store updates `language` state
 3. `useIntl()` hook automatically re-renders with new translations
@@ -39,7 +44,9 @@ The system works with your existing language toggle in the navbar:
 ## API Response Translation Approaches
 
 ### Method 1: Server-Side (Current)
+
 Your API already returns both languages:
+
 ```typescript
 {
   title: "English Title",
@@ -50,7 +57,9 @@ Your API already returns both languages:
 ```
 
 ### Method 2: Client-Side (New Capability)
+
 Using Next Intl for API responses:
+
 ```typescript
 // Translation keys in JSON files
 const post = {
@@ -58,12 +67,13 @@ const post = {
   title: t('blog.posts.introduction.title'),
   body_markdown: t('blog.posts.introduction.content', {
     author: userData.name,
-    date: formatDate(post.created_at)
-  })
-}
+    date: formatDate(post.created_at),
+  }),
+};
 ```
 
 ### Method 3: Hybrid Approach (Recommended)
+
 - Use server-side for user-generated content (blog posts, comments)
 - Use client-side for system-generated content (error messages, UI text)
 - Use interpolation for dynamic values in translations

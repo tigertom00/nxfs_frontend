@@ -104,55 +104,60 @@ export default function JobDetailPage() {
       <Navbar />
       <div className="container mx-auto px-4 py-6 max-w-md">
         <div className="space-y-6">
-        {/* Job Header with Navigation */}
-        <JobHeader job={job} onBack={handleBackToJobs} />
+          {/* Job Header with Navigation */}
+          <JobHeader job={job} onBack={handleBackToJobs} />
 
-        {/* Timer Widget */}
-        <TimerWidget jobId={job.ordre_nr} />
+          {/* Timer Widget */}
+          <TimerWidget jobId={job.ordre_nr} />
 
-        {/* Material Manager */}
-        <MaterialManager jobId={job.ordre_nr} />
+          {/* Material Manager */}
+          <MaterialManager jobId={job.ordre_nr} />
 
-        {/* Photo Gallery */}
-        <PhotoGallery jobId={job.ordre_nr} />
+          {/* Photo Gallery */}
+          <PhotoGallery jobId={job.ordre_nr} />
 
-
-        {/* Job Info */}
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold">Job Details</h3>
-          <div className="p-4 border rounded-lg bg-card space-y-2">
-            {job.adresse && (
+          {/* Job Info */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold">Job Details</h3>
+            <div className="p-4 border rounded-lg bg-card space-y-2">
+              {job.adresse && (
+                <div>
+                  <span className="text-sm text-muted-foreground">
+                    Address:
+                  </span>
+                  <p className="font-medium">📍 {job.adresse}</p>
+                </div>
+              )}
+              {job.telefon_nr && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Phone:</span>
+                  <p className="font-medium">📞 {job.telefon_nr}</p>
+                </div>
+              )}
+              {job.beskrivelse && (
+                <div>
+                  <span className="text-sm text-muted-foreground">
+                    Description:
+                  </span>
+                  <p className="font-medium">{job.beskrivelse}</p>
+                </div>
+              )}
+              {job.total_hours && (
+                <div>
+                  <span className="text-sm text-muted-foreground">
+                    Total Hours:
+                  </span>
+                  <p className="font-medium">⏱️ {job.total_hours}h</p>
+                </div>
+              )}
               <div>
-                <span className="text-sm text-muted-foreground">Address:</span>
-                <p className="font-medium">📍 {job.adresse}</p>
+                <span className="text-sm text-muted-foreground">Status:</span>
+                <p className="font-medium">
+                  {job.ferdig ? '✅ Completed' : '🚧 In Progress'}
+                </p>
               </div>
-            )}
-            {job.telefon_nr && (
-              <div>
-                <span className="text-sm text-muted-foreground">Phone:</span>
-                <p className="font-medium">📞 {job.telefon_nr}</p>
-              </div>
-            )}
-            {job.beskrivelse && (
-              <div>
-                <span className="text-sm text-muted-foreground">Description:</span>
-                <p className="font-medium">{job.beskrivelse}</p>
-              </div>
-            )}
-            {job.total_hours && (
-              <div>
-                <span className="text-sm text-muted-foreground">Total Hours:</span>
-                <p className="font-medium">⏱️ {job.total_hours}h</p>
-              </div>
-            )}
-            <div>
-              <span className="text-sm text-muted-foreground">Status:</span>
-              <p className="font-medium">
-                {job.ferdig ? '✅ Completed' : '🚧 In Progress'}
-              </p>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </>

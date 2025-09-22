@@ -310,7 +310,13 @@ export interface DockerContainer {
   container_id: string; // Docker container ID
   name: string;
   image: string;
-  status: 'running' | 'stopped' | 'paused' | 'restarting' | 'exited' | 'created';
+  status:
+    | 'running'
+    | 'stopped'
+    | 'paused'
+    | 'restarting'
+    | 'exited'
+    | 'created';
   state: {
     Status: string;
     Running: boolean;

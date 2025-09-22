@@ -84,59 +84,60 @@ export default function MemoPage() {
       <Navbar />
       <div className="container mx-auto px-4 py-6 max-w-md">
         <div className="space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            📱 NXFS Memo
-          </h1>
-          <p className="text-muted-foreground">
-            Work Order Management
-          </p>
-        </div>
-
-        {/* Job Selector */}
-        <JobSelector
-          jobs={jobs}
-          selectedJob={selectedJob}
-          onJobSelect={handleJobSelect}
-          onNewJob={handleNewJob}
-          loading={loading}
-        />
-
-        {/* Recent Jobs */}
-        {jobs.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold">Recent Jobs</h3>
-            <div className="space-y-2">
-              {jobs.slice(0, 5).map((job) => (
-                <button
-                  key={job.ordre_nr}
-                  onClick={() => handleJobSelect(job)}
-                  className="w-full text-left p-3 border rounded-lg hover:bg-muted transition-colors"
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="font-medium">Job #{job.ordre_nr}</span>
-                      {job.tittel && (
-                        <span className="text-muted-foreground"> - {job.tittel}</span>
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {job.adresse && job.adresse.split(',')[0]}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+          {/* Header */}
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              📱 NXFS Memo
+            </h1>
+            <p className="text-muted-foreground">Work Order Management</p>
           </div>
-        )}
 
-        {/* New Job Modal */}
-        <NewJobModal
-          isOpen={showNewJobModal}
-          onClose={() => setShowNewJobModal(false)}
-          onJobCreated={handleJobCreated}
-        />
+          {/* Job Selector */}
+          <JobSelector
+            jobs={jobs}
+            selectedJob={selectedJob}
+            onJobSelect={handleJobSelect}
+            onNewJob={handleNewJob}
+            loading={loading}
+          />
+
+          {/* Recent Jobs */}
+          {jobs.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Recent Jobs</h3>
+              <div className="space-y-2">
+                {jobs.slice(0, 5).map((job) => (
+                  <button
+                    key={job.ordre_nr}
+                    onClick={() => handleJobSelect(job)}
+                    className="w-full text-left p-3 border rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="font-medium">Job #{job.ordre_nr}</span>
+                        {job.tittel && (
+                          <span className="text-muted-foreground">
+                            {' '}
+                            - {job.tittel}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {job.adresse && job.adresse.split(',')[0]}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* New Job Modal */}
+          <NewJobModal
+            isOpen={showNewJobModal}
+            onClose={() => setShowNewJobModal(false)}
+            onJobCreated={handleJobCreated}
+          />
         </div>
       </div>
     </>

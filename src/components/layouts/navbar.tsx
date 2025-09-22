@@ -50,7 +50,11 @@ export default function Navbar() {
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 flex items-center justify-center">
                       <img
-                        src={theme === 'dark' ? '/logo_dark.svg' : '/logo_light.svg'}
+                        src={
+                          theme === 'dark'
+                            ? '/logo_dark.svg'
+                            : '/logo_light.svg'
+                        }
                         alt="NXFS Logo"
                         className="w-8 h-8"
                       />
@@ -111,7 +115,10 @@ export default function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/memo" className="w-full">
-                    📱 {language === 'no' ? 'Memo (Arbeidsordre)' : 'Memo (Work Orders)'}
+                    📱{' '}
+                    {language === 'no'
+                      ? 'Memo (Arbeidsordre)'
+                      : 'Memo (Work Orders)'}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
@@ -163,13 +170,20 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <DropdownMenu open={isUnauthMenuOpen} onOpenChange={setIsUnauthMenuOpen}>
+            <DropdownMenu
+              open={isUnauthMenuOpen}
+              onOpenChange={setIsUnauthMenuOpen}
+            >
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="p-2 h-auto">
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 flex items-center justify-center">
                       <img
-                        src={theme === 'dark' ? '/logo_dark.svg' : '/logo_light.svg'}
+                        src={
+                          theme === 'dark'
+                            ? '/logo_dark.svg'
+                            : '/logo_light.svg'
+                        }
                         alt="NXFS Logo"
                         className="w-8 h-8"
                       />
@@ -180,7 +194,9 @@ export default function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-72">
                 <div className="p-4">
-                  <h3 className="font-medium mb-3">{language === 'no' ? 'Innstillinger' : 'Settings'}</h3>
+                  <h3 className="font-medium mb-3">
+                    {language === 'no' ? 'Innstillinger' : 'Settings'}
+                  </h3>
 
                   {/* Theme Selection */}
                   <div className="mb-4">
@@ -189,26 +205,37 @@ export default function Navbar() {
                     </Label>
                     <RadioGroup
                       value={theme}
-                      onValueChange={(value: 'light' | 'dark' | 'purple') => setTheme(value)}
+                      onValueChange={(value: 'light' | 'dark' | 'purple') =>
+                        setTheme(value)
+                      }
                       className="flex gap-4"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="light" id="light" />
-                        <Label htmlFor="light" className="flex items-center gap-1 cursor-pointer">
+                        <Label
+                          htmlFor="light"
+                          className="flex items-center gap-1 cursor-pointer"
+                        >
                           <Sun className="h-4 w-4" />
                           {language === 'no' ? 'Lys' : 'Light'}
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="dark" id="dark" />
-                        <Label htmlFor="dark" className="flex items-center gap-1 cursor-pointer">
+                        <Label
+                          htmlFor="dark"
+                          className="flex items-center gap-1 cursor-pointer"
+                        >
                           <Moon className="h-4 w-4" />
                           {language === 'no' ? 'Mørk' : 'Dark'}
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="purple" id="purple" />
-                        <Label htmlFor="purple" className="flex items-center gap-1 cursor-pointer">
+                        <Label
+                          htmlFor="purple"
+                          className="flex items-center gap-1 cursor-pointer"
+                        >
                           <Palette className="h-4 w-4" />
                           {language === 'no' ? 'Lilla' : 'Purple'}
                         </Label>
@@ -228,13 +255,19 @@ export default function Navbar() {
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="en" id="en" />
-                        <Label htmlFor="en" className="flex items-center gap-1 cursor-pointer">
+                        <Label
+                          htmlFor="en"
+                          className="flex items-center gap-1 cursor-pointer"
+                        >
                           🇺🇸 English
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="no" id="no" />
-                        <Label htmlFor="no" className="flex items-center gap-1 cursor-pointer">
+                        <Label
+                          htmlFor="no"
+                          className="flex items-center gap-1 cursor-pointer"
+                        >
                           🇳🇴 Norsk
                         </Label>
                       </div>

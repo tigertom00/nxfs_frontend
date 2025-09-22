@@ -50,7 +50,9 @@ export function CreationModal({
   onCategoriesChange,
 }: CreationModalProps) {
   const { language } = useUIStore();
-  const [activeTab, setActiveTab] = useState(editingProject ? 'projects' : 'tasks');
+  const [activeTab, setActiveTab] = useState(
+    editingProject ? 'projects' : 'tasks'
+  );
 
   const texts = {
     tasks: language === 'no' ? 'Oppgaver' : 'Tasks',
@@ -60,7 +62,8 @@ export function CreationModal({
     editTask: language === 'no' ? 'Rediger Oppgave' : 'Edit Task',
     createProject: language === 'no' ? 'Opprett Prosjekt' : 'Create Project',
     editProject: language === 'no' ? 'Rediger Prosjekt' : 'Edit Project',
-    manageCategories: language === 'no' ? 'Administrer Kategorier' : 'Manage Categories',
+    manageCategories:
+      language === 'no' ? 'Administrer Kategorier' : 'Manage Categories',
     taskDescription: editingTask
       ? language === 'no'
         ? 'Rediger detaljene for oppgaven'
@@ -114,7 +117,11 @@ export function CreationModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="tasks" className="flex items-center gap-2">
               <CheckSquare className="h-4 w-4" />
@@ -147,8 +154,12 @@ export function CreationModal({
               <div className="border rounded-lg p-4">
                 <h3 className="text-lg font-medium mb-4">
                   {editingProject
-                    ? language === 'no' ? 'Rediger Prosjekt' : 'Edit Project'
-                    : language === 'no' ? 'Opprett Nytt Prosjekt' : 'Create New Project'}
+                    ? language === 'no'
+                      ? 'Rediger Prosjekt'
+                      : 'Edit Project'
+                    : language === 'no'
+                      ? 'Opprett Nytt Prosjekt'
+                      : 'Create New Project'}
                 </h3>
                 <ProjectForm
                   project={editingProject}
@@ -160,7 +171,9 @@ export function CreationModal({
               {/* Project Manager */}
               <div className="border rounded-lg p-4">
                 <h3 className="text-lg font-medium mb-4">
-                  {language === 'no' ? 'Eksisterende Prosjekter' : 'Existing Projects'}
+                  {language === 'no'
+                    ? 'Eksisterende Prosjekter'
+                    : 'Existing Projects'}
                 </h3>
                 <ProjectManager
                   projects={projects}

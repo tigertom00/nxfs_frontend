@@ -38,7 +38,7 @@ export function BlogAdminDashboard() {
   const handleSaveComplete = () => {
     setSelectedPost(null);
     setIsCreating(false);
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   };
 
   const handleCancel = () => {
@@ -50,7 +50,9 @@ export function BlogAdminDashboard() {
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{t('blog.admin.title')}</h1>
-        <p className="text-muted-foreground mt-2">{t('blog.admin.description')}</p>
+        <p className="text-muted-foreground mt-2">
+          {t('blog.admin.description')}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -76,7 +78,7 @@ export function BlogAdminDashboard() {
 
         {/* Editor */}
         <div className="lg:col-span-2">
-          {(isCreating || selectedPost) ? (
+          {isCreating || selectedPost ? (
             <BlogEditor
               post={selectedPost}
               onSave={handleSaveComplete}
@@ -86,8 +88,12 @@ export function BlogAdminDashboard() {
             <Card>
               <CardContent className="flex items-center justify-center h-96">
                 <div className="text-center">
-                  <h3 className="text-lg font-medium mb-2">{t('blog.admin.selectPost')}</h3>
-                  <p className="text-muted-foreground mb-4">{t('blog.admin.selectPostDescription')}</p>
+                  <h3 className="text-lg font-medium mb-2">
+                    {t('blog.admin.selectPost')}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    {t('blog.admin.selectPostDescription')}
+                  </p>
                   <Button onClick={handleNewPost}>
                     <Plus className="h-4 w-4 mr-2" />
                     {t('blog.admin.createFirst')}

@@ -28,6 +28,7 @@ nano .env.production
 ```
 
 **Required variables:**
+
 - `NEXT_PUBLIC_N8N_SECRET_KEY` - Your N8N webhook secret key
 - `NEXT_PUBLIC_API_URL` - Your Django backend API URL
 - `NEXT_PUBLIC_N8N_WEBHOOK_URL` - Your N8N webhook URL
@@ -43,6 +44,7 @@ chmod +x deploy.sh
 ```
 
 The script will:
+
 - Build the Docker image
 - Start all services
 - Check if everything is running correctly
@@ -129,6 +131,7 @@ sudo certbot --nginx -d your-domain.com -d www.your-domain.com
 ### Option 3: Custom Certificates
 
 Place your certificates in the `./ssl/` directory:
+
 - `ssl/cert.pem` - Certificate
 - `ssl/key.pem` - Private key
 - `ssl/dhparam.pem` - DH parameters (optional)
@@ -175,6 +178,7 @@ curl http://localhost/health
 ### Security
 
 1. **Firewall Configuration:**
+
    ```bash
    # Allow only necessary ports
    sudo ufw allow 22/tcp    # SSH
@@ -215,10 +219,11 @@ curl http://localhost/health
 ### Monitoring
 
 1. **Logs:**
+
    ```bash
    # View logs in real-time
    docker-compose logs -f --tail=100 nxfs-app
-   
+
    # Archive logs
    docker-compose logs nxfs-app > logs/app.log
    ```
@@ -254,15 +259,17 @@ docker exec postgres_container pg_dump -U user database > backup.sql
 ### Common Issues
 
 1. **Port Already in Use:**
+
    ```bash
    # Check what's using the port
    sudo lsof -i :3000
-   
+
    # Kill the process
    sudo kill -9 <PID>
    ```
 
 2. **Permission Issues:**
+
    ```bash
    # Fix file permissions
    sudo chown -R $USER:$USER .
@@ -270,13 +277,14 @@ docker exec postgres_container pg_dump -U user database > backup.sql
    ```
 
 3. **Container Won't Start:**
+
    ```bash
    # Check logs
    docker-compose logs nxfs-app
-   
+
    # Check resource usage
    docker stats
-   
+
    # Rebuild and restart
    docker-compose build --no-cache
    docker-compose up -d

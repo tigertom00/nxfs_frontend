@@ -15,20 +15,26 @@ interface TagInputProps {
   placeholder?: string;
 }
 
-export function TagInput({ value, onChange, availableTags, placeholder }: TagInputProps) {
+export function TagInput({
+  value,
+  onChange,
+  availableTags,
+  placeholder,
+}: TagInputProps) {
   const { t } = useIntl();
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Get selected tags from IDs
-  const selectedTags = availableTags.filter(tag => value.includes(tag.id));
+  const selectedTags = availableTags.filter((tag) => value.includes(tag.id));
 
   // Filter available tags for suggestions
   const filteredSuggestions = availableTags
-    .filter(tag =>
-      tag.name.toLowerCase().includes(inputValue.toLowerCase()) &&
-      !value.includes(tag.id)
+    .filter(
+      (tag) =>
+        tag.name.toLowerCase().includes(inputValue.toLowerCase()) &&
+        !value.includes(tag.id)
     )
     .slice(0, 5);
 
@@ -41,7 +47,7 @@ export function TagInput({ value, onChange, availableTags, placeholder }: TagInp
   };
 
   const removeTag = (tagId: number) => {
-    onChange(value.filter(id => id !== tagId));
+    onChange(value.filter((id) => id !== tagId));
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -71,7 +77,9 @@ export function TagInput({ value, onChange, availableTags, placeholder }: TagInp
       {/* Selected Tags Display */}
       {selectedTags.length > 0 && (
         <div className="mb-2">
-          <p className="text-sm font-medium mb-2">{t('blog.editor.selectedTags')}:</p>
+          <p className="text-sm font-medium mb-2">
+            {t('blog.editor.selectedTags')}:
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {selectedTags.map((tag) => (
               <Badge key={tag.id} variant="default" className="gap-1">
@@ -118,7 +126,7 @@ export function TagInput({ value, onChange, availableTags, placeholder }: TagInp
               ))
             ) : !inputValue ? (
               availableTags
-                .filter(tag => !value.includes(tag.id))
+                .filter((tag) => !value.includes(tag.id))
                 .slice(0, 10)
                 .map((tag) => (
                   <button

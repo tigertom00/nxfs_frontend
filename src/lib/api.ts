@@ -217,10 +217,13 @@ api.interceptors.response.use(
 // Authentication API
 export const authAPI = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await axios.post(`${env.NEXT_PUBLIC_API_URL}/auth/token/`, {
-      email,
-      password,
-    });
+    const response = await axios.post(
+      `${env.NEXT_PUBLIC_API_URL}/auth/token/`,
+      {
+        email,
+        password,
+      }
+    );
     return response.data;
   },
 
@@ -278,7 +281,6 @@ export const postsAPI = {
     return response.data;
   },
 
-
   createPost: async (
     postData: CreatePostPayload
   ): Promise<CreatePostResponse> => {
@@ -296,7 +298,10 @@ export const postsAPI = {
 
       // If it's a validation error, don't try FormData fallback - just throw the error
       if (jsonError.response?.status === 400) {
-        console.log('Validation error from JSON request:', jsonError.response.data);
+        console.log(
+          'Validation error from JSON request:',
+          jsonError.response.data
+        );
         throw jsonError;
       }
 
@@ -349,7 +354,10 @@ export const postsAPI = {
 
       // If it's a validation error, don't try FormData fallback - just throw the error
       if (jsonError.response?.status === 400) {
-        console.log('Validation error from JSON request:', jsonError.response.data);
+        console.log(
+          'Validation error from JSON request:',
+          jsonError.response.data
+        );
         throw jsonError;
       }
 
@@ -399,17 +407,23 @@ export const postsAPI = {
     return response.data;
   },
 
-
-  uploadAudio: async (postId: string, audio: File): Promise<UploadPostAudioResponse> => {
+  uploadAudio: async (
+    postId: string,
+    audio: File
+  ): Promise<UploadPostAudioResponse> => {
     try {
       const formData = new FormData();
       formData.append('audio', audio);
 
-      const response = await api.post(`/app/blog/posts/${postId}/audio/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post(
+        `/app/blog/posts/${postId}/audio/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('Audio uploaded successfully');
       return response.data;
     } catch (error) {
@@ -418,9 +432,14 @@ export const postsAPI = {
     }
   },
 
-  deleteAudio: async (postId: string, audioId: string): Promise<DeletePostAudioResponse> => {
+  deleteAudio: async (
+    postId: string,
+    audioId: string
+  ): Promise<DeletePostAudioResponse> => {
     try {
-      const response = await api.delete(`/app/blog/posts/${postId}/audio/${audioId}/`);
+      const response = await api.delete(
+        `/app/blog/posts/${postId}/audio/${audioId}/`
+      );
       showSuccessToast('Audio deleted successfully');
       return response.data;
     } catch (error) {
@@ -429,16 +448,23 @@ export const postsAPI = {
     }
   },
 
-  uploadImage: async (postId: string, image: File): Promise<UploadPostImageResponse> => {
+  uploadImage: async (
+    postId: string,
+    image: File
+  ): Promise<UploadPostImageResponse> => {
     try {
       const formData = new FormData();
       formData.append('image', image);
 
-      const response = await api.post(`/app/blog/posts/${postId}/images/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post(
+        `/app/blog/posts/${postId}/images/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('Image uploaded successfully');
       return response.data;
     } catch (error) {
@@ -447,9 +473,14 @@ export const postsAPI = {
     }
   },
 
-  deleteImage: async (postId: string, imageId: string): Promise<DeletePostImageResponse> => {
+  deleteImage: async (
+    postId: string,
+    imageId: string
+  ): Promise<DeletePostImageResponse> => {
     try {
-      const response = await api.delete(`/app/blog/posts/${postId}/images/${imageId}/`);
+      const response = await api.delete(
+        `/app/blog/posts/${postId}/images/${imageId}/`
+      );
       showSuccessToast('Image deleted successfully');
       return response.data;
     } catch (error) {
@@ -463,7 +494,11 @@ export const postsAPI = {
     return response.data;
   },
 
-  uploadYouTube: async (postId: string, url: string, title?: string): Promise<PostYouTubeResponse> => {
+  uploadYouTube: async (
+    postId: string,
+    url: string,
+    title?: string
+  ): Promise<PostYouTubeResponse> => {
     try {
       const formData = new FormData();
       formData.append('url', url);
@@ -471,11 +506,15 @@ export const postsAPI = {
         formData.append('title', title);
       }
 
-      const response = await api.post(`/app/blog/posts/${postId}/youtube/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post(
+        `/app/blog/posts/${postId}/youtube/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('YouTube video added successfully');
       return response.data;
     } catch (error) {
@@ -486,7 +525,9 @@ export const postsAPI = {
 
   deleteYouTube: async (postId: string, youtubeId: string): Promise<void> => {
     try {
-      const response = await api.delete(`/app/blog/posts/${postId}/youtube/${youtubeId}/`);
+      const response = await api.delete(
+        `/app/blog/posts/${postId}/youtube/${youtubeId}/`
+      );
       showSuccessToast('YouTube video deleted successfully');
       return response.data;
     } catch (error) {
@@ -661,11 +702,15 @@ export const tasksAPI = {
         }
       });
 
-      const response = await api.patch(`/app/tasks/tasks/${taskId}/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.patch(
+        `/app/tasks/tasks/${taskId}/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('Task updated successfully');
       return response.data;
     } catch (error) {
@@ -685,16 +730,23 @@ export const tasksAPI = {
     }
   },
 
-  uploadImage: async (taskId: string, image: File): Promise<UploadTaskImageResponse> => {
+  uploadImage: async (
+    taskId: string,
+    image: File
+  ): Promise<UploadTaskImageResponse> => {
     try {
       const formData = new FormData();
       formData.append('image', image);
 
-      const response = await api.post(`/app/tasks/tasks/${taskId}/upload_image/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post(
+        `/app/tasks/tasks/${taskId}/upload_image/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('Image uploaded successfully');
       return response.data;
     } catch (error) {
@@ -703,9 +755,14 @@ export const tasksAPI = {
     }
   },
 
-  deleteImage: async (taskId: string, imageId: string): Promise<DeleteTaskImageResponse> => {
+  deleteImage: async (
+    taskId: string,
+    imageId: string
+  ): Promise<DeleteTaskImageResponse> => {
     try {
-      const response = await api.delete(`/app/tasks/tasks/${taskId}/images/${imageId}/`);
+      const response = await api.delete(
+        `/app/tasks/tasks/${taskId}/images/${imageId}/`
+      );
       showSuccessToast('Image deleted successfully');
       return response.data;
     } catch (error) {
@@ -820,11 +877,15 @@ export const projectsAPI = {
         }
       });
 
-      const response = await api.put(`/app/tasks/projects/${projectId}/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.put(
+        `/app/tasks/projects/${projectId}/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('Project updated successfully');
       return response.data;
     } catch (error) {
@@ -837,16 +898,23 @@ export const projectsAPI = {
     return response.data;
   },
 
-  uploadImage: async (projectId: string, image: File): Promise<UploadProjectImageResponse> => {
+  uploadImage: async (
+    projectId: string,
+    image: File
+  ): Promise<UploadProjectImageResponse> => {
     try {
       const formData = new FormData();
       formData.append('image', image);
 
-      const response = await api.post(`/app/tasks/projects/${projectId}/upload_image/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post(
+        `/app/tasks/projects/${projectId}/upload_image/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('Image uploaded successfully');
       return response.data;
     } catch (error) {
@@ -855,9 +923,14 @@ export const projectsAPI = {
     }
   },
 
-  deleteImage: async (projectId: string, imageId: string): Promise<DeleteProjectImageResponse> => {
+  deleteImage: async (
+    projectId: string,
+    imageId: string
+  ): Promise<DeleteProjectImageResponse> => {
     try {
-      const response = await api.delete(`/app/tasks/projects/${projectId}/images/${imageId}/`);
+      const response = await api.delete(
+        `/app/tasks/projects/${projectId}/images/${imageId}/`
+      );
       showSuccessToast('Image deleted successfully');
       return response.data;
     } catch (error) {
@@ -880,10 +953,11 @@ export const dockerAPI = {
     return response.data;
   },
 
-
   syncContainers: async (hostId: number): Promise<SyncContainersResponse> => {
     try {
-      const response = await api.post(`/api/docker/hosts/${hostId}/sync_containers/`);
+      const response = await api.post(
+        `/api/docker/hosts/${hostId}/sync_containers/`
+      );
       showSuccessToast('Container sync initiated successfully');
       return response.data;
     } catch (error) {
@@ -899,15 +973,20 @@ export const dockerAPI = {
     running_only?: boolean;
   }): Promise<GetDockerContainersResponse> => {
     const queryParams = new URLSearchParams();
-    if (params?.host_id) queryParams.append('host_id', params.host_id.toString());
+    if (params?.host_id)
+      queryParams.append('host_id', params.host_id.toString());
     if (params?.status) queryParams.append('status', params.status);
     if (params?.running_only) queryParams.append('running_only', 'true');
 
-    const response = await api.get(`/api/docker/containers/?${queryParams.toString()}`);
+    const response = await api.get(
+      `/api/docker/containers/?${queryParams.toString()}`
+    );
     return response.data;
   },
 
-  getContainer: async (containerId: string): Promise<GetDockerContainerResponse> => {
+  getContainer: async (
+    containerId: string
+  ): Promise<GetDockerContainerResponse> => {
     const response = await api.get(`/api/docker/containers/${containerId}/`);
     return response.data;
   },
@@ -1029,7 +1108,9 @@ export const suppliersAPI = {
     return response.data;
   },
 
-  createSupplier: async (supplierData: CreateSupplierPayload): Promise<CreateSupplierResponse> => {
+  createSupplier: async (
+    supplierData: CreateSupplierPayload
+  ): Promise<CreateSupplierResponse> => {
     try {
       const response = await api.post('/app/memo/leverandorer/', supplierData);
       showSuccessToast('Supplier created successfully');
@@ -1045,7 +1126,10 @@ export const suppliersAPI = {
     supplierData: UpdateSupplierPayload
   ): Promise<UpdateSupplierResponse> => {
     try {
-      const response = await api.put(`/app/memo/leverandorer/${supplierId}/`, supplierData);
+      const response = await api.put(
+        `/app/memo/leverandorer/${supplierId}/`,
+        supplierData
+      );
       showSuccessToast('Supplier updated successfully');
       return response.data;
     } catch (error) {
@@ -1054,9 +1138,13 @@ export const suppliersAPI = {
     }
   },
 
-  deleteSupplier: async (supplierId: number): Promise<DeleteSupplierResponse> => {
+  deleteSupplier: async (
+    supplierId: number
+  ): Promise<DeleteSupplierResponse> => {
     try {
-      const response = await api.delete(`/app/memo/leverandorer/${supplierId}/`);
+      const response = await api.delete(
+        `/app/memo/leverandorer/${supplierId}/`
+      );
       showSuccessToast('Supplier deleted successfully');
       return response.data;
     } catch (error) {
@@ -1078,7 +1166,9 @@ export const materialsAPI = {
     return response.data;
   },
 
-  createMaterial: async (materialData: CreateMaterialPayload): Promise<CreateMaterialResponse> => {
+  createMaterial: async (
+    materialData: CreateMaterialPayload
+  ): Promise<CreateMaterialResponse> => {
     try {
       const formData = new FormData();
       Object.entries(materialData).forEach(([key, value]) => {
@@ -1120,11 +1210,15 @@ export const materialsAPI = {
         }
       });
 
-      const response = await api.put(`/app/memo/matriell/${materialId}/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.put(
+        `/app/memo/matriell/${materialId}/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('Material updated successfully');
       return response.data;
     } catch (error) {
@@ -1133,7 +1227,9 @@ export const materialsAPI = {
     }
   },
 
-  deleteMaterial: async (materialId: number): Promise<DeleteMaterialResponse> => {
+  deleteMaterial: async (
+    materialId: number
+  ): Promise<DeleteMaterialResponse> => {
     try {
       const response = await api.delete(`/app/memo/matriell/${materialId}/`);
       showSuccessToast('Material deleted successfully');
@@ -1143,9 +1239,13 @@ export const materialsAPI = {
       throw error;
     }
   },
-  toggleFavorite: async (materialId: number): Promise<UpdateMaterialResponse> => {
+  toggleFavorite: async (
+    materialId: number
+  ): Promise<UpdateMaterialResponse> => {
     try {
-      const response = await api.patch(`/app/memo/matriell/${materialId}/favorite/`);
+      const response = await api.patch(
+        `/app/memo/matriell/${materialId}/favorite/`
+      );
       showSuccessToast('Material favorite status updated');
       return response.data;
     } catch (error) {
@@ -1181,7 +1281,10 @@ export const jobsAPI = {
       console.log('JSON create failed, trying FormData:', jsonError);
 
       // If JSON fails and we have files, try FormData
-      if (jsonError.response?.status === 400 && jobData.profile_picture instanceof File) {
+      if (
+        jsonError.response?.status === 400 &&
+        jobData.profile_picture instanceof File
+      ) {
         try {
           const formData = new FormData();
           Object.entries(jobData).forEach(([key, value]) => {
@@ -1218,18 +1321,25 @@ export const jobsAPI = {
   ): Promise<UpdateJobResponse> => {
     try {
       // Try JSON first for simple data
-      const response = await api.put(`/app/memo/jobber/${orderNumber}/`, jobData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.put(
+        `/app/memo/jobber/${orderNumber}/`,
+        jobData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       showSuccessToast('Job updated successfully');
       return response.data;
     } catch (jsonError: any) {
       console.log('JSON update failed, trying FormData:', jsonError);
 
       // If JSON fails and we have files, try FormData
-      if (jsonError.response?.status === 400 && jobData.profile_picture instanceof File) {
+      if (
+        jsonError.response?.status === 400 &&
+        jobData.profile_picture instanceof File
+      ) {
         try {
           const formData = new FormData();
           Object.entries(jobData).forEach(([key, value]) => {
@@ -1242,11 +1352,15 @@ export const jobsAPI = {
             }
           });
 
-          const response = await api.put(`/app/memo/jobber/${orderNumber}/`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+          const response = await api.put(
+            `/app/memo/jobber/${orderNumber}/`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
           showSuccessToast('Job updated successfully');
           return response.data;
         } catch (error) {
@@ -1279,14 +1393,21 @@ export const jobMaterialsAPI = {
     return Array.isArray(response.data) ? response.data : [];
   },
 
-  getJobMaterial: async (jobMaterialId: number): Promise<GetJobMaterialResponse> => {
+  getJobMaterial: async (
+    jobMaterialId: number
+  ): Promise<GetJobMaterialResponse> => {
     const response = await api.get(`/app/memo/jobbmatriell/${jobMaterialId}/`);
     return response.data;
   },
 
-  createJobMaterial: async (jobMaterialData: CreateJobMaterialPayload): Promise<CreateJobMaterialResponse> => {
+  createJobMaterial: async (
+    jobMaterialData: CreateJobMaterialPayload
+  ): Promise<CreateJobMaterialResponse> => {
     try {
-      const response = await api.post('/app/memo/jobbmatriell/', jobMaterialData);
+      const response = await api.post(
+        '/app/memo/jobbmatriell/',
+        jobMaterialData
+      );
       showSuccessToast('Job material created successfully');
       return response.data;
     } catch (error) {
@@ -1300,7 +1421,10 @@ export const jobMaterialsAPI = {
     jobMaterialData: UpdateJobMaterialPayload
   ): Promise<UpdateJobMaterialResponse> => {
     try {
-      const response = await api.put(`/app/memo/jobbmatriell/${jobMaterialId}/`, jobMaterialData);
+      const response = await api.put(
+        `/app/memo/jobbmatriell/${jobMaterialId}/`,
+        jobMaterialData
+      );
       showSuccessToast('Job material updated successfully');
       return response.data;
     } catch (error) {
@@ -1309,9 +1433,13 @@ export const jobMaterialsAPI = {
     }
   },
 
-  deleteJobMaterial: async (jobMaterialId: number): Promise<DeleteJobMaterialResponse> => {
+  deleteJobMaterial: async (
+    jobMaterialId: number
+  ): Promise<DeleteJobMaterialResponse> => {
     try {
-      const response = await api.delete(`/app/memo/jobbmatriell/${jobMaterialId}/`);
+      const response = await api.delete(
+        `/app/memo/jobbmatriell/${jobMaterialId}/`
+      );
       showSuccessToast('Job material deleted successfully');
       return response.data;
     } catch (error) {
@@ -1333,7 +1461,9 @@ export const jobImagesAPI = {
     return response.data;
   },
 
-  uploadJobImage: async (imageData: CreateJobImagePayload): Promise<CreateJobImageResponse> => {
+  uploadJobImage: async (
+    imageData: CreateJobImagePayload
+  ): Promise<CreateJobImageResponse> => {
     try {
       const formData = new FormData();
       formData.append('image', imageData.image);
@@ -1376,7 +1506,9 @@ export const jobFilesAPI = {
     return response.data;
   },
 
-  uploadJobFile: async (fileData: CreateJobFilePayload): Promise<CreateJobFileResponse> => {
+  uploadJobFile: async (
+    fileData: CreateJobFilePayload
+  ): Promise<CreateJobFileResponse> => {
     try {
       const formData = new FormData();
       formData.append('file', fileData.file);
@@ -1419,7 +1551,9 @@ export const timeEntriesAPI = {
     return response.data;
   },
 
-  createTimeEntry: async (timeEntryData: CreateTimeEntryPayload): Promise<CreateTimeEntryResponse> => {
+  createTimeEntry: async (
+    timeEntryData: CreateTimeEntryPayload
+  ): Promise<CreateTimeEntryResponse> => {
     try {
       const response = await api.post('/app/memo/timeliste/', timeEntryData);
       showSuccessToast('Time entry created successfully');
@@ -1435,7 +1569,10 @@ export const timeEntriesAPI = {
     timeEntryData: UpdateTimeEntryPayload
   ): Promise<UpdateTimeEntryResponse> => {
     try {
-      const response = await api.put(`/app/memo/timeliste/${timeEntryId}/`, timeEntryData);
+      const response = await api.put(
+        `/app/memo/timeliste/${timeEntryId}/`,
+        timeEntryData
+      );
       showSuccessToast('Time entry updated successfully');
       return response.data;
     } catch (error) {
@@ -1444,7 +1581,9 @@ export const timeEntriesAPI = {
     }
   },
 
-  deleteTimeEntry: async (timeEntryId: number): Promise<DeleteTimeEntryResponse> => {
+  deleteTimeEntry: async (
+    timeEntryId: number
+  ): Promise<DeleteTimeEntryResponse> => {
     try {
       const response = await api.delete(`/app/memo/timeliste/${timeEntryId}/`);
       showSuccessToast('Time entry deleted successfully');
@@ -1468,21 +1607,30 @@ export const llmProvidersAPI = {
     return response.data;
   },
 
-  createProvider: async (providerData: CreateLLMProviderPayload): Promise<CreateLLMProviderResponse> => {
+  createProvider: async (
+    providerData: CreateLLMProviderPayload
+  ): Promise<CreateLLMProviderResponse> => {
     try {
       // First try JSON payload
-      const response = await api.post('/app/components/providers/', providerData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.post(
+        '/app/components/providers/',
+        providerData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       showSuccessToast('LLM Provider created successfully');
       return response.data;
     } catch (jsonError: any) {
       console.log('JSON create failed, trying FormData:', jsonError);
 
       // If JSON fails and we have files, try FormData
-      if (jsonError.response?.status === 400 && providerData.icon instanceof File) {
+      if (
+        jsonError.response?.status === 400 &&
+        providerData.icon instanceof File
+      ) {
         try {
           const formData = new FormData();
           Object.entries(providerData).forEach(([key, value]) => {
@@ -1500,11 +1648,15 @@ export const llmProvidersAPI = {
             }
           });
 
-          const response = await api.post('/app/components/providers/', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+          const response = await api.post(
+            '/app/components/providers/',
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
           showSuccessToast('LLM Provider created successfully');
           return response.data;
         } catch (error) {
@@ -1524,18 +1676,25 @@ export const llmProvidersAPI = {
   ): Promise<UpdateLLMProviderResponse> => {
     try {
       // First try JSON payload
-      const response = await api.put(`/app/components/providers/${providerId}/`, providerData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.put(
+        `/app/components/providers/${providerId}/`,
+        providerData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       showSuccessToast('LLM Provider updated successfully');
       return response.data;
     } catch (jsonError: any) {
       console.log('JSON update failed, trying FormData:', jsonError);
 
       // If JSON fails and we have files, try FormData
-      if (jsonError.response?.status === 400 && providerData.icon instanceof File) {
+      if (
+        jsonError.response?.status === 400 &&
+        providerData.icon instanceof File
+      ) {
         try {
           const formData = new FormData();
           Object.entries(providerData).forEach(([key, value]) => {
@@ -1553,11 +1712,15 @@ export const llmProvidersAPI = {
             }
           });
 
-          const response = await api.put(`/app/components/providers/${providerId}/`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+          const response = await api.put(
+            `/app/components/providers/${providerId}/`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
           showSuccessToast('LLM Provider updated successfully');
           return response.data;
         } catch (error) {
@@ -1571,9 +1734,13 @@ export const llmProvidersAPI = {
     }
   },
 
-  deleteProvider: async (providerId: number): Promise<DeleteLLMProviderResponse> => {
+  deleteProvider: async (
+    providerId: number
+  ): Promise<DeleteLLMProviderResponse> => {
     try {
-      const response = await api.delete(`/app/components/providers/${providerId}/`);
+      const response = await api.delete(
+        `/app/components/providers/${providerId}/`
+      );
       showSuccessToast('LLM Provider deleted successfully');
       return response.data;
     } catch (error) {

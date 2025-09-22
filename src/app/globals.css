@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 @custom-variant purple (&:is(.purple *));
@@ -42,7 +42,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  
+
   /* Purple accent colors */
   --color-purple-50: oklch(0.98 0.014 280);
   --color-purple-100: oklch(0.96 0.03 280);
@@ -50,9 +50,9 @@
   --color-purple-300: oklch(0.88 0.12 280);
   --color-purple-400: oklch(0.82 0.18 280);
   --color-purple-500: oklch(0.72 0.25 280);
-  --color-purple-600: oklch(0.62 0.30 280);
+  --color-purple-600: oklch(0.62 0.3 280);
   --color-purple-700: oklch(0.52 0.35 280);
-  --color-purple-800: oklch(0.42 0.40 280);
+  --color-purple-800: oklch(0.42 0.4 280);
   --color-purple-900: oklch(0.32 0.45 280);
 }
 
@@ -98,7 +98,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.75 0.20 280);
+  --primary: oklch(0.75 0.2 280);
   --primary-foreground: oklch(0.98 0.01 280);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -109,7 +109,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.75 0.20 280);
+  --ring: oklch(0.75 0.2 280);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -117,12 +117,12 @@
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.75 0.20 280);
+  --sidebar-primary: oklch(0.75 0.2 280);
   --sidebar-primary-foreground: oklch(0.98 0.01 280);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.75 0.20 280);
+  --sidebar-ring: oklch(0.75 0.2 280);
 }
 
 .purple {
@@ -132,7 +132,7 @@
   --card-foreground: oklch(0.15 0.05 280);
   --popover: oklch(0.98 0.02 280);
   --popover-foreground: oklch(0.15 0.05 280);
-  --primary: oklch(0.55 0.30 280);
+  --primary: oklch(0.55 0.3 280);
   --primary-foreground: oklch(0.98 0.01 280);
   --secondary: oklch(0.97 0.01 280);
   --secondary-foreground: oklch(0.25 0.05 280);
@@ -143,20 +143,20 @@
   --destructive: oklch(0.55 0.22 15);
   --border: oklch(0.92 0.02 280);
   --input: oklch(0.92 0.02 280);
-  --ring: oklch(0.55 0.30 280);
+  --ring: oklch(0.55 0.3 280);
   --chart-1: oklch(0.65 0.25 280);
-  --chart-2: oklch(0.55 0.20 260);
+  --chart-2: oklch(0.55 0.2 260);
   --chart-3: oklch(0.45 0.15 300);
-  --chart-4: oklch(0.75 0.30 270);
+  --chart-4: oklch(0.75 0.3 270);
   --chart-5: oklch(0.85 0.15 290);
   --sidebar: oklch(0.98 0.02 280);
   --sidebar-foreground: oklch(0.15 0.05 280);
-  --sidebar-primary: oklch(0.55 0.30 280);
+  --sidebar-primary: oklch(0.55 0.3 280);
   --sidebar-primary-foreground: oklch(0.98 0.01 280);
   --sidebar-accent: oklch(0.94 0.03 280);
   --sidebar-accent-foreground: oklch(0.25 0.05 280);
   --sidebar-border: oklch(0.92 0.02 280);
-  --sidebar-ring: oklch(0.55 0.30 280);
+  --sidebar-ring: oklch(0.55 0.3 280);
 }
 
 @layer base {
@@ -182,20 +182,28 @@
 }
 
 .hover\:bg-purple-accent:hover {
-  background-color: oklch(0.62 0.30 280);
+  background-color: oklch(0.62 0.3 280);
 }
 
 .hover\:text-purple-accent:hover {
-  color: oklch(0.62 0.30 280);
+  color: oklch(0.62 0.3 280);
 }
 
 /* Purple gradient utilities */
 .bg-purple-gradient {
-  background: linear-gradient(135deg, oklch(0.72 0.25 280) 0%, oklch(0.82 0.18 280) 100%);
+  background: linear-gradient(
+    135deg,
+    oklch(0.72 0.25 280) 0%,
+    oklch(0.82 0.18 280) 100%
+  );
 }
 
 .text-purple-gradient {
-  background: linear-gradient(135deg, oklch(0.72 0.25 280) 0%, oklch(0.82 0.18 280) 100%);
+  background: linear-gradient(
+    135deg,
+    oklch(0.72 0.25 280) 0%,
+    oklch(0.82 0.18 280) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -207,12 +215,18 @@
 }
 
 .shadow-purple-lg {
-  box-shadow: 0 10px 25px -3px oklch(0.72 0.25 280 / 0.1), 0 4px 6px -2px oklch(0.72 0.25 280 / 0.05);
+  box-shadow:
+    0 10px 25px -3px oklch(0.72 0.25 280 / 0.1),
+    0 4px 6px -2px oklch(0.72 0.25 280 / 0.05);
 }
 
 /* API Tester Styles */
 .api-gradient {
-  background: linear-gradient(135deg, oklch(0.646 0.222 41.116) 0%, oklch(0.488 0.243 264.376) 100%);
+  background: linear-gradient(
+    135deg,
+    oklch(0.646 0.222 41.116) 0%,
+    oklch(0.488 0.243 264.376) 100%
+  );
 }
 
 .api-accent-border {
@@ -268,7 +282,9 @@
 
 /* Hover effects */
 .hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .hover-lift:hover {
@@ -297,13 +313,25 @@
 
 /* Animated gradient background */
 @keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animated-gradient {
-  background: linear-gradient(-45deg, oklch(0.646 0.222 41.116), oklch(0.488 0.243 264.376), oklch(0.696 0.17 162.48), oklch(0.769 0.188 70.08));
+  background: linear-gradient(
+    -45deg,
+    oklch(0.646 0.222 41.116),
+    oklch(0.488 0.243 264.376),
+    oklch(0.696 0.17 162.48),
+    oklch(0.769 0.188 70.08)
+  );
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;
 }

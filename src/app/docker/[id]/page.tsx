@@ -67,14 +67,21 @@ function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleString();
 }
 
-function formatPort(port: { container_port: number; host_ip?: string; host_port?: number }): string {
+function formatPort(port: {
+  container_port: number;
+  host_ip?: string;
+  host_port?: number;
+}): string {
   if (port.host_port) {
     return `${port.host_port}:${port.container_port}`;
   }
   return `${port.container_port}`;
 }
 
-function getPortUrl(port: { container_port: number; host_ip?: string; host_port?: number }, hostName?: string): string | null {
+function getPortUrl(
+  port: { container_port: number; host_ip?: string; host_port?: number },
+  hostName?: string
+): string | null {
   if (!port.host_port) return null;
 
   let baseUrl = '';
@@ -101,7 +108,9 @@ function StatsCard({ stats }: { stats: DockerStats }) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {stats.cpu_percent !== null ? `${stats.cpu_percent.toFixed(2)}%` : 'N/A'}
+            {stats.cpu_percent !== null
+              ? `${stats.cpu_percent.toFixed(2)}%`
+              : 'N/A'}
           </div>
         </CardContent>
       </Card>
@@ -115,13 +124,14 @@ function StatsCard({ stats }: { stats: DockerStats }) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {stats.memory_percent !== null ? `${stats.memory_percent.toFixed(1)}%` : 'N/A'}
+            {stats.memory_percent !== null
+              ? `${stats.memory_percent.toFixed(1)}%`
+              : 'N/A'}
           </div>
           <div className="text-sm text-muted-foreground">
             {stats.memory_usage !== null && stats.memory_limit !== null
               ? `${formatBytes(stats.memory_usage)} / ${formatBytes(stats.memory_limit)}`
-              : 'N/A'
-            }
+              : 'N/A'}
           </div>
         </CardContent>
       </Card>
@@ -138,13 +148,17 @@ function StatsCard({ stats }: { stats: DockerStats }) {
             <div className="flex justify-between">
               <span>RX:</span>
               <span className="font-medium">
-                {stats.network_rx !== null ? formatBytes(stats.network_rx) : 'N/A'}
+                {stats.network_rx !== null
+                  ? formatBytes(stats.network_rx)
+                  : 'N/A'}
               </span>
             </div>
             <div className="flex justify-between">
               <span>TX:</span>
               <span className="font-medium">
-                {stats.network_tx !== null ? formatBytes(stats.network_tx) : 'N/A'}
+                {stats.network_tx !== null
+                  ? formatBytes(stats.network_tx)
+                  : 'N/A'}
               </span>
             </div>
           </div>
@@ -163,13 +177,17 @@ function StatsCard({ stats }: { stats: DockerStats }) {
             <div className="flex justify-between">
               <span>Read:</span>
               <span className="font-medium">
-                {stats.disk_read !== null ? formatBytes(stats.disk_read) : 'N/A'}
+                {stats.disk_read !== null
+                  ? formatBytes(stats.disk_read)
+                  : 'N/A'}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Write:</span>
               <span className="font-medium">
-                {stats.disk_write !== null ? formatBytes(stats.disk_write) : 'N/A'}
+                {stats.disk_write !== null
+                  ? formatBytes(stats.disk_write)
+                  : 'N/A'}
               </span>
             </div>
           </div>
@@ -209,19 +227,25 @@ function HistoricalStats({ stats }: { stats: DockerStats[] }) {
               <div>
                 <div className="text-muted-foreground">CPU</div>
                 <div className="font-medium">
-                  {stat.cpu_percent !== null ? `${stat.cpu_percent.toFixed(2)}%` : 'N/A'}
+                  {stat.cpu_percent !== null
+                    ? `${stat.cpu_percent.toFixed(2)}%`
+                    : 'N/A'}
                 </div>
               </div>
               <div>
                 <div className="text-muted-foreground">Memory</div>
                 <div className="font-medium">
-                  {stat.memory_percent !== null ? `${stat.memory_percent.toFixed(1)}%` : 'N/A'}
+                  {stat.memory_percent !== null
+                    ? `${stat.memory_percent.toFixed(1)}%`
+                    : 'N/A'}
                 </div>
               </div>
               <div>
                 <div className="text-muted-foreground">Network RX</div>
                 <div className="font-medium">
-                  {stat.network_rx !== null ? formatBytes(stat.network_rx) : 'N/A'}
+                  {stat.network_rx !== null
+                    ? formatBytes(stat.network_rx)
+                    : 'N/A'}
                 </div>
               </div>
               <div>
@@ -236,7 +260,11 @@ function HistoricalStats({ stats }: { stats: DockerStats[] }) {
   );
 }
 
-export default function ContainerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ContainerDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const { isAuthenticated, isInitialized } = useAuthStore();
   const { theme } = useUIStore();
@@ -325,269 +353,329 @@ export default function ContainerDetailPage({ params }: { params: Promise<{ id: 
       <Navbar />
       <main className="container mx-auto px-4 py-4 sm:py-8">
         <div className="max-w-7xl mx-auto">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">{container.name}</h1>
-            <Badge
-              variant="secondary"
-              className={cn("text-white", statusInfo.color)}
-            >
-              <StatusIcon className="w-3 h-3 mr-1" />
-              {statusInfo.label}
-            </Badge>
-          </div>
-          <div className="flex items-center text-muted-foreground">
-            <Server className="w-4 h-4 mr-1" />
-            {container.host_name}
-          </div>
-        </div>
-        <Button onClick={handleRefresh} disabled={refreshing}>
-          <RefreshCw className={cn("w-4 h-4 mr-2", refreshing && "animate-spin")} />
-          Refresh
-        </Button>
-      </div>
-
-      {container.latest_stats && (
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Current Stats</h2>
-          <StatsCard stats={container.latest_stats} />
-        </div>
-      )}
-
-      <Tabs defaultValue="details" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="environment">Environment</TabsTrigger>
-          <TabsTrigger value="network">Network</TabsTrigger>
-          <TabsTrigger value="history">Stats History</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="details" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Tag className="w-4 h-4 mr-2" />
-                  Container Info
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Container ID</div>
-                  <div className="font-mono text-sm">{container.container_id}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Image</div>
-                  <div className="font-mono text-sm">{container.image}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">State</div>
-                  <div className="text-sm space-y-1">
-                    <div>Status: {container.state.Status}</div>
-                    {container.state.Pid > 0 && (
-                      <div>PID: {container.state.Pid}</div>
-                    )}
-                    {container.state.ExitCode !== 0 && (
-                      <div>Exit Code: {container.state.ExitCode}</div>
-                    )}
-                    {container.state.Error && (
-                      <div className="text-red-500">Error: {container.state.Error}</div>
-                    )}
-                  </div>
-                </div>
-                {container.command && (
-                  <div>
-                    <div className="text-sm font-medium text-muted-foreground">Command</div>
-                    <div className="font-mono text-sm bg-muted p-2 rounded">
-                      {container.command}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Timestamps
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Created</div>
-                  <div className="text-sm">{formatDate(container.created_at)}</div>
-                </div>
-                {container.started_at && (
-                  <div>
-                    <div className="text-sm font-medium text-muted-foreground">Started</div>
-                    <div className="text-sm">{formatDate(container.started_at)}</div>
-                  </div>
-                )}
-                {container.status === 'running' && (
-                  <div>
-                    <div className="text-sm font-medium text-muted-foreground">Uptime</div>
-                    <div className="text-sm">
-                      {formatUptime(container.created_at, container.started_at)}
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Last Updated</div>
-                  <div className="text-sm">{formatDate(container.updated_at)}</div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="flex items-center gap-4 mb-6">
+            <Button variant="outline" size="sm" onClick={() => router.back()}>
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold">{container.name}</h1>
+                <Badge
+                  variant="secondary"
+                  className={cn('text-white', statusInfo.color)}
+                >
+                  <StatusIcon className="w-3 h-3 mr-1" />
+                  {statusInfo.label}
+                </Badge>
+              </div>
+              <div className="flex items-center text-muted-foreground">
+                <Server className="w-4 h-4 mr-1" />
+                {container.host_name}
+              </div>
+            </div>
+            <Button onClick={handleRefresh} disabled={refreshing}>
+              <RefreshCw
+                className={cn('w-4 h-4 mr-2', refreshing && 'animate-spin')}
+              />
+              Refresh
+            </Button>
           </div>
 
-          {container.volumes && container.volumes.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FolderOpen className="w-4 h-4 mr-2" />
-                  Volumes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {container.volumes.map((volume, index) => (
-                    <div key={index} className="font-mono text-sm bg-muted p-2 rounded">
-                      {volume}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          {container.latest_stats && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-4">Current Stats</h2>
+              <StatsCard stats={container.latest_stats} />
+            </div>
           )}
-        </TabsContent>
 
-        <TabsContent value="environment" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Terminal className="w-4 h-4 mr-2" />
-                Environment Variables
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {container.environment && Object.keys(container.environment).length > 0 ? (
-                <div className="space-y-2">
-                  {Object.entries(container.environment).map(([key, value]) => (
-                    <div key={key} className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b">
-                      <div className="font-medium text-sm">{key}</div>
-                      <div className="md:col-span-2 font-mono text-sm bg-muted p-2 rounded">
-                        {value}
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="environment">Environment</TabsTrigger>
+              <TabsTrigger value="network">Network</TabsTrigger>
+              <TabsTrigger value="history">Stats History</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="details" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Tag className="w-4 h-4 mr-2" />
+                      Container Info
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Container ID
+                      </div>
+                      <div className="font-mono text-sm">
+                        {container.container_id}
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No environment variables found.</p>
+                    <div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Image
+                      </div>
+                      <div className="font-mono text-sm">{container.image}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        State
+                      </div>
+                      <div className="text-sm space-y-1">
+                        <div>Status: {container.state.Status}</div>
+                        {container.state.Pid > 0 && (
+                          <div>PID: {container.state.Pid}</div>
+                        )}
+                        {container.state.ExitCode !== 0 && (
+                          <div>Exit Code: {container.state.ExitCode}</div>
+                        )}
+                        {container.state.Error && (
+                          <div className="text-red-500">
+                            Error: {container.state.Error}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {container.command && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Command
+                        </div>
+                        <div className="font-mono text-sm bg-muted p-2 rounded">
+                          {container.command}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Clock className="w-4 h-4 mr-2" />
+                      Timestamps
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Created
+                      </div>
+                      <div className="text-sm">
+                        {formatDate(container.created_at)}
+                      </div>
+                    </div>
+                    {container.started_at && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Started
+                        </div>
+                        <div className="text-sm">
+                          {formatDate(container.started_at)}
+                        </div>
+                      </div>
+                    )}
+                    {container.status === 'running' && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Uptime
+                        </div>
+                        <div className="text-sm">
+                          {formatUptime(
+                            container.created_at,
+                            container.started_at
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    <div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Last Updated
+                      </div>
+                      <div className="text-sm">
+                        {formatDate(container.updated_at)}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {container.volumes && container.volumes.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <FolderOpen className="w-4 h-4 mr-2" />
+                      Volumes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {container.volumes.map((volume, index) => (
+                        <div
+                          key={index}
+                          className="font-mono text-sm bg-muted p-2 rounded"
+                        >
+                          {volume}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
-            </CardContent>
-          </Card>
+            </TabsContent>
 
-          {container.labels && Object.keys(container.labels).length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Tag className="w-4 h-4 mr-2" />
-                  Labels
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(container.labels).map(([key, value]) => (
-                    <div key={key} className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b">
-                      <div className="font-medium text-sm">{key}</div>
-                      <div className="md:col-span-2 font-mono text-sm bg-muted p-2 rounded">
-                        {value}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="network" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {container.ports && container.ports.length > 0 && (
+            <TabsContent value="environment" className="space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Globe className="w-4 h-4 mr-2" />
-                    Port Mappings
+                    <Terminal className="w-4 h-4 mr-2" />
+                    Environment Variables
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    {(() => {
-                      // Deduplicate ports by unique host_port:container_port combination
-                      const uniquePorts = container.ports.filter((port, index, arr) => {
-                        return arr.findIndex(p =>
-                          p.host_port === port.host_port &&
-                          p.container_port === port.container_port
-                        ) === index;
-                      });
-
-                      return uniquePorts.map((port, index) => {
-                        const url = getPortUrl(port, container.host_name);
-                        return url ? (
-                          <Badge
-                            key={`${port.host_port}-${port.container_port}`}
-                            variant="outline"
-                            className="mr-2 mb-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                            onClick={() => window.open(url, '_blank')}
+                  {container.environment &&
+                  Object.keys(container.environment).length > 0 ? (
+                    <div className="space-y-2">
+                      {Object.entries(container.environment).map(
+                        ([key, value]) => (
+                          <div
+                            key={key}
+                            className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b"
                           >
-                            {formatPort(port)}
-                          </Badge>
-                        ) : (
-                          <Badge key={`${port.host_port}-${port.container_port}`} variant="outline" className="mr-2 mb-2">
-                            {formatPort(port)}
-                          </Badge>
-                        );
-                      });
-                    })()}
-                  </div>
+                            <div className="font-medium text-sm">{key}</div>
+                            <div className="md:col-span-2 font-mono text-sm bg-muted p-2 rounded">
+                              {value}
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No environment variables found.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
-            )}
 
-            {container.networks && container.networks.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Network className="w-4 h-4 mr-2" />
-                    Networks
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {container.networks.map((network, index) => (
-                      <Badge key={index} variant="outline" className="mr-2 mb-2">
-                        {network}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
+              {container.labels && Object.keys(container.labels).length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Tag className="w-4 h-4 mr-2" />
+                      Labels
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {Object.entries(container.labels).map(([key, value]) => (
+                        <div
+                          key={key}
+                          className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b"
+                        >
+                          <div className="font-medium text-sm">{key}</div>
+                          <div className="md:col-span-2 font-mono text-sm bg-muted p-2 rounded">
+                            {value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
 
-        <TabsContent value="history" className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Performance History</h3>
-            <HistoricalStats stats={historicalStats} />
-          </div>
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="network" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {container.ports && container.ports.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Globe className="w-4 h-4 mr-2" />
+                        Port Mappings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {(() => {
+                          // Deduplicate ports by unique host_port:container_port combination
+                          const uniquePorts = container.ports.filter(
+                            (port, index, arr) => {
+                              return (
+                                arr.findIndex(
+                                  (p) =>
+                                    p.host_port === port.host_port &&
+                                    p.container_port === port.container_port
+                                ) === index
+                              );
+                            }
+                          );
+
+                          return uniquePorts.map((port, index) => {
+                            const url = getPortUrl(port, container.host_name);
+                            return url ? (
+                              <Badge
+                                key={`${port.host_port}-${port.container_port}`}
+                                variant="outline"
+                                className="mr-2 mb-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                                onClick={() => window.open(url, '_blank')}
+                              >
+                                {formatPort(port)}
+                              </Badge>
+                            ) : (
+                              <Badge
+                                key={`${port.host_port}-${port.container_port}`}
+                                variant="outline"
+                                className="mr-2 mb-2"
+                              >
+                                {formatPort(port)}
+                              </Badge>
+                            );
+                          });
+                        })()}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {container.networks && container.networks.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Network className="w-4 h-4 mr-2" />
+                        Networks
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {container.networks.map((network, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="mr-2 mb-2"
+                          >
+                            {network}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="history" className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">
+                  Performance History
+                </h3>
+                <HistoricalStats stats={historicalStats} />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
       <ChatBot />

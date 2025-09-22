@@ -53,8 +53,13 @@ class EFOService {
     this.baseUrl = process.env.NEXT_PUBLIC_EFO_API_URL || '';
     this.apiKey = process.env.NEXT_PUBLIC_EFO_API_KEY || '';
     this.enabled = process.env.NEXT_PUBLIC_EFO_API_ENABLED === 'true';
-    this.scraperUrl = process.env.NEXT_PUBLIC_N8N_URL?.replace('/webhook/nxfs', '/webhook/efobasen-lookup') || 'https://n8n.nxfs.no/webhook/efobasen-lookup';
-    this.scraperEnabled = process.env.NEXT_PUBLIC_EFO_SCRAPER_ENABLED === 'true';
+    this.scraperUrl =
+      process.env.NEXT_PUBLIC_N8N_URL?.replace(
+        '/webhook/nxfs',
+        '/webhook/efobasen-lookup'
+      ) || 'https://n8n.nxfs.no/webhook/efobasen-lookup';
+    this.scraperEnabled =
+      process.env.NEXT_PUBLIC_EFO_SCRAPER_ENABLED === 'true';
   }
 
   /**
@@ -74,7 +79,9 @@ class EFOService {
   /**
    * Search for products by EL-number using N8N scraper
    */
-  async searchByElNumberScraper(elNumber: string | number): Promise<EFOProduct | null> {
+  async searchByElNumberScraper(
+    elNumber: string | number
+  ): Promise<EFOProduct | null> {
     try {
       const response = await fetch(this.scraperUrl, {
         method: 'POST',
@@ -82,7 +89,8 @@ class EFOService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          el_number: typeof elNumber === 'string' ? parseInt(elNumber) : elNumber,
+          el_number:
+            typeof elNumber === 'string' ? parseInt(elNumber) : elNumber,
           force_update: false,
         }),
       });
@@ -118,7 +126,9 @@ class EFOService {
   /**
    * Search for products by EL-number (tries scraper first, then API, then mock)
    */
-  async searchByElNumber(elNumber: string | number): Promise<EFOProduct | null> {
+  async searchByElNumber(
+    elNumber: string | number
+  ): Promise<EFOProduct | null> {
     // Try N8N scraper first (if enabled)
     if (this.isScraperEnabled()) {
       const scraperResult = await this.searchByElNumberScraper(elNumber);
@@ -134,7 +144,7 @@ class EFOService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`,
+            Authorization: `Bearer ${this.apiKey}`,
           },
           body: JSON.stringify({
             el_nr: typeof elNumber === 'string' ? parseInt(elNumber) : elNumber,
@@ -157,7 +167,11 @@ class EFOService {
   /**
    * Search for products by text query
    */
-  async searchByText(query: string, page = 1, pageSize = 20): Promise<EFOSearchResponse | null> {
+  async searchByText(
+    query: string,
+    page = 1,
+    pageSize = 20
+  ): Promise<EFOSearchResponse | null> {
     if (!this.isEnabled()) {
       console.warn('EFO API not enabled or configured');
       return null;
@@ -168,7 +182,7 @@ class EFOService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           query,
@@ -191,7 +205,10 @@ class EFOService {
   /**
    * Convert EFO product to local material format
    */
-  convertToMaterial(efoProduct: EFOProduct, supplierId: number): CreateMaterialPayload {
+  convertToMaterial(
+    efoProduct: EFOProduct,
+    supplierId: number
+  ): CreateMaterialPayload {
     return {
       leverandor_id: supplierId,
       el_nr: efoProduct.el_nr,
@@ -201,14 +218,19 @@ class EFOService {
         efoProduct.manufacturer && `Manufacturer: ${efoProduct.manufacturer}`,
         efoProduct.category && `Category: ${efoProduct.category}`,
         efoProduct.etimClass && `ETIM: ${efoProduct.etimClass}`,
-      ].filter(Boolean).join(' | '),
+      ]
+        .filter(Boolean)
+        .join(' | '),
     };
   }
 
   /**
    * Lookup and import material from EFO database
    */
-  async lookupAndImportMaterial(elNumber: string | number, supplierId: number): Promise<Material | null> {
+  async lookupAndImportMaterial(
+    elNumber: string | number,
+    supplierId: number
+  ): Promise<Material | null> {
     const efoProduct = await this.searchByElNumber(elNumber);
 
     if (!efoProduct) {
@@ -233,110 +255,114 @@ class EFOService {
    * Demo/fallback search using enhanced mock data
    * This matches the N8N workflow mock data
    */
-  async mockSearchByElNumber(elNumber: string | number): Promise<EFOProduct | null> {
+  async mockSearchByElNumber(
+    elNumber: string | number
+  ): Promise<EFOProduct | null> {
     // Enhanced mock EFO data for demonstration
     const mockProducts: EFOProduct[] = [
       {
         el_nr: 123456,
-        productName: "LED-pære E27 9W 2700K dimbar",
-        manufacturer: "Philips",
-        supplierName: "Elektro Grossist AS",
-        description: "LED-pære med E27 sokkel, 9W effekt, varmhvitt lys 2700K, dimbar",
-        category: "Belysning - LED pærer",
-        price: 89.90,
-        availability: "På lager",
+        productName: 'LED-pære E27 9W 2700K dimbar',
+        manufacturer: 'Philips',
+        supplierName: 'Elektro Grossist AS',
+        description:
+          'LED-pære med E27 sokkel, 9W effekt, varmhvitt lys 2700K, dimbar',
+        category: 'Belysning - LED pærer',
+        price: 89.9,
+        availability: 'På lager',
         specifications: {
-          "Effekt": "9W",
-          "Sokkel": "E27",
-          "Lumen": "806 lm",
-          "Fargetemp": "2700K",
-          "Dimbar": "Ja"
+          Effekt: '9W',
+          Sokkel: 'E27',
+          Lumen: '806 lm',
+          Fargetemp: '2700K',
+          Dimbar: 'Ja',
         },
       },
       {
         el_nr: 234567,
-        productName: "Jordfeilbryter 2-pol 16A 30mA Type A",
-        manufacturer: "Schneider Electric",
-        supplierName: "El-Grossisten",
-        description: "Jordfeilbryter 2-polet 16A 30mA Type A for boliger",
-        category: "Sikkerhetsutstyr - Jordfeilbrytere",
-        price: 245.00,
-        availability: "På lager",
+        productName: 'Jordfeilbryter 2-pol 16A 30mA Type A',
+        manufacturer: 'Schneider Electric',
+        supplierName: 'El-Grossisten',
+        description: 'Jordfeilbryter 2-polet 16A 30mA Type A for boliger',
+        category: 'Sikkerhetsutstyr - Jordfeilbrytere',
+        price: 245.0,
+        availability: 'På lager',
         specifications: {
-          "Strøm": "16A",
-          "Utløsestrøm": "30mA",
-          "Type": "A",
-          "Poler": "2"
+          Strøm: '16A',
+          Utløsestrøm: '30mA',
+          Type: 'A',
+          Poler: '2',
         },
       },
       {
         el_nr: 345678,
-        productName: "Kabel NYM-J 3x1.5mm² 100m",
-        manufacturer: "Nexans",
-        supplierName: "Kabel Norge AS",
-        description: "Installasjonskabel NYM-J 3x1.5mm² på 100m trommel, grå",
-        category: "Kabler - Installasjon",
-        price: 1250.00,
-        availability: "Bestillingsvare",
+        productName: 'Kabel NYM-J 3x1.5mm² 100m',
+        manufacturer: 'Nexans',
+        supplierName: 'Kabel Norge AS',
+        description: 'Installasjonskabel NYM-J 3x1.5mm² på 100m trommel, grå',
+        category: 'Kabler - Installasjon',
+        price: 1250.0,
+        availability: 'Bestillingsvare',
         specifications: {
-          "Tverrsnitt": "3x1.5mm²",
-          "Type": "NYM-J",
-          "Lengde": "100m",
-          "Farge": "Grå"
+          Tverrsnitt: '3x1.5mm²',
+          Type: 'NYM-J',
+          Lengde: '100m',
+          Farge: 'Grå',
         },
       },
       {
         el_nr: 456789,
-        productName: "Stikkontakt 1-fas med jord hvit",
-        manufacturer: "Gira",
-        supplierName: "Elektro Partner",
-        description: "Stikkontakt 1-fas med jord, hvit, for standard veggboks",
-        category: "Stikkontakter - Standard",
-        price: 45.00,
-        availability: "På lager",
+        productName: 'Stikkontakt 1-fas med jord hvit',
+        manufacturer: 'Gira',
+        supplierName: 'Elektro Partner',
+        description: 'Stikkontakt 1-fas med jord, hvit, for standard veggboks',
+        category: 'Stikkontakter - Standard',
+        price: 45.0,
+        availability: 'På lager',
         specifications: {
-          "Faser": "1",
-          "Jording": "Ja",
-          "Farge": "Hvit",
-          "IP-klasse": "IP20"
+          Faser: '1',
+          Jording: 'Ja',
+          Farge: 'Hvit',
+          'IP-klasse': 'IP20',
         },
       },
       {
         el_nr: 567890,
-        productName: "Lysbryter 1-pol hvit",
-        manufacturer: "ABB",
-        supplierName: "ABB Norge",
-        description: "Lysbryter 1-polet, hvit, for standard veggboks",
-        category: "Brytere - Standard",
-        price: 35.00,
-        availability: "På lager",
+        productName: 'Lysbryter 1-pol hvit',
+        manufacturer: 'ABB',
+        supplierName: 'ABB Norge',
+        description: 'Lysbryter 1-polet, hvit, for standard veggboks',
+        category: 'Brytere - Standard',
+        price: 35.0,
+        availability: 'På lager',
         specifications: {
-          "Poler": "1",
-          "Farge": "Hvit",
-          "Type": "Veksler",
-          "IP-klasse": "IP20"
+          Poler: '1',
+          Farge: 'Hvit',
+          Type: 'Veksler',
+          'IP-klasse': 'IP20',
         },
       },
       {
         el_nr: 678901,
-        productName: "Automatsikring C16 1-pol",
-        manufacturer: "Schneider Electric",
-        supplierName: "El-Grossisten",
-        description: "Automatsikring C16 1-polet for fordelertavle",
-        category: "Sikringer - Automat",
-        price: 85.00,
-        availability: "På lager",
+        productName: 'Automatsikring C16 1-pol',
+        manufacturer: 'Schneider Electric',
+        supplierName: 'El-Grossisten',
+        description: 'Automatsikring C16 1-polet for fordelertavle',
+        category: 'Sikringer - Automat',
+        price: 85.0,
+        availability: 'På lager',
         specifications: {
-          "Strøm": "16A",
-          "Type": "C",
-          "Poler": "1",
-          "Utløsekarakteristikk": "C"
+          Strøm: '16A',
+          Type: 'C',
+          Poler: '1',
+          Utløsekarakteristikk: 'C',
         },
       },
     ];
 
-    const normalizedElNumber = typeof elNumber === 'string' ? parseInt(elNumber) : elNumber;
-    return mockProducts.find(p => p.el_nr === normalizedElNumber) || null;
+    const normalizedElNumber =
+      typeof elNumber === 'string' ? parseInt(elNumber) : elNumber;
+    return mockProducts.find((p) => p.el_nr === normalizedElNumber) || null;
   }
 }
 
@@ -346,9 +372,7 @@ export const efoService = new EFOService();
 // Helper function to parse EL-number from various formats
 export function parseElNumber(input: string): number | null {
   // Remove common prefixes and clean the string
-  const cleaned = input
-    .replace(/^(EL|el)[:\s-]*/i, '')
-    .replace(/[^\d]/g, '');
+  const cleaned = input.replace(/^(EL|el)[:\s-]*/i, '').replace(/[^\d]/g, '');
 
   const number = parseInt(cleaned);
 

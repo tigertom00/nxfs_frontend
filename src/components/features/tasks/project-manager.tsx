@@ -136,10 +136,12 @@ export function ProjectManager({
     completed: language === 'no' ? 'Fullført' : 'Completed',
     tasksCount: language === 'no' ? 'oppgaver' : 'tasks',
     attachments: language === 'no' ? 'Vedlegg' : 'Attachments',
-    attachmentsDescription: language === 'no'
-      ? 'Last opp bilder relatert til prosjektet'
-      : 'Upload images related to the project',
-    existingImages: language === 'no' ? 'Eksisterende Bilder' : 'Existing Images',
+    attachmentsDescription:
+      language === 'no'
+        ? 'Last opp bilder relatert til prosjektet'
+        : 'Upload images related to the project',
+    existingImages:
+      language === 'no' ? 'Eksisterende Bilder' : 'Existing Images',
     deleteImage: language === 'no' ? 'Slett bilde' : 'Delete image',
   };
 
@@ -271,7 +273,7 @@ export function ProjectManager({
     try {
       // Note: You'll need to implement the delete image API call
       // await projectsAPI.deleteImage(editingProject.id.toString(), imageId);
-      setExistingImages(prev => prev.filter(img => img.id !== imageId));
+      setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
       console.log('Delete image:', imageId);
     } catch (error) {
       console.error('Failed to delete image:', error);

@@ -25,11 +25,7 @@ interface ProjectFormProps {
   onCancel: () => void;
 }
 
-export function ProjectForm({
-  project,
-  onSubmit,
-  onCancel,
-}: ProjectFormProps) {
+export function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
   const { language } = useUIStore();
   const [formData, setFormData] = useState<ProjectFormData>({
     name: project?.name || '',
@@ -40,7 +36,9 @@ export function ProjectForm({
   });
   const [loading, setLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<ProjectImage[]>(project?.images || []);
+  const [existingImages, setExistingImages] = useState<ProjectImage[]>(
+    project?.images || []
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +57,7 @@ export function ProjectForm({
     try {
       // Note: You'll need to implement the delete image API call
       // await projectsAPI.deleteImage(project.id.toString(), imageId);
-      setExistingImages(prev => prev.filter(img => img.id !== imageId));
+      setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
       console.log('Delete image:', imageId);
     } catch (error) {
       console.error('Failed to delete image:', error);
@@ -88,11 +86,16 @@ export function ProjectForm({
     inProgress: language === 'no' ? 'Pågår' : 'In Progress',
     completed: language === 'no' ? 'Fullført' : 'Completed',
     attachments: language === 'no' ? 'Vedlegg' : 'Attachments',
-    attachmentsDescription: language === 'no'
-      ? 'Last opp bilder relatert til prosjektet'
-      : 'Upload images related to the project',
-    nameRequired: language === 'no' ? 'Prosjektnavn er påkrevd' : 'Project name is required',
-    existingImages: language === 'no' ? 'Eksisterende Bilder' : 'Existing Images',
+    attachmentsDescription:
+      language === 'no'
+        ? 'Last opp bilder relatert til prosjektet'
+        : 'Upload images related to the project',
+    nameRequired:
+      language === 'no'
+        ? 'Prosjektnavn er påkrevd'
+        : 'Project name is required',
+    existingImages:
+      language === 'no' ? 'Eksisterende Bilder' : 'Existing Images',
     deleteImage: language === 'no' ? 'Slett bilde' : 'Delete image',
   };
 
@@ -105,9 +108,7 @@ export function ProjectForm({
           <Input
             id="project-name"
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
             disabled={loading}
             placeholder="Website Redesign, Mobile App, etc."
@@ -115,9 +116,7 @@ export function ProjectForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="project-name-nb">
-            {texts.projectNameNorwegian}
-          </Label>
+          <Label htmlFor="project-name-nb">{texts.projectNameNorwegian}</Label>
           <Input
             id="project-name-nb"
             value={formData.name_nb || ''}
@@ -242,13 +241,8 @@ export function ProjectForm({
         >
           {texts.cancel}
         </Button>
-        <Button
-          type="submit"
-          disabled={loading || !formData.name.trim()}
-        >
-          {loading
-            ? texts.saving
-            : texts.save}
+        <Button type="submit" disabled={loading || !formData.name.trim()}>
+          {loading ? texts.saving : texts.save}
         </Button>
       </div>
     </form>

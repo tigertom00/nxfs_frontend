@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,76 +8,82 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { Trash2, Calendar } from "lucide-react"
-import { toast } from "sonner"
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface SavedRequest {
-  id: string
-  name: string
-  url: string
-  method: string
-  headers: Array<{ key: string; value: string }>
-  body: string
-  token: string
-  createdAt: Date
+  id: string;
+  name: string;
+  url: string;
+  method: string;
+  headers: Array<{ key: string; value: string }>;
+  body: string;
+  token: string;
+  createdAt: Date;
 }
 
 interface SavedRequestsDialogProps {
-  children: React.ReactNode
-  savedRequests: SavedRequest[]
-  onLoadRequest: (request: SavedRequest) => void
-  onDeleteRequest: (id: string) => void
+  children: React.ReactNode;
+  savedRequests: SavedRequest[];
+  onLoadRequest: (request: SavedRequest) => void;
+  onDeleteRequest: (id: string) => void;
 }
 
 export function SavedRequestsDialog({
   children,
   savedRequests,
   onLoadRequest,
-  onDeleteRequest
+  onDeleteRequest,
 }: SavedRequestsDialogProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   const handleLoadRequest = (request: SavedRequest) => {
     try {
-      onLoadRequest(request)
-      toast.success(`Loaded request "${request.name}"`)
-      setOpen(false)
+      onLoadRequest(request);
+      toast.success(`Loaded request "${request.name}"`);
+      setOpen(false);
     } catch (error) {
-      toast.error("Failed to load request")
+      toast.error('Failed to load request');
     }
-  }
+  };
 
   const handleDeleteRequest = (id: string, name: string) => {
     try {
-      onDeleteRequest(id)
-      toast.success(`Deleted request "${name}"`)
+      onDeleteRequest(id);
+      toast.success(`Deleted request "${name}"`);
     } catch (error) {
-      toast.error("Failed to delete request")
+      toast.error('Failed to delete request');
     }
-  }
+  };
 
   const getMethodBadgeClass = (method: string) => {
     switch (method.toLowerCase()) {
-      case 'get': return 'method-get'
-      case 'post': return 'method-post'
-      case 'put': return 'method-put'
-      case 'delete': return 'method-delete'
-      case 'patch': return 'method-patch'
-      case 'head': return 'method-head'
-      case 'options': return 'method-options'
-      default: return 'bg-secondary text-secondary-foreground'
+      case 'get':
+        return 'method-get';
+      case 'post':
+        return 'method-post';
+      case 'put':
+        return 'method-put';
+      case 'delete':
+        return 'method-delete';
+      case 'patch':
+        return 'method-patch';
+      case 'head':
+        return 'method-head';
+      case 'options':
+        return 'method-options';
+      default:
+        return 'bg-secondary text-secondary-foreground';
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>Saved Requests</DialogTitle>
@@ -107,7 +113,9 @@ export function SavedRequestsDialog({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDeleteRequest(request.id, request.name)}
+                      onClick={() =>
+                        handleDeleteRequest(request.id, request.name)
+                      }
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -135,5 +143,5 @@ export function SavedRequestsDialog({
         </ScrollArea>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

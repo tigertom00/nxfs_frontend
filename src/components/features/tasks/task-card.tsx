@@ -32,8 +32,14 @@ interface TaskCardProps {
   projects: Project[];
   onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;
-  onStatusChange: (taskId: string, newStatus: 'todo' | 'in_progress' | 'completed') => void;
-  onPriorityChange: (taskId: string, newPriority: 'low' | 'medium' | 'high') => void;
+  onStatusChange: (
+    taskId: string,
+    newStatus: 'todo' | 'in_progress' | 'completed'
+  ) => void;
+  onPriorityChange: (
+    taskId: string,
+    newPriority: 'low' | 'medium' | 'high'
+  ) => void;
 }
 
 export function TaskCard({
@@ -48,7 +54,11 @@ export function TaskCard({
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   const cycleStatus = () => {
-    const statusOrder: ('todo' | 'in_progress' | 'completed')[] = ['todo', 'in_progress', 'completed'];
+    const statusOrder: ('todo' | 'in_progress' | 'completed')[] = [
+      'todo',
+      'in_progress',
+      'completed',
+    ];
     const currentIndex = statusOrder.indexOf(task.status);
     const nextIndex = (currentIndex + 1) % statusOrder.length;
     const nextStatus = statusOrder[nextIndex];
@@ -56,7 +66,11 @@ export function TaskCard({
   };
 
   const cyclePriority = () => {
-    const priorityOrder: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
+    const priorityOrder: ('low' | 'medium' | 'high')[] = [
+      'low',
+      'medium',
+      'high',
+    ];
     const currentIndex = priorityOrder.indexOf(task.priority);
     const nextIndex = (currentIndex + 1) % priorityOrder.length;
     const nextPriority = priorityOrder[nextIndex];
@@ -144,37 +158,56 @@ export function TaskCard({
   };
 
   return (
-    <Card className={`h-full hover:shadow-lg transition-all duration-200 ${getCardBorderStyle(task.status)} ${task.status === 'completed' ? 'opacity-80' : ''}`}>
+    <Card
+      className={`h-full hover:shadow-lg transition-all duration-200 ${getCardBorderStyle(task.status)} ${task.status === 'completed' ? 'opacity-80' : ''}`}
+    >
       <CardHeader className="pb-3">
         {/* Status Banner */}
-        <div className={`flex items-center justify-between p-2 -mx-6 -mt-6 mb-4 rounded-t-lg border-b ${getStatusBadgeStyle(task.status)}`}>
+        <div
+          className={`flex items-center justify-between p-2 -mx-6 -mt-6 mb-4 rounded-t-lg border-b ${getStatusBadgeStyle(task.status)}`}
+        >
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={cycleStatus}
               className="h-auto w-auto p-1 hover:bg-transparent"
-              title={language === 'no' ? 'Klikk for å endre status' : 'Click to change status'}
+              title={
+                language === 'no'
+                  ? 'Klikk for å endre status'
+                  : 'Click to change status'
+              }
             >
               {getStatusIcon(task.status)}
             </Button>
-            <span className="font-medium text-sm">{getStatusText(task.status)}</span>
+            <span className="font-medium text-sm">
+              {getStatusText(task.status)}
+            </span>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={cyclePriority}
             className="h-auto w-auto p-0 hover:bg-transparent"
-            title={language === 'no' ? 'Klikk for å endre prioritet' : 'Click to change priority'}
+            title={
+              language === 'no'
+                ? 'Klikk for å endre prioritet'
+                : 'Click to change priority'
+            }
           >
-            <Badge className={getPriorityColor(task.priority)} variant="secondary">
+            <Badge
+              className={getPriorityColor(task.priority)}
+              variant="secondary"
+            >
               {getPriorityText(task.priority)}
             </Badge>
           </Button>
         </div>
 
         <div className="flex items-start justify-between">
-          <CardTitle className={`text-lg line-clamp-2 flex-1 ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+          <CardTitle
+            className={`text-lg line-clamp-2 flex-1 ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}
+          >
             {task.title}
           </CardTitle>
           <div className="flex items-center space-x-1 ml-2">
@@ -270,7 +303,8 @@ export function TaskCard({
             <div className="flex items-center space-x-1">
               <ImageIcon className="h-3 w-3" />
               <span className="text-xs">
-                {task.images.length} {language === 'no' ? 'bilde(r)' : 'image(s)'}
+                {task.images.length}{' '}
+                {language === 'no' ? 'bilde(r)' : 'image(s)'}
               </span>
             </div>
           )}

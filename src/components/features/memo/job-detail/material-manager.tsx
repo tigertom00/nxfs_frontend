@@ -47,7 +47,9 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   const [showMaterialDialog, setShowMaterialDialog] = useState(false);
   const [allMaterials, setAllMaterials] = useState<Material[]>([]);
   const [jobMaterials, setJobMaterials] = useState<JobMaterial[]>([]);
-  const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterial[]>([]);
+  const [selectedMaterials, setSelectedMaterials] = useState<
+    SelectedMaterial[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [recentMaterials, setRecentMaterials] = useState<Material[]>([]);
@@ -68,7 +70,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       setAllMaterials(materials);
 
       // Filter favorites
-      const favorites = materials.filter(m => m.is_favorite);
+      const favorites = materials.filter((m) => m.is_favorite);
       setFavoriteMaterials(favorites);
     } catch (error) {
       console.error('Failed to load materials:', error);
@@ -78,7 +80,9 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   const loadJobMaterials = async () => {
     try {
       const jobMaterials = await jobMaterialsAPI.getJobMaterials();
-      const jobSpecificMaterials = jobMaterials.filter(jm => jm.jobb === jobId);
+      const jobSpecificMaterials = jobMaterials.filter(
+        (jm) => jm.jobb === jobId
+      );
       setJobMaterials(jobSpecificMaterials);
     } catch (error) {
       console.error('Failed to load job materials:', error);
@@ -101,11 +105,13 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     if (stored) {
       try {
         const recent = JSON.parse(stored);
-        const validRecent = recent.filter((item: any) =>
-          Date.now() - item.lastUsed < 30 * 24 * 60 * 60 * 1000 // 30 days
+        const validRecent = recent.filter(
+          (item: any) => Date.now() - item.lastUsed < 30 * 24 * 60 * 60 * 1000 // 30 days
         );
         const materialIds = validRecent.map((item: any) => item.materialId);
-        const recentMats = allMaterials.filter(m => materialIds.includes(m.id));
+        const recentMats = allMaterials.filter((m) =>
+          materialIds.includes(m.id)
+        );
         setRecentMaterials(recentMats);
       } catch (error) {
         console.error('Failed to load recent materials:', error);
@@ -160,7 +166,9 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     }
 
     // First, check if material already exists locally
-    const existingMaterial = allMaterials.find(m => m.el_nr === parsedELNumber);
+    const existingMaterial = allMaterials.find(
+      (m) => m.el_nr === parsedELNumber
+    );
 
     if (existingMaterial) {
       addMaterialToSelection(existingMaterial);
@@ -190,10 +198,12 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 
       if (efoProduct) {
         // Found in EFO database, import it
-        const defaultSupplier = suppliers.find(s =>
-          s.name.toLowerCase().includes('efo') ||
-          s.name.toLowerCase().includes('elektro')
-        ) || suppliers[0];
+        const defaultSupplier =
+          suppliers.find(
+            (s) =>
+              s.name.toLowerCase().includes('efo') ||
+              s.name.toLowerCase().includes('elektro')
+          ) || suppliers[0];
 
         if (!defaultSupplier) {
           toast({
@@ -237,15 +247,12 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     }
   };
 
-
   const addMaterialToSelection = (material: Material) => {
-    setSelectedMaterials(prev => {
-      const existing = prev.find(sm => sm.id === material.id);
+    setSelectedMaterials((prev) => {
+      const existing = prev.find((sm) => sm.id === material.id);
       if (existing) {
-        return prev.map(sm =>
-          sm.id === material.id
-            ? { ...sm, quantity: sm.quantity + 1 }
-            : sm
+        return prev.map((sm) =>
+          sm.id === material.id ? { ...sm, quantity: sm.quantity + 1 } : sm
         );
       } else {
         return [...prev, { ...material, quantity: 1 }];
@@ -254,28 +261,32 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   };
 
   const updateMaterialQuantity = (materialId: number, change: number) => {
-    setSelectedMaterials(prev =>
-      prev.map(sm => {
-        if (sm.id === materialId) {
-          const newQuantity = Math.max(0, sm.quantity + change);
-          return newQuantity === 0
-            ? null
-            : { ...sm, quantity: newQuantity };
-        }
-        return sm;
-      }).filter(Boolean) as SelectedMaterial[]
+    setSelectedMaterials(
+      (prev) =>
+        prev
+          .map((sm) => {
+            if (sm.id === materialId) {
+              const newQuantity = Math.max(0, sm.quantity + change);
+              return newQuantity === 0
+                ? null
+                : { ...sm, quantity: newQuantity };
+            }
+            return sm;
+          })
+          .filter(Boolean) as SelectedMaterial[]
     );
   };
 
   const clearMaterialQuantity = (materialId: number) => {
-    setSelectedMaterials(prev => prev.filter(sm => sm.id !== materialId));
+    setSelectedMaterials((prev) => prev.filter((sm) => sm.id !== materialId));
   };
 
-  const filteredMaterials = allMaterials.filter(material =>
-    !searchQuery ||
-    material.tittel?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    material.el_nr?.toString().includes(searchQuery) ||
-    material.leverandor.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredMaterials = allMaterials.filter(
+    (material) =>
+      !searchQuery ||
+      material.tittel?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      material.el_nr?.toString().includes(searchQuery) ||
+      material.leverandor.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleAddToJob = async () => {
@@ -369,7 +380,8 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
             <DialogHeader>
               <DialogTitle>Add Materials to Job</DialogTitle>
               <DialogDescription>
-                Select materials to add to this work order. Use scanner, search, or browse categories.
+                Select materials to add to this work order. Use scanner, search,
+                or browse categories.
               </DialogDescription>
             </DialogHeader>
 
@@ -398,13 +410,20 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
             {selectedMaterials.length > 0 && (
               <Card className="mb-4">
                 <CardHeader>
-                  <CardTitle className="text-sm">Selected Materials ({selectedMaterials.length})</CardTitle>
+                  <CardTitle className="text-sm">
+                    Selected Materials ({selectedMaterials.length})
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {selectedMaterials.map(material => (
-                    <div key={material.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                  {selectedMaterials.map((material) => (
+                    <div
+                      key={material.id}
+                      className="flex items-center justify-between p-2 bg-muted rounded"
+                    >
                       <div className="flex-1">
-                        <p className="font-medium text-sm">{material.tittel || 'Untitled'}</p>
+                        <p className="font-medium text-sm">
+                          {material.tittel || 'Untitled'}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {material.leverandor.name} • EL: {material.el_nr}
                         </p>
@@ -413,11 +432,15 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateMaterialQuantity(material.id, -1)}
+                          onClick={() =>
+                            updateMaterialQuantity(material.id, -1)
+                          }
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-8 text-center font-medium">{material.quantity}</span>
+                        <span className="w-8 text-center font-medium">
+                          {material.quantity}
+                        </span>
                         <Button
                           size="sm"
                           variant="outline"
@@ -428,7 +451,9 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateMaterialQuantity(material.id, 10)}
+                          onClick={() =>
+                            updateMaterialQuantity(material.id, 10)
+                          }
                         >
                           +10
                         </Button>
@@ -447,7 +472,9 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                     disabled={loading}
                     className="w-full"
                   >
-                    {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {loading && (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    )}
                     Add to Job
                   </Button>
                 </CardContent>
@@ -467,17 +494,21 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                   <div className="text-center py-8 text-muted-foreground">
                     <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p>No recent materials</p>
-                    <p className="text-xs">Materials you use will appear here</p>
+                    <p className="text-xs">
+                      Materials you use will appear here
+                    </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
-                    {recentMaterials.map(material => (
+                    {recentMaterials.map((material) => (
                       <MaterialCard
                         key={material.id}
                         material={material}
                         onSelect={addMaterialToSelection}
                         onToggleFavorite={handleToggleFavorite}
-                        isSelected={selectedMaterials.some(sm => sm.id === material.id)}
+                        isSelected={selectedMaterials.some(
+                          (sm) => sm.id === material.id
+                        )}
                       />
                     ))}
                   </div>
@@ -489,17 +520,21 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                   <div className="text-center py-8 text-muted-foreground">
                     <Heart className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p>No favorite materials</p>
-                    <p className="text-xs">Mark materials as favorites for quick access</p>
+                    <p className="text-xs">
+                      Mark materials as favorites for quick access
+                    </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
-                    {favoriteMaterials.map(material => (
+                    {favoriteMaterials.map((material) => (
                       <MaterialCard
                         key={material.id}
                         material={material}
                         onSelect={addMaterialToSelection}
                         onToggleFavorite={handleToggleFavorite}
-                        isSelected={selectedMaterials.some(sm => sm.id === material.id)}
+                        isSelected={selectedMaterials.some(
+                          (sm) => sm.id === material.id
+                        )}
                       />
                     ))}
                   </div>
@@ -508,13 +543,15 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 
               <TabsContent value="all" className="space-y-2">
                 <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
-                  {filteredMaterials.map(material => (
+                  {filteredMaterials.map((material) => (
                     <MaterialCard
                       key={material.id}
                       material={material}
                       onSelect={addMaterialToSelection}
                       onToggleFavorite={handleToggleFavorite}
-                      isSelected={selectedMaterials.some(sm => sm.id === material.id)}
+                      isSelected={selectedMaterials.some(
+                        (sm) => sm.id === material.id
+                      )}
                     />
                   ))}
                 </div>
@@ -526,19 +563,26 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
               {efoService.isEnabled() ? (
                 <div className="space-y-1">
                   <p>✅ EFO Official API Active</p>
-                  <p>Scan EL-numbers to import materials from EFObasen (250,000+ products)</p>
+                  <p>
+                    Scan EL-numbers to import materials from EFObasen (250,000+
+                    products)
+                  </p>
                 </div>
               ) : efoService.isScraperEnabled() ? (
                 <div className="space-y-1">
                   <p>🤖 N8N Puppeteer Scraper Mode</p>
                   <p>Free EFObasen integration via n8n-nodes-puppeteer</p>
                   <p>💰 Saves 24,000 NOK/year vs official API</p>
-                  <p className="text-xs">Requires: n8n community node installation</p>
+                  <p className="text-xs">
+                    Requires: n8n community node installation
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-1">
                   <p>📱 Demo Mode - Mock EL-number data</p>
-                  <p>Options: N8N scraper (free) or EFO API (24,000 NOK/year)</p>
+                  <p>
+                    Options: N8N scraper (free) or EFO API (24,000 NOK/year)
+                  </p>
                 </div>
               )}
             </div>
@@ -549,14 +593,18 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       {/* Current Job Materials */}
       {jobMaterials.length > 0 ? (
         <div className="space-y-2">
-          {jobMaterials.map(jobMaterial => (
-            <div key={jobMaterial.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+          {jobMaterials.map((jobMaterial) => (
+            <div
+              key={jobMaterial.id}
+              className="flex items-center justify-between p-3 bg-muted rounded-lg"
+            >
               <div className="flex-1">
                 <p className="font-medium text-sm">
                   {jobMaterial.matriell.tittel || 'Untitled'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {jobMaterial.matriell.leverandor.name} • EL: {jobMaterial.matriell.el_nr}
+                  {jobMaterial.matriell.leverandor.name} • EL:{' '}
+                  {jobMaterial.matriell.el_nr}
                 </p>
                 {jobMaterial.antall && (
                   <Badge variant="secondary" className="text-xs mt-1">
@@ -600,7 +648,12 @@ interface MaterialCardProps {
   isSelected: boolean;
 }
 
-function MaterialCard({ material, onSelect, onToggleFavorite, isSelected }: MaterialCardProps) {
+function MaterialCard({
+  material,
+  onSelect,
+  onToggleFavorite,
+  isSelected,
+}: MaterialCardProps) {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFavorite?.(material);
@@ -618,7 +671,9 @@ function MaterialCard({ material, onSelect, onToggleFavorite, isSelected }: Mate
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <p className="font-medium text-sm">{material.tittel || 'Untitled'}</p>
+            <p className="font-medium text-sm">
+              {material.tittel || 'Untitled'}
+            </p>
             {onToggleFavorite && (
               <Button
                 size="sm"

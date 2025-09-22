@@ -35,21 +35,23 @@ function YouTubeVideoCard() {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-3xl">
-          {language === 'no' ? 'Velkommen til nxfs.no - Introduksjonsvideo' : 'Welcome to nxfs.no - Introduction Video'}
+          {language === 'no'
+            ? 'Velkommen til nxfs.no - Introduksjonsvideo'
+            : 'Welcome to nxfs.no - Introduction Video'}
         </CardTitle>
         <p className="text-lg text-muted-foreground mt-2">
           {language === 'no'
             ? 'Se denne videoen for å lære mer om plattformen og hva vi tilbyr'
-            : 'Watch this video to learn more about our platform and what we offer'
-          }
+            : 'Watch this video to learn more about our platform and what we offer'}
         </p>
-        <CardDescription>
-          {formatDate('2025-09-20')}
-        </CardDescription>
+        <CardDescription>{formatDate('2025-09-20')}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="w-full">
-          <div className="relative w-full" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+          <div
+            className="relative w-full"
+            style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}
+          >
             <iframe
               className="absolute top-0 left-0 w-full h-full rounded-lg"
               src="https://www.youtube.com/embed/C9j0eJsA7-8"
@@ -303,9 +305,10 @@ export default function BlogPosts() {
         // Fetch real posts from API
         const response = await postsAPI.getPublicPosts();
 
-
         // Handle both array and paginated response formats
-        const postsArray = Array.isArray(response) ? response : response.results || [];
+        const postsArray = Array.isArray(response)
+          ? response
+          : response.results || [];
 
         // Transform API Post data to BlogPost format
         const transformedPosts: BlogPost[] = postsArray.map((post: Post) => ({

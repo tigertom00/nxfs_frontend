@@ -68,12 +68,13 @@ export default function MemoAdminPage() {
       try {
         setLoading(true);
 
-        const [jobsData, suppliersData, materialsData, timeEntriesData] = await Promise.all([
-          jobsAPI.getJobs(),
-          suppliersAPI.getSuppliers(),
-          materialsAPI.getMaterials(),
-          timeEntriesAPI.getTimeEntries(),
-        ]);
+        const [jobsData, suppliersData, materialsData, timeEntriesData] =
+          await Promise.all([
+            jobsAPI.getJobs(),
+            suppliersAPI.getSuppliers(),
+            materialsAPI.getMaterials(),
+            timeEntriesAPI.getTimeEntries(),
+          ]);
 
         setJobs(jobsData);
         setSuppliers(suppliersData);
@@ -81,9 +82,12 @@ export default function MemoAdminPage() {
         setTimeEntries(timeEntriesData);
 
         // Calculate stats
-        const activeJobs = jobsData.filter(job => !job.ferdig).length;
-        const completedJobs = jobsData.filter(job => job.ferdig).length;
-        const totalHours = jobsData.reduce((sum, job) => sum + (job.total_hours || 0), 0);
+        const activeJobs = jobsData.filter((job) => !job.ferdig).length;
+        const completedJobs = jobsData.filter((job) => job.ferdig).length;
+        const totalHours = jobsData.reduce(
+          (sum, job) => sum + (job.total_hours || 0),
+          0
+        );
 
         setStats({
           totalJobs: jobsData.length,
@@ -93,7 +97,6 @@ export default function MemoAdminPage() {
           totalSuppliers: suppliersData.length,
           totalMaterials: materialsData.length,
         });
-
       } catch (error) {
         console.error('Failed to load admin data:', error);
       } finally {
@@ -157,12 +160,11 @@ export default function MemoAdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">📊 Memo Admin</h1>
-              <p className="text-muted-foreground">Work Order Management Dashboard</p>
+              <p className="text-muted-foreground">
+                Work Order Management Dashboard
+              </p>
             </div>
-            <Button
-              onClick={() => router.push('/memo')}
-              variant="outline"
-            >
+            <Button onClick={() => router.push('/memo')} variant="outline">
               <ExternalLink className="h-4 w-4 mr-2" />
               Go to Mobile App
             </Button>
@@ -172,7 +174,9 @@ export default function MemoAdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Jobs
+                </CardTitle>
                 <Briefcase className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -185,11 +189,15 @@ export default function MemoAdminPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Hours</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Hours
+                </CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formatTime(stats.totalHours)}</div>
+                <div className="text-2xl font-bold">
+                  {formatTime(stats.totalHours)}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Across all projects
                 </p>
@@ -216,15 +224,15 @@ export default function MemoAdminPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalMaterials}</div>
-                <p className="text-xs text-muted-foreground">
-                  In database
-                </p>
+                <p className="text-xs text-muted-foreground">In database</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Time Entries</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Time Entries
+                </CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -237,12 +245,17 @@ export default function MemoAdminPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Active Rate
+                </CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {stats.totalJobs > 0 ? Math.round((stats.activeJobs / stats.totalJobs) * 100) : 0}%
+                  {stats.totalJobs > 0
+                    ? Math.round((stats.activeJobs / stats.totalJobs) * 100)
+                    : 0}
+                  %
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Jobs in progress
@@ -285,23 +298,31 @@ export default function MemoAdminPage() {
                     <TableBody>
                       {jobs.map((job) => (
                         <TableRow key={job.ordre_nr}>
-                          <TableCell className="font-medium">#{job.ordre_nr}</TableCell>
+                          <TableCell className="font-medium">
+                            #{job.ordre_nr}
+                          </TableCell>
                           <TableCell>{job.tittel || 'Untitled'}</TableCell>
                           <TableCell className="max-w-xs truncate">
                             {job.adresse || 'No address'}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={job.ferdig ? 'default' : 'secondary'}>
+                            <Badge
+                              variant={job.ferdig ? 'default' : 'secondary'}
+                            >
                               {job.ferdig ? 'Completed' : 'Active'}
                             </Badge>
                           </TableCell>
-                          <TableCell>{formatTime(job.total_hours || 0)}</TableCell>
+                          <TableCell>
+                            {formatTime(job.total_hours || 0)}
+                          </TableCell>
                           <TableCell>{formatDate(job.created_at)}</TableCell>
                           <TableCell>
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => router.push(`/memo/job/${job.ordre_nr}`)}
+                              onClick={() =>
+                                router.push(`/memo/job/${job.ordre_nr}`)
+                              }
                             >
                               View
                             </Button>
@@ -337,7 +358,9 @@ export default function MemoAdminPage() {
                       {suppliers.map((supplier) => (
                         <TableRow key={supplier.id}>
                           <TableCell>{supplier.id}</TableCell>
-                          <TableCell className="font-medium">{supplier.name}</TableCell>
+                          <TableCell className="font-medium">
+                            {supplier.name}
+                          </TableCell>
                           <TableCell>
                             {supplier.url ? (
                               <a
@@ -352,7 +375,9 @@ export default function MemoAdminPage() {
                               'No URL'
                             )}
                           </TableCell>
-                          <TableCell>{formatDate(supplier.created_at)}</TableCell>
+                          <TableCell>
+                            {formatDate(supplier.created_at)}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -396,11 +421,15 @@ export default function MemoAdminPage() {
                               'No EL-nr'
                             )}
                           </TableCell>
-                          <TableCell>{material.leverandor?.name || 'Unknown'}</TableCell>
+                          <TableCell>
+                            {material.leverandor?.name || 'Unknown'}
+                          </TableCell>
                           <TableCell className="max-w-xs truncate">
                             {material.info || 'No info'}
                           </TableCell>
-                          <TableCell>{formatDate(material.created_at)}</TableCell>
+                          <TableCell>
+                            {formatDate(material.created_at)}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -414,9 +443,7 @@ export default function MemoAdminPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Time Entries</CardTitle>
-                  <CardDescription>
-                    All logged time entries
-                  </CardDescription>
+                  <CardDescription>All logged time entries</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -439,7 +466,9 @@ export default function MemoAdminPage() {
                           </TableCell>
                           <TableCell>User {entry.user}</TableCell>
                           <TableCell>{formatTime(entry.timer || 0)}</TableCell>
-                          <TableCell>{entry.dato ? formatDate(entry.dato) : 'No date'}</TableCell>
+                          <TableCell>
+                            {entry.dato ? formatDate(entry.dato) : 'No date'}
+                          </TableCell>
                           <TableCell className="max-w-xs truncate">
                             {entry.beskrivelse || 'No description'}
                           </TableCell>

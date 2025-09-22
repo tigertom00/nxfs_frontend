@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,7 +30,11 @@ interface LocationCoords {
   longitude: number;
 }
 
-export function NewJobModal({ isOpen, onClose, onJobCreated }: NewJobModalProps) {
+export function NewJobModal({
+  isOpen,
+  onClose,
+  onJobCreated,
+}: NewJobModalProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
@@ -43,7 +52,7 @@ export function NewJobModal({ isOpen, onClose, onJobCreated }: NewJobModalProps)
     if (isOpen) {
       // Generate a simple order number (you might want to get this from the backend)
       const nextOrderNr = Date.now() % 100000; // Simple approach for demo
-      setFormData(prev => ({ ...prev, ordre_nr: nextOrderNr }));
+      setFormData((prev) => ({ ...prev, ordre_nr: nextOrderNr }));
     }
   }, [isOpen]);
 
@@ -104,7 +113,7 @@ export function NewJobModal({ isOpen, onClose, onJobCreated }: NewJobModalProps)
       const coords = await getCurrentLocation();
       const address = await reverseGeocode(coords);
 
-      setFormData(prev => ({ ...prev, adresse: address }));
+      setFormData((prev) => ({ ...prev, adresse: address }));
 
       toast({
         title: 'Location detected',
@@ -114,7 +123,8 @@ export function NewJobModal({ isOpen, onClose, onJobCreated }: NewJobModalProps)
       console.error('Location error:', error);
       toast({
         title: 'Location error',
-        description: 'Could not get current location. Please enter address manually.',
+        description:
+          'Could not get current location. Please enter address manually.',
         variant: 'destructive',
       });
     } finally {
@@ -156,7 +166,7 @@ export function NewJobModal({ isOpen, onClose, onJobCreated }: NewJobModalProps)
   };
 
   const handleInputChange = (field: keyof CreateJobPayload, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -174,7 +184,9 @@ export function NewJobModal({ isOpen, onClose, onJobCreated }: NewJobModalProps)
               id="ordre_nr"
               type="number"
               value={formData.ordre_nr}
-              onChange={(e) => handleInputChange('ordre_nr', parseInt(e.target.value) || 0)}
+              onChange={(e) =>
+                handleInputChange('ordre_nr', parseInt(e.target.value) || 0)
+              }
               required
             />
           </div>
@@ -253,11 +265,7 @@ export function NewJobModal({ isOpen, onClose, onJobCreated }: NewJobModalProps)
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={loading}
-            >
+            <Button type="submit" className="flex-1" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

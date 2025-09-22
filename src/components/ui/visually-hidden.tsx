@@ -5,7 +5,10 @@ interface VisuallyHiddenProps {
   asChild?: boolean;
 }
 
-export function VisuallyHidden({ children, asChild = false }: VisuallyHiddenProps) {
+export function VisuallyHidden({
+  children,
+  asChild = false,
+}: VisuallyHiddenProps) {
   const style = {
     position: 'absolute' as const,
     width: '1px',

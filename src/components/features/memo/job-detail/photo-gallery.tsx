@@ -25,7 +25,9 @@ export function PhotoGallery({ jobId }: PhotoGalleryProps) {
       try {
         const jobPhotos = await jobImagesAPI.getJobImages();
         // Filter photos for this specific job
-        const jobSpecificPhotos = jobPhotos.filter(photo => photo.jobb === jobId);
+        const jobSpecificPhotos = jobPhotos.filter(
+          (photo) => photo.jobb === jobId
+        );
         setPhotos(jobSpecificPhotos);
       } catch (error) {
         console.error('Failed to load photos:', error);
@@ -65,12 +67,14 @@ export function PhotoGallery({ jobId }: PhotoGalleryProps) {
     }
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
 
     // Validate file types and sizes
-    const validFiles = files.filter(file => {
+    const validFiles = files.filter((file) => {
       const isImage = file.type.startsWith('image/');
       const isUnderLimit = file.size <= 10 * 1024 * 1024; // 10MB limit
 
@@ -117,13 +121,12 @@ export function PhotoGallery({ jobId }: PhotoGalleryProps) {
       }
 
       if (uploadedImages.length > 0) {
-        setPhotos(prev => [...prev, ...uploadedImages]);
+        setPhotos((prev) => [...prev, ...uploadedImages]);
         toast({
           title: 'Upload successful',
           description: `${uploadedImages.length} photo(s) uploaded successfully`,
         });
       }
-
     } catch (error) {
       toast({
         title: 'Upload error',
@@ -142,7 +145,7 @@ export function PhotoGallery({ jobId }: PhotoGalleryProps) {
   const handleDeletePhoto = async (photo: JobImage) => {
     try {
       await jobImagesAPI.deleteJobImage(photo.id);
-      setPhotos(prev => prev.filter(p => p.id !== photo.id));
+      setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
       toast({
         title: 'Photo deleted',
         description: 'Photo has been removed from the job',
@@ -196,7 +199,8 @@ export function PhotoGallery({ jobId }: PhotoGalleryProps) {
                 className="w-full h-full object-cover rounded-lg"
                 onError={(e) => {
                   // Handle broken image
-                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDMuNVYyMC41SDNWMy41SDIxWk0yMiAySDJDMS40NSAyIDEgMi40NSAxIDNWMjFDMSAyMS41NSAxLjQ1IDIyIDIgMjJIMjJDMjIuNTUgMjIgMjMgMjEuNTUgMjMgMjFWM0MyMyAyLjQ1IDIyLjU1IDIgMjIgMloiIGZpbGw9IiNjY2MiLz4KPC9zdmc+';
+                  e.currentTarget.src =
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDMuNVYyMC41SDNWMy41SDIxWk0yMiAySDJDMS40NSAyIDEgMi40NSAxIDNWMjFDMSAyMS41NSAxLjQ1IDIyIDIgMjJIMjJDMjIuNTUgMjIgMjMgMjEuNTUgMjMgMjFWM0MyMyAyLjQ1IDIyLjU1IDIgMjIgMloiIGZpbGw9IiNjY2MiLz4KPC9zdmc+';
                 }}
               />
               <button

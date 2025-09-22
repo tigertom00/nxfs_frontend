@@ -1,9 +1,11 @@
 # NXFS Frontend - Architecture & Optimization Recommendations
 
 ## Executive Summary
+
 Your NXFS frontend is well-architected with modern patterns and solid foundations. The hybrid approach (Next.js + Socket.IO + external API) is appropriate for your use case. Here are targeted recommendations for optimization and enhancement, with special focus on error handling and user feedback.
 
 ## 🟢 Strengths (Keep These)
+
 - **Modern Stack**: Next.js 15, React 19, TypeScript, Tailwind CSS 4
 - **Solid State Management**: Zustand with persistence
 - **Component Architecture**: shadcn/ui with Radix primitives
@@ -15,7 +17,9 @@ Your NXFS frontend is well-architected with modern patterns and solid foundation
 ## 🔴 Critical Error Handling & Toast Improvements
 
 ### 1. Enhanced API Error Handling
+
 **Create Global Error Handler (src/lib/error-handler.ts):**
+
 ```typescript
 import { toast } from '@/hooks/use-toast';
 import { AxiosError } from 'axios';
@@ -35,7 +39,7 @@ export class ErrorHandler {
       const apiError: ApiError = {
         message: error.response?.data?.detail || error.message,
         status: error.response?.status,
-        code: error.code
+        code: error.code,
       };
 
       this.showToast(apiError, context);
@@ -43,7 +47,8 @@ export class ErrorHandler {
     }
 
     const genericError: ApiError = {
-      message: error instanceof Error ? error.message : 'An unexpected error occurred'
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred',
     };
 
     this.showToast(genericError, context);
@@ -66,13 +71,20 @@ export class ErrorHandler {
 
   private static getErrorTitle(status?: number): string {
     switch (status) {
-      case 400: return 'Invalid Request';
-      case 401: return 'Authentication Required';
-      case 403: return 'Access Denied';
-      case 404: return 'Not Found';
-      case 429: return 'Too Many Requests';
-      case 500: return 'Server Error';
-      default: return 'Error';
+      case 400:
+        return 'Invalid Request';
+      case 401:
+        return 'Authentication Required';
+      case 403:
+        return 'Access Denied';
+      case 404:
+        return 'Not Found';
+      case 429:
+        return 'Too Many Requests';
+      case 500:
+        return 'Server Error';
+      default:
+        return 'Error';
     }
   }
 }
@@ -100,7 +112,9 @@ export const showErrorToast = (message: string, title = 'Error') => {
 ```
 
 ### 2. Improved API Client with Better Error Handling
+
 **Update src/lib/api.ts:**
+
 ```typescript
 // Add to existing api.ts
 import { handleApiError, showSuccessToast } from './error-handler';
@@ -113,7 +127,10 @@ api.interceptors.response.use(
 
     // Don't show toast for auth refresh attempts
     if (!originalRequest.url?.includes('/auth/token/refresh/')) {
-      handleApiError(error, `API ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`);
+      handleApiError(
+        error,
+        `API ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`
+      );
     }
 
     // ... existing refresh logic
@@ -158,7 +175,9 @@ export const tasksAPI = {
 ```
 
 ### 3. React Error Boundary Component
+
 **Create src/components/error-boundary.tsx:**
+
 ```typescript
 'use client';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
@@ -240,7 +259,9 @@ export const useErrorHandler = () => {
 ```
 
 ### 4. Enhanced Toast Configuration
+
 **Update src/hooks/use-toast.ts:**
+
 ```typescript
 // Update TOAST_LIMIT and TOAST_REMOVE_DELAY
 const TOAST_LIMIT = 3; // Allow multiple toasts
@@ -291,7 +312,9 @@ export const toast = {
 ```
 
 ### 5. Store Error Handling Integration
+
 **Update src/stores/auth.ts:**
+
 ```typescript
 import { handleApiError, showSuccessToast } from '@/lib/error-handler';
 
@@ -320,7 +343,9 @@ export const useAuthStore = create<AuthState>()(
             isInitialized: true,
           });
 
-          showSuccessToast(`Welcome back, ${user.display_name || user.username}!`);
+          showSuccessToast(
+            `Welcome back, ${user.display_name || user.username}!`
+          );
         } catch (error: any) {
           const apiError = handleApiError(error, 'Login');
           set({
@@ -335,7 +360,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // Similar updates for other methods...
-    }),
+    })
     // ... persist config
   )
 );
@@ -344,22 +369,28 @@ export const useAuthStore = create<AuthState>()(
 ## 🟡 General Optimization Opportunities
 
 ### 1. Package Dependencies
+
 **Remove Unused/Redundant Packages:**
+
 ```bash
 npm uninstall ci next-auth next-themes z-ai-web-dev-sdk
 ```
+
 - `ci` (line 53): Unclear utility, likely unused
 - `next-auth` (line 63): You're using custom JWT auth, not NextAuth
 - `next-themes` (line 65): You have custom theme management in UI store
 - `z-ai-web-dev-sdk` (line 86): Specific SDK that may not be needed
 
 **Add Error Handling Dependencies:**
+
 ```bash
 npm install react-error-boundary @hookform/error-message
 ```
 
 ### 2. Form Error Handling
+
 **Create Enhanced Form Hook (src/hooks/use-form-with-toast.ts):**
+
 ```typescript
 import { useForm, UseFormProps } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
@@ -398,7 +429,9 @@ export function useFormWithToast<T extends Record<string, any>>(
 ```
 
 ### 3. Global Error Handling Setup
+
 **Update src/app/layout.tsx:**
+
 ```typescript
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -424,6 +457,7 @@ export default function RootLayout({
 ## 📋 Implementation Priority
 
 ### High Priority (Do First)
+
 1. **Create error handler utility** - Centralized error management
 2. **Add React Error Boundary** - Catch React component errors
 3. **Enhanced toast configuration** - Better user feedback
@@ -431,6 +465,7 @@ export default function RootLayout({
 5. **Form error handling** - Better form validation feedback
 
 ### Medium Priority (Next Month)
+
 1. **Add error logging service** (Sentry integration)
 2. **Network status handling** - Offline/online states
 3. **Retry mechanisms** - Automatic retry for failed requests
@@ -438,6 +473,7 @@ export default function RootLayout({
 5. **Loading states** - Better loading indicators
 
 ### Low Priority (When Time Permits)
+
 1. **Advanced error recovery** - Smart error recovery strategies
 2. **Error boundary reporting** - Automatic error reporting
 3. **Performance error tracking** - Monitor performance issues
@@ -464,17 +500,20 @@ npx prettier --write "src/**/*.{ts,tsx}"
 ## 📝 Error Handling Best Practices
 
 ### 1. Error Classification
+
 - **User Errors**: Validation, form errors → Show helpful messages
 - **System Errors**: API failures, network issues → Show generic message + log details
 - **Unexpected Errors**: Bugs, crashes → Error boundary + automatic reporting
 
 ### 2. Toast Guidelines
+
 - **Success**: 3 seconds duration, positive language
 - **Errors**: 5 seconds duration, actionable messages
 - **Loading**: Infinite duration with progress updates
 - **Warnings**: 4 seconds duration, clear next steps
 
 ### 3. Error Recovery
+
 - **Retry buttons** for network failures
 - **Refresh suggestions** for component errors
 - **Alternative paths** when primary actions fail

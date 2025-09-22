@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,49 +9,50 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 interface SaveRequestDialogProps {
-  children: React.ReactNode
-  onRequestSave: (name: string) => void
+  children: React.ReactNode;
+  onRequestSave: (name: string) => void;
 }
 
-export function SaveRequestDialog({ children, onRequestSave }: SaveRequestDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [name, setName] = useState("")
+export function SaveRequestDialog({
+  children,
+  onRequestSave,
+}: SaveRequestDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
 
   const handleSave = () => {
     if (!name.trim()) {
-      toast.error("Please enter a name for the request")
-      return
+      toast.error('Please enter a name for the request');
+      return;
     }
 
     try {
-      onRequestSave(name.trim())
-      toast.success(`Request "${name.trim()}" saved successfully`)
-      setName("")
-      setOpen(false)
+      onRequestSave(name.trim());
+      toast.success(`Request "${name.trim()}" saved successfully`);
+      setName('');
+      setOpen(false);
     } catch (error) {
-      toast.error("Failed to save request")
+      toast.error('Failed to save request');
     }
-  }
+  };
 
   const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen)
+    setOpen(newOpen);
     if (!newOpen) {
-      setName("")
+      setName('');
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Save Request</DialogTitle>
@@ -71,8 +72,8 @@ export function SaveRequestDialog({ children, onRequestSave }: SaveRequestDialog
               className="col-span-3"
               placeholder="Enter request name..."
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSave()
+                if (e.key === 'Enter') {
+                  handleSave();
                 }
               }}
             />
@@ -85,5 +86,5 @@ export function SaveRequestDialog({ children, onRequestSave }: SaveRequestDialog
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

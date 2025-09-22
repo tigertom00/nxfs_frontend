@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,7 +30,12 @@ const EL_NUMBER_PATTERNS = [
   /^EL\d{6,8}$/i, // Format like "EL123456"
 ];
 
-export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Number" }: BarcodeScannerProps) {
+export function BarcodeScanner({
+  isOpen,
+  onClose,
+  onScan,
+  title = 'Scan EL-Number',
+}: BarcodeScannerProps) {
   const { toast } = useToast();
   const [manualInput, setManualInput] = useState('');
   const [isWebCamSupported, setIsWebCamSupported] = useState(false);
@@ -38,7 +48,9 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
     const checkCamera = async () => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const hasCamera = devices.some(device => device.kind === 'videoinput');
+        const hasCamera = devices.some(
+          (device) => device.kind === 'videoinput'
+        );
         setIsWebCamSupported(hasCamera);
       } catch (error) {
         console.log('Camera check failed:', error);
@@ -54,7 +66,7 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
   // Clean up camera stream when modal closes
   useEffect(() => {
     if (!isOpen && streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
       setIsScanning(false);
     }
@@ -65,7 +77,7 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
     const cleanCode = code.trim();
 
     // Check against known EL-number patterns
-    return EL_NUMBER_PATTERNS.some(pattern => pattern.test(cleanCode));
+    return EL_NUMBER_PATTERNS.some((pattern) => pattern.test(cleanCode));
   };
 
   const handleManualSubmit = () => {
@@ -81,7 +93,8 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
     if (!validateELNumber(manualInput)) {
       toast({
         title: 'Invalid EL-number format',
-        description: 'Please check the EL-number format. Expected formats: 123456, 10 123 45, or EL123456',
+        description:
+          'Please check the EL-number format. Expected formats: 123456, 10 123 45, or EL123456',
         variant: 'destructive',
       });
       return;
@@ -101,7 +114,7 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
           facingMode: 'environment', // Use back camera on mobile
           width: { ideal: 1280 },
           height: { ideal: 720 },
-        }
+        },
       });
 
       streamRef.current = stream;
@@ -113,9 +126,9 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
 
       toast({
         title: 'Camera started',
-        description: 'Point camera at the EL-number barcode. Note: Web-based barcode scanning has limited accuracy.',
+        description:
+          'Point camera at the EL-number barcode. Note: Web-based barcode scanning has limited accuracy.',
       });
-
     } catch (error) {
       console.error('Camera access failed:', error);
       setIsScanning(false);
@@ -129,7 +142,7 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
 
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     setIsScanning(false);
@@ -187,7 +200,8 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
                     Stop Camera
                   </Button>
                   <p className="text-xs text-muted-foreground text-center">
-                    Note: Web-based scanning has limited accuracy. Consider using manual input for better results.
+                    Note: Web-based scanning has limited accuracy. Consider
+                    using manual input for better results.
                   </p>
                 </div>
               )}
@@ -215,7 +229,8 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                Supported formats: 6-8 digits, spaced (10 123 45), or with EL prefix
+                Supported formats: 6-8 digits, spaced (10 123 45), or with EL
+                prefix
               </p>
             </div>
 
@@ -232,17 +247,14 @@ export function BarcodeScanner({ isOpen, onClose, onScan, title = "Scan EL-Numbe
           <div className="bg-muted p-3 rounded-lg">
             <h4 className="text-sm font-medium mb-2">About EL-Numbers</h4>
             <p className="text-xs text-muted-foreground">
-              EL-numbers are Norwegian electrical product identifiers from EFObasen database.
-              They help identify electrical materials and components for work orders.
+              EL-numbers are Norwegian electrical product identifiers from
+              EFObasen database. They help identify electrical materials and
+              components for work orders.
             </p>
           </div>
 
           {/* Close Button */}
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="w-full"
-          >
+          <Button variant="outline" onClick={onClose} className="w-full">
             Cancel
           </Button>
         </div>

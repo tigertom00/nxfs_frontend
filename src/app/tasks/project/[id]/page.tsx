@@ -225,10 +225,13 @@ export default function ProjectDetailPage() {
     setIsDialogOpen(true);
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: 'todo' | 'in_progress' | 'completed') => {
+  const handleStatusChange = async (
+    taskId: string,
+    newStatus: 'todo' | 'in_progress' | 'completed'
+  ) => {
     try {
       setActionLoading(true);
-      const task = tasks.find(t => t.id === taskId);
+      const task = tasks.find((t) => t.id === taskId);
       if (!task || !user) return;
 
       const payload = {

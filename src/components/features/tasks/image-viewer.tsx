@@ -38,13 +38,16 @@ export function ImageViewer({
   taskTitle,
 }: ImageViewerProps) {
   const { language } = useUIStore();
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null
+  );
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
 
   const texts = {
     title: language === 'no' ? 'Bilder for oppgave' : 'Images for task',
-    noImages: language === 'no' ? 'Ingen bilder tilgjengelig' : 'No images available',
+    noImages:
+      language === 'no' ? 'Ingen bilder tilgjengelig' : 'No images available',
     download: language === 'no' ? 'Last ned' : 'Download',
     close: language === 'no' ? 'Lukk' : 'Close',
     zoomIn: language === 'no' ? 'Zoom inn' : 'Zoom in',
@@ -66,7 +69,11 @@ export function ImageViewer({
       let date: Date;
 
       // If it's already a valid ISO string or timestamp
-      if (dateString.includes('T') || dateString.includes('-') || !isNaN(Number(dateString))) {
+      if (
+        dateString.includes('T') ||
+        dateString.includes('-') ||
+        !isNaN(Number(dateString))
+      ) {
         date = new Date(dateString);
       } else {
         // Try parsing as is
@@ -114,7 +121,8 @@ export function ImageViewer({
 
   const handlePrevious = () => {
     if (selectedImageIndex === null) return;
-    const newIndex = selectedImageIndex > 0 ? selectedImageIndex - 1 : images.length - 1;
+    const newIndex =
+      selectedImageIndex > 0 ? selectedImageIndex - 1 : images.length - 1;
     setSelectedImageIndex(newIndex);
     setZoom(1);
     setRotation(0);
@@ -122,7 +130,8 @@ export function ImageViewer({
 
   const handleNext = () => {
     if (selectedImageIndex === null) return;
-    const newIndex = selectedImageIndex < images.length - 1 ? selectedImageIndex + 1 : 0;
+    const newIndex =
+      selectedImageIndex < images.length - 1 ? selectedImageIndex + 1 : 0;
     setSelectedImageIndex(newIndex);
     setZoom(1);
     setRotation(0);
@@ -139,15 +148,15 @@ export function ImageViewer({
   };
 
   const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.25, 3));
+    setZoom((prev) => Math.min(prev + 0.25, 3));
   };
 
   const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.25, 0.25));
+    setZoom((prev) => Math.max(prev - 0.25, 0.25));
   };
 
   const handleRotate = () => {
-    setRotation(prev => (prev + 90) % 360);
+    setRotation((prev) => (prev + 90) % 360);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -196,7 +205,10 @@ export function ImageViewer({
   return (
     <>
       {/* Image Gallery Modal */}
-      <Dialog open={isOpen && selectedImageIndex === null} onOpenChange={onOpenChange}>
+      <Dialog
+        open={isOpen && selectedImageIndex === null}
+        onOpenChange={onOpenChange}
+      >
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{texts.title}</DialogTitle>
@@ -262,7 +274,8 @@ export function ImageViewer({
             <DialogHeader>
               <VisuallyHidden>
                 <DialogTitle>
-                  {texts.imageNumber} {selectedImageIndex + 1} {texts.of} {images.length}
+                  {texts.imageNumber} {selectedImageIndex + 1} {texts.of}{' '}
+                  {images.length}
                 </DialogTitle>
               </VisuallyHidden>
             </DialogHeader>
@@ -270,10 +283,14 @@ export function ImageViewer({
             <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 <Badge variant="secondary" className="text-sm">
-                  {texts.imageNumber} {selectedImageIndex + 1} {texts.of} {images.length}
+                  {texts.imageNumber} {selectedImageIndex + 1} {texts.of}{' '}
+                  {images.length}
                 </Badge>
                 {images[selectedImageIndex].file_name && (
-                  <Badge variant="outline" className="text-sm bg-black/50 text-white border-white/20">
+                  <Badge
+                    variant="outline"
+                    className="text-sm bg-black/50 text-white border-white/20"
+                  >
                     {images[selectedImageIndex].file_name}
                   </Badge>
                 )}
@@ -299,11 +316,7 @@ export function ImageViewer({
                 >
                   <ZoomIn className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleRotate}
-                >
+                <Button variant="secondary" size="sm" onClick={handleRotate}>
                   <RotateCw className="h-4 w-4" />
                 </Button>
                 <Button
@@ -347,7 +360,10 @@ export function ImageViewer({
             <div className="w-screen h-screen flex items-center justify-center p-16">
               <img
                 src={images[selectedImageIndex].image}
-                alt={images[selectedImageIndex].file_name || `Image ${selectedImageIndex + 1}`}
+                alt={
+                  images[selectedImageIndex].file_name ||
+                  `Image ${selectedImageIndex + 1}`
+                }
                 className="max-w-[calc(100vw-8rem)] max-h-[calc(100vh-8rem)] object-contain transition-transform"
                 style={{
                   transform: `scale(${zoom}) rotate(${rotation}deg)`,
@@ -358,7 +374,10 @@ export function ImageViewer({
             {/* Bottom info */}
             <div className="absolute bottom-4 left-4 right-4 z-10">
               <div className="bg-black/50 rounded p-3 text-white text-sm">
-                <p>{texts.uploadedOn}: {formatDate(images[selectedImageIndex].upload_date)}</p>
+                <p>
+                  {texts.uploadedOn}:{' '}
+                  {formatDate(images[selectedImageIndex].upload_date)}
+                </p>
                 {images[selectedImageIndex].file_size && (
                   <p>{formatFileSize(images[selectedImageIndex].file_size)}</p>
                 )}

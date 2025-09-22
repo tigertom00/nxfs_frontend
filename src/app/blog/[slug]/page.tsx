@@ -43,14 +43,21 @@ export default function BlogPostPage() {
           return;
         } catch (directError: any) {
           // If slug endpoint fails, fall back to public posts list
-          console.log('Direct slug lookup failed, trying public posts list:', directError);
+          console.log(
+            'Direct slug lookup failed, trying public posts list:',
+            directError
+          );
         }
 
         // Fallback: Get all public posts and find by slug
         const response = await postsAPI.getPublicPosts();
-        const postsArray = Array.isArray(response) ? response : response.results || [];
+        const postsArray = Array.isArray(response)
+          ? response
+          : response.results || [];
         // Only show published posts to public users
-        const foundPost = postsArray.find((p: Post) => p.slug === slug && p.status === 'published');
+        const foundPost = postsArray.find(
+          (p: Post) => p.slug === slug && p.status === 'published'
+        );
 
         if (!foundPost) {
           setError('Post not found');
@@ -108,9 +115,7 @@ export default function BlogPostPage() {
         <Navbar />
         <main className="container mx-auto px-4 py-8">
           <Alert className="max-w-4xl mx-auto">
-            <AlertDescription>
-              {error || 'Post not found'}
-            </AlertDescription>
+            <AlertDescription>{error || 'Post not found'}</AlertDescription>
           </Alert>
         </main>
         <ChatBot />
@@ -131,7 +136,9 @@ export default function BlogPostPage() {
 
               {(post.excerpt || post.excerpt_nb) && (
                 <p className="text-lg text-muted-foreground mt-2">
-                  {language === 'no' ? post.excerpt_nb || post.excerpt : post.excerpt}
+                  {language === 'no'
+                    ? post.excerpt_nb || post.excerpt
+                    : post.excerpt}
                 </p>
               )}
 
@@ -169,7 +176,11 @@ export default function BlogPostPage() {
                   components={{
                     img: ({ src, alt }) => (
                       <img
-                        src={src?.startsWith('http') ? src : `https://api.nxfs.no${src}`}
+                        src={
+                          src?.startsWith('http')
+                            ? src
+                            : `https://api.nxfs.no${src}`
+                        }
                         alt={alt}
                         className="max-w-full h-auto rounded-lg my-4"
                       />
@@ -194,7 +205,9 @@ export default function BlogPostPage() {
                     ),
                   }}
                 >
-                  {language === 'no' ? post.body_markdown_nb || post.body_markdown : post.body_markdown}
+                  {language === 'no'
+                    ? post.body_markdown_nb || post.body_markdown
+                    : post.body_markdown}
                 </ReactMarkdown>
               </div>
             </CardContent>

@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,67 +8,73 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Copy } from "lucide-react"
-import { toast } from "sonner"
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Copy } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface RequestLog {
-  id: string
-  url: string
-  method: string
-  status: number
-  statusText: string
-  timestamp: Date
-  responseTime: number
-  headers: Record<string, string>
-  response: string
-  error?: string
+  id: string;
+  url: string;
+  method: string;
+  status: number;
+  statusText: string;
+  timestamp: Date;
+  responseTime: number;
+  headers: Record<string, string>;
+  response: string;
+  error?: string;
 }
 
 interface RequestLogDialogProps {
-  children: React.ReactNode
-  log: RequestLog
+  children: React.ReactNode;
+  log: RequestLog;
 }
 
 export function RequestLogDialog({ children, log }: RequestLogDialogProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    toast.success("Copied to clipboard")
-  }
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard');
+  };
 
   const getMethodBadgeClass = (method: string) => {
     switch (method.toLowerCase()) {
-      case 'get': return 'method-get'
-      case 'post': return 'method-post'
-      case 'put': return 'method-put'
-      case 'delete': return 'method-delete'
-      case 'patch': return 'method-patch'
-      case 'head': return 'method-head'
-      case 'options': return 'method-options'
-      default: return 'bg-secondary text-secondary-foreground'
+      case 'get':
+        return 'method-get';
+      case 'post':
+        return 'method-post';
+      case 'put':
+        return 'method-put';
+      case 'delete':
+        return 'method-delete';
+      case 'patch':
+        return 'method-patch';
+      case 'head':
+        return 'method-head';
+      case 'options':
+        return 'method-options';
+      default:
+        return 'bg-secondary text-secondary-foreground';
     }
-  }
+  };
 
   const formatJson = (jsonString: string) => {
     try {
-      const parsed = JSON.parse(jsonString)
-      return JSON.stringify(parsed, null, 2)
+      const parsed = JSON.parse(jsonString);
+      return JSON.stringify(parsed, null, 2);
     } catch {
-      return jsonString
+      return jsonString;
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
         <DialogHeader>
           <div className="flex items-center gap-2">
@@ -81,8 +87,14 @@ export function RequestLogDialog({ children, log }: RequestLogDialogProps) {
             {log.timestamp.toLocaleString()} • {log.responseTime}ms
             {log.status > 0 && (
               <>
-                {" • Status: "}
-                <Badge variant={log.status >= 200 && log.status < 300 ? "default" : "destructive"}>
+                {' • Status: '}
+                <Badge
+                  variant={
+                    log.status >= 200 && log.status < 300
+                      ? 'default'
+                      : 'destructive'
+                  }
+                >
                   {log.status} {log.statusText}
                 </Badge>
               </>
@@ -104,7 +116,9 @@ export function RequestLogDialog({ children, log }: RequestLogDialogProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => copyToClipboard(log.response || log.error || "")}
+                  onClick={() =>
+                    copyToClipboard(log.response || log.error || '')
+                  }
                 >
                   <Copy className="w-4 h-4 mr-2" />
                   Copy
@@ -114,7 +128,9 @@ export function RequestLogDialog({ children, log }: RequestLogDialogProps) {
                 {log.error ? (
                   <div className="text-destructive">
                     <p className="font-medium">Error:</p>
-                    <pre className="whitespace-pre-wrap text-sm mt-2">{log.error}</pre>
+                    <pre className="whitespace-pre-wrap text-sm mt-2">
+                      {log.error}
+                    </pre>
                   </div>
                 ) : (
                   <pre className="whitespace-pre-wrap text-sm">
@@ -132,7 +148,9 @@ export function RequestLogDialog({ children, log }: RequestLogDialogProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => copyToClipboard(JSON.stringify(log.headers, null, 2))}
+                  onClick={() =>
+                    copyToClipboard(JSON.stringify(log.headers, null, 2))
+                  }
                 >
                   <Copy className="w-4 h-4 mr-2" />
                   Copy
@@ -191,5 +209,5 @@ export function RequestLogDialog({ children, log }: RequestLogDialogProps) {
         </Tabs>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

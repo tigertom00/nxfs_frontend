@@ -73,8 +73,7 @@ export function TagManager({ tags, onTagsChange }: TagManagerProps) {
       language === 'no'
         ? 'Opprett, rediger eller slett tagger for blogginnleggene dine.'
         : 'Create, edit, or delete tags for your blog posts.',
-    existingTags:
-      language === 'no' ? 'Eksisterende Tagger' : 'Existing Tags',
+    existingTags: language === 'no' ? 'Eksisterende Tagger' : 'Existing Tags',
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -218,7 +217,9 @@ export function TagManager({ tags, onTagsChange }: TagManagerProps) {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>{texts.cancel}</AlertDialogCancel>
+                            <AlertDialogCancel>
+                              {texts.cancel}
+                            </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDelete(tag.id)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

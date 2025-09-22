@@ -257,9 +257,12 @@ export default function TasksPage() {
       const payload: any = {
         name: projectData.name.trim(),
         status: projectData.status,
-        status_nb: statusMapping[projectData.status as keyof typeof statusMapping],
+        status_nb:
+          statusMapping[projectData.status as keyof typeof statusMapping],
         user_id: parseInt(user.id),
-        ...(projectData.name_nb?.trim() && { name_nb: projectData.name_nb.trim() }),
+        ...(projectData.name_nb?.trim() && {
+          name_nb: projectData.name_nb.trim(),
+        }),
         ...(projectData.description?.trim() && {
           description: projectData.description.trim(),
         }),
@@ -290,7 +293,11 @@ export default function TasksPage() {
     try {
       setActionLoading(true);
       if (!user || !editingProject) {
-        setError(language === 'no' ? 'Bruker eller prosjekt ikke funnet' : 'User or project not found');
+        setError(
+          language === 'no'
+            ? 'Bruker eller prosjekt ikke funnet'
+            : 'User or project not found'
+        );
         setActionLoading(false);
         return;
       }
@@ -305,10 +312,15 @@ export default function TasksPage() {
       const payload: any = {
         name: projectData.name.trim(),
         status: projectData.status,
-        status_nb: statusMapping[projectData.status as keyof typeof statusMapping],
+        status_nb:
+          statusMapping[projectData.status as keyof typeof statusMapping],
         completed: projectData.status === 'completed',
-        ...(projectData.status === 'completed' && { completed_at: new Date().toISOString() }),
-        ...(projectData.name_nb?.trim() && { name_nb: projectData.name_nb.trim() }),
+        ...(projectData.status === 'completed' && {
+          completed_at: new Date().toISOString(),
+        }),
+        ...(projectData.name_nb?.trim() && {
+          name_nb: projectData.name_nb.trim(),
+        }),
         ...(projectData.description?.trim() && {
           description: projectData.description.trim(),
         }),
@@ -371,10 +383,13 @@ export default function TasksPage() {
     setIsDialogOpen(true);
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: 'todo' | 'in_progress' | 'completed') => {
+  const handleStatusChange = async (
+    taskId: string,
+    newStatus: 'todo' | 'in_progress' | 'completed'
+  ) => {
     try {
       setActionLoading(true);
-      const task = tasks.find(t => t.id === taskId);
+      const task = tasks.find((t) => t.id === taskId);
       if (!task || !user) return;
 
       const payload = {
@@ -402,10 +417,13 @@ export default function TasksPage() {
     }
   };
 
-  const handlePriorityChange = async (taskId: string, newPriority: 'low' | 'medium' | 'high') => {
+  const handlePriorityChange = async (
+    taskId: string,
+    newPriority: 'low' | 'medium' | 'high'
+  ) => {
     try {
       setActionLoading(true);
-      const task = tasks.find(t => t.id === taskId);
+      const task = tasks.find((t) => t.id === taskId);
       if (!task || !user) return;
 
       const payload = {
@@ -433,10 +451,13 @@ export default function TasksPage() {
     }
   };
 
-  const handleProjectStatusChange = async (projectId: number, newStatus: 'todo' | 'in_progress' | 'completed') => {
+  const handleProjectStatusChange = async (
+    projectId: number,
+    newStatus: 'todo' | 'in_progress' | 'completed'
+  ) => {
     try {
       setActionLoading(true);
-      const project = projects.find(p => p.id === projectId);
+      const project = projects.find((p) => p.id === projectId);
       if (!project || !user) return;
 
       // Map status to Norwegian equivalent
@@ -764,7 +785,8 @@ export default function TasksPage() {
               )}
 
               {/* Show/Hide Completed Button */}
-              {(sortedStandaloneTasks.length > 0 || sortedProjects.length > 0) && (
+              {(sortedStandaloneTasks.length > 0 ||
+                sortedProjects.length > 0) && (
                 <div className="flex justify-center pt-4">
                   <Button
                     variant="outline"

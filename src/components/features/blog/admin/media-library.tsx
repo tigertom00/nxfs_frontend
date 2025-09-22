@@ -42,7 +42,9 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
     // If it's a relative URL, prepend the API base URL
     const baseUrl = env.NEXT_PUBLIC_API_URL || 'https://api.nxfs.no';
-    const normalizedUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+    const normalizedUrl = url.startsWith('/')
+      ? `${baseUrl}${url}`
+      : `${baseUrl}/${url}`;
     return normalizedUrl;
   };
 
@@ -54,12 +56,12 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
     try {
       setError(null);
       // Fetch images, audio, and YouTube videos separately using dedicated endpoints
-      const [imagesResponse, audioResponse, youtubeResponse] = await Promise.all([
-        postsAPI.getImages(postId),
-        postsAPI.getAudio(postId),
-        postsAPI.getYouTubeVideos(postId)
-      ]);
-
+      const [imagesResponse, audioResponse, youtubeResponse] =
+        await Promise.all([
+          postsAPI.getImages(postId),
+          postsAPI.getAudio(postId),
+          postsAPI.getYouTubeVideos(postId),
+        ]);
 
       setImages(imagesResponse || []);
       setAudio(audioResponse || []);
@@ -177,7 +179,8 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
   // Extract YouTube video ID from URL
   const extractYouTubeId = (url: string) => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const regex =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
   };
@@ -263,7 +266,9 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                 className="w-full"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {uploading ? t('common.uploading') : t('blog.media.uploadImage')}
+                {uploading
+                  ? t('common.uploading')
+                  : t('blog.media.uploadImage')}
               </Button>
             </div>
 
@@ -279,17 +284,22 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
-                            e.currentTarget.parentElement!.innerHTML = '<div class="text-muted-foreground text-sm">Image not found</div>';
+                            e.currentTarget.parentElement!.innerHTML =
+                              '<div class="text-muted-foreground text-sm">Image not found</div>';
                           }}
                         />
                       ) : (
-                        <div className="text-muted-foreground text-sm">No image URL</div>
+                        <div className="text-muted-foreground text-sm">
+                          No image URL
+                        </div>
                       )}
                     </div>
 
                     <div className="space-y-2">
                       <p className="text-sm font-medium truncate">
-                        {image.file_name || image.image?.split('/').pop() || 'Unknown file'}
+                        {image.file_name ||
+                          image.image?.split('/').pop() ||
+                          'Unknown file'}
                       </p>
 
                       <div className="text-xs text-muted-foreground space-y-1">
@@ -366,7 +376,9 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                 className="w-full"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {uploading ? t('common.uploading') : t('blog.media.uploadAudio')}
+                {uploading
+                  ? t('common.uploading')
+                  : t('blog.media.uploadAudio')}
               </Button>
             </div>
 
@@ -394,7 +406,10 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
                       {normalizeUrl(audioFile.audio) ? (
                         <audio controls className="w-full h-8">
-                          <source src={normalizeUrl(audioFile.audio)} type="audio/mpeg" />
+                          <source
+                            src={normalizeUrl(audioFile.audio)}
+                            type="audio/mpeg"
+                          />
                           Your browser does not support the audio element.
                         </audio>
                       ) : (
@@ -458,7 +473,9 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
               <CardContent className="p-4">
                 <div className="space-y-3">
                   <div>
-                    <Label htmlFor="youtube-url">{t('blog.media.youtubeUrl')}</Label>
+                    <Label htmlFor="youtube-url">
+                      {t('blog.media.youtubeUrl')}
+                    </Label>
                     <Input
                       id="youtube-url"
                       value={youtubeUrl}
@@ -473,7 +490,9 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                     className="w-full"
                   >
                     <Youtube className="h-4 w-4 mr-2" />
-                    {uploading ? t('common.uploading') : t('blog.media.uploadYoutube')}
+                    {uploading
+                      ? t('common.uploading')
+                      : t('blog.media.uploadYoutube')}
                   </Button>
                 </div>
               </CardContent>
@@ -482,7 +501,9 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
             {/* Saved YouTube Videos */}
             {youtubeVideos.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-sm font-medium">{t('blog.media.savedYoutubeVideos')}</h3>
+                <h3 className="text-sm font-medium">
+                  {t('blog.media.savedYoutubeVideos')}
+                </h3>
                 {youtubeVideos.map((video) => (
                   <Card key={video.id}>
                     <CardContent className="p-3">

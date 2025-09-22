@@ -1,8 +1,8 @@
 interface ParsedCurl {
-  url: string
-  method: string
-  headers: Record<string, string>
-  body: string
+  url: string;
+  method: string;
+  headers: Record<string, string>;
+  body: string;
 }
 
 export function parseCurlCommand(curlCommand: string): ParsedCurl | null {
@@ -15,7 +15,7 @@ export function parseCurlCommand(curlCommand: string): ParsedCurl | null {
       url: '',
       method: 'GET',
       headers: {},
-      body: ''
+      body: '',
     };
 
     // Parse method

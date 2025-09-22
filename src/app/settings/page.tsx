@@ -3,11 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layouts/navbar';
+import { CategoryManager, ProjectManager } from '@/components/features/tasks';
 import {
-  CategoryManager,
-  ProjectManager,
-} from '@/components/features/tasks';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -33,14 +36,17 @@ import {
 } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { isAuthenticated, user, isLoading, initialize, isInitialized } = useAuthStore();
+  const { isAuthenticated, user, isLoading, initialize, isInitialized } =
+    useAuthStore();
   const { theme, language, setTheme, setLanguage } = useUIStore();
   const router = useRouter();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [saveStatus, setSaveStatus] = useState<
+    'idle' | 'saving' | 'success' | 'error'
+  >('idle');
   const [error, setError] = useState<string | null>(null);
 
   // Check authentication
@@ -110,22 +116,30 @@ export default function SettingsPage() {
 
   const texts = {
     settings: language === 'no' ? 'Innstillinger' : 'Settings',
-    personalPreferences: language === 'no' ? 'Personlige Innstillinger' : 'Personal Preferences',
+    personalPreferences:
+      language === 'no' ? 'Personlige Innstillinger' : 'Personal Preferences',
     language: language === 'no' ? 'Språk' : 'Language',
     theme: language === 'no' ? 'Tema' : 'Theme',
-    projectManagement: language === 'no' ? 'Prosjektadministrasjon' : 'Project Management',
-    categoryManagement: language === 'no' ? 'Kategori-administrasjon' : 'Category Management',
-    manageProjects: language === 'no' ? 'Administrer Prosjekter' : 'Manage Projects',
-    manageCategories: language === 'no' ? 'Administrer Kategorier' : 'Manage Categories',
-    projectsDescription: language === 'no'
-      ? 'Organiser oppgavene dine med prosjekter'
-      : 'Organize your tasks with projects',
-    categoriesDescription: language === 'no'
-      ? 'Kategoriser oppgavene dine for bedre organisering'
-      : 'Categorize your tasks for better organization',
-    preferencesDescription: language === 'no'
-      ? 'Tilpass språk og utseende etter dine preferanser'
-      : 'Customize language and appearance to your preferences',
+    projectManagement:
+      language === 'no' ? 'Prosjektadministrasjon' : 'Project Management',
+    categoryManagement:
+      language === 'no' ? 'Kategori-administrasjon' : 'Category Management',
+    manageProjects:
+      language === 'no' ? 'Administrer Prosjekter' : 'Manage Projects',
+    manageCategories:
+      language === 'no' ? 'Administrer Kategorier' : 'Manage Categories',
+    projectsDescription:
+      language === 'no'
+        ? 'Organiser oppgavene dine med prosjekter'
+        : 'Organize your tasks with projects',
+    categoriesDescription:
+      language === 'no'
+        ? 'Kategoriser oppgavene dine for bedre organisering'
+        : 'Categorize your tasks for better organization',
+    preferencesDescription:
+      language === 'no'
+        ? 'Tilpass språk og utseende etter dine preferanser'
+        : 'Customize language and appearance to your preferences',
     english: 'English',
     norwegian: 'Norsk',
     light: language === 'no' ? 'Lys' : 'Light',
@@ -158,12 +172,13 @@ export default function SettingsPage() {
           <div className="flex items-center gap-3">
             <SettingsIcon className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{texts.settings}</h1>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {texts.settings}
+              </h1>
               <p className="text-muted-foreground">
                 {language === 'no'
                   ? 'Administrer dine preferanser og innstillinger'
-                  : 'Manage your preferences and settings'
-                }
+                  : 'Manage your preferences and settings'}
               </p>
             </div>
           </div>
@@ -182,7 +197,9 @@ export default function SettingsPage() {
                   <Palette className="h-5 w-5" />
                   {texts.personalPreferences}
                 </CardTitle>
-                <CardDescription>{texts.preferencesDescription}</CardDescription>
+                <CardDescription>
+                  {texts.preferencesDescription}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Language */}
@@ -208,7 +225,10 @@ export default function SettingsPage() {
                     <Palette className="h-4 w-4" />
                     {texts.theme}
                   </Label>
-                  <Select value={theme === 'purple' ? 'light' : theme} onValueChange={handleThemeChange}>
+                  <Select
+                    value={theme === 'purple' ? 'light' : theme}
+                    onValueChange={handleThemeChange}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

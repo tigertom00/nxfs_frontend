@@ -50,23 +50,42 @@ export function CreateProviderDialog({
 
   const texts = {
     title: language === 'no' ? 'Legg til LLM-leverandør' : 'Add LLM Provider',
-    description: language === 'no' ? 'Opprett en ny LLM-leverandør' : 'Create a new LLM provider',
+    description:
+      language === 'no'
+        ? 'Opprett en ny LLM-leverandør'
+        : 'Create a new LLM provider',
     name: language === 'no' ? 'Navn' : 'Name',
     namePlaceholder: language === 'no' ? 'f.eks. ChatGPT' : 'e.g. ChatGPT',
     url: language === 'no' ? 'URL' : 'URL',
-    urlPlaceholder: language === 'no' ? 'https://chatgpt.com' : 'https://chatgpt.com',
-    descriptionEn: language === 'no' ? 'Beskrivelse (engelsk)' : 'Description (English)',
-    descriptionNo: language === 'no' ? 'Beskrivelse (norsk)' : 'Description (Norwegian)',
-    descriptionPlaceholder: language === 'no' ? 'Beskriv leverandøren...' : 'Describe the provider...',
-    strengthsEn: language === 'no' ? 'Styrker (engelsk)' : 'Strengths (English)',
-    strengthsNo: language === 'no' ? 'Styrker (norsk)' : 'Strengths (Norwegian)',
-    strengthPlaceholder: language === 'no' ? 'f.eks. Utmerkede skriveferdigheter' : 'e.g. Excellent writing capabilities',
+    urlPlaceholder:
+      language === 'no' ? 'https://chatgpt.com' : 'https://chatgpt.com',
+    descriptionEn:
+      language === 'no' ? 'Beskrivelse (engelsk)' : 'Description (English)',
+    descriptionNo:
+      language === 'no' ? 'Beskrivelse (norsk)' : 'Description (Norwegian)',
+    descriptionPlaceholder:
+      language === 'no'
+        ? 'Beskriv leverandøren...'
+        : 'Describe the provider...',
+    strengthsEn:
+      language === 'no' ? 'Styrker (engelsk)' : 'Strengths (English)',
+    strengthsNo:
+      language === 'no' ? 'Styrker (norsk)' : 'Strengths (Norwegian)',
+    strengthPlaceholder:
+      language === 'no'
+        ? 'f.eks. Utmerkede skriveferdigheter'
+        : 'e.g. Excellent writing capabilities',
     pricing: language === 'no' ? 'Prissetting' : 'Pricing',
-    pricingEn: language === 'no' ? 'Prissetting (engelsk)' : 'Pricing (English)',
-    pricingNo: language === 'no' ? 'Prissetting (norsk)' : 'Pricing (Norwegian)',
+    pricingEn:
+      language === 'no' ? 'Prissetting (engelsk)' : 'Pricing (English)',
+    pricingNo:
+      language === 'no' ? 'Prissetting (norsk)' : 'Pricing (Norwegian)',
     pricingPlaceholder: language === 'no' ? 'f.eks. Freemium' : 'e.g. Freemium',
     tags: language === 'no' ? 'Kategorier (Tag-IDer)' : 'Categories (Tag IDs)',
-    tagPlaceholder: language === 'no' ? 'Skriv tag-ID og trykk Enter' : 'Type tag ID and press Enter',
+    tagPlaceholder:
+      language === 'no'
+        ? 'Skriv tag-ID og trykk Enter'
+        : 'Type tag ID and press Enter',
     icon: language === 'no' ? 'Ikon' : 'Icon',
     uploadIcon: language === 'no' ? 'Last opp ikon' : 'Upload Icon',
     addStrength: language === 'no' ? 'Legg til styrke' : 'Add Strength',
@@ -85,8 +104,8 @@ export function CreateProviderDialog({
         url: formData.url,
         description: formData.description,
         description_nb: formData.description_nb,
-        strengths_en: strengths_en.filter(s => s.trim()),
-        strengths_no: strengths_no.filter(s => s.trim()),
+        strengths_en: strengths_en.filter((s) => s.trim()),
+        strengths_no: strengths_no.filter((s) => s.trim()),
         pricing: formData.pricing,
         pricing_nb: formData.pricing_nb,
         tag_ids: tags,
@@ -99,7 +118,11 @@ export function CreateProviderDialog({
       resetForm();
     } catch (error) {
       console.error('Failed to create provider:', error);
-      toast.error(language === 'no' ? 'Kunne ikke opprette leverandør' : 'Failed to create provider');
+      toast.error(
+        language === 'no'
+          ? 'Kunne ikke opprette leverandør'
+          : 'Failed to create provider'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -121,14 +144,14 @@ export function CreateProviderDialog({
     setIconFile(null);
   };
 
-  const handleInputChange = (field: keyof typeof formData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
-  };
+  const handleInputChange =
+    (field: keyof typeof formData) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: e.target.value,
+      }));
+    };
 
   const handleStrengthChange = (
     index: number,
@@ -174,7 +197,7 @@ export function CreateProviderDialog({
   };
 
   const removeTag = (tagId: number) => {
-    setTags(tags.filter(t => t !== tagId));
+    setTags(tags.filter((t) => t !== tagId));
   };
 
   const handleIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,15 +209,11 @@ export function CreateProviderDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{texts.title}</DialogTitle>
-          <DialogDescription>
-            {texts.description}
-          </DialogDescription>
+          <DialogDescription>{texts.description}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -282,7 +301,9 @@ export function CreateProviderDialog({
                   <Input
                     placeholder={texts.strengthPlaceholder}
                     value={strength}
-                    onChange={(e) => handleStrengthChange(index, e.target.value, false)}
+                    onChange={(e) =>
+                      handleStrengthChange(index, e.target.value, false)
+                    }
                   />
                   {strengths_en.length > 1 && (
                     <Button
@@ -314,7 +335,9 @@ export function CreateProviderDialog({
                   <Input
                     placeholder={texts.strengthPlaceholder}
                     value={strength}
-                    onChange={(e) => handleStrengthChange(index, e.target.value, true)}
+                    onChange={(e) =>
+                      handleStrengthChange(index, e.target.value, true)
+                    }
                   />
                   {strengths_no.length > 1 && (
                     <Button
@@ -354,7 +377,11 @@ export function CreateProviderDialog({
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {tags.map((tagId) => (
-                  <Badge key={tagId} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={tagId}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     Tag {tagId}
                     <X
                       className="w-3 h-3 cursor-pointer"
@@ -395,7 +422,11 @@ export function CreateProviderDialog({
         </form>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
             {texts.cancel}
           </Button>
           <Button

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layouts/navbar';
 import ChatBot from '@/components/features/chat/chatbot';
 import {
@@ -14,13 +14,19 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useAuthStore, useUIStore } from '@/stores';
 import { useDebounce } from '@/hooks';
-import { llmProvidersAPI } from '@/lib/api'
-import type { LLMProvider } from '@/types/api'
-import { toast } from "sonner"
-import { CreateProviderDialog } from '@/components/features/llm-providers'
+import { llmProvidersAPI } from '@/lib/api';
+import type { LLMProvider } from '@/types/api';
+import { toast } from 'sonner';
+import { CreateProviderDialog } from '@/components/features/llm-providers';
 import {
   Search,
   Settings,
@@ -33,101 +39,142 @@ import {
 } from 'lucide-react';
 
 export default function LLMProvidersPage() {
-  const { isAuthenticated, user, isLoading: authLoading, initialize } = useAuthStore()
-  const { language, theme } = useUIStore()
-  const router = useRouter()
+  const {
+    isAuthenticated,
+    user,
+    isLoading: authLoading,
+    initialize,
+  } = useAuthStore();
+  const { language, theme } = useUIStore();
+  const router = useRouter();
 
-  const [providers, setProviders] = useState<LLMProvider[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedTag, setSelectedTag] = useState<string>("all")
+  const [providers, setProviders] = useState<LLMProvider[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string>('all');
 
   // Debounce search term to avoid excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Authentication and theme initialization
   useEffect(() => {
-    initialize()
-  }, [initialize])
+    initialize();
+  }, [initialize]);
 
   useEffect(() => {
     // Apply theme to document
-    document.documentElement.classList.remove('light', 'dark', 'purple')
-    document.documentElement.classList.add(theme)
-  }, [theme])
+    document.documentElement.classList.remove('light', 'dark', 'purple');
+    document.documentElement.classList.add(theme);
+  }, [theme]);
 
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
-      router.push('/auth/signin')
+      router.push('/auth/signin');
     }
-  }, [isAuthenticated, authLoading, router])
+  }, [isAuthenticated, authLoading, router]);
 
   // Fetch providers
   const fetchProviders = async () => {
     try {
-      setIsLoading(true)
-      const data = await llmProvidersAPI.getProviders()
-      setProviders(data)
+      setIsLoading(true);
+      const data = await llmProvidersAPI.getProviders();
+      setProviders(data);
     } catch (error) {
-      console.error('Failed to fetch providers:', error)
-      toast.error(language === 'no' ? 'Kunne ikke hente leverandører' : 'Failed to fetch providers')
+      console.error('Failed to fetch providers:', error);
+      toast.error(
+        language === 'no'
+          ? 'Kunne ikke hente leverandører'
+          : 'Failed to fetch providers'
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchProviders()
+      fetchProviders();
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated]);
 
   // Filter providers based on search and tags
   const filteredProviders = providers.filter((provider) => {
-    const description = language === 'no' ? provider.description_nb : provider.description
-    const strengths = language === 'no' ? provider.strengths_no : provider.strengths_en
+    const description =
+      language === 'no' ? provider.description_nb : provider.description;
+    const strengths =
+      language === 'no' ? provider.strengths_no : provider.strengths_en;
 
-    const matchesSearch = provider.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                         description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                         strengths.some(strength => strength.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+    const matchesSearch =
+      provider.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      strengths.some((strength) =>
+        strength.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      );
 
-    const matchesTag = selectedTag === "all" || provider.tags.includes(parseInt(selectedTag))
+    const matchesTag =
+      selectedTag === 'all' || provider.tags.includes(parseInt(selectedTag));
 
-    return matchesSearch && matchesTag
-  })
+    return matchesSearch && matchesTag;
+  });
 
   // Get unique tag IDs for filter dropdown
-  const availableTags = [...new Set(providers.flatMap(p => p.tags))]
+  const availableTags = [...new Set(providers.flatMap((p) => p.tags))];
 
   const handleDeleteProvider = async (providerId: number) => {
     try {
-      await llmProvidersAPI.deleteProvider(providerId)
-      setProviders(prev => prev.filter(p => p.id !== providerId))
-      toast.success(language === 'no' ? 'Leverandør slettet' : 'Provider deleted')
+      await llmProvidersAPI.deleteProvider(providerId);
+      setProviders((prev) => prev.filter((p) => p.id !== providerId));
+      toast.success(
+        language === 'no' ? 'Leverandør slettet' : 'Provider deleted'
+      );
     } catch (error) {
-      toast.error(language === 'no' ? 'Kunne ikke slette leverandør' : 'Failed to delete provider')
+      toast.error(
+        language === 'no'
+          ? 'Kunne ikke slette leverandør'
+          : 'Failed to delete provider'
+      );
     }
-  }
+  };
 
   const handleProviderCreated = (newProvider: LLMProvider) => {
-    setProviders(prev => [newProvider, ...prev])
-  }
+    setProviders((prev) => [newProvider, ...prev]);
+  };
 
   const texts = {
     title: language === 'no' ? 'LLM-leverandører' : 'LLM Providers',
-    subtitle: language === 'no' ? 'Administrer og utforsk AI-modeller og plattformer' : 'Manage and explore AI models and platforms',
+    subtitle:
+      language === 'no'
+        ? 'Administrer og utforsk AI-modeller og plattformer'
+        : 'Manage and explore AI models and platforms',
     addProvider: language === 'no' ? 'Legg til leverandør' : 'Add Provider',
-    searchPlaceholder: language === 'no' ? 'Søk etter leverandører...' : 'Search providers...',
+    searchPlaceholder:
+      language === 'no' ? 'Søk etter leverandører...' : 'Search providers...',
     allTags: language === 'no' ? 'Alle kategorier' : 'All Categories',
-    searchAndFilters: language === 'no' ? 'Søk og filter' : 'Search and Filters',
+    searchAndFilters:
+      language === 'no' ? 'Søk og filter' : 'Search and Filters',
     noProviders: language === 'no' ? 'Ingen leverandører' : 'No Providers',
-    noProvidersDescription: language === 'no' ? 'Kom i gang ved å legge til din første LLM-leverandør' : 'Get started by adding your first LLM provider',
-    noMatchingProviders: language === 'no' ? 'Ingen samsvarende leverandører' : 'No Matching Providers',
-    tryDifferentSearch: language === 'no' ? 'Prøv et annet søk eller filter' : 'Try a different search or filter',
-    addFirstProvider: language === 'no' ? 'Legg til første leverandør' : 'Add First Provider',
-    showingResults: language === 'no' ? 'Viser {count} av {total} leverandører' : 'Showing {count} of {total} providers',
-    totalProviders: language === 'no' ? 'Totalt leverandører' : 'Total Providers',
-    availableTags: language === 'no' ? 'Tilgjengelige kategorier' : 'Available Categories',
+    noProvidersDescription:
+      language === 'no'
+        ? 'Kom i gang ved å legge til din første LLM-leverandør'
+        : 'Get started by adding your first LLM provider',
+    noMatchingProviders:
+      language === 'no'
+        ? 'Ingen samsvarende leverandører'
+        : 'No Matching Providers',
+    tryDifferentSearch:
+      language === 'no'
+        ? 'Prøv et annet søk eller filter'
+        : 'Try a different search or filter',
+    addFirstProvider:
+      language === 'no' ? 'Legg til første leverandør' : 'Add First Provider',
+    showingResults:
+      language === 'no'
+        ? 'Viser {count} av {total} leverandører'
+        : 'Showing {count} of {total} providers',
+    totalProviders:
+      language === 'no' ? 'Totalt leverandører' : 'Total Providers',
+    availableTags:
+      language === 'no' ? 'Tilgjengelige kategorier' : 'Available Categories',
     visitSite: language === 'no' ? 'Besøk nettsted' : 'Visit Site',
     edit: language === 'no' ? 'Rediger' : 'Edit',
     delete: language === 'no' ? 'Slett' : 'Delete',
@@ -135,7 +182,7 @@ export default function LLMProvidersPage() {
     strengths: language === 'no' ? 'Styrker' : 'Strengths',
     pricing: language === 'no' ? 'Priser' : 'Pricing',
     loading: language === 'no' ? 'Laster...' : 'Loading...',
-  }
+  };
 
   // Loading state
   if (authLoading) {
@@ -143,17 +190,15 @@ export default function LLMProvidersPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">
-            {texts.loading}
-          </p>
+          <p className="mt-4 text-muted-foreground">{texts.loading}</p>
         </div>
       </div>
-    )
+    );
   }
 
   // Redirect if not authenticated
   if (!isAuthenticated || !user) {
-    return null // Will redirect to sign in
+    return null; // Will redirect to sign in
   }
 
   return (
@@ -202,7 +247,9 @@ export default function LLMProvidersPage() {
                       <SelectValue>
                         <div className="flex items-center">
                           <Filter className="w-4 h-4 mr-2" />
-                          {selectedTag === "all" ? texts.allTags : `Tag ${selectedTag}`}
+                          {selectedTag === 'all'
+                            ? texts.allTags
+                            : `Tag ${selectedTag}`}
                         </div>
                       </SelectValue>
                     </SelectTrigger>
@@ -224,7 +271,10 @@ export default function LLMProvidersPage() {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, index) => (
-                <Card key={index} className="animate-pulse hover-lift border-l-4 border-l-api-accent-border">
+                <Card
+                  key={index}
+                  className="animate-pulse hover-lift border-l-4 border-l-api-accent-border"
+                >
                   <CardHeader>
                     <div className="h-6 bg-muted rounded w-3/4"></div>
                     <div className="h-4 bg-muted rounded w-full"></div>
@@ -247,16 +297,19 @@ export default function LLMProvidersPage() {
               <CardContent>
                 <Settings className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">
-                  {providers.length === 0 ? texts.noProviders : texts.noMatchingProviders}
+                  {providers.length === 0
+                    ? texts.noProviders
+                    : texts.noMatchingProviders}
                 </h3>
                 <p className="text-muted-foreground mb-4">
                   {providers.length === 0
                     ? texts.noProvidersDescription
-                    : texts.tryDifferentSearch
-                  }
+                    : texts.tryDifferentSearch}
                 </p>
                 {providers.length === 0 && (
-                  <CreateProviderDialog onProviderCreated={handleProviderCreated}>
+                  <CreateProviderDialog
+                    onProviderCreated={handleProviderCreated}
+                  >
                     <Button className="api-gradient hover:opacity-90">
                       <Plus className="w-4 h-4 mr-2" />
                       {texts.addFirstProvider}
@@ -268,9 +321,16 @@ export default function LLMProvidersPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProviders.map((provider) => {
-                const description = language === 'no' ? provider.description_nb : provider.description
-                const strengths = language === 'no' ? provider.strengths_no : provider.strengths_en
-                const pricing = language === 'no' ? provider.pricing_nb : provider.pricing
+                const description =
+                  language === 'no'
+                    ? provider.description_nb
+                    : provider.description;
+                const strengths =
+                  language === 'no'
+                    ? provider.strengths_no
+                    : provider.strengths_en;
+                const pricing =
+                  language === 'no' ? provider.pricing_nb : provider.pricing;
 
                 return (
                   <Card
@@ -287,13 +347,15 @@ export default function LLMProvidersPage() {
                                 alt={`${provider.name} icon`}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  e.currentTarget.style.display = 'none'
+                                  e.currentTarget.style.display = 'none';
                                 }}
                               />
                             </div>
                           )}
                           <div className="flex-1">
-                            <CardTitle className="text-lg">{provider.name}</CardTitle>
+                            <CardTitle className="text-lg">
+                              {provider.name}
+                            </CardTitle>
                             <div className="flex gap-2 mt-1">
                               <Badge className="api-accent-bg text-xs">
                                 {pricing}
@@ -358,7 +420,11 @@ export default function LLMProvidersPage() {
 
                       <Button
                         onClick={() =>
-                          window.open(provider.url, '_blank', 'noopener,noreferrer')
+                          window.open(
+                            provider.url,
+                            '_blank',
+                            'noopener,noreferrer'
+                          )
                         }
                         className="w-full"
                         size="sm"
@@ -368,7 +434,7 @@ export default function LLMProvidersPage() {
                       </Button>
                     </CardContent>
                   </Card>
-                )
+                );
               })}
             </div>
           )}
@@ -381,12 +447,15 @@ export default function LLMProvidersPage() {
                   <span>
                     {texts.showingResults
                       .replace('{count}', filteredProviders.length.toString())
-                      .replace('{total}', providers.length.toString())
-                    }
+                      .replace('{total}', providers.length.toString())}
                   </span>
                   <div className="flex gap-4">
-                    <span>{texts.totalProviders}: {providers.length}</span>
-                    <span>{texts.availableTags}: {availableTags.length}</span>
+                    <span>
+                      {texts.totalProviders}: {providers.length}
+                    </span>
+                    <span>
+                      {texts.availableTags}: {availableTags.length}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -396,5 +465,5 @@ export default function LLMProvidersPage() {
       </div>
       <ChatBot />
     </div>
-  )
+  );
 }

@@ -1,7 +1,13 @@
 'use client';
 
 import { Job } from '@/types/api';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Plus, Briefcase } from 'lucide-react';
 
@@ -18,7 +24,7 @@ export function JobSelector({
   selectedJob,
   onJobSelect,
   onNewJob,
-  loading
+  loading,
 }: JobSelectorProps) {
   if (loading) {
     return (
@@ -44,7 +50,7 @@ export function JobSelector({
         <Select
           value={selectedJob?.ordre_nr.toString() || ''}
           onValueChange={(value) => {
-            const job = jobs.find(j => j.ordre_nr.toString() === value);
+            const job = jobs.find((j) => j.ordre_nr.toString() === value);
             if (job) onJobSelect(job);
           }}
         >
@@ -61,14 +67,9 @@ export function JobSelector({
               </SelectItem>
             ) : (
               jobs.map((job) => (
-                <SelectItem
-                  key={job.ordre_nr}
-                  value={job.ordre_nr.toString()}
-                >
+                <SelectItem key={job.ordre_nr} value={job.ordre_nr.toString()}>
                   <div className="flex flex-col items-start">
-                    <span className="font-medium">
-                      Job #{job.ordre_nr}
-                    </span>
+                    <span className="font-medium">Job #{job.ordre_nr}</span>
                     {job.tittel && (
                       <span className="text-sm text-muted-foreground">
                         {job.tittel}

@@ -73,11 +73,17 @@ export default function ChatBot() {
       language === 'no'
         ? 'Start en samtale med AI-assistenten'
         : 'Start a conversation with the AI assistant',
-    fileSizeLimit: language === 'no' ? 'Fil for stor (maks 10MB)' : 'File too large (max 10MB)',
-    fileTypeNotSupported: language === 'no' ? 'Filtype ikke støttet' : 'File type not supported',
-    maxFiles: language === 'no' ? 'Maks 5 filer per melding' : 'Maximum 5 files per message',
+    fileSizeLimit:
+      language === 'no'
+        ? 'Fil for stor (maks 10MB)'
+        : 'File too large (max 10MB)',
+    fileTypeNotSupported:
+      language === 'no' ? 'Filtype ikke støttet' : 'File type not supported',
+    maxFiles:
+      language === 'no'
+        ? 'Maks 5 filer per melding'
+        : 'Maximum 5 files per message',
   };
-
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -94,7 +100,12 @@ export default function ChatBot() {
   }, [chatOpen, isMinimized]);
 
   const handleSendMessage = async () => {
-    if ((!inputValue.trim() && attachedFiles.length === 0) || isLoading || !isAuthenticated || !user) {
+    if (
+      (!inputValue.trim() && attachedFiles.length === 0) ||
+      isLoading ||
+      !isAuthenticated ||
+      !user
+    ) {
       return;
     }
 
@@ -103,12 +114,17 @@ export default function ChatBot() {
       content: inputValue.trim(),
       sender: 'user',
       timestamp: new Date(),
-      attachments: attachedFiles.length > 0 ? attachedFiles.map(file => ({
-        type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
-        name: file.name,
-        url: '',
-        file
-      })) : undefined,
+      attachments:
+        attachedFiles.length > 0
+          ? attachedFiles.map((file) => ({
+              type: file.type.startsWith('image/')
+                ? ('image' as const)
+                : ('file' as const),
+              name: file.name,
+              url: '',
+              file,
+            }))
+          : undefined,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -124,9 +140,15 @@ export default function ChatBot() {
       // Get user's preferred name (first_name or display_name as fallback)
       const userName = user.first_name || user.display_name || user.username;
 
-      const response = attachedFiles.length > 0
-        ? await chatbotAPI.sendMessageWithFiles(sessionId, messageText, attachedFiles, userName)
-        : await chatbotAPI.sendMessage(sessionId, messageText, userName);
+      const response =
+        attachedFiles.length > 0
+          ? await chatbotAPI.sendMessageWithFiles(
+              sessionId,
+              messageText,
+              attachedFiles,
+              userName
+            )
+          : await chatbotAPI.sendMessage(sessionId, messageText, userName);
 
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -464,7 +486,10 @@ export default function ChatBot() {
                   />
                   <Button
                     onClick={handleSendMessage}
-                    disabled={(!inputValue.trim() && attachedFiles.length === 0) || isLoading}
+                    disabled={
+                      (!inputValue.trim() && attachedFiles.length === 0) ||
+                      isLoading
+                    }
                     size="sm"
                     className="p-2"
                   >

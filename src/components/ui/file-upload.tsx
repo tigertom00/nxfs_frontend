@@ -36,7 +36,10 @@ export function FileUpload({
   const texts = {
     selectFiles: language === 'no' ? 'Velg filer' : 'Select files',
     takePhoto: language === 'no' ? 'Ta bilde' : 'Take photo',
-    dragDrop: language === 'no' ? 'Dra og slipp filer her, eller' : 'Drag and drop files here, or',
+    dragDrop:
+      language === 'no'
+        ? 'Dra og slipp filer her, eller'
+        : 'Drag and drop files here, or',
     click: language === 'no' ? 'klikk for å velge' : 'click to select',
     maxFiles: language === 'no' ? 'Maks filer' : 'Max files',
     maxSize: language === 'no' ? 'Maks størrelse' : 'Max size',
@@ -61,7 +64,9 @@ export function FileUpload({
     for (const file of fileArray) {
       // Check file size
       if (file.size > maxFileSize * 1024 * 1024) {
-        alert(`${file.name}: ${texts.fileTooLarge} (${texts.maxSize}: ${maxFileSize}${texts.mb})`);
+        alert(
+          `${file.name}: ${texts.fileTooLarge} (${texts.maxSize}: ${maxFileSize}${texts.mb})`
+        );
         continue;
       }
 
@@ -206,15 +211,21 @@ export function FileUpload({
       )}
 
       <div className="text-xs text-muted-foreground space-x-4">
-        <span>{texts.maxFiles}: {maxFiles}</span>
-        <span>{texts.maxSize}: {maxFileSize}{texts.mb}</span>
+        <span>
+          {texts.maxFiles}: {maxFiles}
+        </span>
+        <span>
+          {texts.maxSize}: {maxFileSize}
+          {texts.mb}
+        </span>
       </div>
 
       {/* Selected Files */}
       {value.length > 0 && (
         <div className="space-y-2">
           <Label className="text-sm font-medium">
-            {language === 'no' ? 'Valgte filer' : 'Selected files'} ({value.length})
+            {language === 'no' ? 'Valgte filer' : 'Selected files'} (
+            {value.length})
           </Label>
           <div className="grid gap-2">
             {value.map((file, index) => (

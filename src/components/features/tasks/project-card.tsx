@@ -27,7 +27,10 @@ interface ProjectCardProps {
   projectTasks: Task[];
   onEdit: (project: Project) => void;
   onClick: (project: Project) => void;
-  onStatusChange: (projectId: number, newStatus: 'todo' | 'in_progress' | 'completed') => void;
+  onStatusChange: (
+    projectId: number,
+    newStatus: 'todo' | 'in_progress' | 'completed'
+  ) => void;
 }
 
 export function ProjectCard({
@@ -40,7 +43,11 @@ export function ProjectCard({
   const { language } = useUIStore();
 
   const cycleStatus = () => {
-    const statusOrder: ('todo' | 'in_progress' | 'completed')[] = ['todo', 'in_progress', 'completed'];
+    const statusOrder: ('todo' | 'in_progress' | 'completed')[] = [
+      'todo',
+      'in_progress',
+      'completed',
+    ];
     const currentIndex = statusOrder.indexOf(project.status);
     const nextIndex = (currentIndex + 1) % statusOrder.length;
     const nextStatus = statusOrder[nextIndex];
@@ -126,21 +133,31 @@ export function ProjectCard({
   };
 
   return (
-    <Card className={`h-full hover:shadow-lg transition-all duration-200 ${getCardBorderStyle(project.status)} ${project.status === 'completed' ? 'opacity-80' : ''}`}>
+    <Card
+      className={`h-full hover:shadow-lg transition-all duration-200 ${getCardBorderStyle(project.status)} ${project.status === 'completed' ? 'opacity-80' : ''}`}
+    >
       <CardHeader className="pb-3">
         {/* Status Banner */}
-        <div className={`flex items-center justify-between p-2 -mx-6 -mt-6 mb-4 rounded-t-lg border-b ${getStatusBadgeStyle(project.status)}`}>
+        <div
+          className={`flex items-center justify-between p-2 -mx-6 -mt-6 mb-4 rounded-t-lg border-b ${getStatusBadgeStyle(project.status)}`}
+        >
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={cycleStatus}
               className="h-auto w-auto p-1 hover:bg-transparent"
-              title={language === 'no' ? 'Klikk for å endre status' : 'Click to change status'}
+              title={
+                language === 'no'
+                  ? 'Klikk for å endre status'
+                  : 'Click to change status'
+              }
             >
               {getStatusIcon(project.status)}
             </Button>
-            <span className="font-medium text-sm">{getStatusText(project.status)}</span>
+            <span className="font-medium text-sm">
+              {getStatusText(project.status)}
+            </span>
           </div>
           <Badge variant="outline" className="bg-white/50 dark:bg-black/50">
             {taskStats.total} {texts.tasks}
@@ -150,7 +167,9 @@ export function ProjectCard({
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2 flex-1">
             <FolderKanban className="h-5 w-5 text-purple-600" />
-            <CardTitle className={`text-lg line-clamp-2 flex-1 ${project.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+            <CardTitle
+              className={`text-lg line-clamp-2 flex-1 ${project.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}
+            >
               {language === 'no' && project.name_nb
                 ? project.name_nb
                 : project.name}
