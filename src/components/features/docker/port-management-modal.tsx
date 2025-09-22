@@ -144,7 +144,7 @@ export function PortManagementModal({
     hostName: string
   ): number => {
     const usedHostPorts = new Set(
-      (portsByHost[hostName] || []).map((p) => p.port)
+      (portsByHost[hostName] || []).map((p) => Number(p.port))
     );
 
     let nextPort = startPort;
