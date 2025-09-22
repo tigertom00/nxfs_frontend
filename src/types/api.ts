@@ -595,3 +595,50 @@ export type GetTimeEntryResponse = TimeEntry;
 export type CreateTimeEntryResponse = TimeEntry;
 export type UpdateTimeEntryResponse = TimeEntry;
 export type DeleteTimeEntryResponse = void;
+
+/**
+ * LLM Provider Types
+ * Based on API response from /app/components/providers/
+ */
+export interface LLMProvider {
+  id: number;
+  name: string;
+  url: string;
+  description: string;
+  description_nb: string;
+  strengths_en: string[];
+  strengths_no: string[];
+  pricing: string;
+  pricing_nb: string;
+  icon: string | null;
+  tags: number[]; // Array of tag IDs
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * LLM Provider API Request/Payload Types
+ */
+export interface CreateLLMProviderPayload {
+  name: string;
+  url: string;
+  description: string;
+  description_nb: string;
+  strengths_en: string[];
+  strengths_no: string[];
+  pricing: string;
+  pricing_nb: string;
+  icon?: File | string | null;
+  tag_ids: number[]; // Required field based on API response
+}
+
+export type UpdateLLMProviderPayload = Partial<CreateLLMProviderPayload>;
+
+/**
+ * LLM Provider API Response Types
+ */
+export type GetLLMProvidersResponse = LLMProvider[];
+export type GetLLMProviderResponse = LLMProvider;
+export type CreateLLMProviderResponse = LLMProvider;
+export type UpdateLLMProviderResponse = LLMProvider;
+export type DeleteLLMProviderResponse = void;

@@ -106,6 +106,15 @@ import type {
   CreateTimeEntryResponse,
   UpdateTimeEntryResponse,
   DeleteTimeEntryResponse,
+  // LLM Provider types
+  LLMProvider,
+  CreateLLMProviderPayload,
+  UpdateLLMProviderPayload,
+  GetLLMProvidersResponse,
+  GetLLMProviderResponse,
+  CreateLLMProviderResponse,
+  UpdateLLMProviderResponse,
+  DeleteLLMProviderResponse,
 } from '@/types/api';
 
 // Create axios instance
@@ -1442,6 +1451,133 @@ export const timeEntriesAPI = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Deleting time entry');
+      throw error;
+    }
+  },
+};
+
+// LLM Providers API
+export const llmProvidersAPI = {
+  getProviders: async (): Promise<GetLLMProvidersResponse> => {
+    const response = await api.get('/app/components/providers/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getProvider: async (providerId: number): Promise<GetLLMProviderResponse> => {
+    const response = await api.get(`/app/components/providers/${providerId}/`);
+    return response.data;
+  },
+
+  createProvider: async (providerData: CreateLLMProviderPayload): Promise<CreateLLMProviderResponse> => {
+    try {
+      // First try JSON payload
+      const response = await api.post('/app/components/providers/', providerData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      showSuccessToast('LLM Provider created successfully');
+      return response.data;
+    } catch (jsonError: any) {
+      console.log('JSON create failed, trying FormData:', jsonError);
+
+      // If JSON fails and we have files, try FormData
+      if (jsonError.response?.status === 400 && providerData.icon instanceof File) {
+        try {
+          const formData = new FormData();
+          Object.entries(providerData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              if (value instanceof File) {
+                formData.append(key, value);
+              } else if (Array.isArray(value)) {
+                // Handle array fields like tag_ids and strengths
+                value.forEach((item) => {
+                  formData.append(key, item.toString());
+                });
+              } else {
+                formData.append(key, value.toString());
+              }
+            }
+          });
+
+          const response = await api.post('/app/components/providers/', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          showSuccessToast('LLM Provider created successfully');
+          return response.data;
+        } catch (error) {
+          handleApiError(error, 'Creating LLM provider');
+          throw error;
+        }
+      } else {
+        handleApiError(jsonError, 'Creating LLM provider');
+        throw jsonError;
+      }
+    }
+  },
+
+  updateProvider: async (
+    providerId: number,
+    providerData: UpdateLLMProviderPayload
+  ): Promise<UpdateLLMProviderResponse> => {
+    try {
+      // First try JSON payload
+      const response = await api.put(`/app/components/providers/${providerId}/`, providerData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      showSuccessToast('LLM Provider updated successfully');
+      return response.data;
+    } catch (jsonError: any) {
+      console.log('JSON update failed, trying FormData:', jsonError);
+
+      // If JSON fails and we have files, try FormData
+      if (jsonError.response?.status === 400 && providerData.icon instanceof File) {
+        try {
+          const formData = new FormData();
+          Object.entries(providerData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              if (value instanceof File) {
+                formData.append(key, value);
+              } else if (Array.isArray(value)) {
+                // Handle array fields like tag_ids and strengths
+                value.forEach((item) => {
+                  formData.append(key, item.toString());
+                });
+              } else {
+                formData.append(key, value.toString());
+              }
+            }
+          });
+
+          const response = await api.put(`/app/components/providers/${providerId}/`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          showSuccessToast('LLM Provider updated successfully');
+          return response.data;
+        } catch (error) {
+          handleApiError(error, 'Updating LLM provider');
+          throw error;
+        }
+      } else {
+        handleApiError(jsonError, 'Updating LLM provider');
+        throw jsonError;
+      }
+    }
+  },
+
+  deleteProvider: async (providerId: number): Promise<DeleteLLMProviderResponse> => {
+    try {
+      const response = await api.delete(`/app/components/providers/${providerId}/`);
+      showSuccessToast('LLM Provider deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting LLM provider');
       throw error;
     }
   },

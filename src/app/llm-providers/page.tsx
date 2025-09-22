@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation'
 import Navbar from '@/components/layouts/navbar';
 import ChatBot from '@/components/features/chat/chatbot';
 import {
@@ -13,622 +14,387 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuthStore, useUIStore } from '@/stores';
-import { useDebounce, useLocalStorage } from '@/hooks';
+import { useDebounce } from '@/hooks';
+import { llmProvidersAPI } from '@/lib/api'
+import type { LLMProvider } from '@/types/api'
+import { toast } from "sonner"
+import { CreateProviderDialog } from '@/components/features/llm-providers'
 import {
-  ExternalLink,
   Search,
-  Brain,
-  Zap,
-  Code,
-  Book,
-  Image,
-  Mic,
-  Video,
-  Globe,
-  Shield,
-  Sparkles,
-  Target,
-  Rocket,
-  Lightbulb,
-  FileText,
-  MessageSquare,
-  Palette,
-  Database,
+  Settings,
+  Plus,
+  Filter,
+  ExternalLink,
+  Trash2,
+  Edit,
+  Eye,
 } from 'lucide-react';
 
-interface LLMProvider {
-  id: string;
-  name: string;
-  url: string;
-  description: string;
-  features: string[];
-  strengths: string[];
-  category: string;
-  pricing: string;
-  icon: React.ReactNode;
-  popular: boolean;
-  new: boolean;
-}
-
 export default function LLMProvidersPage() {
-  const { isAuthenticated } = useAuthStore();
-  const { language, theme } = useUIStore();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useLocalStorage('llm-providers-category', 'all');
+  const { isAuthenticated, user, isLoading: authLoading, initialize } = useAuthStore()
+  const { language, theme } = useUIStore()
+  const router = useRouter()
+
+  const [providers, setProviders] = useState<LLMProvider[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedTag, setSelectedTag] = useState<string>("all")
 
   // Debounce search term to avoid excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
+  // Authentication and theme initialization
+  useEffect(() => {
+    initialize()
+  }, [initialize])
+
   useEffect(() => {
     // Apply theme to document
-    document.documentElement.classList.remove('light', 'dark', 'purple');
-    document.documentElement.classList.add(theme);
-  }, [theme]);
+    document.documentElement.classList.remove('light', 'dark', 'purple')
+    document.documentElement.classList.add(theme)
+  }, [theme])
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      router.push('/auth/signin')
+    }
+  }, [isAuthenticated, authLoading, router])
+
+  // Fetch providers
+  const fetchProviders = async () => {
+    try {
+      setIsLoading(true)
+      const data = await llmProvidersAPI.getProviders()
+      setProviders(data)
+    } catch (error) {
+      console.error('Failed to fetch providers:', error)
+      toast.error(language === 'no' ? 'Kunne ikke hente leverandører' : 'Failed to fetch providers')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchProviders()
+    }
+  }, [isAuthenticated])
+
+  // Filter providers based on search and tags
+  const filteredProviders = providers.filter((provider) => {
+    const description = language === 'no' ? provider.description_nb : provider.description
+    const strengths = language === 'no' ? provider.strengths_no : provider.strengths_en
+
+    const matchesSearch = provider.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                         description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                         strengths.some(strength => strength.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+
+    const matchesTag = selectedTag === "all" || provider.tags.includes(parseInt(selectedTag))
+
+    return matchesSearch && matchesTag
+  })
+
+  // Get unique tag IDs for filter dropdown
+  const availableTags = [...new Set(providers.flatMap(p => p.tags))]
+
+  const handleDeleteProvider = async (providerId: number) => {
+    try {
+      await llmProvidersAPI.deleteProvider(providerId)
+      setProviders(prev => prev.filter(p => p.id !== providerId))
+      toast.success(language === 'no' ? 'Leverandør slettet' : 'Provider deleted')
+    } catch (error) {
+      toast.error(language === 'no' ? 'Kunne ikke slette leverandør' : 'Failed to delete provider')
+    }
+  }
+
+  const handleProviderCreated = (newProvider: LLMProvider) => {
+    setProviders(prev => [newProvider, ...prev])
+  }
 
   const texts = {
     title: language === 'no' ? 'LLM-leverandører' : 'LLM Providers',
-    subtitle:
-      language === 'no'
-        ? 'En omfattende liste over AI-modeller og plattformer'
-        : 'A comprehensive list of AI models and platforms',
-    search:
-      language === 'no' ? 'Søk etter leverandører...' : 'Search providers...',
-    allCategories: language === 'no' ? 'Alle kategorier' : 'All Categories',
-    general: language === 'no' ? 'Generell' : 'General',
-    coding: language === 'no' ? 'Koding' : 'Coding',
-    creative: language === 'no' ? 'Kreativ' : 'Creative',
-    research: language === 'no' ? 'Forskning' : 'Research',
-    multimodal: language === 'no' ? 'Multimodal' : 'Multimodal',
-    openSource: language === 'no' ? 'Åpen kildekode' : 'Open Source',
-    enterprise: language === 'no' ? 'Bedrift' : 'Enterprise',
-    free: language === 'no' ? 'Gratis' : 'Free',
-    freemium: language === 'no' ? 'Freemium' : 'Freemium',
-    paid: language === 'no' ? 'Betalt' : 'Paid',
+    subtitle: language === 'no' ? 'Administrer og utforsk AI-modeller og plattformer' : 'Manage and explore AI models and platforms',
+    addProvider: language === 'no' ? 'Legg til leverandør' : 'Add Provider',
+    searchPlaceholder: language === 'no' ? 'Søk etter leverandører...' : 'Search providers...',
+    allTags: language === 'no' ? 'Alle kategorier' : 'All Categories',
+    searchAndFilters: language === 'no' ? 'Søk og filter' : 'Search and Filters',
+    noProviders: language === 'no' ? 'Ingen leverandører' : 'No Providers',
+    noProvidersDescription: language === 'no' ? 'Kom i gang ved å legge til din første LLM-leverandør' : 'Get started by adding your first LLM provider',
+    noMatchingProviders: language === 'no' ? 'Ingen samsvarende leverandører' : 'No Matching Providers',
+    tryDifferentSearch: language === 'no' ? 'Prøv et annet søk eller filter' : 'Try a different search or filter',
+    addFirstProvider: language === 'no' ? 'Legg til første leverandør' : 'Add First Provider',
+    showingResults: language === 'no' ? 'Viser {count} av {total} leverandører' : 'Showing {count} of {total} providers',
+    totalProviders: language === 'no' ? 'Totalt leverandører' : 'Total Providers',
+    availableTags: language === 'no' ? 'Tilgjengelige kategorier' : 'Available Categories',
     visitSite: language === 'no' ? 'Besøk nettsted' : 'Visit Site',
-    popular: language === 'no' ? 'Populær' : 'Popular',
-    new: language === 'no' ? 'Ny' : 'New',
-    features: language === 'no' ? 'Funksjoner' : 'Features',
+    edit: language === 'no' ? 'Rediger' : 'Edit',
+    delete: language === 'no' ? 'Slett' : 'Delete',
+    viewDetails: language === 'no' ? 'Se detaljer' : 'View Details',
     strengths: language === 'no' ? 'Styrker' : 'Strengths',
-    learnMore: language === 'no' ? 'Lær mer' : 'Learn More',
-  };
+    pricing: language === 'no' ? 'Priser' : 'Pricing',
+    loading: language === 'no' ? 'Laster...' : 'Loading...',
+  }
 
-  const providers: LLMProvider[] = [
-    {
-      id: 'chatgpt',
-      name: 'ChatGPT',
-      url: 'https://chatgpt.com',
-      description:
-        language === 'no'
-          ? "OpenAI's flaggskiprodukt med GPT-4o, GPT-4, og GPT-3.5 for generell AI-assistanse."
-          : "OpenAI's flagship product featuring GPT-4o, GPT-4, and GPT-3.5 for general AI assistance.",
-      features: [texts.general, texts.coding, texts.creative, texts.multimodal],
-      strengths: [
-        language === 'no'
-          ? 'Utmerkede skriveferdigheter'
-          : 'Excellent writing capabilities',
-        language === 'no'
-          ? 'Sterk i koding og problemløsning'
-          : 'Strong in coding and problem solving',
-        language === 'no'
-          ? 'Bilde- og dokumentanalyse'
-          : 'Image and document analysis',
-        language === 'no'
-          ? 'Stort økosystem med plugins'
-          : 'Large ecosystem with plugins',
-      ],
-      category: texts.general,
-      pricing: texts.freemium,
-      icon: <Brain className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'claude',
-      name: 'Claude',
-      url: 'https://claude.ai',
-      description:
-        language === 'no'
-          ? "Anthropic's AI-assistent kjent for lange kontekstvinduer og sikkerhet."
-          : "Anthropic's AI assistant known for long context windows and safety.",
-      features: [texts.general, texts.coding, texts.research, texts.creative],
-      strengths: [
-        language === 'no' ? '200K tokens kontekst' : '200K tokens context',
-        language === 'no'
-          ? 'Sterk i dokumentanalyse'
-          : 'Excellent at document analysis',
-        language === 'no'
-          ? 'Fokus på sikkerhet og etikk'
-          : 'Focus on safety and ethics',
-        language === 'no'
-          ? 'God til komplekse oppgaver'
-          : 'Good at complex tasks',
-      ],
-      category: texts.general,
-      pricing: texts.freemium,
-      icon: <Shield className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'gemini',
-      name: 'Gemini',
-      url: 'https://gemini.google.com',
-      description:
-        language === 'no'
-          ? "Google's multimodale AI med integrasjon i Google-økosystemet."
-          : "Google's multimodal AI with deep integration in Google ecosystem.",
-      features: [texts.multimodal, texts.general, texts.creative],
-      strengths: [
-        language === 'no'
-          ? 'Multimodal (tekst, bilder, lyd)'
-          : 'Multimodal (text, images, audio)',
-        language === 'no' ? 'Google-integrasjoner' : 'Google integrations',
-        language === 'no' ? 'Sanntidsinformasjon' : 'Real-time information',
-        language === 'no' ? 'Gratis tilgang' : 'Free access',
-      ],
-      category: texts.multimodal,
-      pricing: texts.free,
-      icon: <Sparkles className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'grok',
-      name: 'Grok',
-      url: 'https://grok.com',
-      description:
-        language === 'no'
-          ? "xAI's AI-assistent med tilgang til sanntidsinformasjon fra X/Twitter."
-          : "xAI's AI assistant with access to real-time information from X/Twitter.",
-      features: [texts.general, texts.research],
-      strengths: [
-        language === 'no' ? 'Sanntidsdata fra X' : 'Real-time data from X',
-        language === 'no' ? 'Oppdatert informasjon' : 'Up-to-date information',
-        language === 'no' ? 'Sarkastisk personlighet' : 'Sarcastic personality',
-        language === 'no' ? 'Raske svar' : 'Fast responses',
-      ],
-      category: texts.general,
-      pricing: texts.paid,
-      icon: <Zap className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'copilot',
-      name: 'Microsoft Copilot',
-      url: 'https://copilot.microsoft.com',
-      description:
-        language === 'no'
-          ? "Microsoft's AI-assistent integrert i Windows og Office-produkter."
-          : "Microsoft's AI assistant integrated into Windows and Office products.",
-      features: [texts.general, texts.enterprise, texts.coding],
-      strengths: [
-        language === 'no'
-          ? 'Dyp Office-integrasjon'
-          : 'Deep Office integration',
-        language === 'no' ? 'Windows-integrasjon' : 'Windows integration',
-        language === 'no' ? 'Bedriftsfokus' : 'Enterprise focus',
-        language === 'no' ? 'Produktivitetsverktøy' : 'Productivity tools',
-      ],
-      category: texts.enterprise,
-      pricing: texts.freemium,
-      icon: <Target className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'perplexity',
-      name: 'Perplexity',
-      url: 'https://perplexity.ai',
-      description:
-        language === 'no'
-          ? 'AI-drevet søkemotor med kildehenvisninger og nøyaktige svar.'
-          : 'AI-powered search engine with source citations and accurate answers.',
-      features: [texts.research, texts.general],
-      strengths: [
-        language === 'no' ? 'Kildehenvisninger' : 'Source citations',
-        language === 'no' ? 'Akademisk nøyaktighet' : 'Academic accuracy',
-        language === 'no' ? 'Forskningsassistanse' : 'Research assistance',
-        language === 'no' ? 'Sanntidsinformasjon' : 'Real-time information',
-      ],
-      category: texts.research,
-      pricing: texts.freemium,
-      icon: <Book className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'meta',
-      name: 'Meta AI',
-      url: 'https://meta.ai',
-      description:
-        language === 'no'
-          ? 'Metas Llama 3-modeller med fokus på åpenhet og tilgjengelighet.'
-          : "Meta's Llama 3 models focusing on openness and accessibility.",
-      features: [texts.general, texts.openSource],
-      strengths: [
-        language === 'no' ? 'Åpen kildekode' : 'Open source',
-        language === 'no' ? 'Høy ytelse' : 'High performance',
-        language === 'no' ? 'Lokal kjøring mulig' : 'Local execution possible',
-        language === 'no' ? 'Stort samfunn' : 'Large community',
-      ],
-      category: texts.openSource,
-      pricing: texts.free,
-      icon: <Rocket className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'groq',
-      name: 'Groq',
-      url: 'https://chat.groq.com',
-      description:
-        language === 'no'
-          ? 'Ekstremt rask AI-inferens med LPU-teknologi for sanntidsapplikasjoner.'
-          : 'Extremely fast AI inference with LPU technology for real-time applications.',
-      features: [texts.general, texts.coding],
-      strengths: [
-        language === 'no' ? 'Blinkende rask' : 'Blazing fast',
-        language === 'no' ? 'Lav latens' : 'Low latency',
-        language === 'no' ? 'Sanntidsapplikasjoner' : 'Real-time applications',
-        language === 'no' ? 'Utviklervennlig' : 'Developer friendly',
-      ],
-      category: texts.coding,
-      pricing: texts.free,
-      icon: <Lightbulb className="h-6 w-6" />,
-      popular: false,
-      new: false,
-    },
-    {
-      id: 'mistral',
-      name: 'Mistral',
-      url: 'https://chat.mistral.ai',
-      description:
-        language === 'no'
-          ? 'Europeisk ledende AI med fokus på effektivitet og flerspråklig støtte.'
-          : 'European leading AI focusing on efficiency and multilingual support.',
-      features: [texts.general, texts.openSource, texts.enterprise],
-      strengths: [
-        language === 'no' ? 'Flerspråklig sterk' : 'Multilingual strength',
-        language === 'no' ? 'Europeisk personvern' : 'European privacy',
-        language === 'no' ? 'Effektive modeller' : 'Efficient models',
-        language === 'no' ? 'Bedriftsløsninger' : 'Enterprise solutions',
-      ],
-      category: texts.enterprise,
-      pricing: texts.freemium,
-      icon: <Globe className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'cohere',
-      name: 'Coral',
-      url: 'https://coral.cohere.com',
-      description:
-        language === 'no'
-          ? 'Coheres enterprise-fokuserte AI med RAG- og søkekapabiliteter.'
-          : "Cohere's enterprise-focused AI with RAG and search capabilities.",
-      features: [texts.enterprise, texts.research],
-      strengths: [
-        language === 'no' ? 'RAG-integrasjon' : 'RAG integration',
-        language === 'no' ? 'Bedriftssikkerhet' : 'Enterprise security',
-        language === 'no' ? 'Dokumentforståelse' : 'Document understanding',
-        language === 'no' ? 'Søkefunksjoner' : 'Search capabilities',
-      ],
-      category: texts.enterprise,
-      pricing: texts.paid,
-      icon: <Database className="h-6 w-6" />,
-      popular: false,
-      new: true,
-    },
-    {
-      id: 'you',
-      name: 'You.com',
-      url: 'https://you.com',
-      description:
-        language === 'no'
-          ? 'AI-søkemotor som kombinerer tradisjonell søk med AI-svar.'
-          : 'AI search engine combining traditional search with AI answers.',
-      features: [texts.research, texts.general],
-      strengths: [
-        language === 'no' ? 'Søk + AI kombinert' : 'Search + AI combined',
-        language === 'no' ? 'Personlige resultater' : 'Personalized results',
-        language === 'no' ? 'Privatlivsfokus' : 'Privacy focused',
-        language === 'no'
-          ? 'Rask informasjonstilgang'
-          : 'Quick information access',
-      ],
-      category: texts.research,
-      pricing: texts.freemium,
-      icon: <Search className="h-6 w-6" />,
-      popular: false,
-      new: false,
-    },
-    {
-      id: 'poe',
-      name: 'Poe',
-      url: 'https://poe.com',
-      description:
-        language === 'no'
-          ? 'Plattform som gir tilgang til mange forskjellige AI-modeller i ett grensesnitt.'
-          : 'Platform providing access to many different AI models in one interface.',
-      features: [texts.general, texts.multimodal],
-      strengths: [
-        language === 'no'
-          ? 'Mange modeller tilgjengelige'
-          : 'Many models available',
-        language === 'no' ? 'Ett grensesnitt' : 'Single interface',
-        language === 'no' ? 'Samfunnsfunksjoner' : 'Community features',
-        language === 'no' ? 'Eksperimentelle modeller' : 'Experimental models',
-      ],
-      category: texts.general,
-      pricing: texts.freemium,
-      icon: <MessageSquare className="h-6 w-6" />,
-      popular: true,
-      new: false,
-    },
-    {
-      id: 'deepseek',
-      name: 'DeepSeek',
-      url: 'https://deepseek.com',
-      description:
-        language === 'no'
-          ? 'Kinesisk AI-selskap med sterke koding- og matematikkmodeller.'
-          : 'Chinese AI company with strong coding and mathematics models.',
-      features: [texts.coding, texts.research],
-      strengths: [
-        language === 'no' ? 'Sterk i matematikk' : 'Strong in mathematics',
-        language === 'no' ? 'Kodingsekspertise' : 'Coding expertise',
-        language === 'no' ? 'Åpen forskning' : 'Open research',
-        language === 'no' ? 'Høy ytelse' : 'High performance',
-      ],
-      category: texts.coding,
-      pricing: texts.free,
-      icon: <Code className="h-6 w-6" />,
-      popular: true,
-      new: true,
-    },
-    {
-      id: 'zai',
-      name: 'Z.ai',
-      url: 'https://z.ai',
-      description:
-        language === 'no'
-          ? 'AI-plattform med fokus på koding og utviklerverktøy.'
-          : 'AI platform focusing on coding and developer tools.',
-      features: [texts.coding, texts.creative],
-      strengths: [
-        language === 'no' ? 'Utviklerfokusert' : 'Developer focused',
-        language === 'no' ? 'Kodingsassistanse' : 'Coding assistance',
-        language === 'no' ? 'Kreativ skriving' : 'Creative writing',
-        language === 'no' ? 'Prosjektintegrasjon' : 'Project integration',
-      ],
-      category: texts.coding,
-      pricing: texts.freemium,
-      icon: <Palette className="h-6 w-6" />,
-      popular: false,
-      new: true,
-    },
-  ];
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">
+            {texts.loading}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
-  const categories = [
-    texts.allCategories,
-    texts.general,
-    texts.coding,
-    texts.creative,
-    texts.research,
-    texts.multimodal,
-    texts.openSource,
-    texts.enterprise,
-  ];
-
-  const filteredProviders = providers.filter((provider) => {
-    const matchesSearch =
-      provider.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      provider.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      provider.strengths.some((strength) =>
-        strength.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      );
-
-    const matchesCategory =
-      selectedCategory === texts.allCategories ||
-      provider.category === selectedCategory;
-
-    return matchesSearch && matchesCategory;
-  });
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case texts.coding:
-        return <Code className="h-4 w-4" />;
-      case texts.creative:
-        return <Palette className="h-4 w-4" />;
-      case texts.research:
-        return <Book className="h-4 w-4" />;
-      case texts.multimodal:
-        return <Image className="h-4 w-4" />;
-      case texts.openSource:
-        return <Rocket className="h-4 w-4" />;
-      case texts.enterprise:
-        return <Shield className="h-4 w-4" />;
-      default:
-        return <Brain className="h-4 w-4" />;
-    }
-  };
-
-  const getPricingColor = (pricing: string) => {
-    switch (pricing) {
-      case texts.free:
-        return 'bg-green-100 text-green-800';
-      case texts.freemium:
-        return 'bg-blue-100 text-blue-800';
-      case texts.paid:
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // Redirect if not authenticated
+  if (!isAuthenticated || !user) {
+    return null // Will redirect to sign in
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="text-foreground p-4">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">{texts.title}</h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              {texts.subtitle}
-            </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg api-gradient flex items-center justify-center">
+                <Settings className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">{texts.title}</h1>
+                <p className="text-muted-foreground">{texts.subtitle}</p>
+              </div>
+            </div>
+            <CreateProviderDialog onProviderCreated={handleProviderCreated}>
+              <Button className="api-gradient hover:opacity-90">
+                <Plus className="w-4 h-4 mr-2" />
+                {texts.addProvider}
+              </Button>
+            </CreateProviderDialog>
           </div>
 
           {/* Search and Filters */}
-          <div className="mb-8 space-y-4">
-            <div className="relative max-w-md mx-auto">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder={texts.search}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-2">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={
-                    selectedCategory === category ? 'default' : 'outline'
-                  }
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className="flex items-center space-x-2"
-                >
-                  {category !== texts.allCategories &&
-                    getCategoryIcon(category)}
-                  <span>{category}</span>
-                </Button>
-              ))}
-            </div>
-          </div>
+          <Card className="hover-lift border-l-4 border-l-api-accent-border">
+            <CardHeader>
+              <CardTitle>{texts.searchAndFilters}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder={texts.searchPlaceholder}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="w-full sm:w-48">
+                  <Select value={selectedTag} onValueChange={setSelectedTag}>
+                    <SelectTrigger>
+                      <SelectValue>
+                        <div className="flex items-center">
+                          <Filter className="w-4 h-4 mr-2" />
+                          {selectedTag === "all" ? texts.allTags : `Tag ${selectedTag}`}
+                        </div>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{texts.allTags}</SelectItem>
+                      {availableTags.map((tagId) => (
+                        <SelectItem key={tagId} value={tagId.toString()}>
+                          Tag {tagId}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Providers Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProviders.map((provider) => (
-              <Card
-                key={provider.id}
-                className="h-full hover:shadow-lg transition-shadow"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        {provider.icon}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} className="animate-pulse hover-lift border-l-4 border-l-api-accent-border">
+                  <CardHeader>
+                    <div className="h-6 bg-muted rounded w-3/4"></div>
+                    <div className="h-4 bg-muted rounded w-full"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="h-4 bg-muted rounded w-full"></div>
+                      <div className="h-4 bg-muted rounded w-2/3"></div>
+                      <div className="flex gap-2">
+                        <div className="h-6 bg-muted rounded w-16"></div>
+                        <div className="h-6 bg-muted rounded w-20"></div>
                       </div>
-                      <div>
-                        <CardTitle className="text-lg flex items-center space-x-2">
-                          <span>{provider.name}</span>
-                          {provider.popular && (
-                            <Badge variant="default" className="text-xs">
-                              {texts.popular}
-                            </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredProviders.length === 0 ? (
+            <Card className="text-center py-12 hover-lift border-l-4 border-l-api-accent-border">
+              <CardContent>
+                <Settings className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  {providers.length === 0 ? texts.noProviders : texts.noMatchingProviders}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {providers.length === 0
+                    ? texts.noProvidersDescription
+                    : texts.tryDifferentSearch
+                  }
+                </p>
+                {providers.length === 0 && (
+                  <CreateProviderDialog onProviderCreated={handleProviderCreated}>
+                    <Button className="api-gradient hover:opacity-90">
+                      <Plus className="w-4 h-4 mr-2" />
+                      {texts.addFirstProvider}
+                    </Button>
+                  </CreateProviderDialog>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProviders.map((provider) => {
+                const description = language === 'no' ? provider.description_nb : provider.description
+                const strengths = language === 'no' ? provider.strengths_no : provider.strengths_en
+                const pricing = language === 'no' ? provider.pricing_nb : provider.pricing
+
+                return (
+                  <Card
+                    key={provider.id}
+                    className="h-full hover-lift border-l-4 border-l-api-accent-border"
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-3">
+                          {provider.icon && (
+                            <div className="w-10 h-10 rounded-lg overflow-hidden">
+                              <img
+                                src={provider.icon}
+                                alt={`${provider.name} icon`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none'
+                                }}
+                              />
+                            </div>
                           )}
-                          {provider.new && (
-                            <Badge variant="secondary" className="text-xs">
-                              {texts.new}
-                            </Badge>
-                          )}
-                        </CardTitle>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            {provider.category}
-                          </Badge>
-                          <Badge
-                            className={`text-xs ${getPricingColor(provider.pricing)}`}
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{provider.name}</CardTitle>
+                            <div className="flex gap-2 mt-1">
+                              <Badge className="api-accent-bg text-xs">
+                                {pricing}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteProvider(provider.id)}
                           >
-                            {provider.pricing}
-                          </Badge>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <CardDescription className="text-sm leading-relaxed">
-                    {provider.description}
-                  </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <CardDescription className="text-sm leading-relaxed">
+                        {description}
+                      </CardDescription>
 
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center">
-                      <Target className="h-4 w-4 mr-2" />
-                      {texts.strengths}
-                    </h4>
-                    <ul className="space-y-1">
-                      {provider.strengths.map((strength, index) => (
-                        <li
-                          key={index}
-                          className="text-sm text-muted-foreground flex items-start"
-                        >
-                          <span className="w-1 h-1 bg-primary rounded-full mt-2 mr-2 flex-shrink-0" />
-                          {strength}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                      <div>
+                        <h4 className="text-sm font-semibold mb-2">
+                          {texts.strengths}
+                        </h4>
+                        <ul className="space-y-1">
+                          {strengths.slice(0, 3).map((strength, index) => (
+                            <li
+                              key={index}
+                              className="text-sm text-muted-foreground flex items-start"
+                            >
+                              <span className="w-1 h-1 bg-primary rounded-full mt-2 mr-2 flex-shrink-0" />
+                              {strength}
+                            </li>
+                          ))}
+                          {strengths.length > 3 && (
+                            <li className="text-sm text-muted-foreground">
+                              + {strengths.length - 3} more
+                            </li>
+                          )}
+                        </ul>
+                      </div>
 
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center">
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      {texts.features}
-                    </h4>
-                    <div className="flex flex-wrap gap-1">
-                      {provider.features.map((feature, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
+                      {provider.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {provider.tags.map((tagId) => (
+                            <Badge
+                              key={tagId}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              Tag {tagId}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
 
-                  <Button
-                    onClick={() =>
-                      window.open(provider.url, '_blank', 'noopener,noreferrer')
-                    }
-                    className="w-full"
-                    size="sm"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    {texts.visitSite}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filteredProviders.length === 0 && (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold mb-2">
-                {language === 'no'
-                  ? 'Ingen leverandører funnet'
-                  : 'No providers found'}
-              </h3>
-              <p className="text-muted-foreground">
-                {language === 'no'
-                  ? 'Prøv å justere søket eller filteret'
-                  : 'Try adjusting your search or filters'}
-              </p>
+                      <Button
+                        onClick={() =>
+                          window.open(provider.url, '_blank', 'noopener,noreferrer')
+                        }
+                        className="w-full"
+                        size="sm"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        {texts.visitSite}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           )}
+
+          {/* Stats */}
+          {!isLoading && providers.length > 0 && (
+            <Card className="hover-lift border-l-4 border-l-api-accent-border">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>
+                    {texts.showingResults
+                      .replace('{count}', filteredProviders.length.toString())
+                      .replace('{total}', providers.length.toString())
+                    }
+                  </span>
+                  <div className="flex gap-4">
+                    <span>{texts.totalProviders}: {providers.length}</span>
+                    <span>{texts.availableTags}: {availableTags.length}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
-      </main>
-      {isAuthenticated && <ChatBot />}
+      </div>
+      <ChatBot />
     </div>
-  );
+  )
 }
