@@ -151,6 +151,11 @@ export default function Navbar() {
                     {language === 'no' ? 'Docker' : 'Docker'}
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/system-monitor" className="w-full">
+                    💻 {language === 'no' ? 'Systemovervåkning' : 'System Monitor'}
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/blog/admin" className="w-full">

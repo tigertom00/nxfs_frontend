@@ -715,3 +715,163 @@ export type GetLLMProviderResponse = LLMProvider;
 export type CreateLLMProviderResponse = LLMProvider;
 export type UpdateLLMProviderResponse = LLMProvider;
 export type DeleteLLMProviderResponse = void;
+
+/**
+ * System Monitoring Types
+ * Based on API responses from /api/docker/system-stats/ and /api/system/dashboard/
+ */
+
+// Core system statistics
+export interface SystemStats {
+  id: number;
+  cpu_percent: number;
+  cpu_count: number;
+  load_avg_1m: number;
+  load_avg_5m: number;
+  load_avg_15m: number;
+  memory_total: number;
+  memory_available: number;
+  memory_used: number;
+  memory_free: number;
+  memory_percent: number;
+  swap_total: number;
+  swap_used: number;
+  swap_free: number;
+  swap_percent: number;
+  disk_total: number;
+  disk_used: number;
+  disk_free: number;
+  disk_percent: number;
+  network_bytes_sent: number;
+  network_bytes_recv: number;
+  network_packets_sent: number;
+  network_packets_recv: number;
+  disk_read_bytes: number;
+  disk_write_bytes: number;
+  disk_read_count: number;
+  disk_write_count: number;
+  boot_time: string;
+  process_count: number;
+  cpu_temperature?: number;
+  timestamp: string;
+}
+
+// Host information
+export interface SystemHost {
+  id: number;
+  name: string;
+  hostname: string;
+  is_local: boolean;
+  is_active: boolean;
+  last_seen: string;
+  created_at: string;
+  container_count: number;
+  running_containers: number;
+  cpu_cores: number;
+  cpu_model: string;
+  total_memory: number;
+  architecture: string;
+  os_name: string;
+  os_version: string;
+  kernel_version: string;
+  latest_system_stats?: SystemStats;
+}
+
+// Top processes information
+export interface TopProcess {
+  id: number;
+  pid: number;
+  name: string;
+  username: string;
+  cpu_percent: number;
+  memory_percent: number;
+  memory_rss: number;
+  memory_vms: number;
+  status: string;
+  create_time: string;
+  cmdline: string;
+  timestamp: string;
+}
+
+// Container summary for dashboard
+export interface ContainersSummary {
+  total: number;
+  running: number;
+  stopped: number;
+  paused: number;
+}
+
+// Historical data points for charts
+export interface CPUHistoryPoint {
+  timestamp: string;
+  cpu_percent: number;
+  load_avg_1m: number;
+  load_avg_5m: number;
+  load_avg_15m: number;
+}
+
+export interface MemoryHistoryPoint {
+  timestamp: string;
+  memory_percent: number;
+  memory_used: number;
+  memory_available: number;
+  swap_percent: number;
+}
+
+export interface DiskHistoryPoint {
+  timestamp: string;
+  disk_percent: number;
+  disk_read_bytes: number;
+  disk_write_bytes: number;
+}
+
+export interface NetworkHistoryPoint {
+  timestamp: string;
+  network_bytes_sent: number;
+  network_bytes_recv: number;
+}
+
+// Combined dashboard data structure
+export interface SystemDashboard {
+  host: SystemHost;
+  current_system_stats: SystemStats;
+  containers_summary: ContainersSummary;
+  top_processes: TopProcess[];
+  cpu_history: CPUHistoryPoint[];
+  memory_history: MemoryHistoryPoint[];
+  disk_history: DiskHistoryPoint[];
+  network_history: NetworkHistoryPoint[];
+}
+
+// Latest system stats response (multi-host)
+export interface LatestSystemStatsItem {
+  host: SystemHost;
+  stats: SystemStats;
+}
+
+export interface LatestSystemStatsResponse {
+  count: number;
+  results: LatestSystemStatsItem[];
+}
+
+/**
+ * System Monitoring API Response Types
+ */
+
+// System stats endpoints
+export type GetSystemStatsResponse = SystemStats[];
+export type GetSystemStatResponse = SystemStats;
+export type GetLatestSystemStatsResponse = LatestSystemStatsResponse;
+
+// Dashboard endpoints
+export type GetSystemDashboardResponse = SystemDashboard;
+export type GetHostSystemDashboardResponse = SystemDashboard;
+
+// Collection endpoints
+export interface CollectSystemStatsResponse {
+  message: string;
+  collected_hosts: number;
+  timestamp: string;
+}
+
+export type PostSystemCollectResponse = CollectSystemStatsResponse;

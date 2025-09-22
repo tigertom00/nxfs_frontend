@@ -115,6 +115,13 @@ import type {
   CreateLLMProviderResponse,
   UpdateLLMProviderResponse,
   DeleteLLMProviderResponse,
+  // System monitoring types
+  GetSystemStatsResponse,
+  GetSystemStatResponse,
+  GetLatestSystemStatsResponse,
+  GetSystemDashboardResponse,
+  GetHostSystemDashboardResponse,
+  PostSystemCollectResponse,
 } from '@/types/api';
 
 // Create axios instance
@@ -1745,6 +1752,50 @@ export const llmProvidersAPI = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Deleting LLM provider');
+      throw error;
+    }
+  },
+};
+
+// System Monitoring API
+export const systemAPI = {
+  // System stats endpoints
+  getSystemStats: async (): Promise<GetSystemStatsResponse> => {
+    const response = await api.get('/api/docker/system-stats/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getSystemStat: async (statId: number): Promise<GetSystemStatResponse> => {
+    const response = await api.get(`/api/docker/system-stats/${statId}/`);
+    return response.data;
+  },
+
+  getLatestSystemStats: async (): Promise<GetLatestSystemStatsResponse> => {
+    const response = await api.get('/api/docker/system-stats/latest/');
+    return response.data;
+  },
+
+  // Dashboard endpoints
+  getSystemDashboard: async (): Promise<GetSystemDashboardResponse> => {
+    const response = await api.get('/api/system/dashboard/');
+    return response.data;
+  },
+
+  getHostSystemDashboard: async (
+    hostId: number
+  ): Promise<GetHostSystemDashboardResponse> => {
+    const response = await api.get(`/api/system/dashboard/${hostId}/`);
+    return response.data;
+  },
+
+  // Collection endpoints
+  collectSystemStats: async (): Promise<PostSystemCollectResponse> => {
+    try {
+      const response = await api.post('/api/system/collect/');
+      showSuccessToast('System stats collection initiated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Collecting system stats');
       throw error;
     }
   },
