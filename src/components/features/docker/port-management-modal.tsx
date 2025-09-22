@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, Network, Server, Container, ExternalLink } from 'lucide-react';
 import {
   Dialog,
@@ -53,6 +53,7 @@ export function PortManagementModal({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [nextPortInput, setNextPortInput] = useState('');
+  const [activeTab, setActiveTab] = useState('');
 
   // Filter to only running containers and extract host ports
   const runningContainers = useMemo(() => {
@@ -66,6 +67,13 @@ export function PortManagementModal({
     ) as string[];
     return hosts.sort();
   }, [runningContainers]);
+
+  // Set initial active tab when hosts are available
+  useEffect(() => {
+    if (availableHosts.length > 0 && !activeTab) {
+      setActiveTab(availableHosts[0]);
+    }
+  }, [availableHosts, activeTab]);
 
   // Extract host ports by host
   const portsByHost = useMemo(() => {
@@ -147,12 +155,13 @@ export function PortManagementModal({
     return nextPort;
   };
 
-  const getNextPortSuggestionForHost = (hostName: string) => {
+  // Get next port suggestion only for active tab
+  const nextPortSuggestion = useMemo(() => {
     const inputPort = parseInt(nextPortInput);
-    if (isNaN(inputPort) || inputPort <= 0) return null;
+    if (isNaN(inputPort) || inputPort <= 0 || !activeTab) return null;
 
-    return findNextAvailablePortForHost(inputPort, hostName);
-  };
+    return findNextAvailablePortForHost(inputPort, activeTab);
+  }, [nextPortInput, activeTab, portsByHost]);
 
   if (availableHosts.length === 0) {
     return (
@@ -212,7 +221,8 @@ export function PortManagementModal({
 
           {/* Host Tabs */}
           <Tabs
-            defaultValue={availableHosts[0]}
+            value={activeTab}
+            onValueChange={setActiveTab}
             className="flex-1 overflow-hidden flex flex-col"
           >
             <TabsList className="grid w-full grid-cols-2">
@@ -230,7 +240,6 @@ export function PortManagementModal({
 
             {availableHosts.map((host) => {
               const filteredPorts = getFilteredPortsForHost(host);
-              const nextPortSuggestion = getNextPortSuggestionForHost(host);
 
               return (
                 <TabsContent
@@ -253,7 +262,7 @@ export function PortManagementModal({
                           min="1"
                           max="65535"
                         />
-                        {nextPortSuggestion !== null && (
+                        {nextPortSuggestion !== null && host === activeTab && (
                           <Badge variant="secondary" className="px-3 py-2">
                             Next available: {nextPortSuggestion}
                           </Badge>
