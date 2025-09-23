@@ -69,8 +69,8 @@ export function AdvancedMaterialSearch({
     elNumber: '',
     eanNumber: '',
     articleNumber: '',
-    supplier: '',
-    category: '',
+    supplier: 'all',
+    category: 'all',
     typeDesignation: '',
     favoritesOnly: false,
     approvedOnly: false,
@@ -90,7 +90,7 @@ export function AdvancedMaterialSearch({
           material.english_description?.toLowerCase().includes(searchTerm) ||
           material.german_description?.toLowerCase().includes(searchTerm) ||
           material.type_designation?.toLowerCase().includes(searchTerm) ||
-          material.leverandor.name.toLowerCase().includes(searchTerm) ||
+          material.leverandor?.name?.toLowerCase().includes(searchTerm) ||
           material.el_nr?.includes(searchTerm) ||
           material.ean_number?.includes(searchTerm) ||
           material.article_number?.includes(searchTerm)
@@ -116,13 +116,13 @@ export function AdvancedMaterialSearch({
       );
     }
 
-    if (filters.supplier) {
+    if (filters.supplier && filters.supplier !== 'all') {
       filtered = filtered.filter(
-        (material) => material.leverandor.id.toString() === filters.supplier
+        (material) => material.leverandor?.id.toString() === filters.supplier
       );
     }
 
-    if (filters.category) {
+    if (filters.category && filters.category !== 'all') {
       filtered = filtered.filter(
         (material) => material.category === filters.category
       );
@@ -159,8 +159,8 @@ export function AdvancedMaterialSearch({
       elNumber: '',
       eanNumber: '',
       articleNumber: '',
-      supplier: '',
-      category: '',
+      supplier: 'all',
+      category: 'all',
       typeDesignation: '',
       favoritesOnly: false,
       approvedOnly: false,
@@ -174,8 +174,8 @@ export function AdvancedMaterialSearch({
     if (filters.elNumber.trim()) count++;
     if (filters.eanNumber.trim()) count++;
     if (filters.articleNumber.trim()) count++;
-    if (filters.supplier) count++;
-    if (filters.category) count++;
+    if (filters.supplier && filters.supplier !== 'all') count++;
+    if (filters.category && filters.category !== 'all') count++;
     if (filters.typeDesignation.trim()) count++;
     if (filters.favoritesOnly) count++;
     if (filters.approvedOnly) count++;
@@ -304,7 +304,7 @@ export function AdvancedMaterialSearch({
                     <SelectValue placeholder="Select manufacturer..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Manufacturers</SelectItem>
+                    <SelectItem value="all">All Manufacturers</SelectItem>
                     {suppliers.map((supplier) => (
                       <SelectItem
                         key={supplier.id}
@@ -328,7 +328,7 @@ export function AdvancedMaterialSearch({
                     <SelectValue placeholder="Select category..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}

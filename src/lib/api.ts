@@ -135,9 +135,15 @@ const api: AxiosInstance = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // First try to use environment API token (Django token auth)
+    if (env.NEXT_PUBLIC_API_TOKEN) {
+      config.headers.Authorization = env.NEXT_PUBLIC_API_TOKEN;
+    } else {
+      // Fallback to JWT token from localStorage
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
