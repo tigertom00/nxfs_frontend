@@ -156,8 +156,13 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
+                  <Link href="/blog/my-posts" className="w-full">
+                    📝 {language === 'no' ? 'Mine Innlegg' : 'My Posts'}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
                   <Link href="/blog/admin" className="w-full">
-                    {language === 'no' ? 'Blogg Admin' : 'Blog Admin'}
+                    ⚙️ {language === 'no' ? 'Blogg Admin' : 'Blog Admin'}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>

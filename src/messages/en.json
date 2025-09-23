@@ -148,6 +148,21 @@
       "savedYoutubeVideos": "Saved YouTube Videos",
       "youtubeHelp": "Paste any YouTube URL format:"
     },
+    "myPosts": {
+      "title": "My Blog Posts",
+      "description": "Manage and view all your blog posts",
+      "manage": "Manage Posts",
+      "newPost": "New Post",
+      "searchPlaceholder": "Search posts...",
+      "allStatus": "All Status",
+      "noPosts": "No posts yet",
+      "noPostsDescription": "You haven't created any blog posts yet. Start by creating your first post!",
+      "noFilterResults": "No posts match your filters",
+      "noFilterResultsDescription": "Try adjusting your search or filter criteria.",
+      "createFirst": "Create Your First Post",
+      "errorLoading": "Failed to load your posts",
+      "showing": "Showing {count} of {total} posts"
+    },
     "samplePost": {
       "title": "Introduction to Next.js and Internationalization",
       "content": "Welcome to our blog! This post demonstrates how **Next Intl** can be used to translate not just static UI text, but also dynamic API responses. \n\n## Key Features\n\n1. **Automatic language detection**\n2. **Rich text formatting** with markdown support\n3. **Interpolation** for dynamic values like {author} and {date}\n4. **Pluralization** support\n\nThis approach allows you to have translated content that can be:\n- Stored in translation files\n- Fetched from APIs\n- Combined for complex scenarios\n\n### API Translation Approaches\n\n**Method 1: Server-side translation** - API returns pre-translated content\n**Method 2: Client-side translation** - Use Next Intl to translate API keys\n**Method 3: Hybrid approach** - Combine both methods as needed"

@@ -148,6 +148,21 @@
       "savedYoutubeVideos": "Lagrede YouTube Videoer",
       "youtubeHelp": "Lim inn hvilken som helst YouTube URL format:"
     },
+    "myPosts": {
+      "title": "Mine Blogginnlegg",
+      "description": "Administrer og vis alle dine blogginnlegg",
+      "manage": "Administrer Innlegg",
+      "newPost": "Nytt Innlegg",
+      "searchPlaceholder": "Søk innlegg...",
+      "allStatus": "Alle Statuser",
+      "noPosts": "Ingen innlegg ennå",
+      "noPostsDescription": "Du har ikke opprettet noen blogginnlegg ennå. Start med å lage ditt første innlegg!",
+      "noFilterResults": "Ingen innlegg samsvarer med filtrene dine",
+      "noFilterResultsDescription": "Prøv å justere søke- eller filterkriteriene dine.",
+      "createFirst": "Opprett Ditt Første Innlegg",
+      "errorLoading": "Kunne ikke laste dine innlegg",
+      "showing": "Viser {count} av {total} innlegg"
+    },
     "samplePost": {
       "title": "Introduksjon til Next.js og Internasjonalisering",
       "content": "Velkommen til bloggen vår! Dette innlegget demonstrerer hvordan **Next Intl** kan brukes til å oversette ikke bare statisk UI-tekst, men også dynamiske API-responser.\n\n## Nøkkelfunksjoner\n\n1. **Automatisk språkdeteksjon**\n2. **Rik tekstformatering** med markdown-støtte\n3. **Interpolasjon** for dynamiske verdier som {author} og {date}\n4. **Pluralisering** støtte\n\nDenne tilnærmingen lar deg ha oversatt innhold som kan være:\n- Lagret i oversettelsesfiler\n- Hentet fra APIer\n- Kombinert for komplekse scenarier\n\n### API Oversettelsestilnærminger\n\n**Metode 1: Server-side oversettelse** - API returnerer forhåndsoversatt innhold\n**Metode 2: Klient-side oversettelse** - Bruk Next Intl til å oversette API-nøkler\n**Metode 3: Hybrid tilnærming** - Kombiner begge metoder etter behov"
