@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { usersAPI } from '@/lib/api';
 
 interface UIState {
-  theme: 'light' | 'dark' | 'purple' | 'pink' | 'system';
+  theme: 'light' | 'dark' | 'purple' | 'pink' | 'system' | null;
   language: 'en' | 'no';
   sidebarOpen: boolean;
   chatOpen: boolean;
@@ -14,6 +14,7 @@ interface UIState {
   getEffectiveTheme: () => 'light' | 'dark' | 'purple' | 'pink';
   syncThemeWithServer: (userId: string) => Promise<void>;
   loadThemeFromUser: (user: any) => void;
+  initializeTheme: () => void;
   setLanguage: (language: 'en' | 'no') => void;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
@@ -24,7 +25,7 @@ interface UIState {
 export const useUIStore = create<UIState>()(
   persist(
     (set, get) => ({
-      theme: 'system',
+      theme: null,
       language: 'en',
       sidebarOpen: false,
       chatOpen: false,
@@ -38,10 +39,34 @@ export const useUIStore = create<UIState>()(
 
       getEffectiveTheme: () => {
         const state = get();
+        if (state.theme === null) {
+          return state.getSystemTheme(); // Default to system theme if no theme set
+        }
         if (state.theme === 'system') {
           return state.getSystemTheme();
         }
         return state.theme as 'light' | 'dark' | 'purple' | 'pink';
+      },
+
+      initializeTheme: () => {
+        const state = get();
+        if (state.theme === null) {
+          // Only set system theme if no theme is stored and no user is logged in
+          if (typeof window !== 'undefined') {
+            const authStorage = localStorage.getItem('auth-storage');
+            if (!authStorage || !JSON.parse(authStorage).state?.isAuthenticated) {
+              set({ theme: 'system' });
+              const effectiveTheme = state.getSystemTheme();
+              document.documentElement.classList.remove('light', 'dark', 'purple', 'pink');
+              document.documentElement.classList.add(effectiveTheme);
+            }
+          }
+        } else {
+          // Apply existing theme
+          const effectiveTheme = state.theme === 'system' ? state.getSystemTheme() : state.theme;
+          document.documentElement.classList.remove('light', 'dark', 'purple', 'pink');
+          document.documentElement.classList.add(effectiveTheme);
+        }
       },
 
       setTheme: (theme) => {
@@ -131,6 +156,20 @@ export const useUIStore = create<UIState>()(
           const effectiveTheme =
             theme === 'system' ? get().getSystemTheme() : theme;
           document.documentElement.classList.add(effectiveTheme);
+        } else if (user && !user.theme) {
+          // User exists but has no theme preference - set to system as default for new users
+          const systemTheme = 'system';
+          set({ theme: systemTheme });
+          const effectiveTheme = get().getSystemTheme();
+          document.documentElement.classList.remove(
+            'light',
+            'dark',
+            'purple',
+            'pink'
+          );
+          document.documentElement.classList.add(effectiveTheme);
+          // Sync this default to server
+          get().syncThemeWithServer(user.id);
         }
       },
 
