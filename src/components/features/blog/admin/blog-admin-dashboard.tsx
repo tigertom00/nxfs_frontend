@@ -21,18 +21,10 @@ export function BlogAdminDashboard() {
     setIsCreating(true);
   };
 
-  const handleEditPost = async (post: Post) => {
-    try {
-      // Fetch the complete post data including tags
-      const fullPost = await postsAPI.getPost(post.id);
-      setSelectedPost(fullPost);
-      setIsCreating(false);
-    } catch (error) {
-      console.error('Error fetching post for editing:', error);
-      // Fallback to the post from the list if API call fails
-      setSelectedPost(post);
-      setIsCreating(false);
-    }
+  const handleEditPost = (post: Post) => {
+    // Use the post data from the list directly since it already contains all necessary data
+    setSelectedPost(post);
+    setIsCreating(false);
   };
 
   const handleSaveComplete = () => {
