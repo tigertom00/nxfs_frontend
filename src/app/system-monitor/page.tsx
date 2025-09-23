@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { systemAPI } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 import { useRouter } from 'next/navigation';
+import Navbar from '@/components/layouts/navbar';
+import ChatBot from '@/components/features/chat/chatbot';
 import { SystemDashboard, LatestSystemStatsResponse } from '@/types/api';
 import {
   Activity,
@@ -39,7 +41,9 @@ const formatUptime = (bootTime: string): string => {
   const now = new Date();
   const diffMs = now.getTime() - boot.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const diffHours = Math.floor(
+    (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
   const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
   if (diffDays > 0) {
@@ -57,7 +61,9 @@ const SystemMonitorPage = () => {
   const { t } = useIntl();
 
   const [dashboard, setDashboard] = useState<SystemDashboard | null>(null);
-  const [allHosts, setAllHosts] = useState<LatestSystemStatsResponse | null>(null);
+  const [allHosts, setAllHosts] = useState<LatestSystemStatsResponse | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -122,7 +128,7 @@ const SystemMonitorPage = () => {
       <div className="flex items-center justify-center min-h-screen">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
         />
       </div>
@@ -149,7 +155,8 @@ const SystemMonitorPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-background">
+      <Navbar />
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <motion.div
@@ -159,18 +166,22 @@ const SystemMonitorPage = () => {
         >
           <div className="flex items-center space-x-4">
             <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-              <Monitor className="w-8 h-8 text-white" />
+              <Monitor className="w-8 h-8 text-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">System Monitor</h1>
-              <p className="text-slate-300">Real-time infrastructure monitoring</p>
+              <h1 className="text-3xl font-bold text-foreground">
+                System Monitor
+              </h1>
+              <p className="text-muted-foreground">
+                Real-time infrastructure monitoring
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             <Button
               onClick={handleCollectStats}
               variant="outline"
-              className="border-purple-500/50 text-purple-200 hover:bg-purple-500/20"
+              className="border-purple-500/50 text-muted-foreground hover:bg-purple-500/20"
             >
               <Zap className="w-4 h-4 mr-2" />
               Collect Stats
@@ -180,7 +191,9 @@ const SystemMonitorPage = () => {
               disabled={refreshing}
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`}
+              />
               Refresh
             </Button>
           </div>
@@ -193,9 +206,9 @@ const SystemMonitorPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="flex items-center text-white">
+                <CardTitle className="flex items-center text-foreground">
                   <Server className="w-5 h-5 mr-2 text-blue-400" />
                   Infrastructure Overview ({allHosts.count} hosts)
                 </CardTitle>
@@ -211,47 +224,61 @@ const SystemMonitorPage = () => {
                       className="p-4 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-lg border border-slate-600"
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-white">{hostData.host.name}</h3>
+                        <h3 className="font-semibold text-foreground">
+                          {hostData.host.name}
+                        </h3>
                         <Badge
-                          variant={hostData.host.is_active ? "default" : "secondary"}
-                          className={hostData.host.is_active ? "bg-green-500" : ""}
+                          variant={
+                            hostData.host.is_active ? 'default' : 'secondary'
+                          }
+                          className={
+                            hostData.host.is_active ? 'bg-green-500' : ''
+                          }
                         >
-                          {hostData.host.is_active ? "Active" : "Inactive"}
+                          {hostData.host.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
 
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-center justify-between text-slate-300">
+                        <div className="flex items-center justify-between text-muted-foreground">
                           <span className="flex items-center">
                             <Cpu className="w-4 h-4 mr-2 text-blue-400" />
                             CPU
                           </span>
-                          <span className="text-white font-mono">{hostData.stats.cpu_percent}%</span>
+                          <span className="text-foreground font-mono">
+                            {hostData.stats.cpu_percent}%
+                          </span>
                         </div>
 
-                        <div className="flex items-center justify-between text-slate-300">
+                        <div className="flex items-center justify-between text-muted-foreground">
                           <span className="flex items-center">
                             <MemoryStick className="w-4 h-4 mr-2 text-green-400" />
                             Memory
                           </span>
-                          <span className="text-white font-mono">{hostData.stats.memory_percent}%</span>
+                          <span className="text-foreground font-mono">
+                            {hostData.stats.memory_percent}%
+                          </span>
                         </div>
 
-                        <div className="flex items-center justify-between text-slate-300">
+                        <div className="flex items-center justify-between text-muted-foreground">
                           <span className="flex items-center">
                             <HardDrive className="w-4 h-4 mr-2 text-purple-400" />
                             Disk
                           </span>
-                          <span className="text-white font-mono">{hostData.stats.disk_percent.toFixed(1)}%</span>
+                          <span className="text-foreground font-mono">
+                            {hostData.stats.disk_percent.toFixed(1)}%
+                          </span>
                         </div>
 
                         {hostData.stats.cpu_temperature && (
-                          <div className="flex items-center justify-between text-slate-300">
+                          <div className="flex items-center justify-between text-muted-foreground">
                             <span className="flex items-center">
                               <Thermometer className="w-4 h-4 mr-2 text-red-400" />
                               Temp
                             </span>
-                            <span className="text-white font-mono">{hostData.stats.cpu_temperature}°C</span>
+                            <span className="text-foreground font-mono">
+                              {hostData.stats.cpu_temperature}°C
+                            </span>
                           </div>
                         )}
                       </div>
@@ -272,9 +299,9 @@ const SystemMonitorPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+              <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-white">
+                  <CardTitle className="flex items-center text-foreground">
                     <Server className="w-5 h-5 mr-2 text-blue-400" />
                     {dashboard.host.name} - System Information
                   </CardTitle>
@@ -282,20 +309,32 @@ const SystemMonitorPage = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-2">
-                      <p className="text-sm text-slate-400">Operating System</p>
-                      <p className="text-white font-mono">{dashboard.host.os_name} {dashboard.host.os_version}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Operating System
+                      </p>
+                      <p className="text-foreground font-mono">
+                        {dashboard.host.os_name} {dashboard.host.os_version}
+                      </p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-slate-400">CPU Model</p>
-                      <p className="text-white font-mono text-xs">{dashboard.host.cpu_model}</p>
+                      <p className="text-sm text-muted-foreground">CPU Model</p>
+                      <p className="text-foreground font-mono text-xs">
+                        {dashboard.host.cpu_model}
+                      </p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-slate-400">Architecture</p>
-                      <p className="text-white font-mono">{dashboard.host.architecture}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Architecture
+                      </p>
+                      <p className="text-foreground font-mono">
+                        {dashboard.host.architecture}
+                      </p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-slate-400">Uptime</p>
-                      <p className="text-white font-mono">{formatUptime(dashboard.current_system_stats.boot_time)}</p>
+                      <p className="text-sm text-muted-foreground">Uptime</p>
+                      <p className="text-foreground font-mono">
+                        {formatUptime(dashboard.current_system_stats.boot_time)}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -310,27 +349,27 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className="bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20 backdrop-blur-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-blue-100">
+                    <CardTitle className="flex items-center text-foreground">
                       <Cpu className="w-5 h-5 mr-2 text-blue-400" />
                       CPU Usage
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="text-3xl font-bold text-white">
+                      <div className="text-3xl font-bold text-foreground">
                         {dashboard.current_system_stats.cpu_percent}%
                       </div>
                       <Progress
                         value={dashboard.current_system_stats.cpu_percent}
                         className="bg-blue-900/50"
                       />
-                      <div className="text-sm text-blue-200">
+                      <div className="text-sm text-muted-foreground">
                         {dashboard.current_system_stats.cpu_count} cores
                       </div>
                       {dashboard.current_system_stats.cpu_temperature && (
-                        <div className="flex items-center text-sm text-blue-200">
+                        <div className="flex items-center text-sm text-muted-foreground">
                           <Thermometer className="w-4 h-4 mr-1" />
                           {dashboard.current_system_stats.cpu_temperature}°C
                         </div>
@@ -346,27 +385,36 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className="bg-gradient-to-br from-green-900/50 to-green-800/50 border-green-700 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20 backdrop-blur-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-green-100">
+                    <CardTitle className="flex items-center text-foreground">
                       <MemoryStick className="w-5 h-5 mr-2 text-green-400" />
                       Memory Usage
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="text-3xl font-bold text-white">
+                      <div className="text-3xl font-bold text-foreground">
                         {dashboard.current_system_stats.memory_percent}%
                       </div>
                       <Progress
                         value={dashboard.current_system_stats.memory_percent}
                         className="bg-green-900/50"
                       />
-                      <div className="text-sm text-green-200">
-                        {formatBytes(dashboard.current_system_stats.memory_used)} / {formatBytes(dashboard.current_system_stats.memory_total)}
+                      <div className="text-sm text-muted-foreground">
+                        {formatBytes(
+                          dashboard.current_system_stats.memory_used
+                        )}{' '}
+                        /{' '}
+                        {formatBytes(
+                          dashboard.current_system_stats.memory_total
+                        )}
                       </div>
-                      <div className="text-xs text-green-300">
-                        Available: {formatBytes(dashboard.current_system_stats.memory_available)}
+                      <div className="text-xs text-muted-foreground">
+                        Available:{' '}
+                        {formatBytes(
+                          dashboard.current_system_stats.memory_available
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -379,27 +427,31 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/50 border-purple-700 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20 backdrop-blur-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-purple-100">
+                    <CardTitle className="flex items-center text-foreground">
                       <HardDrive className="w-5 h-5 mr-2 text-purple-400" />
                       Disk Usage
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="text-3xl font-bold text-white">
-                        {dashboard.current_system_stats.disk_percent.toFixed(1)}%
+                      <div className="text-3xl font-bold text-foreground">
+                        {dashboard.current_system_stats.disk_percent.toFixed(1)}
+                        %
                       </div>
                       <Progress
                         value={dashboard.current_system_stats.disk_percent}
                         className="bg-purple-900/50"
                       />
-                      <div className="text-sm text-purple-200">
-                        {formatBytes(dashboard.current_system_stats.disk_used)} / {formatBytes(dashboard.current_system_stats.disk_total)}
+                      <div className="text-sm text-muted-foreground">
+                        {formatBytes(dashboard.current_system_stats.disk_used)}{' '}
+                        /{' '}
+                        {formatBytes(dashboard.current_system_stats.disk_total)}
                       </div>
-                      <div className="text-xs text-purple-300">
-                        Free: {formatBytes(dashboard.current_system_stats.disk_free)}
+                      <div className="text-xs text-muted-foreground">
+                        Free:{' '}
+                        {formatBytes(dashboard.current_system_stats.disk_free)}
                       </div>
                     </div>
                   </CardContent>
@@ -412,23 +464,32 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <Card className="bg-gradient-to-br from-orange-900/50 to-orange-800/50 border-orange-700 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border-orange-500/20 backdrop-blur-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-orange-100">
+                    <CardTitle className="flex items-center text-foreground">
                       <Network className="w-5 h-5 mr-2 text-orange-400" />
                       Network I/O
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="text-lg font-bold text-white">
-                        ↑ {formatBytes(dashboard.current_system_stats.network_bytes_sent)}
+                      <div className="text-lg font-bold text-foreground">
+                        ↑{' '}
+                        {formatBytes(
+                          dashboard.current_system_stats.network_bytes_sent
+                        )}
                       </div>
-                      <div className="text-lg font-bold text-white">
-                        ↓ {formatBytes(dashboard.current_system_stats.network_bytes_recv)}
+                      <div className="text-lg font-bold text-foreground">
+                        ↓{' '}
+                        {formatBytes(
+                          dashboard.current_system_stats.network_bytes_recv
+                        )}
                       </div>
-                      <div className="text-sm text-orange-200">
-                        Packets: {dashboard.current_system_stats.network_packets_sent.toLocaleString()} / {dashboard.current_system_stats.network_packets_recv.toLocaleString()}
+                      <div className="text-sm text-muted-foreground">
+                        Packets:{' '}
+                        {dashboard.current_system_stats.network_packets_sent.toLocaleString()}{' '}
+                        /{' '}
+                        {dashboard.current_system_stats.network_packets_recv.toLocaleString()}
                       </div>
                     </div>
                   </CardContent>
@@ -444,38 +505,46 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.7 }}
               >
-                <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                <Card className="bg-card border-border">
                   <CardHeader>
-                    <CardTitle className="flex items-center text-white">
+                    <CardTitle className="flex items-center text-foreground">
                       <Activity className="w-5 h-5 mr-2 text-cyan-400" />
                       Container Status
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-4 bg-slate-700/50 rounded-lg">
+                      <div className="text-center p-4 bg-muted rounded-lg">
                         <div className="text-2xl font-bold text-green-400">
                           {dashboard.containers_summary.running}
                         </div>
-                        <div className="text-sm text-slate-300">Running</div>
+                        <div className="text-sm text-muted-foreground">
+                          Running
+                        </div>
                       </div>
-                      <div className="text-center p-4 bg-slate-700/50 rounded-lg">
-                        <div className="text-2xl font-bold text-slate-400">
+                      <div className="text-center p-4 bg-muted rounded-lg">
+                        <div className="text-2xl font-bold text-muted-foreground">
                           {dashboard.containers_summary.stopped}
                         </div>
-                        <div className="text-sm text-slate-300">Stopped</div>
+                        <div className="text-sm text-muted-foreground">
+                          Stopped
+                        </div>
                       </div>
-                      <div className="text-center p-4 bg-slate-700/50 rounded-lg">
+                      <div className="text-center p-4 bg-muted rounded-lg">
                         <div className="text-2xl font-bold text-blue-400">
                           {dashboard.containers_summary.total}
                         </div>
-                        <div className="text-sm text-slate-300">Total</div>
+                        <div className="text-sm text-muted-foreground">
+                          Total
+                        </div>
                       </div>
-                      <div className="text-center p-4 bg-slate-700/50 rounded-lg">
+                      <div className="text-center p-4 bg-muted rounded-lg">
                         <div className="text-2xl font-bold text-yellow-400">
                           {dashboard.containers_summary.paused}
                         </div>
-                        <div className="text-sm text-slate-300">Paused</div>
+                        <div className="text-sm text-muted-foreground">
+                          Paused
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -488,9 +557,9 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.8 }}
               >
-                <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                <Card className="bg-card border-border">
                   <CardHeader>
-                    <CardTitle className="flex items-center text-white">
+                    <CardTitle className="flex items-center text-foreground">
                       <Users className="w-5 h-5 mr-2 text-yellow-400" />
                       Top Processes
                     </CardTitle>
@@ -500,26 +569,26 @@ const SystemMonitorPage = () => {
                       {dashboard.top_processes.slice(0, 5).map((process) => (
                         <div
                           key={process.id}
-                          className="flex items-center justify-between p-2 bg-slate-700/30 rounded"
+                          className="flex items-center justify-between p-2 bg-muted rounded"
                         >
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-slate-600 rounded flex items-center justify-center text-xs text-white font-mono">
+                            <div className="w-8 h-8 bg-slate-600 rounded flex items-center justify-center text-xs text-foreground font-mono">
                               {process.pid}
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-white">
+                              <div className="text-sm font-medium text-foreground">
                                 {process.name}
                               </div>
-                              <div className="text-xs text-slate-400">
+                              <div className="text-xs text-muted-foreground">
                                 {process.username}
                               </div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm text-white font-mono">
+                            <div className="text-sm text-foreground font-mono">
                               {process.memory_percent.toFixed(1)}%
                             </div>
-                            <div className="text-xs text-slate-400">
+                            <div className="text-xs text-muted-foreground">
                               {formatBytes(process.memory_rss)}
                             </div>
                           </div>
@@ -537,32 +606,38 @@ const SystemMonitorPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
             >
-              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+              <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-white">
+                  <CardTitle className="flex items-center text-foreground">
                     <Activity className="w-5 h-5 mr-2 text-red-400" />
                     System Load Average
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                      <div className="text-2xl font-bold text-white font-mono">
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <div className="text-2xl font-bold text-foreground font-mono">
                         {dashboard.current_system_stats.load_avg_1m.toFixed(2)}
                       </div>
-                      <div className="text-sm text-slate-300">1 minute</div>
+                      <div className="text-sm text-muted-foreground">
+                        1 minute
+                      </div>
                     </div>
-                    <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                      <div className="text-2xl font-bold text-white font-mono">
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <div className="text-2xl font-bold text-foreground font-mono">
                         {dashboard.current_system_stats.load_avg_5m.toFixed(2)}
                       </div>
-                      <div className="text-sm text-slate-300">5 minutes</div>
+                      <div className="text-sm text-muted-foreground">
+                        5 minutes
+                      </div>
                     </div>
-                    <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                      <div className="text-2xl font-bold text-white font-mono">
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <div className="text-2xl font-bold text-foreground font-mono">
                         {dashboard.current_system_stats.load_avg_15m.toFixed(2)}
                       </div>
-                      <div className="text-sm text-slate-300">15 minutes</div>
+                      <div className="text-sm text-muted-foreground">
+                        15 minutes
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -571,6 +646,7 @@ const SystemMonitorPage = () => {
           </>
         )}
       </div>
+      <ChatBot />
     </div>
   );
 };

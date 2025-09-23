@@ -84,17 +84,20 @@ export default function SettingsPage() {
 
   const handleLanguageChange = async (newLanguage: 'en' | 'no') => {
     setLanguage(newLanguage);
-    await savePreferences(newLanguage, user?.dark_mode || false);
+    await savePreferences(newLanguage, theme);
   };
 
-  const handleThemeChange = async (newTheme: 'light' | 'dark') => {
+  const handleThemeChange = async (
+    newTheme: 'light' | 'dark' | 'purple' | 'pink' | 'system'
+  ) => {
     setTheme(newTheme);
-    // Convert theme to dark_mode boolean for backend
-    const isDarkMode = newTheme === 'dark';
-    await savePreferences(user?.language || 'en', isDarkMode);
+    await savePreferences(user?.language || 'en', newTheme);
   };
 
-  const savePreferences = async (lang: 'en' | 'no', darkMode: boolean) => {
+  const savePreferences = async (
+    lang: 'en' | 'no',
+    themePreference: 'light' | 'dark' | 'purple' | 'pink' | 'system'
+  ) => {
     if (!user) return;
 
     setSaveStatus('saving');
@@ -103,7 +106,7 @@ export default function SettingsPage() {
     try {
       await usersAPI.updateUser(user.id, {
         language: lang,
-        dark_mode: darkMode,
+        theme: themePreference,
       });
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 2000);
@@ -144,6 +147,9 @@ export default function SettingsPage() {
     norwegian: 'Norsk',
     light: language === 'no' ? 'Lys' : 'Light',
     dark: language === 'no' ? 'Mørk' : 'Dark',
+    purple: language === 'no' ? 'Lilla' : 'Purple',
+    pink: language === 'no' ? 'Rosa' : 'Pink',
+    system: language === 'no' ? 'System' : 'System',
     saved: language === 'no' ? 'Lagret!' : 'Saved!',
     saving: language === 'no' ? 'Lagrer...' : 'Saving...',
   };
@@ -225,16 +231,16 @@ export default function SettingsPage() {
                     <Palette className="h-4 w-4" />
                     {texts.theme}
                   </Label>
-                  <Select
-                    value={theme === 'purple' ? 'light' : theme}
-                    onValueChange={handleThemeChange}
-                  >
+                  <Select value={theme} onValueChange={handleThemeChange}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="system">{texts.system}</SelectItem>
                       <SelectItem value="light">{texts.light}</SelectItem>
                       <SelectItem value="dark">{texts.dark}</SelectItem>
+                      <SelectItem value="purple">{texts.purple}</SelectItem>
+                      <SelectItem value="pink">{texts.pink}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -26,6 +26,8 @@ import {
   Sun,
   Moon,
   Palette,
+  Monitor,
+  Heart,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -127,11 +129,6 @@ export default function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Link href="/dashboard" className="w-full">
-                    {language === 'no' ? 'Kontrollpanel' : 'Dashboard'}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
                   <Link href="/tasks" className="w-full">
                     {language === 'no' ? 'Oppgaver' : 'Tasks'}
                   </Link>
@@ -153,7 +150,8 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link href="/system-monitor" className="w-full">
-                    💻 {language === 'no' ? 'Systemovervåkning' : 'System Monitor'}
+                    💻{' '}
+                    {language === 'no' ? 'Systemovervåkning' : 'System Monitor'}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -210,10 +208,10 @@ export default function Navbar() {
                     </Label>
                     <RadioGroup
                       value={theme}
-                      onValueChange={(value: 'light' | 'dark' | 'purple') =>
-                        setTheme(value)
-                      }
-                      className="flex gap-4"
+                      onValueChange={(
+                        value: 'light' | 'dark' | 'purple' | 'pink' | 'system'
+                      ) => setTheme(value)}
+                      className="grid grid-cols-2 gap-2"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="light" id="light" />
@@ -243,6 +241,26 @@ export default function Navbar() {
                         >
                           <Palette className="h-4 w-4" />
                           {language === 'no' ? 'Lilla' : 'Purple'}
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="pink" id="pink" />
+                        <Label
+                          htmlFor="pink"
+                          className="flex items-center gap-1 cursor-pointer"
+                        >
+                          <Heart className="h-4 w-4" />
+                          {language === 'no' ? 'Rosa' : 'Pink'}
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2 col-span-2">
+                        <RadioGroupItem value="system" id="system" />
+                        <Label
+                          htmlFor="system"
+                          className="flex items-center gap-1 cursor-pointer"
+                        >
+                          <Monitor className="h-4 w-4" />
+                          {language === 'no' ? 'System' : 'System'}
                         </Label>
                       </div>
                     </RadioGroup>

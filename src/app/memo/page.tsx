@@ -9,6 +9,7 @@ import { Job } from '@/types/api';
 import { JobSelector } from '@/components/features/memo/landing/job-selector';
 import { NewJobModal } from '@/components/features/memo/landing/new-job-modal';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
+import ChatBot from '@/components/features/chat/chatbot';
 
 export default function MemoPage() {
   const router = useRouter();
@@ -110,7 +111,7 @@ export default function MemoPage() {
                   <button
                     key={job.ordre_nr}
                     onClick={() => handleJobSelect(job)}
-                    className="w-full text-left p-3 border rounded-lg hover:bg-muted transition-colors"
+                    className="w-full text-left p-3 border rounded-lg hover:bg-muted transition-colors hover-lift"
                   >
                     <div className="flex justify-between items-center">
                       <div>
@@ -140,6 +141,7 @@ export default function MemoPage() {
           />
         </div>
       </div>
+      <ChatBot />
     </>
   );
 }

@@ -62,6 +62,13 @@ export const useAuthStore = create<AuthState>()(
               error: null,
               isInitialized: true,
             });
+
+            // Load theme preference from user data
+            if (typeof window !== 'undefined') {
+              const { useUIStore } = await import('./ui');
+              const { loadThemeFromUser } = useUIStore.getState();
+              loadThemeFromUser(apiUser);
+            }
           } catch (error: any) {
             clearAuthTokens();
             set({
@@ -97,6 +104,13 @@ export const useAuthStore = create<AuthState>()(
             error: null,
             isInitialized: true,
           });
+
+          // Load theme preference from user data
+          if (typeof window !== 'undefined') {
+            const { useUIStore } = await import('./ui');
+            const { loadThemeFromUser } = useUIStore.getState();
+            loadThemeFromUser(user);
+          }
 
           showSuccessToast(
             `Welcome back, ${user.display_name || user.username}!`

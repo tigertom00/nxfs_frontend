@@ -51,7 +51,7 @@ interface UserProfile {
   profile_picture: string;
   date_joined: string;
   last_login: string;
-  dark_mode: boolean;
+  theme: 'light' | 'dark' | 'purple' | 'pink' | 'system';
   chat_session_id: string;
   language: string;
 }
@@ -306,7 +306,7 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground">{user.email}</p>
                   <div className="flex space-x-2 mt-2">
                     <Badge variant="secondary">
-                      {user.dark_mode ? texts.darkMode : texts.theme}
+                      {user.theme ? user.theme.charAt(0).toUpperCase() + user.theme.slice(1) : 'Theme'}
                     </Badge>
                     <Badge variant="outline">
                       {user.language === 'no' ? 'Norsk' : 'English'}

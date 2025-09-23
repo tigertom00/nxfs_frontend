@@ -63,7 +63,7 @@ export interface User {
   date_joined: string;
   last_login?: string;
   language: 'en' | 'no';
-  dark_mode: boolean;
+  theme: 'light' | 'dark' | 'purple' | 'pink' | 'system';
   session_id?: string; // For chatbot session management
 }
 

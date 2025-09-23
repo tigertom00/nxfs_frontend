@@ -237,6 +237,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
       <Tabs defaultValue="images">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="images" className="flex items-center gap-2">
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image className="h-4 w-4" />
             {t('blog.media.images')} ({images.length})
           </TabsTrigger>

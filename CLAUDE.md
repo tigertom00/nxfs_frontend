@@ -291,7 +291,16 @@ The project includes Playwright MCP server integration for browser automation an
 - `NEXT_PUBLIC_API_URL`: Backend API URL (default: https://api.nxfs.no)
 - `NEXT_PUBLIC_N8N_URL`: N8N webhook URL (default: https://n8n.nxfs.no/webhook/nxfs)
 - `NEXT_PUBLIC_N8N_SECRET_KEY`: Authentication key for N8N integration
+- `NEXT_PUBLIC_API_TOKEN`: Django API authentication token (format: "Token xxx#")
+- `PLAYWRIGHT_TEST_EMAIL`: Email for Playwright frontend testing (claude@nxfs.no)
+- `PLAYWRIGHT_TEST_PASSWORD`: Password for Playwright frontend testing
 - `NODE_ENV`: Environment mode (development/production/test)
+
+#### API Schema and Testing
+
+- **Backend API Schema**: https://api.nxfs.no/schema/ - Django REST API documentation
+- **Frontend Testing**: Use `http://10.20.30.202:3000` with Playwright to avoid CORS issues
+- **API Authentication**: Token-based authentication for Django backend integration
 
 #### Setup Instructions
 

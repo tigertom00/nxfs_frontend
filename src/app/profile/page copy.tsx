@@ -51,7 +51,7 @@ interface UserProfile {
   profile_picture: string;
   date_joined: string;
   last_login: string;
-  dark_mode: boolean;
+  theme: 'light' | 'dark' | 'purple' | 'pink' | 'system';
   chat_session_id: string;
   language: string;
 }
