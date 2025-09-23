@@ -274,7 +274,7 @@ export default function ProfilePage() {
           )}
 
           {/* Profile Card */}
-          <Card className="mb-8">
+          <Card className="mb-8 hover-lift">
             <CardHeader>
               <div className="flex items-center space-x-6">
                 <div className="relative">
@@ -318,7 +318,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Personal Information */}
-          <Card className="mb-8">
+          <Card className="mb-8 hover-lift">
             <CardHeader>
               <CardTitle>{texts.personalInfo}</CardTitle>
             </CardHeader>
@@ -526,7 +526,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Account Information */}
-          <Card className="mb-8">
+          <Card className="mb-8 hover-lift">
             <CardHeader>
               <CardTitle>{texts.accountInfo}</CardTitle>
             </CardHeader>

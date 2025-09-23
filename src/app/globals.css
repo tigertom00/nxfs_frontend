@@ -292,6 +292,14 @@
   box-shadow: 0 8px 25px oklch(0.646 0.222 41.116 / 0.15);
 }
 
+/* Lift-only effect without glow */
+.hover-lift-only {
+  transition: transform 0.2s ease;
+}
+.hover-lift-only:hover {
+  transform: translateY(-2px);
+}
+
 /* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

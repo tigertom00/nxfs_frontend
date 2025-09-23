@@ -32,7 +32,7 @@ function YouTubeVideoCard() {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full hover-lift">
       <CardHeader>
         <CardTitle className="text-3xl">
           {language === 'no'
@@ -103,7 +103,7 @@ function BlogPostCard({ post }: { post: BlogPost }) {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full hover-lift">
       <CardHeader>
         <CardTitle className="text-3xl">
           {language === 'no' ? post.title_nb : post.title}
@@ -273,7 +273,7 @@ function BlogPostCard({ post }: { post: BlogPost }) {
 
 function BlogPostSkeleton() {
   return (
-    <Card className="w-full">
+    <Card className="w-full hover-lift">
       <CardHeader>
         <Skeleton className="h-6 w-3/4" />
         <Skeleton className="h-4 w-1/2" />

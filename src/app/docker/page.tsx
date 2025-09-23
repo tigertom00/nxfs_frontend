@@ -145,7 +145,7 @@ function ContainerCard({ container }: { container: DockerContainer }) {
   return (
     <Card
       className={cn(
-        'transition-all duration-500 cursor-pointer transform hover:-translate-y-2 hover:scale-[1.02]',
+        'hover-lift-only cursor-pointer',
         'border border-border/60 backdrop-blur-sm relative overflow-hidden',
         'before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:to-transparent before:pointer-events-none',
         cardStyle.border,
@@ -282,7 +282,7 @@ function ContainerCard({ container }: { container: DockerContainer }) {
 function OverviewCard({ overview }: { overview: DockerOverview }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <Card>
+      <Card className="hover-lift">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Total Hosts</CardTitle>
         </CardHeader>
@@ -291,7 +291,7 @@ function OverviewCard({ overview }: { overview: DockerOverview }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="hover-lift">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">
             Total Containers
@@ -302,7 +302,7 @@ function OverviewCard({ overview }: { overview: DockerOverview }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="hover-lift">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center">
             <PlayCircle className="w-4 h-4 mr-1 text-green-500" />
@@ -316,7 +316,7 @@ function OverviewCard({ overview }: { overview: DockerOverview }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="hover-lift">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center">
             <StopCircle className="w-4 h-4 mr-1 text-red-500" />

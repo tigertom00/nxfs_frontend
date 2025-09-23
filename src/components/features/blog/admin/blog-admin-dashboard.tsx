@@ -58,7 +58,7 @@ export function BlogAdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Posts List */}
         <div className="lg:col-span-1">
-          <Card>
+          <Card className="hover-lift">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg">{t('blog.admin.posts')}</CardTitle>
               <Button onClick={handleNewPost} size="sm">
@@ -85,7 +85,7 @@ export function BlogAdminDashboard() {
               onCancel={handleCancel}
             />
           ) : (
-            <Card>
+            <Card className="hover-lift">
               <CardContent className="flex items-center justify-center h-96">
                 <div className="text-center">
                   <h3 className="text-lg font-medium mb-2">

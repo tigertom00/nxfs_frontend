@@ -191,7 +191,7 @@ export default function SettingsPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Personal Preferences */}
-            <Card>
+            <Card className="hover-lift">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Palette className="h-5 w-5" />
@@ -256,7 +256,7 @@ export default function SettingsPage() {
             </Card>
 
             {/* Project Management */}
-            <Card>
+            <Card className="hover-lift">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FolderKanban className="h-5 w-5" />
@@ -274,7 +274,7 @@ export default function SettingsPage() {
             </Card>
 
             {/* Category Management */}
-            <Card>
+            <Card className="hover-lift">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Tags className="h-5 w-5" />

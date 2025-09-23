@@ -134,7 +134,7 @@ export function ProjectCard({
 
   return (
     <Card
-      className={`h-full hover:shadow-lg transition-all duration-200 ${getCardBorderStyle(project.status)} ${project.status === 'completed' ? 'opacity-80' : ''}`}
+      className={`h-full hover-lift ${getCardBorderStyle(project.status)} ${project.status === 'completed' ? 'opacity-80' : ''}`}
     >
       <CardHeader className="pb-3">
         {/* Status Banner */}

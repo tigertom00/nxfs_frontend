@@ -159,7 +159,7 @@ export function TaskCard({
 
   return (
     <Card
-      className={`h-full hover:shadow-lg transition-all duration-200 ${getCardBorderStyle(task.status)} ${task.status === 'completed' ? 'opacity-80' : ''}`}
+      className={`h-full hover-lift ${getCardBorderStyle(task.status)} ${task.status === 'completed' ? 'opacity-80' : ''}`}
     >
       <CardHeader className="pb-3">
         {/* Status Banner */}
