@@ -304,7 +304,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       material.type_designation
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      material.leverandor.name.toLowerCase().includes(searchQuery.toLowerCase())
+      material.leverandor?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleAddToJob = async () => {
@@ -456,7 +456,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                           {material.tittel || 'Untitled'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {material.leverandor.name}
+                          {material.leverandor?.name || 'Unknown Supplier'}
                           {material.el_nr && ` • EL: ${material.el_nr}`}
                           {material.ean_number &&
                             ` • EAN: ${material.ean_number}`}
@@ -640,7 +640,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                   {jobMaterial.matriell.tittel || 'Untitled'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {jobMaterial.matriell.leverandor.name}
+                  {jobMaterial.matriell.leverandor?.name || 'Unknown Supplier'}
                   {jobMaterial.matriell.el_nr &&
                     ` • EL: ${jobMaterial.matriell.el_nr}`}
                   {jobMaterial.matriell.ean_number &&
@@ -772,7 +772,7 @@ function MaterialCard({
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            {material.leverandor.name}
+            {material.leverandor?.name || 'Unknown Supplier'}
           </p>
           <div className="flex gap-2 mt-1 flex-wrap">
             {material.el_nr && (
