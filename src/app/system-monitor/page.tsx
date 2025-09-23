@@ -206,7 +206,7 @@ const SystemMonitorPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="bg-card border-border">
+            <Card className="bg-card border-border hover-lift">
               <CardHeader>
                 <CardTitle className="flex items-center text-foreground">
                   <Server className="w-5 h-5 mr-2 text-blue-400" />
@@ -221,7 +221,7 @@ const SystemMonitorPage = () => {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.1 * index }}
-                      className="p-4 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-lg border border-slate-600"
+                      className="p-4 bg-card rounded-lg border-border hover-lift"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-semibold text-foreground">
@@ -299,7 +299,7 @@ const SystemMonitorPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border hover-lift">
                 <CardHeader>
                   <CardTitle className="flex items-center text-foreground">
                     <Server className="w-5 h-5 mr-2 text-blue-400" />
@@ -349,7 +349,7 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20 hover-lift backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-foreground">
                       <Cpu className="w-5 h-5 mr-2 text-blue-400" />
@@ -385,7 +385,7 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20 hover-lift backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-foreground">
                       <MemoryStick className="w-5 h-5 mr-2 text-green-400" />
@@ -427,7 +427,7 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20 hover-lift backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-foreground">
                       <HardDrive className="w-5 h-5 mr-2 text-purple-400" />
@@ -464,7 +464,7 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border-orange-500/20 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border-orange-500/20 hover-lift backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-foreground">
                       <Network className="w-5 h-5 mr-2 text-orange-400" />
@@ -505,7 +505,7 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.7 }}
               >
-                <Card className="bg-card border-border">
+                <Card className="bg-card border-border hover-lift">
                   <CardHeader>
                     <CardTitle className="flex items-center text-foreground">
                       <Activity className="w-5 h-5 mr-2 text-cyan-400" />
@@ -557,7 +557,7 @@ const SystemMonitorPage = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.8 }}
               >
-                <Card className="bg-card border-border">
+                <Card className="bg-card border-border hover-lift">
                   <CardHeader>
                     <CardTitle className="flex items-center text-foreground">
                       <Users className="w-5 h-5 mr-2 text-yellow-400" />
@@ -569,10 +569,10 @@ const SystemMonitorPage = () => {
                       {dashboard.top_processes.slice(0, 5).map((process) => (
                         <div
                           key={process.id}
-                          className="flex items-center justify-between p-2 bg-muted rounded"
+                          className="flex items-center justify-between p-2 bg-muted rounded hover-lift"
                         >
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-slate-600 rounded flex items-center justify-center text-xs text-foreground font-mono">
+                            <div className="w-8 h-8 bg-muted rounded flex items-center justify-center text-xs text-foreground font-mono">
                               {process.pid}
                             </div>
                             <div>
@@ -606,7 +606,7 @@ const SystemMonitorPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
             >
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border hover-lift">
                 <CardHeader>
                   <CardTitle className="flex items-center text-foreground">
                     <Activity className="w-5 h-5 mr-2 text-red-400" />

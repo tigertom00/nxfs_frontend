@@ -315,16 +315,35 @@
   color: white;
 }
 
-/* Hover effects */
+/* Hover effects - theme aware */
 .hover-lift {
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
-.hover-lift:hover {
+/* Light theme hover */
+:root .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px oklch(0.646 0.222 41.116 / 0.15);
+  box-shadow: 0 8px 25px oklch(0.65 0.25 280 / 0.15);
+}
+
+/* Dark theme hover */
+.dark .hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px oklch(0.75 0.2 280 / 0.2);
+}
+
+/* Purple theme hover */
+.purple .hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px oklch(0.55 0.3 280 / 0.15);
+}
+
+/* Pink theme hover */
+.pink .hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px oklch(0.65 0.18 340 / 0.15);
 }
 
 /* Lift-only effect without glow */
