@@ -36,20 +36,7 @@ export default function BlogPostPage() {
         setLoading(true);
         setError(null);
 
-        // First try the efficient slug endpoint
-        try {
-          const directPost = await postsAPI.getPostBySlug(slug as string);
-          setPost(directPost);
-          return;
-        } catch (directError: any) {
-          // If slug endpoint fails, fall back to public posts list
-          console.log(
-            'Direct slug lookup failed, trying public posts list:',
-            directError
-          );
-        }
-
-        // Fallback: Get all public posts and find by slug
+        // Get all public posts and find by slug
         const response = await postsAPI.getPublicPosts();
         const postsArray = Array.isArray(response)
           ? response
