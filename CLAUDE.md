@@ -47,7 +47,7 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
 
 - **Zustand stores** with persistence (centralized exports via `src/stores/index.ts`):
   - `useAuthStore`: JWT authentication, user data, automatic token refresh
-  - `useUIStore`: Theme (light/dark/purple), language (en/no), UI state
+  - `useUIStore`: Theme (system/light/dark/purple/pink), language (en/no), UI state
 - **Authentication flow**: Auto-initialization on app start, token refresh on 401/403
 - **Environment Configuration**: Zod-validated environment variables via `src/lib/env.ts`
   - `NEXT_PUBLIC_N8N_SECRET_KEY`: Authentication key for N8N chatbot integration
@@ -131,9 +131,207 @@ useEffect(() => {
 
 ### Styling System
 
-- **Tailwind CSS 4**: Utility-first styling
-- **Theme system**: Custom light/dark/purple themes via CSS classes
+- **Tailwind CSS 4**: Utility-first styling with 2025 design trends
+- **Theme system**: 5 comprehensive themes with automatic OS detection
+  - **System** 🖥️: Automatically follows OS preference (default)
+  - **Light** ☀️: Modern soft cream with digital lavender accents
+  - **Dark** 🌙: Rich dark with purple highlights
+  - **Purple** 💜: Elegant purple theme
+  - **Pink** 💗: Sophisticated rose quartz theme
+- **Server Sync**: Theme preferences automatically sync for authenticated users
+- **CSS Variables**: All themes use CSS custom properties for dynamic theming
 - **Responsive**: Mobile-first approach with standard Tailwind breakpoints
+
+## Page Styling Guidelines
+
+### Standard Page Structure
+
+All new pages should follow this consistent structure for optimal user experience:
+
+```typescript
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Navbar from '@/components/layouts/navbar';
+import ChatBot from '@/components/features/chat/chatbot';
+import { useAuthStore } from '@/stores';
+
+export default function YourPage() {
+  const { isAuthenticated, isInitialized } = useAuthStore();
+  const router = useRouter();
+
+  // Authentication check
+  useEffect(() => {
+    if (isInitialized && !isAuthenticated) {
+      router.push('/auth/signin');
+    }
+  }, [isAuthenticated, isInitialized, router]);
+
+  // Loading state
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect to sign in
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="container mx-auto px-4 py-8">
+        {/* Your page content */}
+      </main>
+      <ChatBot />
+    </div>
+  );
+}
+```
+
+### Theme-Aware Styling Classes
+
+Use these theme-aware CSS classes for consistent appearance across all themes:
+
+#### Background & Layout
+- `bg-background` - Main page background
+- `bg-card` - Card/panel backgrounds
+- `bg-muted` - Subtle background areas
+- `bg-popover` - Modal/dropdown backgrounds
+
+#### Text Colors
+- `text-foreground` - Primary text color
+- `text-muted-foreground` - Secondary/subtle text
+- `text-primary` - Accent/brand text
+- `text-destructive` - Error/warning text
+
+#### Borders & Dividers
+- `border-border` - Standard borders
+- `border-input` - Form input borders
+- `ring-ring` - Focus ring colors
+
+#### Interactive Elements
+- `hover:bg-muted` - Standard hover background
+- `hover-lift` - Subtle lift animation on hover
+- `hover-lift-only` - Lift without glow effect
+
+### Component Examples
+
+#### Cards with Theme Support
+```typescript
+<Card className="bg-card border-border hover-lift">
+  <CardHeader>
+    <CardTitle className="text-foreground">Title</CardTitle>
+    <CardDescription className="text-muted-foreground">
+      Description text
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <p className="text-foreground">Content goes here</p>
+  </CardContent>
+</Card>
+```
+
+#### Buttons with Consistent Styling
+```typescript
+// Primary action
+<Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+  Primary Action
+</Button>
+
+// Secondary action
+<Button variant="outline" className="border-border hover:bg-muted">
+  Secondary Action
+</Button>
+```
+
+#### Form Elements
+```typescript
+<Input
+  className="bg-background border-input focus:ring-ring"
+  placeholder="Enter text..."
+/>
+
+<Label className="text-foreground font-medium">
+  Field Label
+</Label>
+```
+
+### Animation Guidelines
+
+Use Framer Motion for smooth animations:
+
+```typescript
+import { motion } from 'framer-motion';
+
+// Page entrance animation
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.3 }}
+>
+  <YourContent />
+</motion.div>
+
+// Staggered list animations
+<motion.div className="space-y-4">
+  {items.map((item, index) => (
+    <motion.div
+      key={item.id}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className="hover-lift"
+    >
+      <ItemComponent item={item} />
+    </motion.div>
+  ))}
+</motion.div>
+```
+
+### Required Page Elements
+
+1. **Navbar**: Always include `<Navbar />` at the top
+2. **ChatBot**: Always include `<ChatBot />` at the bottom
+3. **Authentication**: Use the standard auth check pattern
+4. **Loading States**: Provide loading indicators for async operations
+5. **Error Handling**: Use toast notifications for errors
+6. **Responsive Design**: Ensure mobile-first responsive layouts
+7. **Theme Consistency**: Use theme-aware CSS classes throughout
+
+### Accessibility Guidelines
+
+- Use semantic HTML elements
+- Provide proper ARIA labels for interactive elements
+- Ensure sufficient color contrast across all themes
+- Support keyboard navigation
+- Include focus indicators with `ring-ring`
+
+### Mobile Optimization
+
+```typescript
+// Responsive grid layouts
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {/* Grid items */}
+</div>
+
+// Container with proper spacing
+<main className="container mx-auto px-4 py-8 max-w-7xl">
+  {/* Page content */}
+</main>
+
+// Mobile-friendly navigation
+<div className="flex flex-col sm:flex-row gap-4">
+  {/* Navigation items */}
+</div>
+```
 
 ## Translation Implementation
 
