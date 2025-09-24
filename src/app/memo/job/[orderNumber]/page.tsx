@@ -12,6 +12,7 @@ import { TimerWidget } from '@/components/features/memo/job-detail/timer-widget'
 import { MaterialManager } from '@/components/features/memo/job-detail/material-manager';
 import { PhotoGallery } from '@/components/features/memo/job-detail/photo-gallery';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
+import { MobileDebugConsole } from '@/components/shared';
 
 export default function JobDetailPage() {
   const router = useRouter();
@@ -160,6 +161,9 @@ export default function JobDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Debug Console for troubleshooting */}
+      <MobileDebugConsole />
     </>
   );
 }

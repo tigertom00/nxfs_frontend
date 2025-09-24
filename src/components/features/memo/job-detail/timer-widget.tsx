@@ -33,31 +33,52 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
 
   // Load saved timer state on mount
   useEffect(() => {
-    const savedTimer = localStorage.getItem(`timer-${jobId}`);
-    if (savedTimer) {
-      try {
-        const parsed = JSON.parse(savedTimer);
-        setTimer(parsed);
-
-        // If timer was running, calculate elapsed time since last save
-        if (parsed.isRunning && parsed.startTime) {
-          const now = Date.now();
-          const additionalElapsed = Math.floor((now - parsed.startTime) / 1000);
-          setTimer((prev) => ({
-            ...prev,
-            elapsed: prev.elapsed + additionalElapsed,
-            startTime: now,
-          }));
-        }
-      } catch (error) {
-        console.error('Failed to parse saved timer:', error);
+    try {
+      // Check if localStorage is available (mobile-safe)
+      if (typeof Storage === 'undefined') {
+        console.warn('localStorage not available');
+        return;
       }
+
+      const savedTimer = localStorage.getItem(`timer-${jobId}`);
+      if (savedTimer) {
+        try {
+          const parsed = JSON.parse(savedTimer);
+          console.log('Loaded saved timer:', parsed);
+          setTimer(parsed);
+
+          // If timer was running, calculate elapsed time since last save
+          if (parsed.isRunning && parsed.startTime) {
+            const now = Date.now();
+            const additionalElapsed = Math.floor((now - parsed.startTime) / 1000);
+            console.log('Resuming timer with additional elapsed time:', additionalElapsed);
+            setTimer((prev) => ({
+              ...prev,
+              elapsed: prev.elapsed + additionalElapsed,
+              startTime: now,
+            }));
+          }
+        } catch (parseError) {
+          console.error('Failed to parse saved timer:', parseError);
+          // Clear corrupted data
+          localStorage.removeItem(`timer-${jobId}`);
+        }
+      }
+    } catch (storageError) {
+      console.error('Failed to access localStorage:', storageError);
     }
   }, [jobId]);
 
   // Save timer state whenever it changes
   useEffect(() => {
-    localStorage.setItem(`timer-${jobId}`, JSON.stringify(timer));
+    try {
+      if (typeof Storage !== 'undefined') {
+        localStorage.setItem(`timer-${jobId}`, JSON.stringify(timer));
+        console.log('Saved timer state:', timer);
+      }
+    } catch (storageError) {
+      console.error('Failed to save timer state:', storageError);
+    }
   }, [timer, jobId]);
 
   // Update timer display every second when running
@@ -81,30 +102,45 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
   // Browser notification for running timer
   useEffect(() => {
     if (timer.isRunning) {
-      // Request notification permission
+      // Request notification permission (mobile-safe)
       if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
+        Notification.requestPermission().catch(error => {
+          console.warn('Notification permission request failed:', error);
+        });
       }
 
-      // Show persistent notification
+      // Show persistent notification (mobile-compatible)
       if ('Notification' in window && Notification.permission === 'granted') {
-        notificationRef.current = new Notification('NXFS Timer Running', {
-          body: `Job #${jobId} - ${formatTime(timer.elapsed)}`,
-          icon: '/favicon.ico',
-          tag: `timer-${jobId}`,
-          requireInteraction: true,
-        });
+        try {
+          notificationRef.current = new Notification('NXFS Timer Running', {
+            body: `Job #${jobId} - ${formatTime(timer.elapsed)}`,
+            icon: '/favicon.ico',
+            tag: `timer-${jobId}`,
+            // Remove requireInteraction for mobile compatibility
+            silent: false,
+          });
+        } catch (error) {
+          console.warn('Failed to create notification:', error);
+        }
       }
     } else {
       // Close notification when timer stops
       if (notificationRef.current) {
-        notificationRef.current.close();
+        try {
+          notificationRef.current.close();
+        } catch (error) {
+          console.warn('Failed to close notification:', error);
+        }
       }
     }
 
     return () => {
       if (notificationRef.current) {
-        notificationRef.current.close();
+        try {
+          notificationRef.current.close();
+        } catch (error) {
+          console.warn('Failed to close notification in cleanup:', error);
+        }
       }
     };
   }, [timer.isRunning, timer.elapsed, jobId]);
@@ -121,41 +157,77 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
   };
 
   const startTimer = () => {
-    const now = Date.now();
-    const sessionId = `${user?.id}-${jobId}-${now}`;
+    try {
+      console.log('Starting timer for job:', jobId, 'user:', user?.id);
+      const now = Date.now();
+      const sessionId = `${user?.id}-${jobId}-${now}`;
 
-    setTimer({
-      isRunning: true,
-      startTime: now,
-      elapsed: 0,
-      sessionId,
-    });
+      setTimer({
+        isRunning: true,
+        startTime: now,
+        elapsed: 0,
+        sessionId,
+      });
 
-    toast({
-      title: 'Timer started',
-      description: `Started tracking time for Job #${jobId}`,
-    });
+      toast({
+        title: 'Timer started',
+        description: `Started tracking time for Job #${jobId}`,
+      });
+
+      console.log('Timer started successfully');
+    } catch (error) {
+      console.error('Error starting timer:', error);
+      toast({
+        title: 'Failed to start timer',
+        description: 'An error occurred while starting the timer. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const stopTimer = async () => {
-    if (!timer.isRunning || !user) return;
+    if (!timer.isRunning || !user) {
+      console.warn('Cannot stop timer - not running or no user');
+      return;
+    }
 
-    const confirmSave = window.confirm(
-      `Save ${formatTime(timer.elapsed)} to Job #${jobId}?\n\nThis will create a time entry record.`
-    );
+    console.log('Stopping timer - elapsed:', timer.elapsed, 'seconds');
+
+    // Mobile-safe confirmation (fallback to native confirm if needed)
+    let confirmSave = false;
+    try {
+      confirmSave = window.confirm(
+        `Save ${formatTime(timer.elapsed)} to Job #${jobId}?\n\nThis will create a time entry record.`
+      );
+    } catch (error) {
+      console.error('Error showing confirmation dialog:', error);
+      // Fallback - assume user wants to save
+      confirmSave = true;
+    }
 
     if (confirmSave) {
       try {
+        console.log('Creating time entry with data:', {
+          jobb: jobId,
+          user: parseInt(user.id),
+          timer: timer.elapsed,
+          dato: new Date().toISOString().split('T')[0],
+        });
+
         // Convert elapsed seconds to hours (rounded to 2 decimals)
         const hours = Math.round((timer.elapsed / 3600) * 100) / 100;
 
-        await timeEntriesAPI.createTimeEntry({
+        const timeEntryData = {
           jobb: jobId,
           user: parseInt(user.id),
           timer: timer.elapsed,
           dato: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
           beskrivelse: `Timer session - ${formatTime(timer.elapsed)}`,
-        });
+        };
+
+        console.log('Sending time entry request:', timeEntryData);
+        const result = await timeEntriesAPI.createTimeEntry(timeEntryData);
+        console.log('Time entry created successfully:', result);
 
         toast({
           title: 'Time saved',
@@ -163,9 +235,20 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
         });
       } catch (error) {
         console.error('Failed to save time entry:', error);
+
+        // Log more details about the error
+        if (error instanceof Error) {
+          console.error('Error message:', error.message);
+          console.error('Error stack:', error.stack);
+        }
+
+        if (typeof error === 'object' && error !== null) {
+          console.error('Error object:', JSON.stringify(error, null, 2));
+        }
+
         toast({
           title: 'Failed to save time',
-          description: 'Time entry could not be saved. Please try again.',
+          description: `Time entry could not be saved. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
           variant: 'destructive',
         });
         return; // Don't stop timer if save failed
@@ -173,6 +256,7 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
     }
 
     // Stop timer and reset
+    console.log('Resetting timer state');
     setTimer({
       isRunning: false,
       startTime: null,
@@ -181,7 +265,14 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
     });
 
     // Clear saved timer
-    localStorage.removeItem(`timer-${jobId}`);
+    try {
+      if (typeof Storage !== 'undefined') {
+        localStorage.removeItem(`timer-${jobId}`);
+        console.log('Cleared saved timer from localStorage');
+      }
+    } catch (storageError) {
+      console.error('Failed to clear saved timer:', storageError);
+    }
 
     if (!confirmSave) {
       toast({
