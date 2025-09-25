@@ -1248,6 +1248,7 @@ export const materialsAPI = {
       throw error;
     }
   },
+
   toggleFavorite: async (
     materialId: number
   ): Promise<UpdateMaterialResponse> => {

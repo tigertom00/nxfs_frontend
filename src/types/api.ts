@@ -406,7 +406,7 @@ export interface Supplier {
   id: number;
   name: string;
   manufacturer_code?: string; // Manufacturer short code (e.g., "WAGO", "ABB")
-  url?: string;
+  website_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -415,45 +415,42 @@ export interface Supplier {
 export interface Material {
   id: number;
   leverandor: Supplier;
-  leverandor_id: number;
-  el_nr?: string; // EL-number (electrical component number)
-  tittel?: string;
-  info?: string;
-  image?: string;
-  favorites?: boolean; // Updated field name from API
+  leverandor_id?: number; // Foreign key to supplier
 
-  // Enhanced electrical component fields
+  // Core identification - el_nr is required and unique in backend
+  el_nr: string; // EL-number (electrical component number) - REQUIRED
+  tittel: string; // Title - REQUIRED
+
+  // Product details
+  info?: string; // Technical description
   ean_number?: string; // EAN barcode
   article_number?: string; // Manufacturer article number
-  order_number?: string; // Supplier order number
-  type_designation?: string; // Component type designation
 
   // Multilingual descriptions
   norwegian_description?: string;
   english_description?: string;
-  german_description?: string;
-
-  // Technical specifications
-  category?: string; // Component category
-  datasheet_url?: string; // Link to technical datasheet
-
-  // Pricing and business data
-  list_price?: number | null;
-  net_price?: number | null;
-  discount_factor?: string;
-  vat?: string;
 
   // Physical specifications
-  weight?: string;
-  unit_per_package?: string;
   height?: string;
   width?: string;
   depth?: string;
+  weight?: string;
+
+  // Classification
+  etim_class?: string; // ETIM classification
+  category?: string; // EC code
+
+  // Documents and media
+  datasheet_url?: string;
+  image_url?: string;
 
   // Status flags
-  approved?: boolean; // Quality control approval
-  discontinued?: boolean; // Product lifecycle status
+  approved: boolean; // Quality control approval
+  discontinued: boolean; // Product lifecycle status
+  in_stock: boolean; // Inventory status
+  favorites: boolean; // User favorite status
 
+  // Timestamps
   created_at: string;
   updated_at: string;
 }
@@ -522,52 +519,48 @@ export interface TimeEntry {
 
 // Supplier payloads
 export interface CreateSupplierPayload {
-  name?: string;
-  url?: string;
+  name: string; // Required in backend model
+  manufacturer_code?: string;
+  website_url?: string;
 }
 
 export type UpdateSupplierPayload = Partial<CreateSupplierPayload>;
 
 // Material payloads - Enhanced for electrical components
 export interface CreateMaterialPayload {
-  leverandor_id: number;
-  el_nr?: string;
-  tittel?: string;
-  info?: string;
-  image?: File;
-  favorites?: boolean;
+  // Core required fields
+  el_nr: string; // Required and unique
+  tittel: string; // Required
+  leverandor_id: number; // Foreign key to supplier
 
-  // Enhanced electrical component fields
+  // Product details
+  info?: string; // Technical description
   ean_number?: string;
   article_number?: string;
-  order_number?: string;
-  type_designation?: string;
 
   // Multilingual descriptions
   norwegian_description?: string;
   english_description?: string;
-  german_description?: string;
-
-  // Technical specifications
-  category?: string;
-  datasheet_url?: string;
-
-  // Pricing and business data
-  list_price?: number | null;
-  net_price?: number | null;
-  discount_factor?: string;
-  vat?: string;
 
   // Physical specifications
-  weight?: string;
-  unit_per_package?: string;
   height?: string;
   width?: string;
   depth?: string;
+  weight?: string;
+
+  // Classification
+  etim_class?: string;
+  category?: string; // EC code
+
+  // Documents and media
+  datasheet_url?: string;
+  image_url?: string;
 
   // Status flags
-  approved?: boolean;
-  discontinued?: boolean;
+  approved?: boolean; // Defaults to true in backend
+  discontinued?: boolean; // Defaults to false in backend
+  in_stock?: boolean; // Defaults to true in backend
+  favorites?: boolean; // User favorite status
 }
 
 export type UpdateMaterialPayload = Partial<CreateMaterialPayload>;
