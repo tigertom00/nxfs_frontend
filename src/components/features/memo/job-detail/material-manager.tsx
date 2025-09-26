@@ -72,7 +72,8 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 
   const loadMaterials = async () => {
     try {
-      const materials = await materialsAPI.getMaterials();
+      const result = await materialsAPI.getAllMaterials(); // Use backward compatible method
+      const materials = Array.isArray(result) ? result : [];
       setAllMaterials(materials);
       setDisplayMaterials(materials); // Initialize display materials
 
@@ -293,15 +294,18 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       !searchQuery ||
       material.tittel?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       material.el_nr?.includes(searchQuery) ||
-      material.ean_number?.includes(searchQuery) ||
-      material.article_number?.includes(searchQuery) ||
-      material.norwegian_description
+      material.gtin_number?.includes(searchQuery) ||
+      material.varenummer?.includes(searchQuery) ||
+      material.teknisk_beskrivelse
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      material.english_description
+      material.varebetegnelse
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      material.type_designation
+      material.info
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      material.varemerke
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
       material.leverandor?.name
@@ -427,13 +431,15 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                 </div>
               </div>
               <AdvancedMaterialSearch
-                materials={allMaterials}
                 suppliers={suppliers}
-                onResults={setDisplayMaterials}
+                onResults={(results, pagination) => {
+                  setDisplayMaterials(results);
+                  // Could also handle pagination info here if needed
+                }}
                 trigger={
                   <Button variant="outline" className="w-full">
                     <Search className="h-4 w-4 mr-2" />
-                    Advanced Search ({allMaterials.length} components)
+                    Advanced Search (Server-side filtering)
                   </Button>
                 }
               />
@@ -460,8 +466,8 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                         <p className="text-xs text-muted-foreground">
                           {material.leverandor?.name || 'Unknown Supplier'}
                           {material.el_nr && ` • EL: ${material.el_nr}`}
-                          {material.ean_number &&
-                            ` • EAN: ${material.ean_number}`}
+                          {material.gtin_number &&
+                            ` • GTIN: ${material.gtin_number}`}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -655,17 +661,17 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                   {jobMaterial.matriell.leverandor?.name || 'Unknown Supplier'}
                   {jobMaterial.matriell.el_nr &&
                     ` • EL: ${jobMaterial.matriell.el_nr}`}
-                  {jobMaterial.matriell.ean_number &&
-                    ` • EAN: ${jobMaterial.matriell.ean_number}`}
+                  {jobMaterial.matriell.gtin_number &&
+                    ` • GTIN: ${jobMaterial.matriell.gtin_number}`}
                 </p>
-                {jobMaterial.matriell.type_designation && (
+                {jobMaterial.matriell.varemerke && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    {jobMaterial.matriell.type_designation}
+                    Brand: {jobMaterial.matriell.varemerke}
                   </p>
                 )}
-                {jobMaterial.matriell.norwegian_description && (
+                {jobMaterial.matriell.teknisk_beskrivelse && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    {jobMaterial.matriell.norwegian_description}
+                    {jobMaterial.matriell.teknisk_beskrivelse}
                   </p>
                 )}
                 {jobMaterial.antall && (
@@ -792,19 +798,19 @@ function MaterialCard({
                 EL: {material.el_nr}
               </Badge>
             )}
-            {material.ean_number && (
+            {material.gtin_number && (
               <Badge variant="outline" className="text-xs">
-                EAN: {material.ean_number}
+                GTIN: {material.gtin_number}
               </Badge>
             )}
-            {material.article_number && (
+            {material.varenummer && (
               <Badge variant="outline" className="text-xs">
-                Art: {material.article_number}
+                Art: {material.varenummer}
               </Badge>
             )}
-            {material.type_designation && (
+            {material.varemerke && (
               <Badge variant="secondary" className="text-xs">
-                {material.type_designation}
+                {material.varemerke}
               </Badge>
             )}
             {material.favorites && (
@@ -813,9 +819,19 @@ function MaterialCard({
                 Favorite
               </Badge>
             )}
+            {!material.approved && (
+              <Badge variant="outline" className="text-xs">
+                Unapproved
+              </Badge>
+            )}
             {material.discontinued && (
               <Badge variant="destructive" className="text-xs">
                 Discontinued
+              </Badge>
+            )}
+            {!material.in_stock && (
+              <Badge variant="outline" className="text-xs">
+                Out of Stock
               </Badge>
             )}
           </div>

@@ -403,7 +403,9 @@ export default function MemoAdminPage() {
                         <TableHead>Title</TableHead>
                         <TableHead>EL-Number</TableHead>
                         <TableHead>Supplier</TableHead>
-                        <TableHead>Info</TableHead>
+                        <TableHead>Brand</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead>Created</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -424,8 +426,41 @@ export default function MemoAdminPage() {
                           <TableCell>
                             {material.leverandor?.name || 'Unknown'}
                           </TableCell>
-                          <TableCell className="max-w-xs truncate">
-                            {material.info || 'No info'}
+                          <TableCell>
+                            {material.varemerke || 'No brand'}
+                          </TableCell>
+                          <TableCell>
+                            {material.kategori ? (
+                              <Badge variant="secondary">
+                                {material.kategori.blokknummer} - {material.kategori.kategori}
+                              </Badge>
+                            ) : (
+                              'No category'
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              {material.approved && (
+                                <Badge variant="default" className="text-xs">
+                                  ✓
+                                </Badge>
+                              )}
+                              {material.favorites && (
+                                <Badge variant="secondary" className="text-xs">
+                                  ★
+                                </Badge>
+                              )}
+                              {material.discontinued && (
+                                <Badge variant="destructive" className="text-xs">
+                                  ⚠
+                                </Badge>
+                              )}
+                              {!material.in_stock && (
+                                <Badge variant="outline" className="text-xs">
+                                  ∅
+                                </Badge>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             {formatDate(material.created_at)}

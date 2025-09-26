@@ -87,6 +87,8 @@ import type {
   UpdateSupplierResponse,
   DeleteSupplierResponse,
   GetMaterialsResponse,
+  GetMaterialsPaginatedResponse,
+  MaterialSearchParams,
   GetMaterialResponse,
   CreateMaterialResponse,
   UpdateMaterialResponse,
@@ -1230,9 +1232,63 @@ export const elektriskKategoriAPI = {
 
 // Materials API (Matriell)
 export const materialsAPI = {
-  getMaterials: async (): Promise<GetMaterialsResponse> => {
+  getMaterials: async (params?: MaterialSearchParams): Promise<GetMaterialsResponse | GetMaterialsPaginatedResponse> => {
+    const queryParams = new URLSearchParams();
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+
+    const url = queryParams.toString()
+      ? `/app/memo/matriell/?${queryParams.toString()}`
+      : '/app/memo/matriell/';
+
+    const response = await api.get(url);
+
+    // If response has pagination structure, return it as is
+    if (response.data && typeof response.data === 'object' && 'pagination' in response.data) {
+      return response.data as GetMaterialsPaginatedResponse;
+    }
+
+    // Otherwise return as simple array
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  // Simplified method for getting all materials (backward compatibility)
+  getAllMaterials: async (): Promise<GetMaterialsResponse> => {
     const response = await api.get('/app/memo/matriell/');
     return Array.isArray(response.data) ? response.data : [];
+  },
+
+  // Method specifically for search with pagination
+  searchMaterials: async (params: MaterialSearchParams): Promise<GetMaterialsPaginatedResponse> => {
+    const result = await materialsAPI.getMaterials(params);
+
+    // If it's already paginated, return as is
+    if (typeof result === 'object' && 'pagination' in result) {
+      return result;
+    }
+
+    // If it's a simple array, wrap it in pagination format
+    return {
+      pagination: {
+        count: result.length,
+        total_pages: 1,
+        current_page: 1,
+        page_size: result.length,
+        has_next: false,
+        has_previous: false,
+      },
+      links: {
+        next: undefined,
+        previous: undefined,
+      },
+      results: result,
+    };
   },
 
   getMaterial: async (materialId: number): Promise<GetMaterialResponse> => {

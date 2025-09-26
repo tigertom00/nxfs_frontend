@@ -602,6 +602,72 @@ export interface CreateMaterialPayload {
 
 export type UpdateMaterialPayload = Partial<CreateMaterialPayload>;
 
+// Material Search Parameters (matching backend MatriellFilter)
+export interface MaterialSearchParams {
+  // Text search fields
+  search?: string; // Multi-field search
+  el_nr?: string;
+  tittel?: string;
+  varemerke?: string;
+  varenummer?: string;
+  gtin_number?: string;
+
+  // Foreign key filters
+  kategori?: number; // Category ID
+  kategori_blokknummer?: string; // Category block number
+  kategori_name?: string; // Category name
+  leverandor?: number; // Supplier ID
+  leverandor_name?: string; // Supplier name
+
+  // Boolean filters
+  approved?: boolean;
+  discontinued?: boolean;
+  in_stock?: boolean;
+  favorites?: boolean;
+
+  // Numeric range filters
+  hoyde_min?: number;
+  hoyde_max?: number;
+  bredde_min?: number;
+  bredde_max?: number;
+  lengde_min?: number;
+  lengde_max?: number;
+  vekt_min?: number;
+  vekt_max?: number;
+
+  // Date range filters
+  created_after?: string;
+  created_before?: string;
+  updated_after?: string;
+  updated_before?: string;
+
+  // Pagination
+  page?: number;
+  page_size?: number;
+
+  // Ordering
+  ordering?: string; // e.g., "-created_at", "el_nr", "tittel"
+}
+
+// Paginated Material Response (matching backend MatriellPagination)
+export interface PaginatedMaterialResponse {
+  pagination: {
+    count: number;
+    total_pages: number;
+    current_page: number;
+    page_size: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next_page?: number;
+    previous_page?: number;
+  };
+  links: {
+    next?: string;
+    previous?: string;
+  };
+  results: Material[];
+}
+
 // Job payloads
 export interface CreateJobPayload {
   ordre_nr: number;
@@ -667,7 +733,8 @@ export type UpdateSupplierResponse = Supplier;
 export type DeleteSupplierResponse = void;
 
 // Material API responses
-export type GetMaterialsResponse = Material[];
+export type GetMaterialsResponse = Material[]; // Simple list response
+export type GetMaterialsPaginatedResponse = PaginatedMaterialResponse; // Paginated response
 export type GetMaterialResponse = Material;
 export type CreateMaterialResponse = Material;
 export type UpdateMaterialResponse = Material;

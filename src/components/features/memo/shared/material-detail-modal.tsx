@@ -79,7 +79,7 @@ export function MaterialDetailModal({
               </DialogTitle>
               <DialogDescription className="mt-1">
                 {material.leverandor.name} •{' '}
-                {material.type_designation || 'Electrical Component'}
+                {material.kategori?.kategori || 'Electrical Component'}
               </DialogDescription>
             </div>
             {onToggleFavorite && (
@@ -150,31 +150,31 @@ export function MaterialDetailModal({
                   </Button>
                 </div>
               )}
-              {material.ean_number && (
+              {material.gtin_number && (
                 <div className="flex items-center justify-between p-3 bg-muted rounded">
                   <div>
-                    <p className="font-medium text-sm">EAN Barcode</p>
+                    <p className="font-medium text-sm">GTIN/EAN Barcode</p>
                     <p className="text-sm text-muted-foreground">
-                      {material.ean_number}
+                      {material.gtin_number}
                     </p>
                   </div>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() =>
-                      copyToClipboard(material.ean_number!, 'EAN Number')
+                      copyToClipboard(material.gtin_number!, 'GTIN Number')
                     }
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
               )}
-              {material.article_number && (
+              {material.varenummer && (
                 <div className="flex items-center justify-between p-3 bg-muted rounded">
                   <div>
-                    <p className="font-medium text-sm">Article Number</p>
+                    <p className="font-medium text-sm">Product Number</p>
                     <p className="text-sm text-muted-foreground">
-                      {material.article_number}
+                      {material.varenummer}
                     </p>
                   </div>
                   <Button
@@ -182,28 +182,9 @@ export function MaterialDetailModal({
                     variant="ghost"
                     onClick={() =>
                       copyToClipboard(
-                        material.article_number!,
-                        'Article Number'
+                        material.varenummer!,
+                        'Product Number'
                       )
-                    }
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-              {material.order_number && (
-                <div className="flex items-center justify-between p-3 bg-muted rounded">
-                  <div>
-                    <p className="font-medium text-sm">Order Number</p>
-                    <p className="text-sm text-muted-foreground">
-                      {material.order_number}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      copyToClipboard(material.order_number!, 'Order Number')
                     }
                   >
                     <Copy className="h-3 w-3" />
@@ -216,9 +197,8 @@ export function MaterialDetailModal({
           <Separator />
 
           {/* Descriptions */}
-          {(material.norwegian_description ||
-            material.english_description ||
-            material.german_description ||
+          {(material.teknisk_beskrivelse ||
+            material.varebetegnelse ||
             material.info) && (
             <>
               <div>
@@ -227,30 +207,24 @@ export function MaterialDetailModal({
                   Descriptions
                 </h3>
                 <div className="space-y-3">
-                  {material.norwegian_description && (
+                  {material.teknisk_beskrivelse && (
                     <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm mb-1">Norwegian</p>
+                      <p className="font-medium text-sm mb-1">Technical Description</p>
                       <p className="text-sm">
-                        {material.norwegian_description}
+                        {material.teknisk_beskrivelse}
                       </p>
                     </div>
                   )}
-                  {material.english_description && (
+                  {material.varebetegnelse && (
                     <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm mb-1">English</p>
-                      <p className="text-sm">{material.english_description}</p>
-                    </div>
-                  )}
-                  {material.german_description && (
-                    <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm mb-1">German</p>
-                      <p className="text-sm">{material.german_description}</p>
+                      <p className="font-medium text-sm mb-1">Product Designation</p>
+                      <p className="text-sm">{material.varebetegnelse}</p>
                     </div>
                   )}
                   {material.info && (
                     <div className="p-3 bg-muted rounded">
                       <p className="font-medium text-sm mb-1">
-                        Additional Info
+                        Technical Info/ETIM
                       </p>
                       <p className="text-sm">{material.info}</p>
                     </div>
@@ -262,12 +236,12 @@ export function MaterialDetailModal({
           )}
 
           {/* Technical Specifications */}
-          {(material.category ||
-            material.weight ||
-            material.height ||
-            material.width ||
-            material.depth ||
-            material.unit_per_package) && (
+          {(material.kategori ||
+            material.vekt ||
+            material.hoyde ||
+            material.bredde ||
+            material.lengde ||
+            material.varemerke) && (
             <>
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -275,51 +249,51 @@ export function MaterialDetailModal({
                   Technical Specifications
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {material.category && (
+                  {material.kategori && (
                     <div className="p-3 bg-muted rounded">
                       <p className="font-medium text-sm">Category</p>
                       <p className="text-sm text-muted-foreground">
-                        {material.category}
+                        {material.kategori.blokknummer} - {material.kategori.kategori}
                       </p>
                     </div>
                   )}
-                  {material.weight && (
+                  {material.varemerke && (
+                    <div className="p-3 bg-muted rounded">
+                      <p className="font-medium text-sm">Brand</p>
+                      <p className="text-sm text-muted-foreground">
+                        {material.varemerke}
+                      </p>
+                    </div>
+                  )}
+                  {material.vekt && (
                     <div className="p-3 bg-muted rounded">
                       <p className="font-medium text-sm">Weight</p>
                       <p className="text-sm text-muted-foreground">
-                        {material.weight}
+                        {material.vekt} g
                       </p>
                     </div>
                   )}
-                  {material.height && (
+                  {material.hoyde && (
                     <div className="p-3 bg-muted rounded">
                       <p className="font-medium text-sm">Height</p>
                       <p className="text-sm text-muted-foreground">
-                        {material.height}
+                        {material.hoyde} mm
                       </p>
                     </div>
                   )}
-                  {material.width && (
+                  {material.bredde && (
                     <div className="p-3 bg-muted rounded">
                       <p className="font-medium text-sm">Width</p>
                       <p className="text-sm text-muted-foreground">
-                        {material.width}
+                        {material.bredde} mm
                       </p>
                     </div>
                   )}
-                  {material.depth && (
+                  {material.lengde && (
                     <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm">Depth</p>
+                      <p className="font-medium text-sm">Length</p>
                       <p className="text-sm text-muted-foreground">
-                        {material.depth}
-                      </p>
-                    </div>
-                  )}
-                  {material.unit_per_package && (
-                    <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm">Units per Package</p>
-                      <p className="text-sm text-muted-foreground">
-                        {material.unit_per_package}
+                        {material.lengde} mm
                       </p>
                     </div>
                   )}
@@ -329,72 +303,71 @@ export function MaterialDetailModal({
             </>
           )}
 
-          {/* Pricing Information */}
-          {(material.list_price ||
-            material.net_price ||
-            material.discount_factor ||
-            material.vat) && (
-            <>
-              <div>
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Pricing Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {material.list_price && (
-                    <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm">List Price</p>
-                      <p className="text-sm text-muted-foreground">
-                        {material.list_price} NOK
-                      </p>
-                    </div>
-                  )}
-                  {material.net_price && (
-                    <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm">Net Price</p>
-                      <p className="text-sm text-muted-foreground">
-                        {material.net_price} NOK
-                      </p>
-                    </div>
-                  )}
-                  {material.discount_factor && (
-                    <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm">Discount Factor</p>
-                      <p className="text-sm text-muted-foreground">
-                        {material.discount_factor}
-                      </p>
-                    </div>
-                  )}
-                  {material.vat && (
-                    <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm">VAT</p>
-                      <p className="text-sm text-muted-foreground">
-                        {material.vat}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <Separator />
-            </>
-          )}
 
           {/* Links and Documentation */}
-          {material.datasheet_url && (
+          {(material.produktblad ||
+            material.produkt_url ||
+            material.fdv ||
+            material.cpr_sertifikat ||
+            material.miljoinformasjon) && (
             <>
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   Documentation
                 </h3>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => window.open(material.datasheet_url, '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open Datasheet
-                </Button>
+                <div className="space-y-2">
+                  {material.produktblad && (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => window.open(material.produktblad, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Product Datasheet
+                    </Button>
+                  )}
+                  {material.produkt_url && (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => window.open(material.produkt_url, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Manufacturer Page
+                    </Button>
+                  )}
+                  {material.fdv && (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => window.open(material.fdv, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      FDV Document
+                    </Button>
+                  )}
+                  {material.cpr_sertifikat && (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => window.open(material.cpr_sertifikat, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      CPR Certificate
+                    </Button>
+                  )}
+                  {material.miljoinformasjon && (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => window.open(material.miljoinformasjon, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Environmental Info
+                    </Button>
+                  )}
+                </div>
               </div>
               <Separator />
             </>
