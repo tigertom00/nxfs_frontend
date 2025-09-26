@@ -1386,6 +1386,39 @@ export const materialsAPI = {
   },
 };
 
+// N8N EL Number Lookup API
+export const elNumberLookupAPI = {
+  lookupELNumber: async (el_nr: string): Promise<any> => {
+    try {
+      const response = await axios.post(
+        'https://n8n.nxfs.no/webhook/el_nr_lookup',
+        { el_nr },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': env.NEXT_PUBLIC_N8N_SECRET_KEY,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Looking up EL number');
+      throw error;
+    }
+  },
+
+  importFromEFObasen: async (efoData: any): Promise<CreateMaterialResponse> => {
+    try {
+      const response = await api.post('/app/memo/matriell/efobasen_import/', efoData);
+      showSuccessToast('Material imported from EFObasen successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Importing material from EFObasen');
+      throw error;
+    }
+  },
+};
+
 // Jobs API (Jobber)
 export const jobsAPI = {
   getJobs: async (): Promise<GetJobsResponse> => {
