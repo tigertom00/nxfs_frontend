@@ -401,12 +401,28 @@ export interface RefreshStatsResponse {
  * Based on API schema from /app/memo/ endpoints
  */
 
+// Electrical Category (ElektriskKategori) types
+export interface ElektriskKategori {
+  id: number;
+  blokknummer: string; // 2-digit block number (e.g., '10', '11', '12')
+  kategori: string; // Category name (e.g., 'Kabler og ledninger')
+  beskrivelse: string; // Detailed description and examples
+  slug: string; // URL-friendly version of category name
+  etim_gruppe?: string; // Related ETIM group code (e.g., 'EC000000')
+  created_at: string;
+  updated_at: string;
+}
+
 // Supplier (Leverandor) types - Enhanced for electrical manufacturers
 export interface Supplier {
   id: number;
-  name: string;
-  manufacturer_code?: string; // Manufacturer short code (e.g., "WAGO", "ABB")
-  website_url?: string;
+  name: string; // Company name (maps to 'navn' in JSON)
+  telefon?: string; // Phone number
+  hjemmeside?: string; // Website URL
+  addresse?: string; // Address
+  poststed?: string; // City/postal place
+  postnummer?: string; // Postal code
+  epost?: string; // Email address
   created_at: string;
   updated_at: string;
 }
@@ -416,33 +432,36 @@ export interface Material {
   id: number;
   leverandor: Supplier;
   leverandor_id?: number; // Foreign key to supplier
+  kategori?: ElektriskKategori; // Category relationship
+  kategori_id?: number; // Foreign key to category
 
   // Core identification - el_nr is required and unique in backend
   el_nr: string; // EL-number (electrical component number) - REQUIRED
   tittel: string; // Title - REQUIRED
 
-  // Product details
-  info?: string; // Technical description
-  ean_number?: string; // EAN barcode
-  article_number?: string; // Manufacturer article number
+  // Product details from EFO Basen JSON
+  varemerke?: string; // Brand/manufacturer
+  info?: string; // Technical description/ETIM info
+  varenummer?: string; // Product number
+  gtin_number?: string; // GTIN/EAN code
 
-  // Multilingual descriptions
-  norwegian_description?: string;
-  english_description?: string;
+  // Descriptions
+  teknisk_beskrivelse?: string; // Detailed technical description
+  varebetegnelse?: string; // Product designation
 
-  // Physical specifications
-  height?: string;
-  width?: string;
-  depth?: string;
-  weight?: string;
-
-  // Classification
-  etim_class?: string; // ETIM classification
-  category?: string; // EC code
+  // Dimensions (using DecimalField for precise measurements)
+  hoyde?: number; // Height in mm
+  bredde?: number; // Width in mm
+  lengde?: number; // Length/depth in mm
+  vekt?: number; // Weight in grams
 
   // Documents and media
-  datasheet_url?: string;
-  image_url?: string;
+  bilder?: string[]; // Array of image URLs
+  produktblad?: string; // Product datasheet URL
+  produkt_url?: string; // Manufacturer product page URL
+  fdv?: string; // FDV document URL
+  cpr_sertifikat?: string; // CPR certificate URL
+  miljoinformasjon?: string; // Environmental information URL
 
   // Status flags
   approved: boolean; // Quality control approval
@@ -517,11 +536,27 @@ export interface TimeEntry {
  * Memo App API Request/Payload Types
  */
 
+// ElektriskKategori payloads
+export interface CreateElektriskKategoriPayload {
+  blokknummer: string; // 2-digit block number (required and unique)
+  kategori: string; // Category name (required)
+  beskrivelse: string; // Description (required)
+  slug?: string; // Auto-generated if not provided
+  etim_gruppe?: string; // Optional ETIM group code
+}
+
+export type UpdateElektriskKategoriPayload =
+  Partial<CreateElektriskKategoriPayload>;
+
 // Supplier payloads
 export interface CreateSupplierPayload {
-  name: string; // Required in backend model
-  manufacturer_code?: string;
-  website_url?: string;
+  name: string; // Required in backend model (maps to 'navn' in JSON)
+  telefon?: string;
+  hjemmeside?: string;
+  addresse?: string;
+  poststed?: string;
+  postnummer?: string;
+  epost?: string;
 }
 
 export type UpdateSupplierPayload = Partial<CreateSupplierPayload>;
@@ -532,29 +567,31 @@ export interface CreateMaterialPayload {
   el_nr: string; // Required and unique
   tittel: string; // Required
   leverandor_id: number; // Foreign key to supplier
+  kategori_id?: number; // Optional foreign key to category
 
-  // Product details
-  info?: string; // Technical description
-  ean_number?: string;
-  article_number?: string;
+  // Product details from EFO Basen JSON
+  varemerke?: string; // Brand/manufacturer
+  info?: string; // Technical description/ETIM info
+  varenummer?: string; // Product number
+  gtin_number?: string; // GTIN/EAN code
 
-  // Multilingual descriptions
-  norwegian_description?: string;
-  english_description?: string;
+  // Descriptions
+  teknisk_beskrivelse?: string; // Detailed technical description
+  varebetegnelse?: string; // Product designation
 
-  // Physical specifications
-  height?: string;
-  width?: string;
-  depth?: string;
-  weight?: string;
-
-  // Classification
-  etim_class?: string;
-  category?: string; // EC code
+  // Dimensions (precise measurements)
+  hoyde?: number; // Height in mm
+  bredde?: number; // Width in mm
+  lengde?: number; // Length/depth in mm
+  vekt?: number; // Weight in grams
 
   // Documents and media
-  datasheet_url?: string;
-  image_url?: string;
+  bilder?: string[]; // Array of image URLs
+  produktblad?: string; // Product datasheet URL
+  produkt_url?: string; // Manufacturer product page URL
+  fdv?: string; // FDV document URL
+  cpr_sertifikat?: string; // CPR certificate URL
+  miljoinformasjon?: string; // Environmental information URL
 
   // Status flags
   approved?: boolean; // Defaults to true in backend
@@ -614,6 +651,13 @@ export type UpdateTimeEntryPayload = Partial<CreateTimeEntryPayload>;
 /**
  * Memo App API Response Types
  */
+
+// ElektriskKategori API responses
+export type GetElektriskKategorierResponse = ElektriskKategori[];
+export type GetElektriskKategoriResponse = ElektriskKategori;
+export type CreateElektriskKategoriResponse = ElektriskKategori;
+export type UpdateElektriskKategoriResponse = ElektriskKategori;
+export type DeleteElektriskKategoriResponse = void;
 
 // Supplier API responses
 export type GetSuppliersResponse = Supplier[];

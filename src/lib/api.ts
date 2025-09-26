@@ -54,6 +54,7 @@ import type {
   CreateTaskPayload,
   UpdateTaskPayload,
   // Memo app types
+  ElektriskKategori,
   Supplier,
   Material,
   Job,
@@ -61,6 +62,8 @@ import type {
   JobImage,
   JobFile,
   TimeEntry,
+  CreateElektriskKategoriPayload,
+  UpdateElektriskKategoriPayload,
   CreateSupplierPayload,
   UpdateSupplierPayload,
   CreateMaterialPayload,
@@ -73,6 +76,11 @@ import type {
   CreateJobFilePayload,
   CreateTimeEntryPayload,
   UpdateTimeEntryPayload,
+  GetElektriskKategorierResponse,
+  GetElektriskKategoriResponse,
+  CreateElektriskKategoriResponse,
+  UpdateElektriskKategoriResponse,
+  DeleteElektriskKategoriResponse,
   GetSuppliersResponse,
   GetSupplierResponse,
   CreateSupplierResponse,
@@ -288,7 +296,6 @@ export const postsAPI = {
     const response = await api.get(`/app/blog/posts/${postId}/`);
     return response.data;
   },
-
 
   createPost: async (
     postData: CreatePostPayload
@@ -1158,6 +1165,64 @@ export const suppliersAPI = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Deleting supplier');
+      throw error;
+    }
+  },
+};
+
+// Electrical Categories API (ElektriskKategori)
+export const elektriskKategoriAPI = {
+  getKategorier: async (): Promise<GetElektriskKategorierResponse> => {
+    const response = await api.get('/app/memo/kategorier/');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  getKategori: async (
+    kategoriId: number
+  ): Promise<GetElektriskKategoriResponse> => {
+    const response = await api.get(`/app/memo/kategorier/${kategoriId}/`);
+    return response.data;
+  },
+
+  createKategori: async (
+    kategoriData: CreateElektriskKategoriPayload
+  ): Promise<CreateElektriskKategoriResponse> => {
+    try {
+      const response = await api.post('/app/memo/kategorier/', kategoriData);
+      showSuccessToast('Category created successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Creating category');
+      throw error;
+    }
+  },
+
+  updateKategori: async (
+    kategoriId: number,
+    kategoriData: UpdateElektriskKategoriPayload
+  ): Promise<UpdateElektriskKategoriResponse> => {
+    try {
+      const response = await api.put(
+        `/app/memo/kategorier/${kategoriId}/`,
+        kategoriData
+      );
+      showSuccessToast('Category updated successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Updating category');
+      throw error;
+    }
+  },
+
+  deleteKategori: async (
+    kategoriId: number
+  ): Promise<DeleteElektriskKategoriResponse> => {
+    try {
+      const response = await api.delete(`/app/memo/kategorier/${kategoriId}/`);
+      showSuccessToast('Category deleted successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Deleting category');
       throw error;
     }
   },

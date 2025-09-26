@@ -2,10 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { timeEntriesAPI } from '@/lib/api';
 import { useAuthStore } from '@/stores';
-import { Play, Square, Clock } from 'lucide-react';
+import { Play, Square, Clock, PlusCircle, List } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ManualTimeEntry } from './manual-time-entry';
+import { TimeEntriesList } from './time-entries-list';
+import {
+  roundSecondsToNearestHalfHour,
+  formatSecondsToTimeString,
+} from '@/lib/time-utils';
 
 interface TimerWidgetProps {
   jobId: number;
@@ -27,6 +34,8 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
     elapsed: 0,
     sessionId: null,
   });
+  const [activeTab, setActiveTab] = useState('timer');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const intervalRef = useRef<NodeJS.Timeout>();
   const notificationRef = useRef<Notification>();
@@ -50,8 +59,13 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
           // If timer was running, calculate elapsed time since last save
           if (parsed.isRunning && parsed.startTime) {
             const now = Date.now();
-            const additionalElapsed = Math.floor((now - parsed.startTime) / 1000);
-            console.log('Resuming timer with additional elapsed time:', additionalElapsed);
+            const additionalElapsed = Math.floor(
+              (now - parsed.startTime) / 1000
+            );
+            console.log(
+              'Resuming timer with additional elapsed time:',
+              additionalElapsed
+            );
             setTimer((prev) => ({
               ...prev,
               elapsed: prev.elapsed + additionalElapsed,
@@ -104,7 +118,7 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
     if (timer.isRunning) {
       // Request notification permission (mobile-safe)
       if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission().catch(error => {
+        Notification.requestPermission().catch((error) => {
           console.warn('Notification permission request failed:', error);
         });
       }
@@ -146,14 +160,7 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
   }, [timer.isRunning, timer.elapsed, jobId]);
 
   const formatTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    return formatSecondsToTimeString(seconds);
   };
 
   const startTimer = () => {
@@ -179,7 +186,8 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
       console.error('Error starting timer:', error);
       toast({
         title: 'Failed to start timer',
-        description: 'An error occurred while starting the timer. Please try again.',
+        description:
+          'An error occurred while starting the timer. Please try again.',
         variant: 'destructive',
       });
     }
@@ -207,22 +215,25 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
 
     if (confirmSave) {
       try {
+        // Apply smart rounding to elapsed time
+        const roundedSeconds = roundSecondsToNearestHalfHour(timer.elapsed);
+        const roundedMinutes = Math.round(roundedSeconds / 60);
+
         console.log('Creating time entry with data:', {
           jobb: jobId,
           user: parseInt(user.id),
-          timer: timer.elapsed,
+          timer: roundedMinutes,
           dato: new Date().toISOString().split('T')[0],
+          original_seconds: timer.elapsed,
+          rounded_seconds: roundedSeconds,
         });
-
-        // Convert elapsed seconds to hours (rounded to 2 decimals)
-        const hours = Math.round((timer.elapsed / 3600) * 100) / 100;
 
         const timeEntryData = {
           jobb: jobId,
           user: parseInt(user.id),
-          timer: timer.elapsed,
+          timer: roundedMinutes, // Store as minutes
           dato: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
-          beskrivelse: `Timer session - ${formatTime(timer.elapsed)}`,
+          beskrivelse: `Timer session - ${formatTime(roundedSeconds)} (rounded from ${formatTime(timer.elapsed)})`,
         };
 
         console.log('Sending time entry request:', timeEntryData);
@@ -231,8 +242,11 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
 
         toast({
           title: 'Time saved',
-          description: `${formatTime(timer.elapsed)} saved to Job #${jobId}`,
+          description: `${formatTime(roundedSeconds)} saved to Job #${jobId}${roundedSeconds !== timer.elapsed ? ' (rounded)' : ''}`,
         });
+
+        // Trigger refresh of time entries list
+        setRefreshTrigger((prev) => prev + 1);
       } catch (error) {
         console.error('Failed to save time entry:', error);
 
@@ -283,55 +297,89 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
     }
   };
 
+  const handleManualEntrySuccess = () => {
+    setRefreshTrigger((prev) => prev + 1);
+    setActiveTab('entries'); // Switch to entries tab after adding
+  };
+
   return (
-    <div className="bg-card border rounded-lg p-4 space-y-4">
-      {/* Timer Display */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Clock className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium text-muted-foreground">
-            TIMER
-          </span>
-        </div>
-        <div className="text-3xl font-mono font-bold">
-          {formatTime(timer.elapsed)}
-        </div>
-        {timer.isRunning && (
-          <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1 animate-pulse">
-            ● Running
+    <div className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="timer" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Timer
+          </TabsTrigger>
+          <TabsTrigger value="manual" className="flex items-center gap-2">
+            <PlusCircle className="h-4 w-4" />
+            Add Time
+          </TabsTrigger>
+          <TabsTrigger value="entries" className="flex items-center gap-2">
+            <List className="h-4 w-4" />
+            Entries
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="timer" className="space-y-0">
+          <div className="bg-card border rounded-lg p-4 space-y-4">
+            {/* Timer Display */}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  TIMER
+                </span>
+              </div>
+              <div className="text-3xl font-mono font-bold">
+                {formatTime(timer.elapsed)}
+              </div>
+              {timer.isRunning && (
+                <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1 animate-pulse">
+                  ● Running
+                </div>
+              )}
+            </div>
+
+            {/* Timer Controls */}
+            <div className="flex gap-3">
+              {!timer.isRunning ? (
+                <Button
+                  onClick={startTimer}
+                  className="flex-1 h-12"
+                  variant="default"
+                >
+                  <Play className="h-5 w-5 mr-2" />
+                  Start Timer
+                </Button>
+              ) : (
+                <Button
+                  onClick={stopTimer}
+                  className="flex-1 h-12"
+                  variant="destructive"
+                >
+                  <Square className="h-5 w-5 mr-2" />
+                  Stop & Save
+                </Button>
+              )}
+            </div>
+
+            {/* Auto-save Status */}
+            <div className="text-center text-xs text-muted-foreground">
+              {timer.isRunning
+                ? 'Timer will auto-save when stopped (with 30-min rounding)'
+                : 'Click start to begin tracking time'}
+            </div>
           </div>
-        )}
-      </div>
+        </TabsContent>
 
-      {/* Timer Controls */}
-      <div className="flex gap-3">
-        {!timer.isRunning ? (
-          <Button
-            onClick={startTimer}
-            className="flex-1 h-12"
-            variant="default"
-          >
-            <Play className="h-5 w-5 mr-2" />
-            Start Timer
-          </Button>
-        ) : (
-          <Button
-            onClick={stopTimer}
-            className="flex-1 h-12"
-            variant="destructive"
-          >
-            <Square className="h-5 w-5 mr-2" />
-            Stop & Save
-          </Button>
-        )}
-      </div>
+        <TabsContent value="manual" className="space-y-0">
+          <ManualTimeEntry jobId={jobId} onSuccess={handleManualEntrySuccess} />
+        </TabsContent>
 
-      {/* Auto-save Status */}
-      <div className="text-center text-xs text-muted-foreground">
-        {timer.isRunning
-          ? 'Timer will auto-save when stopped'
-          : 'Click start to begin tracking time'}
-      </div>
+        <TabsContent value="entries" className="space-y-0">
+          <TimeEntriesList jobId={jobId} refreshTrigger={refreshTrigger} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
