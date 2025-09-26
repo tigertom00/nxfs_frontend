@@ -201,23 +201,27 @@ export default function YourPage() {
 Use these theme-aware CSS classes for consistent appearance across all themes:
 
 #### Background & Layout
+
 - `bg-background` - Main page background
 - `bg-card` - Card/panel backgrounds
 - `bg-muted` - Subtle background areas
 - `bg-popover` - Modal/dropdown backgrounds
 
 #### Text Colors
+
 - `text-foreground` - Primary text color
 - `text-muted-foreground` - Secondary/subtle text
 - `text-primary` - Accent/brand text
 - `text-destructive` - Error/warning text
 
 #### Borders & Dividers
+
 - `border-border` - Standard borders
 - `border-input` - Form input borders
 - `ring-ring` - Focus ring colors
 
 #### Interactive Elements
+
 - `hover:bg-muted` - Standard hover background
 - `hover-lift` - Subtle lift animation on hover
 - `hover-lift-only` - Lift without glow effect
@@ -225,6 +229,7 @@ Use these theme-aware CSS classes for consistent appearance across all themes:
 ### Component Examples
 
 #### Cards with Theme Support
+
 ```typescript
 <Card className="bg-card border-border hover-lift">
   <CardHeader>
@@ -240,6 +245,7 @@ Use these theme-aware CSS classes for consistent appearance across all themes:
 ```
 
 #### Buttons with Consistent Styling
+
 ```typescript
 // Primary action
 <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -253,6 +259,7 @@ Use these theme-aware CSS classes for consistent appearance across all themes:
 ```
 
 #### Form Elements
+
 ```typescript
 <Input
   className="bg-background border-input focus:ring-ring"

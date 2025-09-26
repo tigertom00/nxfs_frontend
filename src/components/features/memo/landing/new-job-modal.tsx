@@ -15,6 +15,8 @@ import { jobsAPI } from '@/lib/api';
 import { Job, CreateJobPayload } from '@/types/api';
 import { MapPin, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { suggestNextJobOrderNumber } from '@/lib/time-utils';
+import { JobOrderValidator } from '../shared/job-order-validator';
 
 interface NewJobModalProps {
   isOpen: boolean;
@@ -38,6 +40,7 @@ export function NewJobModal({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [existingOrderNumbers, setExistingOrderNumbers] = useState<number[]>([]);
   const [formData, setFormData] = useState<CreateJobPayload>({
     ordre_nr: 0,
     tittel: '',
@@ -47,12 +50,29 @@ export function NewJobModal({
     ferdig: false,
   });
 
-  // Generate next order number when modal opens
+  // Load existing order numbers and generate next order number when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Generate a simple order number (you might want to get this from the backend)
-      const nextOrderNr = Date.now() % 100000; // Simple approach for demo
-      setFormData((prev) => ({ ...prev, ordre_nr: nextOrderNr }));
+      const loadExistingNumbers = async () => {
+        try {
+          const jobs = await jobsAPI.getJobs();
+          const orderNumbers = jobs.map(job => job.ordre_nr);
+          setExistingOrderNumbers(orderNumbers);
+
+          // Generate next available order number
+          const nextOrderNr = suggestNextJobOrderNumber(orderNumbers);
+          setFormData((prev) => ({ ...prev, ordre_nr: nextOrderNr }));
+        } catch (error) {
+          console.error('Failed to load existing jobs:', error);
+          // Fallback to simple generation
+          const currentYear = new Date().getFullYear();
+          const yearCode = (currentYear - 2017) % 10;
+          const nextOrderNr = yearCode * 1000 + 1; // Start with sequence 1
+          setFormData((prev) => ({ ...prev, ordre_nr: nextOrderNr }));
+        }
+      };
+
+      loadExistingNumbers();
     }
   }, [isOpen]);
 
@@ -171,25 +191,20 @@ export function NewJobModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-md mx-auto max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Create New Job</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Order Number */}
-          <div className="space-y-2">
-            <Label htmlFor="ordre_nr">Order Number *</Label>
-            <Input
-              id="ordre_nr"
-              type="number"
+        <div className="flex-1 overflow-y-auto pr-1">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Order Number */}
+            <JobOrderValidator
               value={formData.ordre_nr}
-              onChange={(e) =>
-                handleInputChange('ordre_nr', parseInt(e.target.value) || 0)
-              }
+              onChange={(orderNumber) => handleInputChange('ordre_nr', orderNumber)}
+              existingOrderNumbers={existingOrderNumbers}
               required
             />
-          </div>
 
           {/* Title */}
           <div className="space-y-2">
@@ -254,29 +269,35 @@ export function NewJobModal({
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" className="flex-1" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                'Create Job'
-              )}
-            </Button>
-          </div>
-        </form>
+          </form>
+        </div>
+
+        {/* Actions - Fixed at bottom */}
+        <div className="flex gap-3 pt-4 border-t flex-shrink-0">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="flex-1"
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            className="flex-1"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              'Create Job'
+            )}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

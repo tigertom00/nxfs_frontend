@@ -304,7 +304,9 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       material.type_designation
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      material.leverandor?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      material.leverandor?.name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase())
   );
 
   const handleAddToJob = async () => {
@@ -589,17 +591,18 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                     </div>
                   ) : (
                     filteredMaterials.map((material) => (
-                    <MaterialCard
-                      key={material.id}
-                      material={material}
-                      onSelect={addMaterialToSelection}
-                      onToggleFavorite={handleToggleFavorite}
-                      onShowDetail={setSelectedMaterialForDetail}
-                      isSelected={selectedMaterials.some(
-                        (sm) => sm.id === material.id
-                      )}
-                    />
-                  )))}
+                      <MaterialCard
+                        key={material.id}
+                        material={material}
+                        onSelect={addMaterialToSelection}
+                        onToggleFavorite={handleToggleFavorite}
+                        onShowDetail={setSelectedMaterialForDetail}
+                        isSelected={selectedMaterials.some(
+                          (sm) => sm.id === material.id
+                        )}
+                      />
+                    ))
+                  )}
                 </div>
               </TabsContent>
             </Tabs>

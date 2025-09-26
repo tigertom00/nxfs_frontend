@@ -54,17 +54,31 @@ export const useUIStore = create<UIState>()(
           // Only set system theme if no theme is stored and no user is logged in
           if (typeof window !== 'undefined') {
             const authStorage = localStorage.getItem('auth-storage');
-            if (!authStorage || !JSON.parse(authStorage).state?.isAuthenticated) {
+            if (
+              !authStorage ||
+              !JSON.parse(authStorage).state?.isAuthenticated
+            ) {
               set({ theme: 'system' });
               const effectiveTheme = state.getSystemTheme();
-              document.documentElement.classList.remove('light', 'dark', 'purple', 'pink');
+              document.documentElement.classList.remove(
+                'light',
+                'dark',
+                'purple',
+                'pink'
+              );
               document.documentElement.classList.add(effectiveTheme);
             }
           }
         } else {
           // Apply existing theme
-          const effectiveTheme = state.theme === 'system' ? state.getSystemTheme() : state.theme;
-          document.documentElement.classList.remove('light', 'dark', 'purple', 'pink');
+          const effectiveTheme =
+            state.theme === 'system' ? state.getSystemTheme() : state.theme;
+          document.documentElement.classList.remove(
+            'light',
+            'dark',
+            'purple',
+            'pink'
+          );
           document.documentElement.classList.add(effectiveTheme);
         }
       },

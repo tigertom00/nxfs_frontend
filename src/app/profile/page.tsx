@@ -306,7 +306,10 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground">{user.email}</p>
                   <div className="flex space-x-2 mt-2">
                     <Badge variant="secondary">
-                      {user.theme ? user.theme.charAt(0).toUpperCase() + user.theme.slice(1) : 'Theme'}
+                      {user.theme
+                        ? user.theme.charAt(0).toUpperCase() +
+                          user.theme.slice(1)
+                        : 'Theme'}
                     </Badge>
                     <Badge variant="outline">
                       {user.language === 'no' ? 'Norsk' : 'English'}

@@ -20,9 +20,10 @@ export function MobileDebugConsole() {
 
   useEffect(() => {
     // Only enable on mobile devices
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+    const isMobile =
+      /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
 
     if (!isMobile) return;
 
@@ -31,7 +32,11 @@ export function MobileDebugConsole() {
     const originalWarn = console.warn;
     const originalError = console.error;
 
-    const addLog = (type: LogEntry['type'], message: string, ...args: any[]) => {
+    const addLog = (
+      type: LogEntry['type'],
+      message: string,
+      ...args: any[]
+    ) => {
       const logEntry: LogEntry = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         timestamp: new Date().toLocaleTimeString(),
@@ -40,7 +45,7 @@ export function MobileDebugConsole() {
         args: args.length > 0 ? args : undefined,
       };
 
-      setLogs(prev => [...prev.slice(-49), logEntry]); // Keep last 50 logs
+      setLogs((prev) => [...prev.slice(-49), logEntry]); // Keep last 50 logs
     };
 
     console.log = (...args) => {
@@ -82,8 +87,11 @@ export function MobileDebugConsole() {
   };
 
   // Show toggle button on mobile only
-  const isMobile = typeof window !== 'undefined' &&
-    /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isMobile =
+    typeof window !== 'undefined' &&
+    /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
 
   if (!isMobile) return null;
 
@@ -135,7 +143,7 @@ export function MobileDebugConsole() {
                     No logs yet...
                   </div>
                 ) : (
-                  logs.map(log => (
+                  logs.map((log) => (
                     <div
                       key={log.id}
                       className={`p-2 rounded text-xs border ${getLogTypeStyles(log.type)}`}
@@ -154,11 +162,13 @@ export function MobileDebugConsole() {
                         </pre>
                         {log.args && log.args.length > 0 && (
                           <pre className="whitespace-pre-wrap text-xs opacity-75 mt-1">
-                            {log.args.map(arg =>
-                              typeof arg === 'object'
-                                ? JSON.stringify(arg, null, 2)
-                                : String(arg)
-                            ).join(' ')}
+                            {log.args
+                              .map((arg) =>
+                                typeof arg === 'object'
+                                  ? JSON.stringify(arg, null, 2)
+                                  : String(arg)
+                              )
+                              .join(' ')}
                           </pre>
                         )}
                       </div>

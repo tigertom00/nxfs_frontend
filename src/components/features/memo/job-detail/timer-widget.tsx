@@ -9,6 +9,7 @@ import { Play, Square, Clock, PlusCircle, List } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ManualTimeEntry } from './manual-time-entry';
 import { TimeEntriesList } from './time-entries-list';
+import { TimerStopModal } from './timer-stop-modal';
 import {
   roundSecondsToNearestHalfHour,
   formatSecondsToTimeString,
@@ -36,6 +37,7 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
   });
   const [activeTab, setActiveTab] = useState('timer');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showStopModal, setShowStopModal] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout>();
   const notificationRef = useRef<Notification>();
@@ -200,76 +202,74 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
     }
 
     console.log('Stopping timer - elapsed:', timer.elapsed, 'seconds');
+    setShowStopModal(true);
+  };
 
-    // Mobile-safe confirmation (fallback to native confirm if needed)
-    let confirmSave = false;
+  const handleTimerSave = async (description?: string) => {
+    if (!user) return;
+
     try {
-      confirmSave = window.confirm(
-        `Save ${formatTime(timer.elapsed)} to Job #${jobId}?\n\nThis will create a time entry record.`
-      );
+      // Apply smart rounding to elapsed time
+      const roundedSeconds = roundSecondsToNearestHalfHour(timer.elapsed);
+      const roundedMinutes = Math.round(roundedSeconds / 60);
+
+      console.log('Creating time entry with data:', {
+        jobb: jobId,
+        user: parseInt(user.id),
+        timer: roundedMinutes,
+        dato: new Date().toISOString().split('T')[0],
+        original_seconds: timer.elapsed,
+        rounded_seconds: roundedSeconds,
+      });
+
+      const timeEntryData = {
+        jobb: jobId,
+        user: parseInt(user.id),
+        timer: roundedMinutes, // Store as minutes
+        dato: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+        beskrivelse: description || `Timer session - ${formatTime(roundedSeconds)}${roundedSeconds !== timer.elapsed ? ` (rounded from ${formatTime(timer.elapsed)})` : ''}`,
+      };
+
+      console.log('Sending time entry request:', timeEntryData);
+      const result = await timeEntriesAPI.createTimeEntry(timeEntryData);
+      console.log('Time entry created successfully:', result);
+
+      toast({
+        title: 'Time saved',
+        description: `${formatTime(roundedSeconds)} saved to Job #${jobId}${roundedSeconds !== timer.elapsed ? ' (rounded)' : ''}`,
+      });
+
+      // Trigger refresh of time entries list
+      setRefreshTrigger(prev => prev + 1);
+
+      // Stop timer and reset
+      handleTimerReset();
+      setShowStopModal(false);
     } catch (error) {
-      console.error('Error showing confirmation dialog:', error);
-      // Fallback - assume user wants to save
-      confirmSave = true;
+      console.error('Failed to save time entry:', error);
+
+      toast({
+        title: 'Failed to save time',
+        description: `Time entry could not be saved. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: 'destructive',
+      });
+      throw error; // Let modal handle the error state
     }
+  };
 
-    if (confirmSave) {
-      try {
-        // Apply smart rounding to elapsed time
-        const roundedSeconds = roundSecondsToNearestHalfHour(timer.elapsed);
-        const roundedMinutes = Math.round(roundedSeconds / 60);
+  const handleTimerCancel = () => {
+    // Don't save, just stop the timer
+    handleTimerReset();
+    setShowStopModal(false);
 
-        console.log('Creating time entry with data:', {
-          jobb: jobId,
-          user: parseInt(user.id),
-          timer: roundedMinutes,
-          dato: new Date().toISOString().split('T')[0],
-          original_seconds: timer.elapsed,
-          rounded_seconds: roundedSeconds,
-        });
+    toast({
+      title: 'Timer stopped',
+      description: 'Time was not saved',
+      variant: 'destructive',
+    });
+  };
 
-        const timeEntryData = {
-          jobb: jobId,
-          user: parseInt(user.id),
-          timer: roundedMinutes, // Store as minutes
-          dato: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
-          beskrivelse: `Timer session - ${formatTime(roundedSeconds)} (rounded from ${formatTime(timer.elapsed)})`,
-        };
-
-        console.log('Sending time entry request:', timeEntryData);
-        const result = await timeEntriesAPI.createTimeEntry(timeEntryData);
-        console.log('Time entry created successfully:', result);
-
-        toast({
-          title: 'Time saved',
-          description: `${formatTime(roundedSeconds)} saved to Job #${jobId}${roundedSeconds !== timer.elapsed ? ' (rounded)' : ''}`,
-        });
-
-        // Trigger refresh of time entries list
-        setRefreshTrigger((prev) => prev + 1);
-      } catch (error) {
-        console.error('Failed to save time entry:', error);
-
-        // Log more details about the error
-        if (error instanceof Error) {
-          console.error('Error message:', error.message);
-          console.error('Error stack:', error.stack);
-        }
-
-        if (typeof error === 'object' && error !== null) {
-          console.error('Error object:', JSON.stringify(error, null, 2));
-        }
-
-        toast({
-          title: 'Failed to save time',
-          description: `Time entry could not be saved. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          variant: 'destructive',
-        });
-        return; // Don't stop timer if save failed
-      }
-    }
-
-    // Stop timer and reset
+  const handleTimerReset = () => {
     console.log('Resetting timer state');
     setTimer({
       isRunning: false,
@@ -286,14 +286,6 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
       }
     } catch (storageError) {
       console.error('Failed to clear saved timer:', storageError);
-    }
-
-    if (!confirmSave) {
-      toast({
-        title: 'Timer stopped',
-        description: 'Time was not saved',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -380,6 +372,16 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
           <TimeEntriesList jobId={jobId} refreshTrigger={refreshTrigger} />
         </TabsContent>
       </Tabs>
+
+      {/* Timer Stop Confirmation Modal */}
+      <TimerStopModal
+        isOpen={showStopModal}
+        onClose={() => setShowStopModal(false)}
+        onConfirm={handleTimerSave}
+        onCancel={handleTimerCancel}
+        elapsedSeconds={timer.elapsed}
+        jobId={jobId}
+      />
     </div>
   );
 }

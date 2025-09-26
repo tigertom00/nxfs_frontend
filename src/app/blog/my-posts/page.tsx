@@ -13,7 +13,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Plus, Search, Edit, Eye, Calendar, FileText } from 'lucide-react';
@@ -37,7 +43,13 @@ export default function MyBlogPostsPage() {
   }, [isAuthenticated, isInitialized, router]);
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark', 'purple', 'pink', 'system');
+    document.documentElement.classList.remove(
+      'light',
+      'dark',
+      'purple',
+      'pink',
+      'system'
+    );
     document.documentElement.classList.add(theme);
   }, [theme]);
 
@@ -54,9 +66,7 @@ export default function MyBlogPostsPage() {
           : response.results || [];
         setPosts(postsArray);
       } catch (err: any) {
-        setError(
-          err.response?.data?.message || t('blog.myPosts.errorLoading')
-        );
+        setError(err.response?.data?.message || t('blog.myPosts.errorLoading'));
       } finally {
         setLoading(false);
       }
@@ -81,17 +91,20 @@ export default function MyBlogPostsPage() {
       draft: {
         label: t('blog.status.draft'),
         variant: 'secondary' as const,
-        className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+        className:
+          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
       },
       published: {
         label: t('blog.status.published'),
         variant: 'default' as const,
-        className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+        className:
+          'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
       },
       archived: {
         label: t('blog.status.archived'),
         variant: 'outline' as const,
-        className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+        className:
+          'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
       },
     };
 
@@ -106,13 +119,14 @@ export default function MyBlogPostsPage() {
 
   const filteredPosts = posts.filter((post) => {
     const matchesSearch = searchTerm
-      ? (post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         post.title_nb?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         post.excerpt_nb?.toLowerCase().includes(searchTerm.toLowerCase()))
+      ? post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.title_nb?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt_nb?.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
 
-    const matchesStatus = statusFilter === 'all' || post.status === statusFilter;
+    const matchesStatus =
+      statusFilter === 'all' || post.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -189,15 +203,26 @@ export default function MyBlogPostsPage() {
                     </div>
                   </div>
                   <div className="w-full sm:w-48">
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <Select
+                      value={statusFilter}
+                      onValueChange={setStatusFilter}
+                    >
                       <SelectTrigger className="bg-background border-input">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">{t('blog.myPosts.allStatus')}</SelectItem>
-                        <SelectItem value="draft">{t('blog.status.draft')}</SelectItem>
-                        <SelectItem value="published">{t('blog.status.published')}</SelectItem>
-                        <SelectItem value="archived">{t('blog.status.archived')}</SelectItem>
+                        <SelectItem value="all">
+                          {t('blog.myPosts.allStatus')}
+                        </SelectItem>
+                        <SelectItem value="draft">
+                          {t('blog.status.draft')}
+                        </SelectItem>
+                        <SelectItem value="published">
+                          {t('blog.status.published')}
+                        </SelectItem>
+                        <SelectItem value="archived">
+                          {t('blog.status.archived')}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -233,14 +258,12 @@ export default function MyBlogPostsPage() {
                 <h3 className="text-lg font-medium text-foreground mb-2">
                   {posts.length === 0
                     ? t('blog.myPosts.noPosts')
-                    : t('blog.myPosts.noFilterResults')
-                  }
+                    : t('blog.myPosts.noFilterResults')}
                 </h3>
                 <p className="text-muted-foreground text-center mb-4">
                   {posts.length === 0
                     ? t('blog.myPosts.noPostsDescription')
-                    : t('blog.myPosts.noFilterResultsDescription')
-                  }
+                    : t('blog.myPosts.noFilterResultsDescription')}
                 </p>
                 {posts.length === 0 && (
                   <Button
@@ -271,7 +294,9 @@ export default function MyBlogPostsPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between gap-3">
                         <CardTitle className="text-lg line-clamp-2 text-foreground">
-                          {language === 'no' ? post.title_nb || post.title : post.title}
+                          {language === 'no'
+                            ? post.title_nb || post.title
+                            : post.title}
                         </CardTitle>
                         {getStatusBadge(post.status)}
                       </div>
@@ -304,7 +329,9 @@ export default function MyBlogPostsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                            onClick={() =>
+                              window.open(`/blog/${post.slug}`, '_blank')
+                            }
                             className="hover-lift-only"
                           >
                             <Eye className="h-3 w-3" />
@@ -328,7 +355,7 @@ export default function MyBlogPostsPage() {
             >
               {t('blog.myPosts.showing', {
                 count: filteredPosts.length,
-                total: posts.length
+                total: posts.length,
               })}
             </motion.div>
           )}

@@ -13,6 +13,7 @@ import { MaterialManager } from '@/components/features/memo/job-detail/material-
 import { PhotoGallery } from '@/components/features/memo/job-detail/photo-gallery';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
 import { MobileDebugConsole } from '@/components/shared';
+import { formatMinutesToDecimalHours } from '@/lib/time-utils';
 
 export default function JobDetailPage() {
   const router = useRouter();
@@ -148,7 +149,7 @@ export default function JobDetailPage() {
                   <span className="text-sm text-muted-foreground">
                     Total Hours:
                   </span>
-                  <p className="font-medium">⏱️ {job.total_hours}h</p>
+                  <p className="font-medium">⏱️ {formatMinutesToDecimalHours(job.total_hours)}h</p>
                 </div>
               )}
               <div>

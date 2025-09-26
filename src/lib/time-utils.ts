@@ -34,9 +34,14 @@ export interface TimeRoundingResult {
 /**
  * Round time in minutes to nearest 30-minute increment
  * @param minutes - Time in minutes to round
- * @returns Rounded time in minutes (always multiple of 30)
+ * @returns Rounded time in minutes (always multiple of 30, minimum 30)
  */
 export function roundToNearestHalfHour(minutes: number): number {
+  // Ensure minimum of 30 minutes (0.5 hours)
+  if (minutes < 30) {
+    return 30;
+  }
+
   // Find the nearest 30-minute marks (below and above)
   const lowerMark = Math.floor(minutes / 30) * 30;
   const upperMark = lowerMark + 30;
