@@ -51,8 +51,6 @@ import type {
   Task,
   Category,
   Project,
-  CreateTaskPayload,
-  UpdateTaskPayload,
   // Memo app types
   ElektriskKategori,
   Supplier,
@@ -1232,7 +1230,9 @@ export const elektriskKategoriAPI = {
 
 // Materials API (Matriell)
 export const materialsAPI = {
-  getMaterials: async (params?: MaterialSearchParams): Promise<GetMaterialsResponse | GetMaterialsPaginatedResponse> => {
+  getMaterials: async (
+    params?: MaterialSearchParams
+  ): Promise<GetMaterialsResponse | GetMaterialsPaginatedResponse> => {
     const queryParams = new URLSearchParams();
 
     if (params) {
@@ -1250,7 +1250,11 @@ export const materialsAPI = {
     const response = await api.get(url);
 
     // If response has pagination structure, return it as is
-    if (response.data && typeof response.data === 'object' && 'pagination' in response.data) {
+    if (
+      response.data &&
+      typeof response.data === 'object' &&
+      'pagination' in response.data
+    ) {
       return response.data as GetMaterialsPaginatedResponse;
     }
 
@@ -1265,7 +1269,9 @@ export const materialsAPI = {
   },
 
   // Method specifically for search with pagination
-  searchMaterials: async (params: MaterialSearchParams): Promise<GetMaterialsPaginatedResponse> => {
+  searchMaterials: async (
+    params: MaterialSearchParams
+  ): Promise<GetMaterialsPaginatedResponse> => {
     const result = await materialsAPI.getMaterials(params);
 
     // If it's already paginated, return as is
@@ -1396,20 +1402,35 @@ export const elNumberLookupAPI = {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': env.NEXT_PUBLIC_N8N_SECRET_KEY,
+            Authorization: env.NEXT_PUBLIC_N8N_SECRET_KEY,
           },
         }
       );
+      console.log('EL Number Lookup Response:', response.data);
       return response.data;
     } catch (error) {
       handleApiError(error, 'Looking up EL number');
+      console.log('EL Number Lookup Error:', error);
+
       throw error;
     }
   },
 
   importFromEFObasen: async (efoData: any): Promise<CreateMaterialResponse> => {
     try {
-      const response = await api.post('/app/memo/matriell/efobasen_import/', efoData);
+      // Map EFObasen data to our material structure
+      const materialData = {
+        el_nr: efoData.el_nr,
+        tittel: efoData.tittel,
+        info: efoData.info,
+        varemerke: efoData.varemerke,
+        gtin_number: efoData.gtin_number,
+        varenummer: efoData.varenummer,
+        teknisk_beskrivelse: efoData.teknisk_beskrivelse,
+        leverandor: efoData.leverandor // Should be passed from the component
+      };
+
+      const response = await api.post('/app/memo/matriell/', materialData);
       showSuccessToast('Material imported from EFObasen successfully');
       return response.data;
     } catch (error) {

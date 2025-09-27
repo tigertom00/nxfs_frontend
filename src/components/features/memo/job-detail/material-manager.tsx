@@ -65,6 +65,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   const [displayMaterials, setDisplayMaterials] = useState<Material[]>([]);
   const [showingSearchResults, setShowingSearchResults] = useState(false);
   const [activeTab, setActiveTab] = useState('recent');
+  const [materialTab, setMaterialTab] = useState('view');
   const [elNumberInput, setElNumberInput] = useState('');
   const [elLookupResult, setElLookupResult] = useState<any>(null);
   const [showELResult, setShowELResult] = useState(false);
@@ -191,8 +192,30 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     try {
       setLoading(true);
 
+      // Get a default supplier - prefer one with 'efo' or 'elektro' in name, or use first available
+      const defaultSupplier = suppliers.find(
+        (s) =>
+          s.name.toLowerCase().includes('efo') ||
+          s.name.toLowerCase().includes('elektro')
+      ) || suppliers[0];
+
+      if (!defaultSupplier) {
+        toast({
+          title: 'No Supplier Available',
+          description: 'Please add suppliers before importing materials',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Add supplier ID to the data
+      const materialDataWithSupplier = {
+        ...elData,
+        leverandor: defaultSupplier.id
+      };
+
       // Import material from EL lookup result
-      const importedMaterial = await elNumberLookupAPI.importFromEFObasen(elData);
+      const importedMaterial = await elNumberLookupAPI.importFromEFObasen(materialDataWithSupplier);
 
       if (importedMaterial) {
         // Reload materials to include the new one
@@ -210,7 +233,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 
         toast({
           title: 'Material Imported',
-          description: `Successfully imported ${elData.title || 'material'} and added to selection`,
+          description: `Successfully imported ${elData.tittel || 'material'} and added to selection`,
         });
       }
     } catch (error) {
@@ -262,8 +285,12 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 
       const lookupResult = await elNumberLookupAPI.lookupELNumber(parsedELNumber);
 
-      if (lookupResult && lookupResult.success && lookupResult.data) {
-        setElLookupResult(lookupResult);
+      // N8N returns an array, get the first item
+      const materialData = Array.isArray(lookupResult) ? lookupResult[0] : lookupResult;
+
+      if (materialData && (materialData.el_nr || materialData.tittel)) {
+        // N8N returns data directly, wrap it in the expected structure
+        setElLookupResult({ success: true, data: materialData });
         setShowELResult(true);
         toast({
           title: 'EL-Number Found',
@@ -420,7 +447,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   };
 
   return (
-    <div className="bg-card border rounded-lg p-4 space-y-4">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
         <Package className="h-5 w-5 text-muted-foreground" />
@@ -428,12 +455,13 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       </div>
 
       {/* Material Management Tabs */}
-      <Tabs defaultValue="view" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs value={materialTab} onValueChange={setMaterialTab} className="space-y-2">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="view">View</TabsTrigger>
           <TabsTrigger value="add">Add</TabsTrigger>
-          <TabsTrigger value="search">Search</TabsTrigger>
         </TabsList>
+
+        <div className="bg-card border rounded-lg p-4">{/* Card wrapper for tab content */}
 
         {/* View Tab - Compact expandable list */}
         <TabsContent value="view" className="space-y-2">
@@ -466,7 +494,31 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                 id="el-number-input"
                 placeholder="Enter EL number..."
                 value={elNumberInput}
-                onChange={(e) => setElNumberInput(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setElNumberInput(value);
+
+                  // Auto-switch to add tab and search when typing
+                  if (value.trim()) {
+                    setMaterialTab('add');
+                    setActiveTab('search');
+                    setSearchQuery(value);
+
+                    // Search local materials
+                    const searchResults = allMaterials.filter(
+                      (material) =>
+                        material.el_nr?.includes(value) ||
+                        material.tittel?.toLowerCase().includes(value.toLowerCase()) ||
+                        material.gtin_number?.includes(value) ||
+                        material.varenummer?.includes(value)
+                    );
+                    setDisplayMaterials(searchResults);
+                    setShowingSearchResults(true);
+                  } else {
+                    setShowingSearchResults(false);
+                    setDisplayMaterials([]);
+                  }
+                }}
                 className="flex-1"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -494,10 +546,10 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 
           {/* EL Lookup Result */}
           {showELResult && elLookupResult && (
-            <Card className="border-blue-200 bg-blue-50/50">
+            <Card className="border-primary/20 bg-primary/5">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Info className="h-4 w-4 text-blue-600" />
+                  <Info className="h-4 w-4 text-primary" />
                   EL Number Lookup Result
                 </CardTitle>
               </CardHeader>
@@ -507,19 +559,14 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                     <span className="font-medium">EL Number:</span> {elLookupResult.data.el_nr}
                   </div>
                   <div className="text-sm">
-                    <span className="font-medium">Title:</span> {elLookupResult.data.title || 'N/A'}
+                    <span className="font-medium">Title:</span> {elLookupResult.data.tittel || 'N/A'}
                   </div>
                   <div className="text-sm">
-                    <span className="font-medium">Description:</span> {elLookupResult.data.description || 'N/A'}
+                    <span className="font-medium">Description:</span> {elLookupResult.data.info || 'N/A'}
                   </div>
-                  {elLookupResult.data.brand && (
+                  {elLookupResult.data.varemerke && (
                     <div className="text-sm">
-                      <span className="font-medium">Brand:</span> {elLookupResult.data.brand}
-                    </div>
-                  )}
-                  {elLookupResult.data.supplier && (
-                    <div className="text-sm">
-                      <span className="font-medium">Supplier:</span> {elLookupResult.data.supplier}
+                      <span className="font-medium">Brand:</span> {elLookupResult.data.varemerke}
                     </div>
                   )}
                 </div>
@@ -548,11 +595,11 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
           )}
 
           {/* Quick Add Tabs */}
-          <Tabs defaultValue="recent" className="space-y-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="recent">Recent</TabsTrigger>
               <TabsTrigger value="favorites">Favorites</TabsTrigger>
-              <TabsTrigger value="quick">Quick Search</TabsTrigger>
+              <TabsTrigger value="search">Search</TabsTrigger>
             </TabsList>
 
             <TabsContent value="recent" className="space-y-2">
@@ -595,7 +642,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
               )}
             </TabsContent>
 
-            <TabsContent value="quick" className="space-y-2">
+            <TabsContent value="search" className="space-y-2">
               <div className="space-y-2">
                 <Input
                   placeholder="Search materials..."
@@ -603,69 +650,85 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="text-sm"
                 />
-                <div className="space-y-1 max-h-48 overflow-y-auto">
-                  {filteredMaterials.slice(0, 10).map((material) => (
-                    <CompactMaterialCard
-                      key={material.id}
-                      material={material}
-                      onSelect={addMaterialToSelection}
-                      onViewDetail={setSelectedMaterialForDetail}
-                    />
-                  ))}
-                </div>
+
+                {/* Search Results */}
+                {showingSearchResults && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        {displayMaterials.length > 0
+                          ? `Found ${displayMaterials.length} materials`
+                          : 'No materials found in database'
+                        }
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setShowingSearchResults(false);
+                          setDisplayMaterials([]);
+                          setElNumberInput('');
+                          setSearchQuery('');
+                        }}
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Clear
+                      </Button>
+                    </div>
+
+                    {displayMaterials.length > 0 ? (
+                      <div className="space-y-1 max-h-48 overflow-y-auto">
+                        {displayMaterials.map((material) => (
+                          <CompactMaterialCard
+                            key={material.id}
+                            material={material}
+                            onSelect={addMaterialToSelection}
+                            onViewDetail={setSelectedMaterialForDetail}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      // Show N8N lookup option when no results found
+                      elNumberInput.trim() && (
+                        <div className="text-center py-6 border rounded-lg bg-muted/20">
+                          <Package className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                          <p className="text-sm text-muted-foreground mb-3">
+                            No materials found for "{elNumberInput}"
+                          </p>
+                          <Button
+                            size="sm"
+                            onClick={handleELNumberLookup}
+                            disabled={loading}
+                          >
+                            {loading && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                            <Search className="h-3 w-3 mr-1" />
+                            Look up in EFObasen
+                          </Button>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+
+                {/* Default search results when not showing EL search */}
+                {!showingSearchResults && (
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {filteredMaterials.slice(0, 10).map((material) => (
+                      <CompactMaterialCard
+                        key={material.id}
+                        material={material}
+                        onSelect={addMaterialToSelection}
+                        onViewDetail={setSelectedMaterialForDetail}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>
         </TabsContent>
 
-        {/* Search Tab - Advanced search */}
-        <TabsContent value="search" className="space-y-4">
-          <AdvancedMaterialSearch
-            suppliers={suppliers}
-            onResults={(results, pagination) => {
-              setDisplayMaterials(results);
-              setShowingSearchResults(true);
-            }}
-            trigger={
-              <Button variant="outline" className="w-full">
-                <Search className="h-4 w-4 mr-2" />
-                Advanced Material Search
-              </Button>
-            }
-          />
-
-          {/* Search Results */}
-          {showingSearchResults && displayMaterials.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  Found {displayMaterials.length} materials
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setShowingSearchResults(false);
-                    setDisplayMaterials([]);
-                  }}
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  Clear
-                </Button>
-              </div>
-              <div className="space-y-1 max-h-48 overflow-y-auto">
-                {displayMaterials.map((material) => (
-                  <CompactMaterialCard
-                    key={material.id}
-                    material={material}
-                    onSelect={addMaterialToSelection}
-                    onViewDetail={setSelectedMaterialForDetail}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </TabsContent>
+        </div>
       </Tabs>
 
       {/* Selection Summary - Show when materials are selected */}
@@ -788,28 +851,6 @@ function MaterialListItem({ jobMaterial, onRemove }: MaterialListItemProps) {
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              // TODO: Handle edit quantity
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(jobMaterial);
-            }}
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
       </div>
 
       {/* Expanded details */}
@@ -843,6 +884,26 @@ function MaterialListItem({ jobMaterial, onRemove }: MaterialListItemProps) {
               >
                 <Info className="h-3 w-3 mr-1" />
                 View Details
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // TODO: Handle edit quantity
+                }}
+              >
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(jobMaterial);
+                }}
+              >
+                <Trash2 className="h-3 w-3" />
               </Button>
             </div>
           </div>
