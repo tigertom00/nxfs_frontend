@@ -1418,22 +1418,32 @@ export const elNumberLookupAPI = {
 
   importFromEFObasen: async (efoData: any): Promise<CreateMaterialResponse> => {
     try {
+      console.log('Raw EFO data received:', efoData);
+
       // Map EFObasen data to our material structure
       const materialData = {
-        el_nr: efoData.el_nr,
-        tittel: efoData.tittel,
-        info: efoData.info,
-        varemerke: efoData.varemerke,
-        gtin_number: efoData.gtin_number,
-        varenummer: efoData.varenummer,
-        teknisk_beskrivelse: efoData.teknisk_beskrivelse,
+        el_nr: efoData.el_nr || null,
+        tittel: efoData.tittel || null,
+        info: efoData.info || null,
+        varemerke: efoData.varemerke || null,
+        gtin_number: efoData.gtin_number || null,
+        varenummer: efoData.varenummer || null,
+        teknisk_beskrivelse: efoData.teknisk_beskrivelse || null,
         leverandor: efoData.leverandor // Should be passed from the component
       };
 
+      console.log('Mapped material data:', materialData);
+
+      if (!materialData.leverandor) {
+        throw new Error('Supplier ID is required');
+      }
+
       const response = await api.post('/app/memo/matriell/', materialData);
+      console.log('Create material response:', response.data);
       showSuccessToast('Material imported from EFObasen successfully');
       return response.data;
     } catch (error) {
+      console.error('Import from EFObasen error:', error);
       handleApiError(error, 'Importing material from EFObasen');
       throw error;
     }

@@ -195,11 +195,13 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       // Get a default supplier - prefer one with 'efo' or 'elektro' in name, or use first available
       const defaultSupplier = suppliers.find(
         (s) =>
-          s.name.toLowerCase().includes('efo') ||
-          s.name.toLowerCase().includes('elektro')
+          s.name &&
+          (s.name.toLowerCase().includes('efo') ||
+           s.name.toLowerCase().includes('elektro'))
       ) || suppliers[0];
 
-      if (!defaultSupplier) {
+      if (!defaultSupplier || !defaultSupplier.id) {
+        console.log('Available suppliers:', suppliers);
         toast({
           title: 'No Supplier Available',
           description: 'Please add suppliers before importing materials',
@@ -208,11 +210,16 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
         return;
       }
 
+      console.log('Using supplier:', defaultSupplier);
+      console.log('EL Data:', elData);
+
       // Add supplier ID to the data
       const materialDataWithSupplier = {
         ...elData,
         leverandor: defaultSupplier.id
       };
+
+      console.log('Material data to import:', materialDataWithSupplier);
 
       // Import material from EL lookup result
       const importedMaterial = await elNumberLookupAPI.importFromEFObasen(materialDataWithSupplier);
