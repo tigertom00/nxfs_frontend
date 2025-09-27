@@ -192,37 +192,11 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     try {
       setLoading(true);
 
-      // Get a default supplier - prefer one with 'efo' or 'elektro' in name, or use first available
-      const defaultSupplier = suppliers.find(
-        (s) =>
-          s.name &&
-          (s.name.toLowerCase().includes('efo') ||
-           s.name.toLowerCase().includes('elektro'))
-      ) || suppliers[0];
-
-      if (!defaultSupplier || !defaultSupplier.id) {
-        console.log('Available suppliers:', suppliers);
-        toast({
-          title: 'No Supplier Available',
-          description: 'Please add suppliers before importing materials',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      console.log('Using supplier:', defaultSupplier);
       console.log('EL Data:', elData);
 
-      // Add supplier ID to the data
-      const materialDataWithSupplier = {
-        ...elData,
-        leverandor: defaultSupplier.id
-      };
-
-      console.log('Material data to import:', materialDataWithSupplier);
-
+      // Use the EFObasen import endpoint which handles supplier creation
       // Import material from EL lookup result
-      const importedMaterial = await elNumberLookupAPI.importFromEFObasen(materialDataWithSupplier);
+      const importedMaterial = await elNumberLookupAPI.importFromEFObasen(elData);
 
       if (importedMaterial) {
         // Reload materials to include the new one
@@ -392,8 +366,22 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 
     setLoading(true);
     try {
+      let hasUpdates = false;
+
       // Add each selected material to the job
       for (const selectedMaterial of selectedMaterials) {
+        // Check if this material already exists in the job
+        const existingJobMaterial = jobMaterials.find(
+          jm => jm.matriell.id === selectedMaterial.id
+        );
+
+        if (existingJobMaterial) {
+          // Remove the old entry first
+          await jobMaterialsAPI.deleteJobMaterial(existingJobMaterial.id);
+          hasUpdates = true;
+        }
+
+        // Add with new quantity
         await jobMaterialsAPI.createJobMaterial({
           matriell_id: selectedMaterial.id,
           jobb: jobId,
@@ -409,11 +397,10 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 
       // Clear selection
       setSelectedMaterials([]);
-      setShowMaterialDialog(false);
 
       toast({
-        title: 'Materials Added',
-        description: `${selectedMaterials.length} material(s) added to job`,
+        title: hasUpdates ? 'Materials Updated' : 'Materials Added',
+        description: `${selectedMaterials.length} material(s) ${hasUpdates ? 'updated on' : 'added to'} job`,
       });
     } catch (error) {
       toast({
@@ -453,25 +440,38 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     }
   };
 
+  const handleEditMaterial = (jobMaterial: JobMaterial) => {
+    // Add the material to selected materials with current quantity for editing
+    const materialToEdit = {
+      ...jobMaterial.matriell,
+      quantity: jobMaterial.antall || 1
+    };
+
+    setSelectedMaterials([materialToEdit]);
+
+    toast({
+      title: 'Material Added for Editing',
+      description: 'Adjust quantity below and click "Add to Job" to update',
+    });
+  };
+
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Package className="h-5 w-5 text-muted-foreground" />
-        <h3 className="font-semibold">Materials ({jobMaterials.length})</h3>
-      </div>
-
       {/* Material Management Tabs */}
-      <Tabs value={materialTab} onValueChange={setMaterialTab} className="space-y-2">
+      <Tabs value={materialTab} onValueChange={setMaterialTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="view">View</TabsTrigger>
           <TabsTrigger value="add">Add</TabsTrigger>
         </TabsList>
 
-        <div className="bg-card border rounded-lg p-4">{/* Card wrapper for tab content */}
-
         {/* View Tab - Compact expandable list */}
-        <TabsContent value="view" className="space-y-2">
+        <TabsContent value="view" className="space-y-0">
+          <div className="bg-card border rounded-lg p-4 space-y-4">
+            {/* Header inside card */}
+            <div className="flex items-center justify-center gap-2">
+              <Package className="h-5 w-5 text-muted-foreground" />
+              <h3 className="font-semibold">Materials ({jobMaterials.length})</h3>
+            </div>
           {jobMaterials.length > 0 ? (
             <div className="space-y-2">
               {jobMaterials.map((jobMaterial) => (
@@ -479,6 +479,8 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                   key={jobMaterial.id}
                   jobMaterial={jobMaterial}
                   onRemove={handleRemoveFromJob}
+                  onViewDetail={setSelectedMaterialForDetail}
+                  onEdit={handleEditMaterial}
                 />
               ))}
             </div>
@@ -489,10 +491,17 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
               <p className="text-sm">Add materials to track usage on this job</p>
             </div>
           )}
+          </div>
         </TabsContent>
 
         {/* Add Tab - EL number lookup and quick add */}
-        <TabsContent value="add" className="space-y-4">
+        <TabsContent value="add" className="space-y-0">
+          <div className="bg-card border rounded-lg p-4 space-y-4">
+            {/* Header inside card */}
+            <div className="flex items-center justify-center gap-2">
+              <Package className="h-5 w-5 text-muted-foreground" />
+              <h3 className="font-semibold">Materials ({jobMaterials.length})</h3>
+            </div>
           {/* EL Number Input with Scan */}
           <div className="space-y-2">
             <Label htmlFor="el-number-input">EL Number</Label>
@@ -733,9 +742,8 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
               </div>
             </TabsContent>
           </Tabs>
+          </div>
         </TabsContent>
-
-        </div>
       </Tabs>
 
       {/* Selection Summary - Show when materials are selected */}
@@ -829,9 +837,11 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
 interface MaterialListItemProps {
   jobMaterial: JobMaterial;
   onRemove: (jobMaterial: JobMaterial) => void;
+  onViewDetail: (material: Material) => void;
+  onEdit: (jobMaterial: JobMaterial) => void;
 }
 
-function MaterialListItem({ jobMaterial, onRemove }: MaterialListItemProps) {
+function MaterialListItem({ jobMaterial, onRemove, onViewDetail, onEdit }: MaterialListItemProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -886,7 +896,7 @@ function MaterialListItem({ jobMaterial, onRemove }: MaterialListItemProps) {
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedMaterialForDetail(jobMaterial.matriell);
+                  onViewDetail(jobMaterial.matriell);
                 }}
               >
                 <Info className="h-3 w-3 mr-1" />
@@ -897,7 +907,7 @@ function MaterialListItem({ jobMaterial, onRemove }: MaterialListItemProps) {
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  // TODO: Handle edit quantity
+                  onEdit(jobMaterial);
                 }}
               >
                 Edit

@@ -1420,26 +1420,46 @@ export const elNumberLookupAPI = {
     try {
       console.log('Raw EFO data received:', efoData);
 
-      // Map EFObasen data to our material structure
+      // Map EFObasen data to the efobasen_import structure with embedded supplier
       const materialData = {
         el_nr: efoData.el_nr || null,
         tittel: efoData.tittel || null,
-        info: efoData.info || null,
         varemerke: efoData.varemerke || null,
-        gtin_number: efoData.gtin_number || null,
+        info: efoData.info || null,
         varenummer: efoData.varenummer || null,
+        gtin_number: efoData.gtin_number || null,
         teknisk_beskrivelse: efoData.teknisk_beskrivelse || null,
-        leverandor: efoData.leverandor // Should be passed from the component
+        varebetegnelse: efoData.varebetegnelse || null,
+        hoyde: efoData.hoyde || null,
+        bredde: efoData.bredde || null,
+        lengde: efoData.lengde || null,
+        vekt: efoData.vekt || null,
+        bilder: efoData.bilder || [],
+        produktblad: efoData.produktblad || null,
+        produkt_url: efoData.produkt_url || null,
+        fdv: efoData.fdv || null,
+        cpr_sertifikat: efoData.cpr_sertifikat || null,
+        miljoinformasjon: efoData.miljoinformasjon || null,
+        kategori: efoData.kategori || null,
+        leverandor: efoData.supplierData || {
+          navn: efoData.supplierName || "EFObasen Import",
+          telefon: null,
+          hjemmeside: null,
+          addresse: null,
+          poststed: null,
+          postnummer: null,
+          epost: null
+        },
+        approved: false,
+        discontinued: false,
+        in_stock: true,
+        favorites: false
       };
 
       console.log('Mapped material data:', materialData);
 
-      if (!materialData.leverandor) {
-        throw new Error('Supplier ID is required');
-      }
-
-      const response = await api.post('/app/memo/matriell/', materialData);
-      console.log('Create material response:', response.data);
+      const response = await api.post('/app/memo/matriell/efobasen_import/', materialData);
+      console.log('EFObasen import response:', response.data);
       showSuccessToast('Material imported from EFObasen successfully');
       return response.data;
     } catch (error) {
