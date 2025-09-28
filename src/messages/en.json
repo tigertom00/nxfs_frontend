@@ -24,7 +24,9 @@
     "retry": "Retry",
     "confirm": "Confirm",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "saving": "Saving...",
+    "uploading": "Uploading..."
   },
   "navigation": {
     "home": "Home",

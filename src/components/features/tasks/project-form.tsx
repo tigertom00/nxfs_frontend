@@ -16,16 +16,17 @@ import { FileUpload } from '@/components/ui/file-upload';
 import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores/ui';
 import { Project, ProjectImage } from '@/lib/api';
-import { ProjectFormData } from '@/types/task';
+import { CreateProjectPayload as ProjectFormData } from '@/lib/api';
 import { ImageIcon, X } from 'lucide-react';
 
 interface ProjectFormProps {
   project?: Project;
+  userId: number;
   onSubmit: (data: ProjectFormData) => void;
   onCancel: () => void;
 }
 
-export function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
+export function ProjectForm({ project, userId, onSubmit, onCancel }: ProjectFormProps) {
   const { language } = useUIStore();
   const [formData, setFormData] = useState<ProjectFormData>({
     name: project?.name || '',
@@ -33,6 +34,7 @@ export function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
     description: project?.description || '',
     description_nb: project?.description_nb || '',
     status: project?.status || 'todo',
+    user_id: userId,
   });
   const [loading, setLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);

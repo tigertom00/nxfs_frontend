@@ -113,7 +113,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
 
-          const response = await authAPI.login(email, password);
+          const response = await authAPI.login({ email, password });
           const { access, refresh } = response;
 
           // Store tokens

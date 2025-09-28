@@ -94,6 +94,7 @@ export function ProjectManager({
         description: editProject.description || '',
         description_nb: editProject.description_nb || '',
         status: editProject.status,
+        user_id: userId,
       });
       setExistingImages(editProject.images || []);
       setShowForm(true);
@@ -214,6 +215,7 @@ export function ProjectManager({
         description: '',
         description_nb: '',
         status: 'todo',
+        user_id: userId,
       });
       setEditingProject(undefined);
 
@@ -250,6 +252,7 @@ export function ProjectManager({
       description: project.description || '',
       description_nb: project.description_nb || '',
       status: project.status,
+      user_id: userId,
     });
     setShowForm(true);
   };
@@ -262,6 +265,7 @@ export function ProjectManager({
       description: '',
       description_nb: '',
       status: 'todo',
+      user_id: userId,
     });
     setShowForm(true);
   };
@@ -289,6 +293,7 @@ export function ProjectManager({
       description: '',
       description_nb: '',
       status: 'todo',
+      user_id: userId,
     });
     setError(null);
     setAttachedFiles([]);

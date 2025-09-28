@@ -39,9 +39,30 @@ This project uses a custom Node.js server (`server.ts`) that combines Next.js wi
 - **External API**: `https://api.nxfs.no` - Main backend API with JWT authentication
 - **N8N Chatbot**: `https://n8n.nxfs.no/webhook/nxfs` - AI chatbot integration with file upload support
 - **Authentication**: JWT tokens with automatic refresh via Axios interceptors
-- **API Structure**: All API calls go through centralized API client in `src/lib/api.ts`
-- **Type Safety**: Comprehensive TypeScript interfaces for all API requests/responses
+- **API Architecture**: Domain-driven structure with specialized API clients for each feature area
+- **Type Safety**: Comprehensive TypeScript interfaces within domain-specific API modules
 - **Error Handling**: Global error handler with toast notifications and retry mechanisms
+
+#### Domain-Driven API Structure
+
+The API is organized into domain-specific modules for better maintainability and type safety:
+
+```
+src/lib/api/
+├── auth/           # Authentication & user management
+├── blog/           # Blog posts and media
+├── chat/           # N8N chatbot integration
+├── memo/           # Electrical memo system
+├── system/         # System monitoring & stats
+├── tasks/          # Task management
+├── shared/         # Common utilities & types
+└── index.ts        # Centralized exports
+```
+
+Each domain contains:
+- `types.ts` - TypeScript interfaces for requests/responses
+- `index.ts` - API client methods and exports
+- Domain-specific error handling and validation
 
 ### State Management Architecture
 
@@ -111,10 +132,36 @@ useEffect(() => {
 ### API Response Patterns
 
 - **User API**: Returns arrays (user data is `response.data[0]`)
-- **Tasks API**: Standard REST endpoints with full CRUD
-- **Type Safety**: All API responses use TypeScript interfaces from `src/types/api.ts`
-- **Error Handling**: Global error handler (`src/lib/error-handler.ts`) with toast notifications
+- **Tasks API**: Standard REST endpoints with full CRUD operations
+- **Memo API**: Django REST Framework with pagination support
+- **Type Safety**: All API responses use domain-specific TypeScript interfaces
+- **Error Handling**: Global error handler (`src/lib/api/shared/error-handler.ts`) with toast notifications
 - **Payload Types**: Separate request/response types (e.g., `CreateTaskPayload` vs `Task`)
+
+#### Pagination Handling
+
+The API supports multiple pagination patterns from Django REST Framework:
+
+```typescript
+// Flexible response types for paginated data
+export type GetCategoriesResponse =
+  | ElectricalCategory[]  // Direct array
+  | PaginatedResponse<ElectricalCategory>;  // Paginated response
+
+// Usage pattern in components
+const categoriesArray = Array.isArray(response)
+  ? response
+  : response.results || [];
+```
+
+#### Domain-Specific API Features
+
+- **Auth API**: JWT token management, user CRUD, automatic refresh
+- **Tasks API**: Project-based task management with categories and filters
+- **Blog API**: Content management with media upload capabilities
+- **Memo API**: Electrical industry-specific forms and data management
+- **System API**: Real-time monitoring and analytics data
+- **Chat API**: N8N integration with file upload and session management
 
 ### Chatbot Integration
 
@@ -426,34 +473,56 @@ try {
 
 ## Type Safety
 
-### API Types
+### API Types Architecture
 
-- **Location**: `src/types/api.ts` and `src/types/index.ts`
+- **Location**: Domain-specific type definitions within each API module
+- **Structure**: `src/lib/api/{domain}/types.ts` for each feature area
 - **Coverage**: Complete TypeScript interfaces for all API operations
 - **Pattern**: Separate request payloads and response types for clarity
+- **Migration**: Legacy `/src/types/` directory has been replaced with domain-driven structure
 
-### Key Type Interfaces
+### Domain-Specific Type Organization
 
 ```typescript
-// Request types
-interface CreateTaskPayload {
+// Example: Tasks domain types (src/lib/api/tasks/types.ts)
+export interface CreateTaskPayload {
   title: string;
   description: string;
   status: 'todo' | 'in_progress' | 'completed';
   user_id: string;
+  project_id?: string;
+  category_id?: string;
 }
 
-// Response types
-interface Task extends CreateTaskPayload {
+export interface Task extends CreateTaskPayload {
   id: string;
   created_at: string;
   updated_at: string;
 }
 
-// API response patterns
-type CreateTaskResponse = Task;
-type GetTasksResponse = Task[];
+export type CreateTaskResponse = Task;
+export type GetTasksResponse = Task[];
+
+// Example: Memo domain types (src/lib/api/memo/types.ts)
+export interface ElectricalCategory {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type GetCategoriesResponse =
+  | ElectricalCategory[]
+  | PaginatedResponse<ElectricalCategory>;
 ```
+
+### Type Safety Best Practices
+
+- **Domain Isolation**: Each API domain maintains its own type definitions
+- **Response Flexibility**: Support for both direct arrays and paginated responses
+- **Null Safety**: Comprehensive null checks for optional properties
+- **Type Guards**: Runtime type validation for API responses
+- **Generic Patterns**: Reusable pagination and error types across domains
 
 ## Development Tools
 

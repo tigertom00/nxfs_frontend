@@ -209,8 +209,8 @@ class EFOService {
     supplierId: number
   ): CreateMaterialPayload {
     return {
-      leverandor_id: supplierId,
-      el_nr: efoProduct.el_nr,
+      leverandor: supplierId,
+      el_nr: String(efoProduct.el_nr),
       tittel: efoProduct.productName,
       info: [
         efoProduct.description,
@@ -383,5 +383,4 @@ export function parseElNumber(input: string): number | null {
   return number;
 }
 
-// Export types for use in components
-export type { EFOProduct, EFOSearchResponse };
+// Types are already exported via the interface declarations above

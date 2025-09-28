@@ -17,12 +17,13 @@ import {
 import { FileUpload } from '@/components/ui/file-upload';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useUIStore } from '@/stores/ui';
-import { Task, Category, Project, TaskFormData } from '@/types/task';
+import { Task, Category, Project, CreateTaskPayload as TaskFormData } from '@/lib/api';
 
 interface TaskFormProps {
   task?: Task;
   categories: Category[];
   projects: Project[];
+  userId: string;
   onSubmit: (data: TaskFormData, files?: File[]) => void;
   onCancel: () => void;
   onDelete?: (taskId: string) => void;
@@ -32,6 +33,7 @@ export function TaskForm({
   task,
   categories,
   projects,
+  userId,
   onSubmit,
   onCancel,
   onDelete,
@@ -46,6 +48,7 @@ export function TaskForm({
     estimated_time: task?.estimated_time?.toString() || '',
     category: task?.category || [],
     project: task?.project || undefined,
+    user_id: userId,
   });
   const [loading, setLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);

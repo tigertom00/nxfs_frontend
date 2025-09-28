@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useUIStore } from '@/stores/ui';
 import { categoriesAPI } from '@/lib/api';
-import { Category } from '@/types/task';
+import { Category } from '@/lib/api';
 import { Plus, Edit3, Trash2, Settings, Loader2 } from 'lucide-react';
 
 interface CategoryManagerProps {

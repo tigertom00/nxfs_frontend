@@ -22,9 +22,11 @@ export function VisuallyHidden({
   };
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children, {
-      ...children.props,
-      style: { ...children.props.style, ...style },
+    // Type assertion to ensure we can safely access props and style
+    const element = children as React.ReactElement<any>;
+    return React.cloneElement(element, {
+      ...element.props,
+      style: { ...element.props.style, ...style },
     });
   }
 

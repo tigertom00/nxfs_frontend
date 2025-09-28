@@ -214,7 +214,7 @@ const SystemMonitorPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {allHosts.results.map((hostData, index) => (
+                  {allHosts.results?.map((hostData, index) => (
                     <motion.div
                       key={hostData.host.id}
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -245,7 +245,7 @@ const SystemMonitorPage = () => {
                             CPU
                           </span>
                           <span className="text-foreground font-mono">
-                            {hostData.stats.cpu_percent}%
+                            {hostData.current_system_stats.cpu_percent}%
                           </span>
                         </div>
 
@@ -255,7 +255,7 @@ const SystemMonitorPage = () => {
                             Memory
                           </span>
                           <span className="text-foreground font-mono">
-                            {hostData.stats.memory_percent}%
+                            {hostData.current_system_stats.memory_percent}%
                           </span>
                         </div>
 
@@ -265,18 +265,18 @@ const SystemMonitorPage = () => {
                             Disk
                           </span>
                           <span className="text-foreground font-mono">
-                            {hostData.stats.disk_percent.toFixed(1)}%
+                            {hostData.current_system_stats.disk_percent.toFixed(1)}%
                           </span>
                         </div>
 
-                        {hostData.stats.cpu_temperature && (
+                        {hostData.current_system_stats.cpu_temperature && (
                           <div className="flex items-center justify-between text-muted-foreground">
                             <span className="flex items-center">
                               <Thermometer className="w-4 h-4 mr-2 text-red-400" />
                               Temp
                             </span>
                             <span className="text-foreground font-mono">
-                              {hostData.stats.cpu_temperature}°C
+                              {hostData.current_system_stats.cpu_temperature}°C
                             </span>
                           </div>
                         )}

@@ -1,4 +1,19 @@
 // System monitoring types
+export interface SystemHost {
+  id: number;
+  name: string;
+  hostname: string;
+  ip_address?: string;
+  status: 'online' | 'offline' | 'maintenance';
+  is_active?: boolean;
+  os_name?: string;
+  os_version?: string;
+  cpu_model?: string;
+  architecture?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SystemStats {
   id: number;
   timestamp: string;
@@ -135,7 +150,10 @@ export interface SystemStatsQuery {
 // Response types
 export type GetSystemStatsResponse = SystemStats[];
 export type GetSystemStatResponse = SystemStats;
-export type GetLatestSystemStatsResponse = SystemStats;
+export interface GetLatestSystemStatsResponse {
+  count: number;
+  results: HostSystemDashboard[];
+}
 export type GetSystemDashboardResponse = SystemDashboard;
 export type GetHostSystemDashboardResponse = HostSystemDashboard;
 

@@ -24,7 +24,9 @@
     "retry": "Prøv igjen",
     "confirm": "Bekreft",
     "yes": "Ja",
-    "no": "Nei"
+    "no": "Nei",
+    "saving": "Lagrer...",
+    "uploading": "Laster opp..."
   },
   "navigation": {
     "home": "Hjem",

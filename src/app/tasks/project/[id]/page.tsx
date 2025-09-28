@@ -24,7 +24,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/auth';
 import { useUIStore } from '@/stores/ui';
 import { tasksAPI, categoriesAPI, projectsAPI, Task, Category, Project } from '@/lib/api';
-import { TaskFormData } from '@/types/task';
+import { CreateTaskPayload as TaskFormData } from '@/lib/api';
 import {
   ArrowLeft,
   Plus,
@@ -104,11 +104,14 @@ export default function ProjectDetailPage() {
       ]);
 
       setProject(projectResponse);
-      // Extract array from potentially paginated response
-      const tasksArray = Array.isArray(tasksResponse) ? tasksResponse : tasksResponse.results || [];
+      // Extract arrays from potentially paginated responses
+      const tasksArray = Array.isArray(tasksResponse) ? tasksResponse : (tasksResponse as any).results || [];
+      const projectsArray = Array.isArray(projectsResponse) ? projectsResponse : (projectsResponse as any).results || [];
+      const categoriesArray = Array.isArray(categoriesResponse) ? categoriesResponse : (categoriesResponse as any).results || [];
+
       setTasks(tasksArray);
-      setCategories(categoriesResponse);
-      setProjects(projectsResponse);
+      setCategories(categoriesArray);
+      setProjects(projectsArray);
     } catch (err: any) {
       console.error('Failed to load project data:', err);
       const errorMessages = Object.values(err.response?.data ?? {}).flat();
@@ -251,12 +254,49 @@ export default function ProjectDetailPage() {
 
       await tasksAPI.updateTask(taskId, payload);
       const updatedTasks = await tasksAPI.getTasks();
-      setTasks(updatedTasks);
+      const updatedTasksArray = Array.isArray(updatedTasks) ? updatedTasks : updatedTasks.results || [];
+      setTasks(updatedTasksArray);
     } catch (error) {
       setError(
         language === 'no'
           ? 'Kunne ikke oppdatere oppgavestatus'
           : 'Failed to update task status'
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handlePriorityChange = async (
+    taskId: string,
+    newPriority: 'low' | 'medium' | 'high'
+  ) => {
+    try {
+      setActionLoading(true);
+      const task = tasks.find((t) => t.id === taskId);
+      if (!task || !user) return;
+
+      const payload = {
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: newPriority,
+        due_date: task.due_date || undefined,
+        estimated_time: task.estimated_time?.toString() || undefined,
+        category: task.category,
+        project: task.project || undefined,
+        user_id: user.id,
+      };
+
+      await tasksAPI.updateTask(taskId, payload);
+      const updatedTasks = await tasksAPI.getTasks();
+      const updatedTasksArray = Array.isArray(updatedTasks) ? updatedTasks : updatedTasks.results || [];
+      setTasks(updatedTasksArray);
+    } catch (error) {
+      setError(
+        language === 'no'
+          ? 'Kunne ikke oppdatere oppgaveprioritet'
+          : 'Failed to update task priority'
       );
     } finally {
       setActionLoading(false);
@@ -620,6 +660,7 @@ export default function ProjectDetailPage() {
                   onEdit={handleEditTask}
                   onDelete={handleDeleteTask}
                   onStatusChange={handleStatusChange}
+                  onPriorityChange={handlePriorityChange}
                 />
               ))}
             </div>
@@ -652,6 +693,7 @@ export default function ProjectDetailPage() {
                 task={editingTask}
                 categories={categories}
                 projects={projects}
+                userId={user.id}
                 onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
                 onCancel={handleCloseDialog}
               />
@@ -663,7 +705,7 @@ export default function ProjectDetailPage() {
             <ProjectManager
               projects={projects}
               onProjectsChange={fetchProjectData}
-              userId={user.id}
+              userId={Number(user.id)}
               editProject={editingProject}
               onEditComplete={handleEditComplete}
             />

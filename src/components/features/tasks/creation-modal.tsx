@@ -141,6 +141,7 @@ export function CreationModal({
               task={editingTask}
               categories={categories}
               projects={projects}
+              userId={String(userId)}
               onSubmit={onTaskSubmit}
               onCancel={handleClose}
               onDelete={onTaskDelete}
@@ -162,6 +163,7 @@ export function CreationModal({
                 </h3>
                 <ProjectForm
                   project={editingProject}
+                  userId={userId}
                   onSubmit={onProjectSubmit || (() => {})}
                   onCancel={handleClose}
                 />

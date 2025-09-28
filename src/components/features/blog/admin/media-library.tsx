@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Image, Music, Trash2, Copy, Youtube } from 'lucide-react';
-import { postsAPI, PostImage, PostAudio, PostYouTube } from '@/lib/api';
+import { mediaAPI, PostImage, PostAudio, PostYouTube } from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
 import { toast } from 'sonner';
 import { env } from '@/lib/env';
@@ -57,9 +57,9 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
       // Fetch images, audio, and YouTube videos separately using dedicated endpoints
       const [imagesResponse, audioResponse, youtubeResponse] =
         await Promise.all([
-          postsAPI.getImages(postId),
-          postsAPI.getAudio(postId),
-          postsAPI.getYouTubeVideos(postId),
+          mediaAPI.getImages(postId),
+          mediaAPI.getAudio(postId),
+          mediaAPI.getYouTubeVideos(postId),
         ]);
 
       setImages(imagesResponse || []);
@@ -90,7 +90,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
     try {
       setUploading(true);
-      await postsAPI.uploadImage(postId, file);
+      await mediaAPI.uploadImage(postId, file);
 
       // Refresh the media list to get updated URLs
       await fetchMedia();
@@ -126,7 +126,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
     try {
       setUploading(true);
-      await postsAPI.uploadAudio(postId, file);
+      await mediaAPI.uploadAudio(postId, file);
       // Refresh the media list to get updated URLs
       await fetchMedia();
       toast.success(t('blog.media.audioUploaded'));
@@ -143,7 +143,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
   const handleDeleteImage = async (imageId: string) => {
     try {
-      await postsAPI.deleteImage(postId, imageId);
+      await mediaAPI.deleteImage(postId, imageId);
       // Refresh the media list
       await fetchMedia();
       toast.success(t('blog.media.imageDeleted'));
@@ -154,7 +154,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
   const handleDeleteAudio = async (audioId: string) => {
     try {
-      await postsAPI.deleteAudio(postId, audioId);
+      await mediaAPI.deleteAudio(postId, audioId);
       // Refresh the media list
       await fetchMedia();
       toast.success(t('blog.media.audioDeleted'));
@@ -198,7 +198,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
     try {
       setUploading(true);
-      await postsAPI.uploadYouTube(postId, youtubeUrl);
+      await mediaAPI.uploadYouTube(postId, youtubeUrl);
 
       // Refresh the media list to get updated URLs
       await fetchMedia();
@@ -214,7 +214,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
 
   const handleDeleteYouTube = async (youtubeId: string) => {
     try {
-      await postsAPI.deleteYouTube(postId, youtubeId);
+      await mediaAPI.deleteYouTube(postId, youtubeId);
       // Refresh the media list
       await fetchMedia();
       toast.success(t('blog.media.youtubeDeleted'));
