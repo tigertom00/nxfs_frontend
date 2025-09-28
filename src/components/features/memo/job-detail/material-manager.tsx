@@ -194,13 +194,23 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       try {
         const recent = JSON.parse(stored);
         const recentArray = Array.isArray(recent) ? recent : [];
+        console.log('Raw recent array:', recentArray);
+
         const validRecent = recentArray.filter(
-          (item: any) => Date.now() - item.lastUsed < 30 * 24 * 60 * 60 * 1000 // 30 days
+          (item: any) => {
+            const daysSinceUsed = (Date.now() - item.lastUsed) / (24 * 60 * 60 * 1000);
+            console.log(`Material ${item.materialId}: ${daysSinceUsed.toFixed(1)} days ago`);
+            return Date.now() - item.lastUsed < 30 * 24 * 60 * 60 * 1000; // 30 days
+          }
         );
-        console.log('Valid recent items:', validRecent);
+        console.log('Valid recent items (within 30 days):', validRecent);
 
         const materialIds = validRecent.map((item: any) => item.materialId);
+        console.log('Looking for material IDs:', materialIds);
+
         const materialsArray = Array.isArray(allMaterials) ? allMaterials : [];
+        console.log('Available materials:', materialsArray.map(m => ({id: m.id, title: m.tittel})));
+
         const recentMats = materialsArray.filter((m) =>
           materialIds.includes(m.id)
         );
@@ -211,6 +221,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         console.error('Failed to load recent materials:', error);
         setRecentMaterials([]);
       }
+    } else {
+      console.log('No recent materials in localStorage - showing empty state');
+      setRecentMaterials([]);
     }
   };
 

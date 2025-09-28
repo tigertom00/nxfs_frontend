@@ -15,7 +15,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore, useUIStore } from '@/stores';
-import { tasksAPI, categoriesAPI, projectsAPI, Task, Category, Project, CreateTaskPayload, CreateProjectPayload } from '@/lib/api';
+import {
+  tasksAPI,
+  categoriesAPI,
+  projectsAPI,
+  Task,
+  Category,
+  Project,
+  CreateTaskPayload,
+  CreateProjectPayload,
+} from '@/lib/api';
 import {
   Plus,
   AlertTriangle,
@@ -44,10 +53,16 @@ export default function TasksPage() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<('todo' | 'in_progress' | 'completed')[]>([]);
-  const [selectedPriority, setSelectedPriority] = useState<('low' | 'medium' | 'high')[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<
+    ('todo' | 'in_progress' | 'completed')[]
+  >([]);
+  const [selectedPriority, setSelectedPriority] = useState<
+    ('low' | 'medium' | 'high')[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dateRange, setDateRange] = useState<{start?: string; end?: string}>({});
+  const [dateRange, setDateRange] = useState<{ start?: string; end?: string }>(
+    {}
+  );
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
@@ -82,7 +97,14 @@ export default function TasksPage() {
     if (isAuthenticated && user) {
       fetchTasks();
     }
-  }, [selectedCategories, selectedProject, selectedStatus, selectedPriority, searchQuery, dateRange]);
+  }, [
+    selectedCategories,
+    selectedProject,
+    selectedStatus,
+    selectedPriority,
+    searchQuery,
+    dateRange,
+  ]);
 
   const fetchTasks = async () => {
     try {
@@ -162,14 +184,19 @@ export default function TasksPage() {
     try {
       const response = await projectsAPI.getProjects();
       // Extract array from potentially paginated response
-      const projectsArray = Array.isArray(response) ? response : response.results || [];
+      const projectsArray = Array.isArray(response)
+        ? response
+        : response.results || [];
       setProjects(projectsArray);
     } catch (err: any) {
       console.error('Failed to load projects:', err);
     }
   };
 
-  const handleCreateTask = async (taskData: CreateTaskPayload, files?: File[]) => {
+  const handleCreateTask = async (
+    taskData: CreateTaskPayload,
+    files?: File[]
+  ) => {
     try {
       setActionLoading(true);
       if (!user) {
@@ -187,7 +214,7 @@ export default function TasksPage() {
         estimated_time: taskData.estimated_time || undefined,
         category: taskData.category || [],
         project: taskData.project || undefined,
-        user_id: user.id,
+        user_id: parseInt(user.id), // Convert string to number for API
       };
 
       // Remove undefined fields to avoid sending them
@@ -217,21 +244,26 @@ export default function TasksPage() {
       setIsDialogOpen(false);
       setEditingTask(undefined);
     } catch (err: any) {
-      console.log(err.response?.data);
+      console.error('Task creation error:', err);
+      console.error('Task creation error response:', err.response?.data);
+
       const errorMessages = Object.values(err.response?.data ?? {}).flat();
-      setError(
-        errorMessages.length > 0
-          ? errorMessages.join('\n')
-          : language === 'no'
-            ? 'Kunne ikke opprette oppgave'
-            : 'Failed to create task'
-      );
+      const errorText = errorMessages.length > 0
+        ? errorMessages.join('\n')
+        : err.message || (language === 'no'
+          ? 'Kunne ikke opprette oppgave'
+          : 'Failed to create task');
+
+      setError(errorText);
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleUpdateTask = async (taskData: CreateTaskPayload, files?: File[]) => {
+  const handleUpdateTask = async (
+    taskData: CreateTaskPayload,
+    files?: File[]
+  ) => {
     if (!editingTask) return;
 
     try {

@@ -1,6 +1,10 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
-import { createUrlWithParams, createFormData, normalizeResponse } from '../shared/utils';
+import {
+  createUrlWithParams,
+  createFormData,
+  normalizeResponse,
+} from '../shared/utils';
 import {
   Task,
   TaskImage,
@@ -20,12 +24,36 @@ export const tasksAPI = {
   // Get all tasks
   getTasks: async (params?: TaskSearchParams): Promise<GetTasksResponse> => {
     try {
-      const url = createUrlWithParams('/app/tasks/tasks/', params);
-      const response = await api.get(url);
+      let allTasks: Task[] = [];
+      let nextUrl: string | null = createUrlWithParams('/app/tasks/tasks/', params);
 
-      // Handle both paginated and array responses
-      const normalized = normalizeResponse<Task>(response.data);
-      return Array.isArray(normalized) ? normalized : normalized;
+      // Fetch all pages
+      while (nextUrl) {
+        console.log('Fetching tasks from:', nextUrl);
+        const response = await api.get(nextUrl);
+        console.log('Raw tasks API response:', response.data);
+
+        // Extract tasks from current page
+        const currentPageTasks = Array.isArray(response.data)
+          ? response.data
+          : (response.data?.results && Array.isArray(response.data.results))
+            ? response.data.results
+            : [];
+
+        allTasks = [...allTasks, ...currentPageTasks];
+
+        // Check if there's a next page
+        nextUrl = response.data?.next || null;
+
+        console.log(`Page loaded: ${currentPageTasks.length} tasks, Total so far: ${allTasks.length}`);
+        if (nextUrl) {
+          console.log('Next page available:', nextUrl);
+        }
+      }
+
+      console.log('Final tasks array (all pages):', allTasks);
+      console.log(`Total tasks loaded: ${allTasks.length}`);
+      return allTasks;
     } catch (error) {
       handleApiError(error, 'Getting tasks');
       throw error;
@@ -44,7 +72,9 @@ export const tasksAPI = {
   },
 
   // Create new task
-  createTask: async (taskData: CreateTaskPayload): Promise<CreateTaskResponse> => {
+  createTask: async (
+    taskData: CreateTaskPayload
+  ): Promise<CreateTaskResponse> => {
     try {
       const formData = createFormData(taskData);
       const response = await api.post('/app/tasks/tasks/', formData, {
@@ -87,11 +117,15 @@ export const tasksAPI = {
   ): Promise<UpdateTaskResponse> => {
     try {
       const formData = createFormData(taskData);
-      const response = await api.patch(`/app/tasks/tasks/${taskId}/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.patch(
+        `/app/tasks/tasks/${taskId}/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       showSuccessToast('Task updated successfully');
       return response.data;
     } catch (error) {
