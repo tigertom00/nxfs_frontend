@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { env } from '@/lib/env';
-import { handleApiError, showSuccessToast } from '../shared/error-handler';
+import { handleApiError } from '../shared/error-handler';
 import { CreateMaterialResponse, EFOBasenImportPayload } from './types';
 import { materialsAPI } from './materials';
 

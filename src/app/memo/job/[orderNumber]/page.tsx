@@ -109,13 +109,13 @@ export default function JobDetailPage() {
           <JobHeader job={job} onBack={handleBackToJobs} />
 
           {/* Timer Widget */}
-          <TimerWidget jobId={job.ordre_nr} />
+          <TimerWidget jobId={parseInt(job.ordre_nr)} />
 
           {/* Material Manager */}
-          <MaterialManager jobId={job.ordre_nr} />
+          <MaterialManager jobId={parseInt(job.ordre_nr)} />
 
           {/* Photo Gallery */}
-          <PhotoGallery jobId={job.ordre_nr} />
+          <PhotoGallery jobId={parseInt(job.ordre_nr)} />
 
           {/* Job Info */}
           <div className="space-y-3">

@@ -351,8 +351,8 @@ export default function DockerPage() {
 
   // Initialize theme
   useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark', 'purple');
     if (theme) {
-      document.documentElement.classList.remove('light', 'dark', 'purple');
       document.documentElement.classList.add(theme);
     }
   }, [theme]);

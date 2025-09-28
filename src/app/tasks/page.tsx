@@ -15,8 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore, useUIStore } from '@/stores';
-import { tasksAPI, categoriesAPI, projectsAPI, Task, Category, Project } from '@/lib/api';
-import { TaskFormData, ProjectFormData } from '@/types/task';
+import { tasksAPI, categoriesAPI, projectsAPI, Task, Category, Project, CreateTaskPayload, CreateProjectPayload } from '@/lib/api';
 import {
   Plus,
   AlertTriangle,
@@ -55,7 +54,9 @@ export default function TasksPage() {
   useEffect(() => {
     // Apply theme to document
     document.documentElement.classList.remove('light', 'dark', 'purple');
-    document.documentElement.classList.add(theme);
+    if (theme) {
+      document.documentElement.classList.add(theme);
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -77,7 +78,9 @@ export default function TasksPage() {
       setLoading(true);
       setError(null);
       const response = await tasksAPI.getTasks();
-      setTasks(response);
+      // Extract array from potentially paginated response
+      const tasksArray = Array.isArray(response) ? response : response.results || [];
+      setTasks(tasksArray);
     } catch (err: any) {
       console.log(err.response?.data);
       const errorMessages = Object.values(err.response?.data ?? {}).flat();
@@ -105,13 +108,15 @@ export default function TasksPage() {
   const fetchProjects = async () => {
     try {
       const response = await projectsAPI.getProjects();
-      setProjects(response);
+      // Extract array from potentially paginated response
+      const projectsArray = Array.isArray(response) ? response : response.results || [];
+      setProjects(projectsArray);
     } catch (err: any) {
       console.error('Failed to load projects:', err);
     }
   };
 
-  const handleCreateTask = async (taskData: TaskFormData, files?: File[]) => {
+  const handleCreateTask = async (taskData: CreateTaskPayload, files?: File[]) => {
     try {
       setActionLoading(true);
       if (!user) {
@@ -173,7 +178,7 @@ export default function TasksPage() {
     }
   };
 
-  const handleUpdateTask = async (taskData: TaskFormData, files?: File[]) => {
+  const handleUpdateTask = async (taskData: CreateTaskPayload, files?: File[]) => {
     if (!editingTask) return;
 
     try {
@@ -237,7 +242,7 @@ export default function TasksPage() {
     }
   };
 
-  const handleCreateProject = async (projectData: ProjectFormData) => {
+  const handleCreateProject = async (projectData: CreateProjectPayload) => {
     try {
       setActionLoading(true);
       if (!user) {
@@ -288,7 +293,7 @@ export default function TasksPage() {
     }
   };
 
-  const handleUpdateProject = async (projectData: ProjectFormData) => {
+  const handleUpdateProject = async (projectData: CreateProjectPayload) => {
     try {
       setActionLoading(true);
       if (!user || !editingProject) {

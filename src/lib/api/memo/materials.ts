@@ -1,7 +1,7 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
 import { createUrlWithParams, createFormData, normalizeResponse } from '../shared/utils';
-import { ChoiceItem, BulkOperationResponse } from '../shared/types';
+import { ChoiceItem, BulkOperationResponse, PaginatedResponse } from '../shared/types';
 import {
   Material,
   MaterialSearchParams,
@@ -301,7 +301,7 @@ export const materialsAPI = {
     gtin_number?: string;
     tittel?: string;
     limit?: number;
-  }): Promise<Material[]> => {
+  }): Promise<Material[] | PaginatedResponse<Material>> => {
     try {
       const url = createUrlWithParams('/app/memo/matriell/check_duplicates/', params);
       const response = await api.get(url);

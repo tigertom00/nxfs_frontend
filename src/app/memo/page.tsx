@@ -30,11 +30,13 @@ export default function MemoPage() {
     const loadJobs = async () => {
       try {
         const jobsData = await jobsAPI.getJobs();
-        setJobs(jobsData);
+        // Extract array from potentially paginated response
+        const jobsArray = Array.isArray(jobsData) ? jobsData : jobsData.results || [];
+        setJobs(jobsArray);
 
         // Auto-select most recent job if available
-        if (jobsData.length > 0) {
-          setSelectedJob(jobsData[0]);
+        if (jobsArray.length > 0) {
+          setSelectedJob(jobsArray[0]);
         }
       } catch (error) {
         console.error('Failed to load jobs:', error);

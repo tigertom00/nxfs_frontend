@@ -24,7 +24,9 @@ export default function BlogPostPage() {
   useEffect(() => {
     // Apply theme to document
     document.documentElement.classList.remove('light', 'dark', 'purple');
-    document.documentElement.classList.add(theme);
+    if (theme) {
+      document.documentElement.classList.add(theme);
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -163,7 +165,7 @@ export default function BlogPostPage() {
                     img: ({ src, alt }) => (
                       <img
                         src={
-                          src?.startsWith('http')
+                          typeof src === 'string' && src.startsWith('http')
                             ? src
                             : `https://api.nxfs.no${src}`
                         }

@@ -129,7 +129,9 @@ export default function ApiTesterPage() {
   useEffect(() => {
     // Apply theme to document
     document.documentElement.classList.remove('light', 'dark', 'purple');
-    document.documentElement.classList.add(theme);
+    if (theme) {
+      document.documentElement.classList.add(theme);
+    }
   }, [theme]);
 
   useEffect(() => {

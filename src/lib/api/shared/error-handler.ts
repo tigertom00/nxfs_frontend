@@ -1,12 +1,6 @@
 import { toast } from '@/hooks/use-toast';
 import { AxiosError } from 'axios';
-
-export interface ApiError {
-  message: string;
-  status?: number;
-  code?: string;
-  field?: string;
-}
+import { ApiError } from './types';
 
 export class ErrorHandler {
   static handle(error: unknown, context?: string): ApiError {
@@ -14,8 +8,7 @@ export class ErrorHandler {
 
     if (error instanceof AxiosError) {
       const apiError: ApiError = {
-        message: error.response?.data?.detail || error.message,
-        status: error.response?.status,
+        detail: error.response?.data?.detail || error.message,
         code: error.code,
       };
 
@@ -24,7 +17,7 @@ export class ErrorHandler {
     }
 
     const genericError: ApiError = {
-      message:
+      detail:
         error instanceof Error ? error.message : 'An unexpected error occurred',
     };
 
@@ -33,10 +26,10 @@ export class ErrorHandler {
   }
 
   private static showToast(error: ApiError, context?: string) {
-    const title = this.getErrorTitle(error.status);
+    const title = 'Error';
     const description = context
-      ? `${context}: ${error.message}`
-      : error.message;
+      ? `${context}: ${error.detail}`
+      : error.detail;
 
     toast({
       variant: 'destructive',

@@ -75,7 +75,9 @@ export default function SettingsPage() {
   const fetchProjects = async () => {
     try {
       const response = await projectsAPI.getProjects();
-      setProjects(response);
+      // Extract array from potentially paginated response
+      const projectsArray = Array.isArray(response) ? response : response.results || [];
+      setProjects(projectsArray);
     } catch (err) {
       console.error('Failed to fetch projects:', err);
     }
@@ -83,7 +85,7 @@ export default function SettingsPage() {
 
   const handleLanguageChange = async (newLanguage: 'en' | 'no') => {
     setLanguage(newLanguage);
-    await savePreferences(newLanguage, theme);
+    await savePreferences(newLanguage, theme || 'system');
   };
 
   const handleThemeChange = async (
@@ -230,7 +232,7 @@ export default function SettingsPage() {
                     <Palette className="h-4 w-4" />
                     {texts.theme}
                   </Label>
-                  <Select value={theme} onValueChange={handleThemeChange}>
+                  <Select value={theme || 'system'} onValueChange={handleThemeChange}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

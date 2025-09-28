@@ -49,7 +49,9 @@ export default function MyBlogPostsPage() {
       'pink',
       'system'
     );
-    document.documentElement.classList.add(theme);
+    if (theme) {
+      document.documentElement.classList.add(theme);
+    }
   }, [theme]);
 
   useEffect(() => {

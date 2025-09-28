@@ -6,6 +6,7 @@ import {
   PostYouTube,
   UploadPostImageResponse,
   UploadPostAudioResponse,
+  PostYouTubeResponse,
   UploadPostYouTubeResponse,
   DeletePostImageResponse,
   DeletePostAudioResponse,

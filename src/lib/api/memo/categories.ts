@@ -4,14 +4,14 @@ import { createUrlWithParams, normalizeResponse } from '../shared/utils';
 import { ChoiceItem } from '../shared/types';
 import {
   ElectricalCategory,
-  CategorySearchParams,
-  GetCategoriesResponse,
-  GetCategoryResponse,
+  MemoCategorySearchParams,
+  GetMemoCategoriesResponse,
+  GetMemoCategoryResponse,
 } from './types';
 
 export const categoriesAPI = {
   // List electrical categories with search and pagination
-  getCategories: async (params?: CategorySearchParams): Promise<GetCategoriesResponse> => {
+  getCategories: async (params?: MemoCategorySearchParams): Promise<GetMemoCategoriesResponse> => {
     try {
       const url = createUrlWithParams('/app/memo/elektrisk-kategorier/', params);
       const response = await api.get(url);
@@ -23,7 +23,7 @@ export const categoriesAPI = {
   },
 
   // Get category by ID
-  getCategory: async (categoryId: number): Promise<GetCategoryResponse> => {
+  getCategory: async (categoryId: number): Promise<GetMemoCategoryResponse> => {
     try {
       const response = await api.get(`/app/memo/elektrisk-kategorier/${categoryId}/`);
       return response.data;

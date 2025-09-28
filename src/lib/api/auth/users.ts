@@ -25,7 +25,7 @@ export const usersAPI = {
     userData: UpdateUserPayload
   ): Promise<UpdateUserResponse> => {
     try {
-      let response;
+      let response: any;
 
       // Check if we have file uploads
       const hasFiles = userData.profile_picture instanceof File;

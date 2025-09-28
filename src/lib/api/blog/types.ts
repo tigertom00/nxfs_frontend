@@ -123,6 +123,7 @@ export type UploadPostAudioResponse = PostAudio;
 export type DeletePostAudioResponse = void;
 export type UploadPostImageResponse = PostImage;
 export type DeletePostImageResponse = void;
+export type PostYouTubeResponse = PostYouTube;
 export type UploadPostYouTubeResponse = PostYouTube;
 export type DeletePostYouTubeResponse = void;
 

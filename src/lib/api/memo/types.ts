@@ -1,4 +1,4 @@
-import { BaseSearchParams, PaginatedResponse, ChoiceItem, BulkOperationResponse } from '../shared/types';
+import { BaseSearchParams, PaginatedResponse } from '../shared/types';
 
 // Material types
 export interface Material {
@@ -40,6 +40,8 @@ export interface Supplier {
   poststed: string | null;
   postnummer: string | null;
   epost: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ElectricalCategory {
@@ -52,8 +54,12 @@ export interface ElectricalCategory {
 // Job types
 export interface Job {
   ordre_nr: string;
-  tittel: string;
+  tittel?: string;
+  adresse?: string;
+  telefon_nr?: string;
+  beskrivelse?: string;
   ferdig: boolean;
+  total_hours?: number;
   created_at: string;
   updated_at: string;
 }
@@ -112,7 +118,7 @@ export interface SupplierSearchParams extends BaseSearchParams {
   navn?: string;
 }
 
-export interface CategorySearchParams extends BaseSearchParams {
+export interface MemoCategorySearchParams extends BaseSearchParams {
   blokknummer?: string;
   kategori?: string;
 }
@@ -184,32 +190,32 @@ export interface CreateTimeEntryPayload {
 export type UpdateTimeEntryPayload = Partial<CreateTimeEntryPayload>;
 
 // Response types
-export type GetMaterialsResponse = Material[];
+export type GetMaterialsResponse = Material[] | PaginatedResponse<Material>;
 export type GetMaterialsPaginatedResponse = PaginatedResponse<Material>;
 export type GetMaterialResponse = Material;
 export type CreateMaterialResponse = Material;
 export type UpdateMaterialResponse = Material;
 
-export type GetJobsResponse = Job[];
+export type GetJobsResponse = Job[] | PaginatedResponse<Job>;
 export type GetJobsPaginatedResponse = PaginatedResponse<Job>;
 export type GetJobResponse = Job;
 export type CreateJobResponse = Job;
 export type UpdateJobResponse = Job;
 
-export type GetJobMaterialsResponse = JobMaterial[];
+export type GetJobMaterialsResponse = JobMaterial[] | PaginatedResponse<JobMaterial>;
 export type GetJobMaterialResponse = JobMaterial;
 export type CreateJobMaterialResponse = JobMaterial;
 export type UpdateJobMaterialResponse = JobMaterial;
 
-export type GetSuppliersResponse = Supplier[];
+export type GetSuppliersResponse = Supplier[] | PaginatedResponse<Supplier>;
 export type GetSupplierResponse = Supplier;
 export type CreateSupplierResponse = Supplier;
 export type UpdateSupplierResponse = Supplier;
 
-export type GetCategoriesResponse = ElectricalCategory[];
-export type GetCategoryResponse = ElectricalCategory;
+export type GetMemoCategoriesResponse = ElectricalCategory[] | PaginatedResponse<ElectricalCategory>;
+export type GetMemoCategoryResponse = ElectricalCategory;
 
-export type GetTimeEntriesResponse = TimeEntry[];
+export type GetTimeEntriesResponse = TimeEntry[] | PaginatedResponse<TimeEntry>;
 export type GetTimeEntryResponse = TimeEntry;
 export type CreateTimeEntryResponse = TimeEntry;
 export type UpdateTimeEntryResponse = TimeEntry;

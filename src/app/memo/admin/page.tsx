@@ -84,26 +84,32 @@ export default function MemoAdminPage() {
             timeTrackingAPI.getTimeEntries(),
           ]);
 
-        setJobs(jobsData);
-        setSuppliers(suppliersData);
-        setMaterials(materialsData);
-        setTimeEntries(timeEntriesData);
+        // Extract arrays from potentially paginated responses
+        const jobsArray = Array.isArray(jobsData) ? jobsData : jobsData.results || [];
+        const suppliersArray = Array.isArray(suppliersData) ? suppliersData : suppliersData.results || [];
+        const materialsArray = Array.isArray(materialsData) ? materialsData : materialsData.results || [];
+        const timeEntriesArray = Array.isArray(timeEntriesData) ? timeEntriesData : timeEntriesData.results || [];
+
+        setJobs(jobsArray);
+        setSuppliers(suppliersArray);
+        setMaterials(materialsArray);
+        setTimeEntries(timeEntriesArray);
 
         // Calculate stats
-        const activeJobs = jobsData.filter((job) => !job.ferdig).length;
-        const completedJobs = jobsData.filter((job) => job.ferdig).length;
-        const totalHours = jobsData.reduce(
+        const activeJobs = jobsArray.filter((job) => !job.ferdig).length;
+        const completedJobs = jobsArray.filter((job) => job.ferdig).length;
+        const totalHours = jobsArray.reduce(
           (sum, job) => sum + (job.total_hours || 0),
           0
         );
 
         setStats({
-          totalJobs: jobsData.length,
+          totalJobs: jobsArray.length,
           activeJobs,
           completedJobs,
           totalHours,
-          totalSuppliers: suppliersData.length,
-          totalMaterials: materialsData.length,
+          totalSuppliers: suppliersArray.length,
+          totalMaterials: materialsArray.length,
         });
       } catch (error) {
         console.error('Failed to load admin data:', error);

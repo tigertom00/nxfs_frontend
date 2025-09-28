@@ -2,12 +2,13 @@ import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
 import { createUrlWithParams, normalizeResponse } from '../shared/utils';
 import { JobImage } from './types';
+import { PaginatedResponse } from '../shared/types';
 
 export const jobImagesAPI = {
   // Get all job images
   getJobImages: async (params?: {
     jobb?: string;
-  }): Promise<JobImage[]> => {
+  }): Promise<JobImage[] | PaginatedResponse<JobImage>> => {
     try {
       const url = createUrlWithParams('/app/memo/jobbbilder/', params);
       const response = await api.get(url);

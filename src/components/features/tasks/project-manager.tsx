@@ -34,8 +34,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { FileUpload } from '@/components/ui/file-upload';
 import { useUIStore } from '@/stores/ui';
-import { projectsAPI, Project, ProjectImage } from '@/lib/api';
-import { ProjectFormData } from '@/types/task';
+import { projectsAPI, Project, ProjectImage, CreateProjectPayload } from '@/lib/api';
 import {
   Plus,
   Edit3,
@@ -70,12 +69,13 @@ export function ProjectManager({
     editProject
   );
   const [showForm, setShowForm] = useState(!!editProject);
-  const [formData, setFormData] = useState<ProjectFormData>({
+  const [formData, setFormData] = useState<CreateProjectPayload>({
     name: editProject?.name || '',
     name_nb: editProject?.name_nb || '',
     description: editProject?.description || '',
     description_nb: editProject?.description_nb || '',
     status: editProject?.status || 'todo',
+    user_id: userId,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -203,7 +203,7 @@ export function ProjectManager({
           projectData as Partial<Project>
         );
       } else {
-        await projectsAPI.createProject(projectData as Partial<Project>);
+        await projectsAPI.createProject(projectData as CreateProjectPayload);
       }
 
       onProjectsChange();

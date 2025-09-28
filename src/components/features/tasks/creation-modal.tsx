@@ -14,8 +14,7 @@ import { ProjectForm } from './project-form';
 import { ProjectManager } from './project-manager';
 import { CategoryManager } from './category-manager';
 import { useUIStore } from '@/stores';
-import { Task, Category, Project } from '@/lib/api';
-import { TaskFormData, ProjectFormData } from '@/types/task';
+import { Task, Category, Project, CreateTaskPayload, CreateProjectPayload } from '@/lib/api';
 import { CheckSquare, FolderKanban, Settings } from 'lucide-react';
 
 interface CreationModalProps {
@@ -26,10 +25,10 @@ interface CreationModalProps {
   categories: Category[];
   projects: Project[];
   userId: number;
-  onTaskSubmit: (data: TaskFormData, files?: File[]) => void;
+  onTaskSubmit: (data: CreateTaskPayload, files?: File[]) => void;
   onTaskCancel: () => void;
   onTaskDelete?: (taskId: string) => void;
-  onProjectSubmit?: (data: ProjectFormData) => void;
+  onProjectSubmit?: (data: CreateProjectPayload) => void;
   onProjectsChange: () => void;
   onCategoriesChange: () => void;
 }

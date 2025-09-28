@@ -190,9 +190,11 @@ export const useUIStore = create<UIState>()(
       syncThemeWithServer: async (userId: string) => {
         try {
           const { theme } = get();
-          await usersAPI.updateUser(userId, {
-            theme: theme,
-          });
+          if (theme) {
+            await usersAPI.updateUser(userId, {
+              theme: theme,
+            });
+          }
         } catch (error) {
           console.error('Failed to sync theme with server:', error);
         }

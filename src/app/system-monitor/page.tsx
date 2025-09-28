@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { systemAPI, SystemDashboard, LatestSystemStatsResponse } from '@/lib/api';
+import { systemAPI, SystemDashboard, GetLatestSystemStatsResponse } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layouts/navbar';
@@ -60,7 +60,7 @@ const SystemMonitorPage = () => {
   const { t } = useIntl();
 
   const [dashboard, setDashboard] = useState<SystemDashboard | null>(null);
-  const [allHosts, setAllHosts] = useState<LatestSystemStatsResponse | null>(
+  const [allHosts, setAllHosts] = useState<GetLatestSystemStatsResponse | null>(
     null
   );
   const [loading, setLoading] = useState(true);

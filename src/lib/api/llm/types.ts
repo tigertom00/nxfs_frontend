@@ -2,34 +2,30 @@
 export interface LLMProvider {
   id: number;
   name: string;
-  description?: string;
-  provider_type: 'openai' | 'anthropic' | 'google' | 'huggingface' | 'local' | 'other';
-  base_url?: string;
-  api_key?: string;
-  model_name: string;
-  max_tokens?: number;
-  temperature?: number;
-  is_active: boolean;
-  icon?: string;
-  strengths?: string[];
-  tags?: string[];
+  url: string;
+  description: string;
+  description_nb: string;
+  strengths_en: string[];
+  strengths_no: string[];
+  pricing: string;
+  pricing_nb: string;
+  icon: string | null;
+  tags: number[]; // Array of tag IDs
   created_at: string;
   updated_at: string;
 }
 
 export interface CreateLLMProviderPayload {
   name: string;
-  description?: string;
-  provider_type: 'openai' | 'anthropic' | 'google' | 'huggingface' | 'local' | 'other';
-  base_url?: string;
-  api_key?: string;
-  model_name: string;
-  max_tokens?: number;
-  temperature?: number;
-  is_active?: boolean;
-  icon?: File | string;
-  strengths?: string[];
-  tags?: string[];
+  url: string;
+  description: string;
+  description_nb: string;
+  strengths_en: string[];
+  strengths_no: string[];
+  pricing: string;
+  pricing_nb: string;
+  icon?: File | string | null;
+  tag_ids: number[]; // Required field based on API response
 }
 
 export type UpdateLLMProviderPayload = Partial<CreateLLMProviderPayload>;
