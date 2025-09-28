@@ -17,6 +17,7 @@ import {
 
 interface TimerWidgetProps {
   jobId: number;
+  ordreNr?: string; // Order number for API filtering
 }
 
 interface TimerState {
@@ -26,7 +27,7 @@ interface TimerState {
   sessionId: string | null;
 }
 
-export function TimerWidget({ jobId }: TimerWidgetProps) {
+export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const { toast } = useToast();
   const { user } = useAuthStore();
   const [timer, setTimer] = useState<TimerState>({
@@ -213,21 +214,25 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
       const roundedSeconds = roundSecondsToNearestHalfHour(timer.elapsed);
       const roundedMinutes = Math.round(roundedSeconds / 60);
 
+      // API expects numeric job ID
+      const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
+
       console.log('Creating time entry with data:', {
-        jobb: jobId,
+        jobb: jobIdToUse,
         user: parseInt(user.id),
         timer: roundedMinutes,
         dato: new Date().toISOString().split('T')[0],
         original_seconds: timer.elapsed,
         rounded_seconds: roundedSeconds,
       });
-
       const timeEntryData = {
-        jobb: jobId,
+        jobb: jobIdToUse,
         user: parseInt(user.id),
         timer: roundedMinutes, // Store as minutes
         dato: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
-        beskrivelse: description || `Timer session - ${formatTime(roundedSeconds)}${roundedSeconds !== timer.elapsed ? ` (rounded from ${formatTime(timer.elapsed)})` : ''}`,
+        beskrivelse:
+          description ||
+          `Timer session - ${formatTime(roundedSeconds)}${roundedSeconds !== timer.elapsed ? ` (rounded from ${formatTime(timer.elapsed)})` : ''}`,
       };
 
       console.log('Sending time entry request:', timeEntryData);
@@ -240,7 +245,7 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
       });
 
       // Trigger refresh of time entries list
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
 
       // Stop timer and reset
       handleTimerReset();
@@ -369,7 +374,7 @@ export function TimerWidget({ jobId }: TimerWidgetProps) {
         </TabsContent>
 
         <TabsContent value="entries" className="space-y-0">
-          <TimeEntriesList jobId={jobId} refreshTrigger={refreshTrigger} />
+          <TimeEntriesList jobId={jobId} ordreNr={ordreNr} refreshTrigger={refreshTrigger} />
         </TabsContent>
       </Tabs>
 

@@ -28,6 +28,7 @@ import {
 
 interface TimeEntriesListProps {
   jobId: number;
+  ordreNr?: string; // Order number for API filtering
   refreshTrigger?: number; // Can be used to trigger refresh from parent
 }
 
@@ -39,6 +40,7 @@ interface GroupedTimeEntry extends TimeEntry {
 
 export function TimeEntriesList({
   jobId,
+  ordreNr,
   refreshTrigger,
 }: TimeEntriesListProps) {
   const { toast } = useToast();
@@ -50,13 +52,39 @@ export function TimeEntriesList({
   const loadTimeEntries = async () => {
     try {
       setLoading(true);
-      const entries = await timeEntriesAPI.getTimeEntries();
+      // API expects numeric job ID
+      const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
+      console.log('Loading time entries with params:', {
+        jobb: jobIdToUse,
+        user: parseInt(user?.id || '0'),
+      });
 
-      // Filter entries for this job and current user
-      const jobEntries = entries.filter(
-        (entry) =>
-          entry.jobb === jobId && entry.user === parseInt(user?.id || '0')
+      const entries = await timeEntriesAPI.getTimeEntries({
+        jobb: jobIdToUse,
+        user: parseInt(user?.id || '0'),
+      });
+
+      console.log('Raw time entries response:', entries);
+      console.log('Type of entries:', typeof entries, 'Is array:', Array.isArray(entries));
+
+      // Handle paginated response - extract results array
+      const entriesArray = Array.isArray(entries)
+        ? entries
+        : (entries?.results && Array.isArray(entries.results))
+          ? entries.results
+          : [];
+
+      console.log('Entries array length:', entriesArray.length);
+
+      // Additional client-side filtering for safety (compare as numbers)
+      const jobEntries = entriesArray.filter(
+        (entry) => {
+          console.log('Filtering entry:', entry, 'Job match:', entry.jobb, 'vs', jobIdToUse);
+          return entry.jobb === jobIdToUse && entry.user === parseInt(user?.id || '0');
+        }
       );
+
+      console.log('Filtered job entries:', jobEntries);
 
       // Transform entries to include calculated fields
       const transformedEntries: GroupedTimeEntry[] = jobEntries.map((entry) => {

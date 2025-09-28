@@ -11,7 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Clock, Save, X } from 'lucide-react';
-import { formatSecondsToTimeString, roundSecondsToNearestHalfHour } from '@/lib/time-utils';
+import {
+  formatSecondsToTimeString,
+  roundSecondsToNearestHalfHour,
+} from '@/lib/time-utils';
 
 interface TimerStopModalProps {
   isOpen: boolean;
@@ -75,14 +78,20 @@ export function TimerStopModal({
           {/* Time Summary */}
           <div className="p-4 bg-muted rounded-lg space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Original time:</span>
+              <span className="text-sm text-muted-foreground">
+                Original time:
+              </span>
               <span className="font-mono font-medium">{originalTime}</span>
             </div>
 
             {wasRounded && (
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Rounded time:</span>
-                <span className="font-mono font-medium text-primary">{roundedTime}</span>
+                <span className="text-sm text-muted-foreground">
+                  Rounded time:
+                </span>
+                <span className="font-mono font-medium text-primary">
+                  {roundedTime}
+                </span>
               </div>
             )}
 
@@ -95,16 +104,18 @@ export function TimerStopModal({
 
             {wasRounded && (
               <p className="text-xs text-muted-foreground">
-                Time has been {roundedSeconds > elapsedSeconds ? 'rounded up' : 'rounded down'} to the nearest 30-minute increment
+                Time has been{' '}
+                {roundedSeconds > elapsedSeconds
+                  ? 'rounded up'
+                  : 'rounded down'}{' '}
+                to the nearest 30-minute increment
               </p>
             )}
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="timer-description">
-              Description (Optional)
-            </Label>
+            <Label htmlFor="timer-description">Description (Optional)</Label>
             <Textarea
               id="timer-description"
               value={description}

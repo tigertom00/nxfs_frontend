@@ -9,9 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface PhotoGalleryProps {
   jobId: number;
+  ordreNr?: string; // Order number for API filtering
 }
 
-export function PhotoGallery({ jobId }: PhotoGalleryProps) {
+export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   const { toast } = useToast();
   const [photos, setPhotos] = useState<JobImage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,12 +24,27 @@ export function PhotoGallery({ jobId }: PhotoGalleryProps) {
   useEffect(() => {
     const loadPhotos = async () => {
       try {
-        const jobPhotos = await jobImagesAPI.getJobImages();
-        // Filter photos for this specific job
-        const jobSpecificPhotos = jobPhotos.filter(
-          (photo) => photo.jobb === jobId
-        );
-        setPhotos(jobSpecificPhotos);
+        // API expects numeric job ID
+        const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
+        console.log('Loading job photos with jobIdToUse:', jobIdToUse, 'ordreNr:', ordreNr, 'jobId:', jobId);
+        const jobPhotos = await jobImagesAPI.getImagesByJob(jobIdToUse);
+
+        // Handle job images response structure - it returns {jobb: {...}, image_count: 2, images: [...]}
+        console.log('Raw job photos response:', jobPhotos);
+        const photosArray = Array.isArray(jobPhotos)
+          ? jobPhotos
+          : (jobPhotos?.images && Array.isArray(jobPhotos.images))
+            ? jobPhotos.images
+            : [];
+
+        // Fix HTTP URLs to HTTPS for proper loading
+        const photosWithHttps = photosArray.map(photo => ({
+          ...photo,
+          image: photo.image?.replace('http://', 'https://') || photo.image
+        }));
+
+        console.log('Processed photos for display:', photosWithHttps);
+        setPhotos(photosWithHttps);
       } catch (error) {
         console.error('Failed to load photos:', error);
       } finally {
@@ -37,7 +53,7 @@ export function PhotoGallery({ jobId }: PhotoGalleryProps) {
     };
 
     loadPhotos();
-  }, [jobId]);
+  }, [jobId, ordreNr]);
 
   const handleTakePhoto = () => {
     // Trigger camera input
@@ -56,9 +72,11 @@ export function PhotoGallery({ jobId }: PhotoGalleryProps) {
 
   const uploadFile = async (file: File): Promise<JobImage> => {
     try {
+      // API expects numeric job ID
+      const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
       const uploadedImage = await jobImagesAPI.uploadJobImage({
         image: file,
-        jobb: jobId,
+        jobb: jobIdToUse,
       });
       return uploadedImage;
     } catch (error) {
