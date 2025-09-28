@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { env } from '@/lib/env';
 import { useAuthStore } from '@/stores';
+import { getAccessToken, getRefreshToken } from './shared/utils';
 
 // Create axios instance with base configuration
 export const api = axios.create({
@@ -14,9 +15,13 @@ export const api = axios.create({
 // Request interceptor to add authentication token
 api.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().token;
+    const token = getAccessToken();
     if (token) {
-      config.headers.Authorization = `${token}`;
+      // JWT tokens use "Bearer" prefix
+      config.headers.Authorization = `Bearer ${token}`;
+    } else if (env.NEXT_PUBLIC_API_TOKEN) {
+      // Fallback to environment API token if no user token
+      config.headers.Authorization = env.NEXT_PUBLIC_API_TOKEN;
     }
     return config;
   },
@@ -37,21 +42,23 @@ api.interceptors.response.use(
 
       try {
         // Try to refresh the token
-        const { refreshToken } = useAuthStore.getState();
+        const refreshToken = getRefreshToken();
         if (refreshToken) {
-          // Use the auth store's refresh method
-          await useAuthStore.getState().refreshUserToken();
+          // Import auth API dynamically to avoid circular dependencies
+          const { authAPI } = await import('./auth/auth');
+          const response = await authAPI.refreshToken(refreshToken);
+
+          // Update tokens in localStorage
+          const { setAuthTokens } = await import('./shared/utils');
+          setAuthTokens(response.access, refreshToken);
 
           // Retry the original request with new token
-          const newToken = useAuthStore.getState().token;
-          if (newToken) {
-            originalRequest.headers.Authorization = `${newToken}`;
-            return api(originalRequest);
-          }
+          originalRequest.headers.Authorization = `Bearer ${response.access}`;
+          return api(originalRequest);
         }
       } catch (refreshError) {
         // Refresh failed, logout user
-        console.log('No refresh token available, redirecting to login.');
+        console.log('Token refresh failed, redirecting to login.');
         useAuthStore.getState().logout();
         if (typeof window !== 'undefined') {
           window.location.href = '/auth/signin';
