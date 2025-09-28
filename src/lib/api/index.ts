@@ -36,6 +36,7 @@ export { containersAPI } from './docker/containers';
 // System monitoring domain
 export * from './system/types';
 export { monitoringAPI } from './system/monitoring';
+export { healthAPI } from './system/health';
 
 // LLM providers domain
 export * from './llm/types';
@@ -45,6 +46,10 @@ export { providersAPI as llmProvidersAPI } from './llm/providers';
 // Chatbot integration domain
 export * from './chatbot/types';
 export { n8nAPI as chatbotAPI } from './chatbot/n8n';
+
+// Admin domain
+export * from './admin/types';
+// Admin API methods will be exported here when implemented
 
 // Memo app domain (already migrated)
 export * from './memo/types';
@@ -65,6 +70,7 @@ export { elNumberLookupAPI } from './memo/n8n-lookup';
 
 // Legacy infrastructure exports with different names to avoid conflicts
 export { monitoringAPI as systemAPI } from './system/monitoring';
+export { healthAPI as systemHealthAPI } from './system/health';
 
 // Combined Docker API for backward compatibility
 import { hostsAPI } from './docker/hosts';

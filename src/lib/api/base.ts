@@ -30,9 +30,48 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling and token refresh
+// Response interceptor for error handling, token refresh, and performance monitoring
 api.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    // Extract performance metrics from response headers
+    const responseTime = response.headers['x-response-time'];
+    const dbQueries = response.headers['x-db-queries'];
+
+    if (responseTime || dbQueries) {
+      // Log performance metrics
+      const url = response.config?.url;
+      const method = response.config?.method?.toUpperCase();
+
+      if (responseTime) {
+        const timeValue = parseFloat(responseTime);
+        // Log slow requests (> 1 second)
+        if (timeValue > 1.0) {
+          console.warn(`Slow API request: ${method} ${url} took ${responseTime}`);
+        }
+      }
+
+      if (dbQueries) {
+        const queryCount = parseInt(dbQueries);
+        // Log heavy database usage (> 10 queries)
+        if (queryCount > 10) {
+          console.warn(`Heavy DB usage: ${method} ${url} made ${dbQueries} queries`);
+        }
+      }
+
+      // Store performance data for potential analytics
+      if (typeof window !== 'undefined' && (window as any).performanceTracker) {
+        (window as any).performanceTracker.trackAPIRequest({
+          url,
+          method,
+          response_time: responseTime ? parseFloat(responseTime) : undefined,
+          db_queries: dbQueries ? parseInt(dbQueries) : undefined,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as any;
 

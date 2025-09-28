@@ -100,16 +100,50 @@ export interface CreateProjectPayload {
 
 export type UpdateProjectPayload = Partial<CreateProjectPayload>;
 
-// Search and filter types
+// Enhanced search and filter types with new backend capabilities
 export interface TaskSearchParams extends BaseSearchParams {
-  status?: 'todo' | 'in_progress' | 'completed';
-  priority?: 'low' | 'medium' | 'high';
-  category?: number[];
-  project?: number;
+  status?: 'todo' | 'in_progress' | 'completed' | ('todo' | 'in_progress' | 'completed')[];
+  priority?: 'low' | 'medium' | 'high' | ('low' | 'medium' | 'high')[];
+  category?: number[] | string[]; // Support both number and string arrays
+  project?: number | string; // Support both number and string
   user_id?: string;
-  due_date_before?: string;
-  due_date_after?: string;
+  due_date_start?: string; // New: start date filter
+  due_date_end?: string;   // New: end date filter
+  due_date_before?: string; // Legacy: keep for backward compatibility
+  due_date_after?: string;  // Legacy: keep for backward compatibility
   completed?: boolean;
+  search?: string; // Full-text search across title, description
+}
+
+// Enhanced tasks response with filter metadata
+export interface TasksFilterResponse {
+  count: number;
+  next?: string;
+  previous?: string;
+  results: Task[];
+  filters_applied: {
+    categories?: string[];
+    projects?: string[];
+    status?: string[];
+    priority?: string[];
+    date_range?: { start: string; end: string };
+    search?: string;
+  };
+}
+
+// Bulk operation payload types
+export interface BulkTaskUpdatePayload {
+  task_ids: number[];
+  updates: {
+    status?: 'todo' | 'in_progress' | 'completed';
+    priority?: 'low' | 'medium' | 'high';
+    category?: number[];
+    project?: number;
+  };
+}
+
+export interface BulkTaskDeletePayload {
+  task_ids: number[];
 }
 
 export interface ProjectSearchParams extends BaseSearchParams {
@@ -124,13 +158,18 @@ export interface CategorySearchParams extends BaseSearchParams {
 }
 
 // Response types
-export type GetTasksResponse = Task[] | PaginatedResponse<Task>;
+export type GetTasksResponse = Task[] | PaginatedResponse<Task> | TasksFilterResponse;
 export type GetTaskResponse = Task;
 export type CreateTaskResponse = Task;
 export type UpdateTaskResponse = Task;
 export type DeleteTaskResponse = void;
 export type UploadTaskImageResponse = TaskImage;
 export type DeleteTaskImageResponse = void;
+
+// Import bulk operation response types from shared
+import { BulkUpdateResponse, BulkDeleteResponse } from '../shared/types';
+export type BulkTaskUpdateResponse = BulkUpdateResponse;
+export type BulkTaskDeleteResponse = BulkDeleteResponse;
 
 export type GetCategoriesResponse = Category[];
 export type GetCategoryResponse = Category;

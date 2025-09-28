@@ -44,8 +44,25 @@ export interface PaginatedResponseWithMeta<T> {
 }
 
 /**
- * Error response structure
- * Standardizes error handling across the API
+ * Standardized API Error response format
+ * Used across all endpoints for consistent error handling
+ */
+export interface APIError {
+  error: {
+    code: string;           // Machine-readable error code
+    message: string;        // User-friendly message
+    details?: any;          // Additional error context
+    field_errors?: {        // For validation errors
+      [field: string]: string[];
+    };
+  };
+  timestamp: string;
+  request_id: string;       // For debugging
+}
+
+/**
+ * Legacy error interface - keep for backward compatibility
+ * @deprecated Use APIError instead
  */
 export interface ApiError {
   detail: string;
@@ -74,7 +91,24 @@ export interface ChoiceItem {
 }
 
 /**
- * Bulk operation response
+ * Bulk operation responses from new backend APIs
+ */
+export interface BulkUpdateResponse {
+  updated_count: number;
+  failed_updates: Array<{
+    id: number;
+    error: string;
+  }>;
+}
+
+export interface BulkDeleteResponse {
+  deleted_count: number;
+  failed_deletes: number[];
+}
+
+/**
+ * Legacy bulk operation response - keep for backward compatibility
+ * @deprecated Use BulkUpdateResponse or BulkDeleteResponse instead
  */
 export interface BulkOperationResponse {
   success: boolean;
@@ -127,4 +161,53 @@ export interface LoginResponse {
 export interface RefreshTokenResponse {
   access: string;
   refresh?: string; // Some APIs return new refresh token
+}
+
+/**
+ * Performance monitoring interfaces
+ */
+export interface PerformanceMetrics {
+  system: {
+    cpu_percent: number;
+    memory_percent: number;
+    disk_percent: number;
+  };
+  database: {
+    vendor: string;
+    connections?: number;
+    query_cache_hit_rate?: number;
+  };
+  cache: {
+    cache_working: boolean;
+    hit_rate?: number;
+  };
+  api_summary: {
+    total_requests: number;
+    avg_response_time: number;
+    max_response_time: number;
+    slow_requests: number;
+  };
+}
+
+/**
+ * Health monitoring interfaces
+ */
+export interface HealthStatus {
+  status: "healthy" | "degraded" | "unhealthy";
+  timestamp: string;
+  checks: {
+    database: string;
+    cache: string;
+    cpu: string;
+    memory: string;
+    disk: string;
+  };
+}
+
+/**
+ * Response headers for performance tracking
+ */
+export interface ResponseHeaders {
+  'X-Response-Time': string;  // e.g., "0.125s"
+  'X-DB-Queries': string;     // e.g., "3"
 }

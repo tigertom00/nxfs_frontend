@@ -37,6 +37,19 @@ export interface Tag {
   updated_at: string;
 }
 
+export interface MediaFile {
+  id: number;
+  filename: string;
+  original_filename: string;
+  file_type: string;
+  file_size: number;
+  upload_date: string;
+  uploaded_by: number;
+  url: string;
+  thumbnail_url?: string;
+  description?: string;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -105,6 +118,19 @@ export interface UploadYouTubePayload {
   title?: string;
 }
 
+export interface UploadMediaPayload {
+  file: File;
+  description?: string;
+}
+
+export interface MediaSearchParams {
+  file_type?: string;
+  date_start?: string;
+  date_end?: string;
+  page?: number;
+  page_size?: number;
+}
+
 // Response types
 export type GetPostsResponse = Post[] | PaginatedResponse<Post>;
 export type GetPublicPostsResponse = Post[] | PaginatedResponse<Post>;
@@ -126,6 +152,11 @@ export type DeletePostImageResponse = void;
 export type PostYouTubeResponse = PostYouTube;
 export type UploadPostYouTubeResponse = PostYouTube;
 export type DeletePostYouTubeResponse = void;
+
+export type GetMediaFilesResponse = MediaFile[] | PaginatedResponse<MediaFile>;
+export type GetMediaFileResponse = MediaFile;
+export type UploadMediaResponse = MediaFile;
+export type DeleteMediaResponse = void;
 
 // Search and filter types
 export interface PostSearchParams {

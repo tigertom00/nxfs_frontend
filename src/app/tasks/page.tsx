@@ -44,6 +44,10 @@ export default function TasksPage() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<('todo' | 'in_progress' | 'completed')[]>([]);
+  const [selectedPriority, setSelectedPriority] = useState<('low' | 'medium' | 'high')[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateRange, setDateRange] = useState<{start?: string; end?: string}>({});
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
@@ -73,13 +77,62 @@ export default function TasksPage() {
     }
   }, [isAuthenticated, user]);
 
+  // Refetch tasks when filters change
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchTasks();
+    }
+  }, [selectedCategories, selectedProject, selectedStatus, selectedPriority, searchQuery, dateRange]);
+
   const fetchTasks = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await tasksAPI.getTasks();
-      // Extract array from potentially paginated response
-      const tasksArray = Array.isArray(response) ? response : response.results || [];
+
+      // Build query parameters using enhanced filtering
+      const queryParams: any = {};
+
+      if (selectedCategories.length > 0) {
+        queryParams.category = selectedCategories;
+      }
+
+      if (selectedProject) {
+        queryParams.project = selectedProject;
+      }
+
+      if (selectedStatus.length > 0) {
+        queryParams.status = selectedStatus;
+      }
+
+      if (selectedPriority.length > 0) {
+        queryParams.priority = selectedPriority;
+      }
+
+      if (searchQuery.trim()) {
+        queryParams.search = searchQuery.trim();
+      }
+
+      if (dateRange.start) {
+        queryParams.due_date_start = dateRange.start;
+      }
+
+      if (dateRange.end) {
+        queryParams.due_date_end = dateRange.end;
+      }
+
+      const response = await tasksAPI.getTasks(queryParams);
+
+      // Handle the enhanced response format
+      let tasksArray: Task[] = [];
+      if (Array.isArray(response)) {
+        tasksArray = response;
+      } else if (response.results) {
+        tasksArray = response.results;
+      } else if ((response as any).filters_applied) {
+        // Handle TasksFilterResponse format
+        tasksArray = (response as any).results || [];
+      }
+
       setTasks(tasksArray);
     } catch (err: any) {
       console.log(err.response?.data);
