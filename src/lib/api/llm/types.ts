@@ -1,3 +1,5 @@
+import { PaginatedResponse } from '../shared/types';
+
 // LLM Provider types
 export interface LLMProvider {
   id: number;

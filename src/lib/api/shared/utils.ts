@@ -136,3 +136,21 @@ export function safeJsonParse<T>(json: string, fallback: T): T {
     return fallback;
   }
 }
+
+/**
+ * Force use of API token for testing purposes
+ * Clears JWT tokens so requests fall back to NEXT_PUBLIC_API_TOKEN
+ */
+export function useApiTokenForTesting(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  console.log('JWT tokens cleared - API requests will now use NEXT_PUBLIC_API_TOKEN');
+}
+
+/**
+ * Check if using API token (no JWT tokens present)
+ */
+export function isUsingApiToken(): boolean {
+  return !getAccessToken() && !getRefreshToken();
+}
