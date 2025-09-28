@@ -64,8 +64,17 @@ export { elNumberLookupAPI } from './memo/n8n-lookup';
 // TODO: Can be deprecated in future versions after migration is complete
 
 // Legacy infrastructure exports with different names to avoid conflicts
-export { hostsAPI as dockerAPI } from './docker/hosts'; // Partial compatibility
 export { monitoringAPI as systemAPI } from './system/monitoring';
+
+// Combined Docker API for backward compatibility
+import { hostsAPI } from './docker/hosts';
+import { containersAPI } from './docker/containers';
+export const dockerAPI = {
+  // Host methods
+  ...hostsAPI,
+  // Container methods
+  ...containersAPI,
+};
 
 // Legacy memo aliases
 export { timeTrackingAPI as timeEntriesAPI } from './memo/time-tracking';
