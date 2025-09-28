@@ -34,9 +34,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { FileUpload } from '@/components/ui/file-upload';
 import { useUIStore } from '@/stores/ui';
-import { Project, ProjectImage } from '@/types/api';
+import { projectsAPI, Project, ProjectImage } from '@/lib/api';
 import { ProjectFormData } from '@/types/task';
-import { projectsAPI } from '@/lib/api';
 import {
   Plus,
   Edit3,

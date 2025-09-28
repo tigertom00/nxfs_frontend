@@ -15,8 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore, useUIStore } from '@/stores';
-import { tasksAPI, categoriesAPI, projectsAPI } from '@/lib/api';
-import { Task, Category, Project } from '@/types/api';
+import { tasksAPI, categoriesAPI, projectsAPI, Task, Category, Project } from '@/lib/api';
 import { TaskFormData, ProjectFormData } from '@/types/task';
 import {
   Plus,

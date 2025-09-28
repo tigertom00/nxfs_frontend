@@ -8,9 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Image, Music, Trash2, Copy, Youtube } from 'lucide-react';
-import { postsAPI } from '@/lib/api';
+import { postsAPI, PostImage, PostAudio, PostYouTube } from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
-import { PostImage, PostAudio, PostYouTube } from '@/types/api';
 import { toast } from 'sonner';
 import { env } from '@/lib/env';
 

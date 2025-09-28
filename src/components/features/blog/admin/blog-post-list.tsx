@@ -6,10 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Trash2, Edit, Eye } from 'lucide-react';
-import { postsAPI } from '@/lib/api';
+import { postsAPI, Post } from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
 import { useUIStore } from '@/stores/ui';
-import { Post } from '@/types/api';
 import {
   AlertDialog,
   AlertDialogAction,

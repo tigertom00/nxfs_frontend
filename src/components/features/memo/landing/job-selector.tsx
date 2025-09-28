@@ -1,6 +1,6 @@
 'use client';
 
-import { Job } from '@/types/api';
+import { Job } from '@/lib/api';
 import {
   Select,
   SelectContent,

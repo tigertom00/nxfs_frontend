@@ -17,8 +17,7 @@
  * 4. Set EFO_API_ENABLED=true in environment
  */
 
-import { materialsAPI } from './api';
-import { Material, CreateMaterialPayload } from '@/types/api';
+import { materialsAPI, Material, CreateMaterialPayload } from '@/lib/api';
 
 // EFO API Response Types
 export interface EFOProduct {

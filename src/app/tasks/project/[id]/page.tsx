@@ -23,8 +23,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/auth';
 import { useUIStore } from '@/stores/ui';
-import { tasksAPI, categoriesAPI, projectsAPI } from '@/lib/api';
-import { Task, Category, Project } from '@/types/api';
+import { tasksAPI, categoriesAPI, projectsAPI, Task, Category, Project } from '@/lib/api';
 import { TaskFormData } from '@/types/task';
 import {
   ArrowLeft,

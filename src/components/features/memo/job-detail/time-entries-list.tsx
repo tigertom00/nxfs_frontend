@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores';
 import { Clock, Edit2, Trash2, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
-import { TimeEntry } from '@/types/api';
+import { TimeEntry } from '@/lib/api';
 import {
   formatMinutesToHourString,
   formatMinutesToDecimalHours,

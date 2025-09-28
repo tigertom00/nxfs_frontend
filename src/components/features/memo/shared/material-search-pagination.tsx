@@ -9,10 +9,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { PaginatedMaterialResponse } from '@/types/api';
+import { PaginatedResponse, Material } from '@/lib/api';
 
 interface MaterialSearchPaginationProps {
-  pagination: PaginatedMaterialResponse['pagination'];
+  pagination: PaginatedResponse<Material>;
   onPageChange: (page: number) => void;
   className?: string;
 }

@@ -23,8 +23,7 @@ import {
 } from '@/components/ui/select';
 import { useAuthStore, useUIStore } from '@/stores';
 import { useDebounce } from '@/hooks';
-import { llmProvidersAPI } from '@/lib/api';
-import type { LLMProvider } from '@/types/api';
+import { llmProvidersAPI, LLMProvider } from '@/lib/api';
 import { toast } from 'sonner';
 import { CreateProviderDialog } from '@/components/features/llm-providers';
 import {

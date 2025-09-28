@@ -22,8 +22,7 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore, useUIStore } from '@/stores';
-import { categoriesAPI, projectsAPI, usersAPI } from '@/lib/api';
-import { Category, Project } from '@/types/api';
+import { categoriesAPI, projectsAPI, usersAPI, Category, Project } from '@/lib/api';
 import {
   Settings as SettingsIcon,
   Globe,

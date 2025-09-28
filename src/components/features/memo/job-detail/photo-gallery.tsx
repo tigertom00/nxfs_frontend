@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { jobImagesAPI } from '@/lib/api';
-import { JobImage } from '@/types/api';
+import { JobImage } from '@/lib/api';
 import { Camera, FolderOpen, Upload, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

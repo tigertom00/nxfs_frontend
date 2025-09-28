@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Material, Supplier, MaterialSearchParams, PaginatedMaterialResponse } from '@/types/api';
+import { Material, Supplier, MaterialSearchParams, PaginatedResponse } from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -43,7 +43,7 @@ import { MaterialSearchPagination } from './material-search-pagination';
 
 interface AdvancedMaterialSearchProps {
   suppliers: Supplier[];
-  onResults: (filteredMaterials: Material[], pagination?: PaginatedMaterialResponse['pagination']) => void;
+  onResults: (filteredMaterials: Material[], pagination?: PaginatedResponse<Material>) => void;
   trigger?: React.ReactNode;
   initialSearchParams?: MaterialSearchParams;
 }
@@ -82,7 +82,7 @@ export function AdvancedMaterialSearch({
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<Material[]>([]);
-  const [pagination, setPagination] = useState<PaginatedMaterialResponse['pagination'] | null>(null);
+  const [pagination, setPagination] = useState<PaginatedResponse<Material> | null>(null);
   const [filters, setFilters] = useState<SearchFilters>({
     generalSearch: initialSearchParams?.search || '',
     elNumber: initialSearchParams?.el_nr || '',

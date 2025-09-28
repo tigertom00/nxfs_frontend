@@ -25,8 +25,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useUIStore } from '@/stores/ui';
-import { Tag } from '@/types/api';
-import { tagsAPI } from '@/lib/api';
+import { tagsAPI, Tag } from '@/lib/api';
 import { Plus, Edit3, Trash2, Settings, Loader2 } from 'lucide-react';
 
 interface TagManagerProps {

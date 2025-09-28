@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { DockerContainer } from '@/types/api';
+import { DockerContainer } from '@/lib/api';
 
 interface PortInfo {
   port: number;

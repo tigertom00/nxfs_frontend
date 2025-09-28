@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { postsAPI } from '@/lib/api';
+import { postsAPI, Post } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { BlogPostList } from './blog-post-list';
 import { BlogEditor } from './blog-editor';
 import { useIntl } from '@/hooks/use-intl';
-import { Post } from '@/types/api';
 
 export function BlogAdminDashboard() {
   const { t } = useIntl();

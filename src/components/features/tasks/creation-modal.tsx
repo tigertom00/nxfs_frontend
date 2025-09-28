@@ -14,7 +14,7 @@ import { ProjectForm } from './project-form';
 import { ProjectManager } from './project-manager';
 import { CategoryManager } from './category-manager';
 import { useUIStore } from '@/stores';
-import { Task, Category, Project } from '@/types/api';
+import { Task, Category, Project } from '@/lib/api';
 import { TaskFormData, ProjectFormData } from '@/types/task';
 import { CheckSquare, FolderKanban, Settings } from 'lucide-react';
 

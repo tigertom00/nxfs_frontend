@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import Navbar from '@/components/layouts/navbar';
 import { useAuthStore } from '@/stores';
-import { jobsAPI } from '@/lib/api';
-import { Job } from '@/types/api';
+import { jobsAPI, Job } from '@/lib/api';
 import { JobHeader } from '@/components/features/memo/job-detail/job-header';
 import { TimerWidget } from '@/components/features/memo/job-detail/timer-widget';
 import { MaterialManager } from '@/components/features/memo/job-detail/material-manager';
@@ -38,7 +37,7 @@ export default function JobDetailPage() {
 
       try {
         setLoading(true);
-        const jobData = await jobsAPI.getJob(parseInt(orderNumber));
+        const jobData = await jobsAPI.getJob(orderNumber);
         setJob(jobData);
       } catch (error) {
         console.error('Failed to load job:', error);

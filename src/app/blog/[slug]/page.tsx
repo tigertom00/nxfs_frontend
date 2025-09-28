@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { postsAPI } from '@/lib/api';
+import { postsAPI, Post } from '@/lib/api';
 import { useUIStore } from '@/stores/ui';
 import Navbar from '@/components/layouts/navbar';
 import ChatBot from '@/components/features/chat/chatbot';
-import { Post } from '@/types/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';

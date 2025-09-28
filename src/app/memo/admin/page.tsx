@@ -4,8 +4,16 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layouts/navbar';
 import { useAuthStore } from '@/stores';
-import { jobsAPI, suppliersAPI, materialsAPI, timeEntriesAPI } from '@/lib/api';
-import { Job, Supplier, Material, TimeEntry } from '@/types/api';
+import {
+  jobsAPI,
+  suppliersAPI,
+  materialsAPI,
+  timeTrackingAPI,
+  Job,
+  Supplier,
+  Material,
+  TimeEntry
+} from '@/lib/api';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
 import {
   Card,
@@ -73,7 +81,7 @@ export default function MemoAdminPage() {
             jobsAPI.getJobs(),
             suppliersAPI.getSuppliers(),
             materialsAPI.getMaterials(),
-            timeEntriesAPI.getTimeEntries(),
+            timeTrackingAPI.getTimeEntries(),
           ]);
 
         setJobs(jobsData);
@@ -359,24 +367,24 @@ export default function MemoAdminPage() {
                         <TableRow key={supplier.id}>
                           <TableCell>{supplier.id}</TableCell>
                           <TableCell className="font-medium">
-                            {supplier.name}
+                            {supplier.navn}
                           </TableCell>
                           <TableCell>
-                            {supplier.url ? (
+                            {supplier.hjemmeside ? (
                               <a
-                                href={supplier.url}
+                                href={supplier.hjemmeside}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-primary hover:underline"
                               >
-                                {supplier.url}
+                                {supplier.hjemmeside}
                               </a>
                             ) : (
                               'No URL'
                             )}
                           </TableCell>
                           <TableCell>
-                            {formatDate(supplier.created_at)}
+                            {supplier.created_at ? formatDate(supplier.created_at) : 'N/A'}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -424,7 +432,7 @@ export default function MemoAdminPage() {
                             )}
                           </TableCell>
                           <TableCell>
-                            {material.leverandor?.name || 'Unknown'}
+                            {material.leverandor?.navn || 'Unknown'}
                           </TableCell>
                           <TableCell>
                             {material.varemerke || 'No brand'}

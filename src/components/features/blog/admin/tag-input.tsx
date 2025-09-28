@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { useIntl } from '@/hooks/use-intl';
-import { Tag } from '@/types/api';
+import { Tag } from '@/lib/api';
 
 interface TagInputProps {
   value: number[]; // Array of tag IDs

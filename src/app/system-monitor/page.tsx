@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { systemAPI } from '@/lib/api';
+import { systemAPI, SystemDashboard, LatestSystemStatsResponse } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layouts/navbar';
 import ChatBot from '@/components/features/chat/chatbot';
-import { SystemDashboard, LatestSystemStatsResponse } from '@/types/api';
 import {
   Activity,
   Cpu,

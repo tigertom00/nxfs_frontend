@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores/ui';
-import { Task, Category, Project } from '@/types/api';
+import { Task, Category, Project } from '@/lib/api';
 import { ImageViewer } from './image-viewer';
 import {
   Edit3,

@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Material } from '@/types/api';
+import { Material } from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
 import {
   Package,
@@ -78,7 +78,7 @@ export function MaterialDetailModal({
                 {material.tittel || 'Untitled Material'}
               </DialogTitle>
               <DialogDescription className="mt-1">
-                {material.leverandor.name} •{' '}
+                {material.leverandor?.name || 'Unknown Supplier'} •{' '}
                 {material.kategori?.kategori || 'Electrical Component'}
               </DialogDescription>
             </div>

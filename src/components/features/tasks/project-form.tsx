@@ -15,7 +15,7 @@ import {
 import { FileUpload } from '@/components/ui/file-upload';
 import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores/ui';
-import { Project, ProjectImage } from '@/types/api';
+import { Project, ProjectImage } from '@/lib/api';
 import { ProjectFormData } from '@/types/task';
 import { ImageIcon, X } from 'lucide-react';
 

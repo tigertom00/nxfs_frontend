@@ -12,7 +12,7 @@ import { VisuallyHidden } from '@/components/ui/visually-hidden';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores';
-import { TaskImage } from '@/types/api';
+import { TaskImage } from '@/lib/api';
 import {
   X,
   Download,

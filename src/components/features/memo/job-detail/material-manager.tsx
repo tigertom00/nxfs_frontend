@@ -1,6 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
+// Extend window interface for search timeout
+declare global {
+  interface Window {
+    searchTimeout?: NodeJS.Timeout;
+  }
+}
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { materialsAPI, jobMaterialsAPI, suppliersAPI, elNumberLookupAPI } from '@/lib/api';
-import { Material, JobMaterial, Supplier } from '@/types/api';
+import { Material, JobMaterial, Supplier } from '@/lib/api';
 import { BarcodeScanner } from '@/components/features/memo/shared/barcode-scanner';
 import { MaterialDetailModal } from '@/components/features/memo/shared/material-detail-modal';
 import { AdvancedMaterialSearch } from '@/components/features/memo/shared/advanced-material-search';
@@ -75,6 +82,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
     loadMaterials();
     loadJobMaterials();
     loadRecentMaterials();
+    loadFavoriteMaterials();
     loadSuppliers();
   }, [jobId]);
 
@@ -84,12 +92,17 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       const materials = Array.isArray(result) ? result : [];
       setAllMaterials(materials);
       setDisplayMaterials(materials); // Initialize display materials
-
-      // Filter favorites
-      const favorites = materials.filter((m) => m.favorites);
-      setFavoriteMaterials(favorites);
     } catch (error) {
       console.error('Failed to load materials:', error);
+    }
+  };
+
+  const loadFavoriteMaterials = async () => {
+    try {
+      const favorites = await materialsAPI.getFavorites();
+      setFavoriteMaterials(favorites);
+    } catch (error) {
+      console.error('Failed to load favorite materials:', error);
     }
   };
 
@@ -100,11 +113,6 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
         (jm) => jm.jobb === jobId
       );
 
-      // Debug supplier data structure
-      if (jobSpecificMaterials.length > 0) {
-        console.log('Job Material Sample:', jobSpecificMaterials[0]);
-        console.log('Supplier Object:', jobSpecificMaterials[0]?.matriell?.leverandor);
-      }
 
       setJobMaterials(jobSpecificMaterials);
     } catch (error) {
@@ -176,7 +184,9 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   };
 
   const handleELNumberLookup = async () => {
-    if (!elNumberInput.trim()) {
+    // Remove spaces and check if we have a valid EL number
+    const rawElNumber = elNumberInput.replace(/\s/g, '');
+    if (!rawElNumber.trim()) {
       toast({
         title: 'Enter EL Number',
         description: 'Please enter an EL number to lookup',
@@ -185,14 +195,13 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
       return;
     }
 
-    await handleELNumberScanned(elNumberInput.trim());
+    await handleELNumberScanned(rawElNumber);
   };
 
   const handleImportFromEL = async (elData: any) => {
     try {
       setLoading(true);
 
-      console.log('EL Data:', elData);
 
       // Use the EFObasen import endpoint which handles supplier creation
       // Import material from EL lookup result
@@ -433,10 +442,41 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
   const handleToggleFavorite = async (material: Material) => {
     try {
       await materialsAPI.toggleFavorite(material.id);
-      // Reload materials to get updated favorite status
+      // Reload materials and favorites to get updated status
       await loadMaterials();
+      await loadFavoriteMaterials();
     } catch (error) {
       // Error is already handled by the API call
+    }
+  };
+
+  // Optimized search using API search endpoint
+  const performOptimizedSearch = async (searchTerm: string) => {
+    try {
+      setLoading(true);
+      const result = await materialsAPI.searchMaterials({
+        search: searchTerm,
+        page: 1,
+        page_size: 20, // Limit results for better performance
+      });
+
+      const materials = 'results' in result ? result.results : result;
+      setDisplayMaterials(materials);
+      setShowingSearchResults(true);
+    } catch (error) {
+      console.error('Failed to perform optimized search:', error);
+      // Fallback to local search
+      const searchResults = allMaterials.filter(
+        (material) =>
+          material.el_nr?.includes(searchTerm) ||
+          material.tittel?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          material.gtin_number?.includes(searchTerm) ||
+          material.varenummer?.includes(searchTerm)
+      );
+      setDisplayMaterials(searchResults);
+      setShowingSearchResults(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -481,6 +521,7 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                   onRemove={handleRemoveFromJob}
                   onViewDetail={setSelectedMaterialForDetail}
                   onEdit={handleEditMaterial}
+                  onToggleFavorite={handleToggleFavorite}
                 />
               ))}
             </div>
@@ -508,34 +549,54 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
             <div className="flex gap-2">
               <Input
                 id="el-number-input"
-                placeholder="Enter EL number..."
+                placeholder="12 345 67"
                 value={elNumberInput}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  setElNumberInput(value);
+                  // Only allow digits and limit to 7 characters
+                  const rawValue = e.target.value.replace(/\D/g, '');
+                  const limitedValue = rawValue.slice(0, 7);
 
-                  // Auto-switch to add tab and search when typing
-                  if (value.trim()) {
+                  // Format with spaces: XX XXX XX
+                  let formattedValue = limitedValue;
+                  if (limitedValue.length >= 2) {
+                    formattedValue = limitedValue.slice(0, 2);
+                    if (limitedValue.length >= 3) {
+                      formattedValue += ' ' + limitedValue.slice(2, 5);
+                      if (limitedValue.length >= 6) {
+                        formattedValue += ' ' + limitedValue.slice(5, 7);
+                      }
+                    }
+                  }
+
+                  setElNumberInput(formattedValue);
+
+                  // Auto-switch to add tab and search when typing (use raw value for search)
+                  if (limitedValue.trim()) {
                     setMaterialTab('add');
                     setActiveTab('search');
-                    setSearchQuery(value);
+                    setSearchQuery(limitedValue);
 
-                    // Search local materials
-                    const searchResults = allMaterials.filter(
-                      (material) =>
-                        material.el_nr?.includes(value) ||
-                        material.tittel?.toLowerCase().includes(value.toLowerCase()) ||
-                        material.gtin_number?.includes(value) ||
-                        material.varenummer?.includes(value)
-                    );
-                    setDisplayMaterials(searchResults);
-                    setShowingSearchResults(true);
+                    // Use choice endpoint for better performance on quick searches
+                    if (limitedValue.length >= 3) {
+                      performOptimizedSearch(limitedValue);
+                    } else {
+                      // Search local materials for short queries
+                      const searchResults = allMaterials.filter(
+                        (material) =>
+                          material.el_nr?.includes(limitedValue) ||
+                          material.tittel?.toLowerCase().includes(limitedValue.toLowerCase()) ||
+                          material.gtin_number?.includes(limitedValue) ||
+                          material.varenummer?.includes(limitedValue)
+                      );
+                      setDisplayMaterials(searchResults);
+                      setShowingSearchResults(true);
+                    }
                   } else {
                     setShowingSearchResults(false);
                     setDisplayMaterials([]);
                   }
                 }}
-                className="flex-1"
+                className="w-32"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     handleELNumberLookup();
@@ -663,7 +724,21 @@ export function MaterialManager({ jobId }: MaterialManagerProps) {
                 <Input
                   placeholder="Search materials..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSearchQuery(value);
+
+                    // Debounced search for better performance
+                    if (value.length >= 3) {
+                      clearTimeout(window.searchTimeout);
+                      window.searchTimeout = setTimeout(() => {
+                        performOptimizedSearch(value);
+                      }, 300);
+                    } else if (value.length === 0) {
+                      setShowingSearchResults(false);
+                      setDisplayMaterials([]);
+                    }
+                  }}
                   className="text-sm"
                 />
 
@@ -839,9 +914,10 @@ interface MaterialListItemProps {
   onRemove: (jobMaterial: JobMaterial) => void;
   onViewDetail: (material: Material) => void;
   onEdit: (jobMaterial: JobMaterial) => void;
+  onToggleFavorite: (material: Material) => void;
 }
 
-function MaterialListItem({ jobMaterial, onRemove, onViewDetail, onEdit }: MaterialListItemProps) {
+function MaterialListItem({ jobMaterial, onRemove, onViewDetail, onEdit, onToggleFavorite }: MaterialListItemProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -911,6 +987,16 @@ function MaterialListItem({ jobMaterial, onRemove, onViewDetail, onEdit }: Mater
                 }}
               >
                 Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite(jobMaterial.matriell);
+                }}
+              >
+                <Heart className={`h-3 w-3 ${jobMaterial.matriell.favorites ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
               </Button>
               <Button
                 size="sm"

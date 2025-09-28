@@ -13,10 +13,9 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { postsAPI } from '@/lib/api';
+import { postsAPI, Post } from '@/lib/api';
 import { useUIStore } from '@/stores/ui';
 import { useIntl } from '@/hooks/use-intl';
-import { Post } from '@/types/api';
 
 // YouTube Video Card Component
 function YouTubeVideoCard() {
