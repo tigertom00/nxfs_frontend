@@ -1,5 +1,6 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
+import { normalizeResponse } from '../shared/utils';
 import {
   DockerHost,
   CreateHostPayload,
@@ -17,7 +18,10 @@ export const hostsAPI = {
   getHosts: async (): Promise<GetDockerHostsResponse> => {
     try {
       const response = await api.get('/api/docker/hosts/');
-      return response.data;
+
+      // Handle both paginated and array responses
+      const normalized = normalizeResponse<DockerHost>(response.data);
+      return Array.isArray(normalized) ? normalized : normalized.results || [];
     } catch (error) {
       handleApiError(error, 'Getting Docker hosts');
       throw error;
@@ -36,7 +40,9 @@ export const hostsAPI = {
   },
 
   // Create host
-  createHost: async (hostData: CreateHostPayload): Promise<CreateDockerHostResponse> => {
+  createHost: async (
+    hostData: CreateHostPayload
+  ): Promise<CreateDockerHostResponse> => {
     try {
       const response = await api.post('/api/docker/hosts/', hostData);
       showSuccessToast('Docker host created successfully');
@@ -76,7 +82,9 @@ export const hostsAPI = {
   // Sync containers for a specific host
   syncContainers: async (hostId: number): Promise<SyncContainersResponse> => {
     try {
-      const response = await api.post(`/api/docker/hosts/${hostId}/sync_containers/`);
+      const response = await api.post(
+        `/api/docker/hosts/${hostId}/sync_containers/`
+      );
       showSuccessToast('Container sync initiated successfully');
       return response.data;
     } catch (error) {
@@ -86,9 +94,13 @@ export const hostsAPI = {
   },
 
   // Test host connection
-  testConnection: async (hostId: number): Promise<{ status: string; message: string }> => {
+  testConnection: async (
+    hostId: number
+  ): Promise<{ status: string; message: string }> => {
     try {
-      const response = await api.post(`/api/docker/hosts/${hostId}/test_connection/`);
+      const response = await api.post(
+        `/api/docker/hosts/${hostId}/test_connection/`
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Testing host connection');

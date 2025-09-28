@@ -1,6 +1,6 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
-import { createUrlWithParams } from '../shared/utils';
+import { createUrlWithParams, normalizeResponse } from '../shared/utils';
 import {
   DockerContainer,
   ContainerSearchParams,
@@ -16,11 +16,16 @@ import {
 
 export const containersAPI = {
   // Get all containers
-  getContainers: async (params?: ContainerSearchParams): Promise<GetDockerContainersResponse> => {
+  getContainers: async (
+    params?: ContainerSearchParams
+  ): Promise<GetDockerContainersResponse> => {
     try {
       const url = createUrlWithParams('/api/docker/containers/', params);
       const response = await api.get(url);
-      return response.data;
+
+      // Handle both paginated and array responses
+      const normalized = normalizeResponse<DockerContainer>(response.data);
+      return Array.isArray(normalized) ? normalized : normalized.results || [];
     } catch (error) {
       handleApiError(error, 'Getting Docker containers');
       throw error;
@@ -28,7 +33,9 @@ export const containersAPI = {
   },
 
   // Get single container
-  getContainer: async (containerId: string): Promise<GetDockerContainerResponse> => {
+  getContainer: async (
+    containerId: string
+  ): Promise<GetDockerContainerResponse> => {
     try {
       const response = await api.get(`/api/docker/containers/${containerId}/`);
       return response.data;
@@ -42,7 +49,10 @@ export const containersAPI = {
   getRunningContainers: async (): Promise<GetRunningContainersResponse> => {
     try {
       const response = await api.get('/api/docker/containers/running/');
-      return response.data;
+
+      // Handle both paginated and array responses
+      const normalized = normalizeResponse<DockerContainer>(response.data);
+      return Array.isArray(normalized) ? normalized : normalized.results || [];
     } catch (error) {
       handleApiError(error, 'Getting running containers');
       throw error;
@@ -55,7 +65,10 @@ export const containersAPI = {
     params?: StatsSearchParams
   ): Promise<GetContainerStatsResponse> => {
     try {
-      const url = createUrlWithParams(`/api/docker/containers/${containerId}/stats/`, params);
+      const url = createUrlWithParams(
+        `/api/docker/containers/${containerId}/stats/`,
+        params
+      );
       const response = await api.get(url);
       return response.data;
     } catch (error) {
@@ -100,7 +113,10 @@ export const containersAPI = {
     params?: { lines?: number; since?: string; until?: string }
   ): Promise<{ logs: string }> => {
     try {
-      const url = createUrlWithParams(`/api/docker/containers/${containerId}/logs/`, params);
+      const url = createUrlWithParams(
+        `/api/docker/containers/${containerId}/logs/`,
+        params
+      );
       const response = await api.get(url);
       return response.data;
     } catch (error) {
