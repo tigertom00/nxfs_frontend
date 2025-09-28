@@ -29,8 +29,10 @@ export const tasksAPI = {
 
       // Fetch all pages
       while (nextUrl) {
-        console.log('Fetching tasks from:', nextUrl);
-        const response = await api.get(nextUrl);
+        // Convert HTTP URLs to HTTPS to avoid mixed content issues
+        const httpsUrl = nextUrl.replace('http://', 'https://');
+        console.log('Fetching tasks from:', httpsUrl);
+        const response = await api.get(httpsUrl);
         console.log('Raw tasks API response:', response.data);
 
         // Extract tasks from current page
