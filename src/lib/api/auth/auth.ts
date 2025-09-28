@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { env } from '../../env';
+import api from '../base';
 import { handleApiError } from '../shared/error-handler';
 import {
   LoginPayload,
@@ -16,10 +15,7 @@ import {
 export const authAPI = {
   login: async (credentials: LoginPayload): Promise<LoginResponse> => {
     try {
-      const response = await axios.post(
-        `${env.NEXT_PUBLIC_API_URL}/auth/token/`,
-        credentials
-      );
+      const response = await api.post('/auth/token/', credentials);
       return response.data;
     } catch (error) {
       handleApiError(error, 'Logging in');
@@ -29,12 +25,9 @@ export const authAPI = {
 
   refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
     try {
-      const response = await axios.post(
-        `${env.NEXT_PUBLIC_API_URL}/auth/token/refresh/`,
-        {
-          refresh: refreshToken,
-        }
-      );
+      const response = await api.post('/auth/token/refresh/', {
+        refresh: refreshToken,
+      });
       return response.data;
     } catch (error) {
       handleApiError(error, 'Refreshing token');
@@ -44,10 +37,7 @@ export const authAPI = {
 
   register: async (userData: RegisterPayload): Promise<RegisterResponse> => {
     try {
-      const response = await axios.post(
-        `${env.NEXT_PUBLIC_API_URL}/auth/register/`,
-        userData
-      );
+      const response = await api.post('/auth/register/', userData);
       return response.data;
     } catch (error) {
       handleApiError(error, 'Registering user');
@@ -59,10 +49,7 @@ export const authAPI = {
     payload: ForgotPasswordPayload
   ): Promise<ForgotPasswordResponse> => {
     try {
-      const response = await axios.post(
-        `${env.NEXT_PUBLIC_API_URL}/auth/password/reset/`,
-        payload
-      );
+      const response = await api.post('/auth/password/reset/', payload);
       return response.data;
     } catch (error) {
       handleApiError(error, 'Requesting password reset');
@@ -74,10 +61,7 @@ export const authAPI = {
     payload: ResetPasswordPayload
   ): Promise<ResetPasswordResponse> => {
     try {
-      const response = await axios.post(
-        `${env.NEXT_PUBLIC_API_URL}/auth/password/reset/confirm/`,
-        payload
-      );
+      const response = await api.post('/auth/password/reset/confirm/', payload);
       return response.data;
     } catch (error) {
       handleApiError(error, 'Resetting password');
@@ -87,10 +71,7 @@ export const authAPI = {
 
   verifyToken: async (token: string): Promise<{ valid: boolean }> => {
     try {
-      const response = await axios.post(
-        `${env.NEXT_PUBLIC_API_URL}/auth/token/verify/`,
-        { token }
-      );
+      const response = await api.post('/auth/token/verify/', { token });
       return response.data;
     } catch (error) {
       handleApiError(error, 'Verifying token');
@@ -103,7 +84,7 @@ export const authAPI = {
       // If your API has a logout endpoint that blacklists the token
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
-        await axios.post(`${env.NEXT_PUBLIC_API_URL}/auth/logout/`, {
+        await api.post('/auth/logout/', {
           refresh_token: refreshToken,
         });
       }
