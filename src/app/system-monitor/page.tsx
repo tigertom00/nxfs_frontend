@@ -25,7 +25,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useIntl } from '@/hooks/use-intl';
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B';
@@ -57,7 +56,6 @@ const formatUptime = (bootTime: string): string => {
 const SystemMonitorPage = () => {
   const { isAuthenticated, isInitialized } = useAuthStore();
   const router = useRouter();
-  const { t } = useIntl();
 
   const [dashboard, setDashboard] = useState<SystemDashboard | null>(null);
   const [allHosts, setAllHosts] = useState<GetLatestSystemStatsResponse | null>(
@@ -239,46 +237,53 @@ const SystemMonitorPage = () => {
                       </div>
 
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-center justify-between text-muted-foreground">
-                          <span className="flex items-center">
-                            <Cpu className="w-4 h-4 mr-2 text-blue-400" />
-                            CPU
-                          </span>
-                          <span className="text-foreground font-mono">
-                            {hostData.current_system_stats.cpu_percent}%
-                          </span>
-                        </div>
+                        {hostData.current_system_stats && (
+                          <>
+                            <div className="flex items-center justify-between text-muted-foreground">
+                              <span className="flex items-center">
+                                <Cpu className="w-4 h-4 mr-2 text-blue-400" />
+                                CPU
+                              </span>
+                              <span className="text-foreground font-mono">
+                                {hostData.current_system_stats.cpu_percent}%
+                              </span>
+                            </div>
 
-                        <div className="flex items-center justify-between text-muted-foreground">
-                          <span className="flex items-center">
-                            <MemoryStick className="w-4 h-4 mr-2 text-green-400" />
-                            Memory
-                          </span>
-                          <span className="text-foreground font-mono">
-                            {hostData.current_system_stats.memory_percent}%
-                          </span>
-                        </div>
+                            <div className="flex items-center justify-between text-muted-foreground">
+                              <span className="flex items-center">
+                                <MemoryStick className="w-4 h-4 mr-2 text-green-400" />
+                                Memory
+                              </span>
+                              <span className="text-foreground font-mono">
+                                {hostData.current_system_stats.memory_percent}%
+                              </span>
+                            </div>
 
-                        <div className="flex items-center justify-between text-muted-foreground">
-                          <span className="flex items-center">
-                            <HardDrive className="w-4 h-4 mr-2 text-purple-400" />
-                            Disk
-                          </span>
-                          <span className="text-foreground font-mono">
-                            {hostData.current_system_stats.disk_percent.toFixed(1)}%
-                          </span>
-                        </div>
+                            <div className="flex items-center justify-between text-muted-foreground">
+                              <span className="flex items-center">
+                                <HardDrive className="w-4 h-4 mr-2 text-purple-400" />
+                                Disk
+                              </span>
+                              <span className="text-foreground font-mono">
+                                {typeof hostData.current_system_stats.disk_percent === 'number'
+                                  ? hostData.current_system_stats.disk_percent.toFixed(1)
+                                  : 0}
+                                %
+                              </span>
+                            </div>
 
-                        {hostData.current_system_stats.cpu_temperature && (
-                          <div className="flex items-center justify-between text-muted-foreground">
-                            <span className="flex items-center">
-                              <Thermometer className="w-4 h-4 mr-2 text-red-400" />
-                              Temp
-                            </span>
-                            <span className="text-foreground font-mono">
-                              {hostData.current_system_stats.cpu_temperature}°C
-                            </span>
-                          </div>
+                            {hostData.current_system_stats.cpu_temperature && (
+                              <div className="flex items-center justify-between text-muted-foreground">
+                                <span className="flex items-center">
+                                  <Thermometer className="w-4 h-4 mr-2 text-red-400" />
+                                  Temp
+                                </span>
+                                <span className="text-foreground font-mono">
+                                  {hostData.current_system_stats.cpu_temperature}°C
+                                </span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </motion.div>
@@ -332,7 +337,7 @@ const SystemMonitorPage = () => {
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Uptime</p>
                       <p className="text-foreground font-mono">
-                        {formatUptime(dashboard.current_system_stats.boot_time)}
+                        {formatUptime(dashboard.host.boot_time)}
                       </p>
                     </div>
                   </div>
@@ -341,160 +346,162 @@ const SystemMonitorPage = () => {
             </motion.div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* CPU */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20 hover-lift backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-foreground">
-                      <Cpu className="w-5 h-5 mr-2 text-blue-400" />
-                      CPU Usage
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="text-3xl font-bold text-foreground">
-                        {dashboard.current_system_stats.cpu_percent}%
-                      </div>
-                      <Progress
-                        value={dashboard.current_system_stats.cpu_percent}
-                        className="bg-blue-900/50"
-                      />
-                      <div className="text-sm text-muted-foreground">
-                        {dashboard.current_system_stats.cpu_count} cores
-                      </div>
-                      {dashboard.current_system_stats.cpu_temperature && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Thermometer className="w-4 h-4 mr-1" />
-                          {dashboard.current_system_stats.cpu_temperature}°C
+            {dashboard.current_system_stats && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* CPU */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20 hover-lift backdrop-blur-sm">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-foreground">
+                        <Cpu className="w-5 h-5 mr-2 text-blue-400" />
+                        CPU Usage
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-3xl font-bold text-foreground">
+                          {dashboard.current_system_stats.cpu_percent}%
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                        <Progress
+                          value={dashboard.current_system_stats.cpu_percent}
+                          className="bg-blue-900/50"
+                        />
+                        <div className="text-sm text-muted-foreground">
+                          {dashboard.current_system_stats.cpu_count} cores
+                        </div>
+                        {dashboard.current_system_stats.cpu_temperature && (
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Thermometer className="w-4 h-4 mr-1" />
+                            {dashboard.current_system_stats.cpu_temperature}°C
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
 
-              {/* Memory */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20 hover-lift backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-foreground">
-                      <MemoryStick className="w-5 h-5 mr-2 text-green-400" />
-                      Memory Usage
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="text-3xl font-bold text-foreground">
-                        {dashboard.current_system_stats.memory_percent}%
+                {/* Memory */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20 hover-lift backdrop-blur-sm">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-foreground">
+                        <MemoryStick className="w-5 h-5 mr-2 text-green-400" />
+                        Memory Usage
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-3xl font-bold text-foreground">
+                          {dashboard.current_system_stats.memory_percent}%
+                        </div>
+                        <Progress
+                          value={dashboard.current_system_stats.memory_percent}
+                          className="bg-green-900/50"
+                        />
+                        <div className="text-sm text-muted-foreground">
+                          {formatBytes(
+                            dashboard.current_system_stats.memory_used
+                          )}{' '}
+                          /{' '}
+                          {formatBytes(
+                            dashboard.current_system_stats.memory_total
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Available:{' '}
+                          {formatBytes(
+                            dashboard.current_system_stats.memory_available
+                          )}
+                        </div>
                       </div>
-                      <Progress
-                        value={dashboard.current_system_stats.memory_percent}
-                        className="bg-green-900/50"
-                      />
-                      <div className="text-sm text-muted-foreground">
-                        {formatBytes(
-                          dashboard.current_system_stats.memory_used
-                        )}{' '}
-                        /{' '}
-                        {formatBytes(
-                          dashboard.current_system_stats.memory_total
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Available:{' '}
-                        {formatBytes(
-                          dashboard.current_system_stats.memory_available
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
 
-              {/* Disk */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20 hover-lift backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-foreground">
-                      <HardDrive className="w-5 h-5 mr-2 text-purple-400" />
-                      Disk Usage
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="text-3xl font-bold text-foreground">
-                        {dashboard.current_system_stats.disk_percent.toFixed(1)}
-                        %
+                {/* Disk */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20 hover-lift backdrop-blur-sm">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-foreground">
+                        <HardDrive className="w-5 h-5 mr-2 text-purple-400" />
+                        Disk Usage
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-3xl font-bold text-foreground">
+                          {dashboard.current_system_stats.disk_percent.toFixed(1)}
+                          %
+                        </div>
+                        <Progress
+                          value={dashboard.current_system_stats.disk_percent}
+                          className="bg-purple-900/50"
+                        />
+                        <div className="text-sm text-muted-foreground">
+                          {formatBytes(dashboard.current_system_stats.disk_used)}{' '}
+                          /{' '}
+                          {formatBytes(dashboard.current_system_stats.disk_total)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Free:{' '}
+                          {formatBytes(dashboard.current_system_stats.disk_free)}
+                        </div>
                       </div>
-                      <Progress
-                        value={dashboard.current_system_stats.disk_percent}
-                        className="bg-purple-900/50"
-                      />
-                      <div className="text-sm text-muted-foreground">
-                        {formatBytes(dashboard.current_system_stats.disk_used)}{' '}
-                        /{' '}
-                        {formatBytes(dashboard.current_system_stats.disk_total)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Free:{' '}
-                        {formatBytes(dashboard.current_system_stats.disk_free)}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
 
-              {/* Network */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border-orange-500/20 hover-lift backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-foreground">
-                      <Network className="w-5 h-5 mr-2 text-orange-400" />
-                      Network I/O
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="text-lg font-bold text-foreground">
-                        ↑{' '}
-                        {formatBytes(
-                          dashboard.current_system_stats.network_bytes_sent
-                        )}
+                {/* Network */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border-orange-500/20 hover-lift backdrop-blur-sm">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-foreground">
+                        <Network className="w-5 h-5 mr-2 text-orange-400" />
+                        Network I/O
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-lg font-bold text-foreground">
+                          ↑{' '}
+                          {formatBytes(
+                            dashboard.current_system_stats.network_bytes_sent
+                          )}
+                        </div>
+                        <div className="text-lg font-bold text-foreground">
+                          ↓{' '}
+                          {formatBytes(
+                            dashboard.current_system_stats.network_bytes_recv
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Packets:{' '}
+                          {dashboard.current_system_stats.network_packets_sent.toLocaleString()}{' '}
+                          /{' '}
+                          {dashboard.current_system_stats.network_packets_recv.toLocaleString()}
+                        </div>
                       </div>
-                      <div className="text-lg font-bold text-foreground">
-                        ↓{' '}
-                        {formatBytes(
-                          dashboard.current_system_stats.network_bytes_recv
-                        )}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Packets:{' '}
-                        {dashboard.current_system_stats.network_packets_sent.toLocaleString()}{' '}
-                        /{' '}
-                        {dashboard.current_system_stats.network_packets_recv.toLocaleString()}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </div>
+            )}
 
             {/* Containers and Processes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -616,7 +623,9 @@ const SystemMonitorPage = () => {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold text-foreground font-mono">
-                        {dashboard.current_system_stats.load_avg_1m.toFixed(2)}
+                        {typeof dashboard.current_system_stats.load_avg_1 === 'number'
+                          ? dashboard.current_system_stats.load_avg_1.toFixed(2)
+                          : '0.00'}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         1 minute
@@ -624,7 +633,9 @@ const SystemMonitorPage = () => {
                     </div>
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold text-foreground font-mono">
-                        {dashboard.current_system_stats.load_avg_5m.toFixed(2)}
+                        {typeof dashboard.current_system_stats.load_avg_5 === 'number'
+                          ? dashboard.current_system_stats.load_avg_5.toFixed(2)
+                          : '0.00'}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         5 minutes
@@ -632,7 +643,9 @@ const SystemMonitorPage = () => {
                     </div>
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold text-foreground font-mono">
-                        {dashboard.current_system_stats.load_avg_15m.toFixed(2)}
+                        {typeof dashboard.current_system_stats.load_avg_15 === 'number'
+                          ? dashboard.current_system_stats.load_avg_15.toFixed(2)
+                          : '0.00'}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         15 minutes
