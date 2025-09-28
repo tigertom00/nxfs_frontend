@@ -54,7 +54,8 @@ export const useAuthStore = create<AuthState>()(
           try {
             set({ isLoading: true, error: null });
             const userData = await usersAPI.getCurrentUser();
-            const apiUser = userData[0];
+            // Handle both array and paginated response formats
+            const apiUser = Array.isArray(userData) ? userData[0] : userData.results?.[0];
             set({
               user: apiUser,
               isAuthenticated: true,
@@ -64,7 +65,7 @@ export const useAuthStore = create<AuthState>()(
             });
 
             // Load theme preference from user data
-            if (typeof window !== 'undefined') {
+            if (apiUser && typeof window !== 'undefined') {
               const { useUIStore } = await import('./ui');
               const { loadThemeFromUser } = useUIStore.getState();
               loadThemeFromUser(apiUser);
@@ -95,7 +96,8 @@ export const useAuthStore = create<AuthState>()(
           setAuthTokens(access, refresh);
 
           const userData = await usersAPI.getCurrentUser();
-          const user = userData[0];
+          // Handle both array and paginated response formats
+          const user = Array.isArray(userData) ? userData[0] : userData.results?.[0];
 
           set({
             user,
@@ -106,15 +108,17 @@ export const useAuthStore = create<AuthState>()(
           });
 
           // Load theme preference from user data
-          if (typeof window !== 'undefined') {
+          if (user && typeof window !== 'undefined') {
             const { useUIStore } = await import('./ui');
             const { loadThemeFromUser } = useUIStore.getState();
             loadThemeFromUser(user);
           }
 
-          showSuccessToast(
-            `Welcome back, ${user.display_name || user.username}!`
-          );
+          if (user) {
+            showSuccessToast(
+              `Welcome back, ${user.display_name || user.username}!`
+            );
+          }
         } catch (error: any) {
           const apiError = handleApiError(error, 'Login');
           set({
@@ -151,8 +155,8 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true, error: null });
 
           const userData = await usersAPI.getCurrentUser();
-          // API returns array with one object
-          const user = userData[0];
+          // Handle both array and paginated response formats
+          const user = Array.isArray(userData) ? userData[0] : userData.results?.[0];
 
           set({
             user,
