@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   materialsAPI,
@@ -48,6 +49,8 @@ import {
   Trash2,
   Info,
   AlertTriangle,
+  User,
+  Users,
 } from 'lucide-react';
 
 interface MaterialManagerProps {
@@ -82,6 +85,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   const [elNumberInput, setElNumberInput] = useState('');
   const [elLookupResult, setElLookupResult] = useState<any>(null);
   const [showELResult, setShowELResult] = useState(false);
+  const [recentMaterialsFilter, setRecentMaterialsFilter] = useState<'my' | 'all'>('my');
 
   // Load materials and job materials
   useEffect(() => {
@@ -164,11 +168,14 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     }
   };
 
-  const loadRecentMaterials = async () => {
+  const loadRecentMaterials = async (filter?: 'my' | 'all') => {
     try {
+      const filterToUse = filter || recentMaterialsFilter;
+
       // Load recent materials from server - last 30 days by default
       const recentJobMaterials = await jobMaterialsAPI.getRecentJobMaterials({
         days: 30,
+        all_users: filterToUse === 'all',
       });
 
       console.log('Loaded recent job materials:', recentJobMaterials);
@@ -182,6 +189,12 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   // Refresh recent materials after adding materials to jobs
   const refreshRecentMaterials = async () => {
     await loadRecentMaterials();
+  };
+
+  // Handle filter change for recent materials
+  const handleRecentMaterialsFilterChange = async (filter: 'my' | 'all') => {
+    setRecentMaterialsFilter(filter);
+    await loadRecentMaterials(filter);
   };
 
   const handleScanELNumber = () => {
@@ -710,13 +723,36 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
               </TabsList>
 
               <TabsContent value="recent" className="space-y-2">
+                {/* Filter Toggle */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground">Filter:</span>
+                  <ToggleGroup
+                    type="single"
+                    value={recentMaterialsFilter}
+                    onValueChange={(value) => value && handleRecentMaterialsFilterChange(value as 'my' | 'all')}
+                    className="h-7"
+                  >
+                    <ToggleGroupItem value="my" className="h-7 px-2 text-xs">
+                      <User className="h-3 w-3 mr-1" />
+                      My
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="all" className="h-7 px-2 text-xs">
+                      <Users className="h-3 w-3 mr-1" />
+                      All
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+
                 {recentMaterials.length === 0 ? (
                   <div className="text-center py-4 text-muted-foreground">
                     <Clock className="h-6 w-6 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No recent materials</p>
+                    <p className="text-xs mt-1">
+                      {recentMaterialsFilter === 'my' ? 'You haven\'t' : 'No one has'} used materials recently
+                    </p>
                   </div>
                 ) : (
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                  <div className="space-y-1 max-h-44 overflow-y-auto">
                     {recentMaterials.map((recentItem) => (
                       <div key={recentItem.id} className="space-y-1">
                         <CompactMaterialCard
@@ -724,9 +760,17 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                           onSelect={addMaterialToSelection}
                           onViewDetail={setSelectedMaterialForDetail}
                         />
-                        <div className="text-xs text-muted-foreground pl-2 pb-1">
-                          Used in: {recentItem.jobb.tittel || recentItem.jobb.ordre_nr}
-                          {recentItem.antall > 1 && ` • Qty: ${recentItem.antall}`}
+                        <div className="text-xs text-muted-foreground pl-2 pb-1 flex items-center gap-2">
+                          <span>
+                            Used in: {recentItem.jobb.tittel || recentItem.jobb.ordre_nr}
+                            {recentItem.antall > 1 && ` • Qty: ${recentItem.antall}`}
+                          </span>
+                          {recentItem.user_username && recentMaterialsFilter === 'all' && (
+                            <span className="flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded">
+                              <User className="h-2.5 w-2.5" />
+                              {recentItem.user_username}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}

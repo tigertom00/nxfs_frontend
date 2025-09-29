@@ -273,6 +273,8 @@ export interface RecentJobMaterial {
   jobb: Job;
   antall: number;
   transf: boolean;
+  user?: number;
+  user_username?: string;
   created_at: string;
   updated_at: string;
 }
@@ -280,6 +282,8 @@ export interface RecentJobMaterial {
 export interface GetRecentJobMaterialsParams {
   days?: number;
   jobb_id?: string;
+  user_id?: number;
+  all_users?: boolean;
 }
 
 export type GetRecentJobMaterialsResponse = RecentJobMaterial[];
