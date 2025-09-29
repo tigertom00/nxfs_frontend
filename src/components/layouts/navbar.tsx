@@ -92,42 +92,34 @@ export default function Navbar() {
 
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
-                    <span className="mr-2">📁</span>
-                    {language === 'no' ? 'Mer' : 'More'}
+                    <span className="mr-2">📱</span>
+                    {language === 'no' ? 'Memo' : 'Memo'}
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuItem>
-                      <Link href="/more/site1" className="w-full">
-                        {language === 'no' ? 'Side 1' : 'Site 1'}
+                      <Link href="/memo" className="w-full">
+                        🏠 {language === 'no' ? 'Arbeidsordre' : 'Work Orders'}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href="/more/site2" className="w-full">
-                        {language === 'no' ? 'Side 2' : 'Site 2'}
+                      <Link href="/memo/dashboard" className="w-full">
+                        📊 {language === 'no' ? 'Dashboard' : 'Dashboard'}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href="/more/site3" className="w-full">
-                        {language === 'no' ? 'Side 3' : 'Site 3'}
+                      <Link href="/memo/reports" className="w-full">
+                        📄 {language === 'no' ? 'Rapporter' : 'Reports'}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/memo/admin" className="w-full">
+                        ⚙️ {language === 'no' ? 'Administrasjon' : 'Administration'}
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/memo" className="w-full">
-                    📱{' '}
-                    {language === 'no'
-                      ? 'Memo (Arbeidsordre)'
-                      : 'Memo (Work Orders)'}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/memo/admin" className="w-full">
-                    📊 {language === 'no' ? 'Memo Admin' : 'Memo Admin'}
-                  </Link>
-                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link href="/tasks" className="w-full">
                     {language === 'no' ? 'Oppgaver' : 'Tasks'}

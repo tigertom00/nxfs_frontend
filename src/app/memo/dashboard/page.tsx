@@ -22,7 +22,8 @@ import {
   Activity,
   Zap,
   RefreshCw,
-  ExternalLink
+  ExternalLink,
+  FileText
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -142,6 +143,14 @@ export default function MemoDashboardPage() {
               >
                 <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
                 Refresh
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/memo/reports')}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Reports
               </Button>
               <Button
                 variant="outline"

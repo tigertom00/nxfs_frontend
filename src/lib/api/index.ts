@@ -60,6 +60,7 @@ export { suppliersAPI } from './memo/suppliers';
 export { categoriesAPI as memoCategoriesAPI } from './memo/categories';
 export { timeTrackingAPI } from './memo/time-tracking';
 export { dashboardAPI } from './memo/dashboard';
+export { reportsAPI } from './memo/reports';
 export { elNumberLookupAPI } from './memo/n8n-lookup';
 
 // ============================================================================

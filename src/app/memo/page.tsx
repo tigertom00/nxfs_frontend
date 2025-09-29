@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Grid, List, BarChart3 } from 'lucide-react';
+import { Search, Plus, Grid, List, BarChart3, FileText } from 'lucide-react';
 
 export default function MemoPage() {
   const router = useRouter();
@@ -195,6 +195,13 @@ export default function MemoPage() {
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Dashboard
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/memo/reports')}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Reports
               </Button>
               <Button onClick={handleNewJob}>
                 <Plus className="h-4 w-4 mr-2" />

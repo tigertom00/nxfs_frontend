@@ -42,6 +42,7 @@ import {
   BarChart3,
   Plus,
   ExternalLink,
+  FileText,
 } from 'lucide-react';
 
 export default function MemoAdminPage() {
@@ -190,6 +191,10 @@ export default function MemoAdminPage() {
               <Button onClick={() => router.push('/memo/dashboard')} variant="outline">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Dashboard
+              </Button>
+              <Button onClick={() => router.push('/memo/reports')} variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                Reports
               </Button>
               <Button onClick={() => router.push('/memo')} variant="outline">
                 <ExternalLink className="h-4 w-4 mr-2" />
