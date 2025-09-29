@@ -40,7 +40,9 @@ export function NewJobModal({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
-  const [existingOrderNumbers, setExistingOrderNumbers] = useState<number[]>([]);
+  const [existingOrderNumbers, setExistingOrderNumbers] = useState<number[]>(
+    []
+  );
   const [formData, setFormData] = useState<CreateJobPayload>({
     ordre_nr: 0,
     tittel: '',
@@ -56,7 +58,7 @@ export function NewJobModal({
       const loadExistingNumbers = async () => {
         try {
           const jobs = await jobsAPI.getJobs();
-          const orderNumbers = jobs.map(job => job.ordre_nr);
+          const orderNumbers = jobs.map((job) => job.ordre_nr);
           setExistingOrderNumbers(orderNumbers);
 
           // Generate next available order number
@@ -201,74 +203,79 @@ export function NewJobModal({
             {/* Order Number */}
             <JobOrderValidator
               value={formData.ordre_nr}
-              onChange={(orderNumber) => handleInputChange('ordre_nr', orderNumber)}
+              onChange={(orderNumber) =>
+                handleInputChange('ordre_nr', orderNumber)
+              }
               existingOrderNumbers={existingOrderNumbers}
               required
             />
 
-          {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="tittel">Job Title *</Label>
-            <Input
-              id="tittel"
-              value={formData.tittel}
-              onChange={(e) => handleInputChange('tittel', e.target.value)}
-              placeholder="e.g., Electrical Installation"
-              required
-            />
-          </div>
-
-          {/* Address */}
-          <div className="space-y-2">
-            <Label htmlFor="adresse">Address</Label>
+            {/* Title */}
             <div className="space-y-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleUseCurrentLocation}
-                disabled={gettingLocation}
-                className="w-full transition-colors hover:bg-muted"
-              >
-                {gettingLocation ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <MapPin className="h-4 w-4 mr-2" />
-                )}
-                Use Current Location
-              </Button>
+              <Label htmlFor="tittel">Job Title *</Label>
               <Input
-                id="adresse"
-                value={formData.adresse}
-                onChange={(e) => handleInputChange('adresse', e.target.value)}
-                placeholder="Or enter address manually"
+                id="tittel"
+                value={formData.tittel}
+                onChange={(e) => handleInputChange('tittel', e.target.value)}
+                placeholder="e.g., Electrical Installation"
+                required
               />
             </div>
-          </div>
 
-          {/* Phone */}
-          <div className="space-y-2">
-            <Label htmlFor="telefon_nr">Phone Number</Label>
-            <Input
-              id="telefon_nr"
-              type="tel"
-              value={formData.telefon_nr}
-              onChange={(e) => handleInputChange('telefon_nr', e.target.value)}
-              placeholder="+47 xxx xx xxx"
-            />
-          </div>
+            {/* Address */}
+            <div className="space-y-2">
+              <Label htmlFor="adresse">Address</Label>
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleUseCurrentLocation}
+                  disabled={gettingLocation}
+                  className="w-full transition-colors hover:bg-muted"
+                >
+                  {gettingLocation ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <MapPin className="h-4 w-4 mr-2" />
+                  )}
+                  Use Current Location
+                </Button>
+                <Input
+                  id="adresse"
+                  value={formData.adresse}
+                  onChange={(e) => handleInputChange('adresse', e.target.value)}
+                  placeholder="Or enter address manually"
+                />
+              </div>
+            </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="beskrivelse">Description</Label>
-            <Textarea
-              id="beskrivelse"
-              value={formData.beskrivelse}
-              onChange={(e) => handleInputChange('beskrivelse', e.target.value)}
-              placeholder="Job description..."
-              rows={3}
-            />
-          </div>
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label htmlFor="telefon_nr">Phone Number</Label>
+              <Input
+                id="telefon_nr"
+                type="tel"
+                value={formData.telefon_nr}
+                onChange={(e) =>
+                  handleInputChange('telefon_nr', e.target.value)
+                }
+                placeholder="+47 xxx xx xxx"
+              />
+            </div>
 
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="beskrivelse">Description</Label>
+              <Textarea
+                id="beskrivelse"
+                value={formData.beskrivelse}
+                onChange={(e) =>
+                  handleInputChange('beskrivelse', e.target.value)
+                }
+                placeholder="Job description..."
+                rows={3}
+              />
+            </div>
           </form>
         </div>
 
@@ -283,11 +290,7 @@ export function NewJobModal({
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            className="flex-1"
-            disabled={loading}
-          >
+          <Button onClick={handleSubmit} className="flex-1" disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
