@@ -29,9 +29,7 @@ export const tasksAPI = {
 
       // Fetch all pages
       while (nextUrl) {
-        console.log('Fetching tasks from:', nextUrl);
         const response = await api.get(nextUrl);
-        console.log('Raw tasks API response:', response.data);
 
         // Extract tasks from current page
         const currentPageTasks = Array.isArray(response.data)
@@ -44,15 +42,8 @@ export const tasksAPI = {
 
         // Check if there's a next page
         nextUrl = response.data?.next || null;
-
-        console.log(`Page loaded: ${currentPageTasks.length} tasks, Total so far: ${allTasks.length}`);
-        if (nextUrl) {
-          console.log('Next page available:', nextUrl);
-        }
       }
 
-      console.log('Final tasks array (all pages):', allTasks);
-      console.log(`Total tasks loaded: ${allTasks.length}`);
       return allTasks;
     } catch (error) {
       handleApiError(error, 'Getting tasks');

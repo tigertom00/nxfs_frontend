@@ -244,9 +244,6 @@ export default function TasksPage() {
       setIsDialogOpen(false);
       setEditingTask(undefined);
     } catch (err: any) {
-      console.error('Task creation error:', err);
-      console.error('Task creation error response:', err.response?.data);
-
       const errorMessages = Object.values(err.response?.data ?? {}).flat();
       const errorText = errorMessages.length > 0
         ? errorMessages.join('\n')

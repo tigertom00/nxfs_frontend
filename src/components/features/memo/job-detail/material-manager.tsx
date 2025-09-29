@@ -112,10 +112,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
 
   const loadFavoriteMaterials = async () => {
     try {
-      console.log('Loading favorite materials...');
       const favorites = await materialsAPI.getFavorites();
-      console.log('Raw favorites response:', favorites);
-      console.log('Type of favorites:', typeof favorites, 'Is array:', Array.isArray(favorites));
 
       // Handle paginated response - extract results array
       const favoritesArray = Array.isArray(favorites)
@@ -124,7 +121,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
           ? favorites.results
           : [];
 
-      console.log('Processed favorites array:', favoritesArray);
       setFavoriteMaterials(favoritesArray);
     } catch (error) {
       console.error('Failed to load favorite materials:', error);
@@ -136,16 +132,10 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     try {
       // API expects numeric job ID
       const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
-      console.log('Loading job materials with params:', {
-        jobb: jobIdToUse,
-      });
 
       const jobMaterials = await jobMaterialsAPI.getJobMaterials({
         jobb: jobIdToUse,
       });
-
-      console.log('Raw job materials response:', jobMaterials);
-      console.log('Type of job materials:', typeof jobMaterials, 'Is array:', Array.isArray(jobMaterials));
 
       // Handle paginated response - extract results array
       const jobMaterialsArray = Array.isArray(jobMaterials)
@@ -153,16 +143,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         : (jobMaterials?.results && Array.isArray(jobMaterials.results))
           ? jobMaterials.results
           : [];
-      console.log('Job materials array length:', jobMaterialsArray.length);
-
       const jobSpecificMaterials = jobMaterialsArray.filter(
-        (jm) => {
-          console.log('Filtering job material:', jm, 'Job match:', jm.jobb, 'vs', jobIdToUse);
-          return jm.jobb === jobIdToUse;
-        }
+        (jm) => jm.jobb === jobIdToUse
       );
-
-      console.log('Filtered job materials:', jobSpecificMaterials);
       setJobMaterials(jobSpecificMaterials);
     } catch (error) {
       console.error('Failed to load job materials:', error);
@@ -183,46 +166,29 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
 
   const loadRecentMaterials = () => {
     // Load from localStorage - materials used in the last 30 days
-    console.log('Loading recent materials...');
-    console.log('allMaterials length:', allMaterials.length);
-
     const recentKey = 'memo-recent-materials';
     const stored = localStorage.getItem(recentKey);
-    console.log('Recent materials from localStorage:', stored);
 
     if (stored) {
       try {
         const recent = JSON.parse(stored);
         const recentArray = Array.isArray(recent) ? recent : [];
-        console.log('Raw recent array:', recentArray);
 
         const validRecent = recentArray.filter(
-          (item: any) => {
-            const daysSinceUsed = (Date.now() - item.lastUsed) / (24 * 60 * 60 * 1000);
-            console.log(`Material ${item.materialId}: ${daysSinceUsed.toFixed(1)} days ago`);
-            return Date.now() - item.lastUsed < 30 * 24 * 60 * 60 * 1000; // 30 days
-          }
+          (item: any) => Date.now() - item.lastUsed < 30 * 24 * 60 * 60 * 1000 // 30 days
         );
-        console.log('Valid recent items (within 30 days):', validRecent);
 
         const materialIds = validRecent.map((item: any) => item.materialId);
-        console.log('Looking for material IDs:', materialIds);
-
         const materialsArray = Array.isArray(allMaterials) ? allMaterials : [];
-        console.log('Available materials:', materialsArray.map(m => ({id: m.id, title: m.tittel})));
-
         const recentMats = materialsArray.filter((m) =>
           materialIds.includes(m.id)
         );
-
-        console.log('Found recent materials:', recentMats);
         setRecentMaterials(recentMats);
       } catch (error) {
         console.error('Failed to load recent materials:', error);
         setRecentMaterials([]);
       }
     } else {
-      console.log('No recent materials in localStorage - showing empty state');
       setRecentMaterials([]);
     }
   };

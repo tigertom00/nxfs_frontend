@@ -46,7 +46,9 @@ api.interceptors.response.use(
         const timeValue = parseFloat(responseTime);
         // Log slow requests (> 1 second)
         if (timeValue > 1.0) {
-          console.warn(`Slow API request: ${method} ${url} took ${responseTime}`);
+          console.warn(
+            `Slow API request: ${method} ${url} took ${responseTime}`
+          );
         }
       }
 
@@ -54,7 +56,9 @@ api.interceptors.response.use(
         const queryCount = parseInt(dbQueries);
         // Log heavy database usage (> 10 queries)
         if (queryCount > 10) {
-          console.warn(`Heavy DB usage: ${method} ${url} made ${dbQueries} queries`);
+          console.warn(
+            `Heavy DB usage: ${method} ${url} made ${dbQueries} queries`
+          );
         }
       }
 
@@ -76,7 +80,11 @@ api.interceptors.response.use(
     const originalRequest = error.config as any;
 
     // Handle 401/403 errors (unauthorized/forbidden)
-    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/token/refresh/')
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -94,6 +102,14 @@ api.interceptors.response.use(
           // Retry the original request with new token
           originalRequest.headers.Authorization = `Bearer ${response.access}`;
           return api(originalRequest);
+        } else {
+          // No refresh token available, logout immediately
+          console.log('No refresh token available, redirecting to login.');
+          useAuthStore.getState().logout();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/auth/signin';
+          }
+          return Promise.reject(error);
         }
       } catch (refreshError) {
         // Refresh failed, logout user
@@ -106,10 +122,31 @@ api.interceptors.response.use(
       }
     }
 
+    // If this is a refresh token request that failed, logout immediately
+    if (
+      originalRequest.url?.includes('/auth/token/refresh/') &&
+      (error.response?.status === 401 || error.response?.status === 403)
+    ) {
+      console.log('Refresh token request failed, redirecting to login.');
+      useAuthStore.getState().logout();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/signin';
+      }
+      return Promise.reject(error);
+    }
+
+    // Handle rate limiting (429) errors
+    if (error.response?.status === 429) {
+      console.warn('Rate limit exceeded, please wait before making more requests');
+      // Don't show error toast for rate limiting to avoid spam
+      return Promise.reject(error);
+    }
+
     // Only show error toast if it's not a 401/403 that we just handled with token refresh
     if (
       !originalRequest.url?.includes('/auth/token/refresh/') &&
-      !(error.response?.status === 401 || error.response?.status === 403)
+      !(error.response?.status === 401 || error.response?.status === 403) &&
+      !(error.response?.status === 429)
     ) {
       // Import error handler dynamically to avoid circular dependencies
       const { handleApiError } = await import('./shared/error-handler');
