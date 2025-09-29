@@ -12,7 +12,7 @@ import {
   Job,
   Supplier,
   Material,
-  TimeEntry
+  TimeEntry,
 } from '@/lib/api';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
 import {
@@ -85,10 +85,18 @@ export default function MemoAdminPage() {
           ]);
 
         // Extract arrays from potentially paginated responses
-        const jobsArray = Array.isArray(jobsData) ? jobsData : jobsData.results || [];
-        const suppliersArray = Array.isArray(suppliersData) ? suppliersData : suppliersData.results || [];
-        const materialsArray = Array.isArray(materialsData) ? materialsData : materialsData.results || [];
-        const timeEntriesArray = Array.isArray(timeEntriesData) ? timeEntriesData : timeEntriesData.results || [];
+        const jobsArray = Array.isArray(jobsData)
+          ? jobsData
+          : jobsData.results || [];
+        const suppliersArray = Array.isArray(suppliersData)
+          ? suppliersData
+          : suppliersData.results || [];
+        const materialsArray = Array.isArray(materialsData)
+          ? materialsData
+          : materialsData.results || [];
+        const timeEntriesArray = Array.isArray(timeEntriesData)
+          ? timeEntriesData
+          : timeEntriesData.results || [];
 
         setJobs(jobsArray);
         setSuppliers(suppliersArray);
@@ -178,10 +186,16 @@ export default function MemoAdminPage() {
                 Work Order Management Dashboard
               </p>
             </div>
-            <Button onClick={() => router.push('/memo')} variant="outline">
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Go to Mobile App
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => router.push('/memo/dashboard')} variant="outline">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
+              <Button onClick={() => router.push('/memo')} variant="outline">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Go to Mobile App
+              </Button>
+            </div>
           </div>
 
           {/* Stats Grid */}
@@ -390,7 +404,9 @@ export default function MemoAdminPage() {
                             )}
                           </TableCell>
                           <TableCell>
-                            {supplier.created_at ? formatDate(supplier.created_at) : 'N/A'}
+                            {supplier.created_at
+                              ? formatDate(supplier.created_at)
+                              : 'N/A'}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -446,7 +462,8 @@ export default function MemoAdminPage() {
                           <TableCell>
                             {material.kategori ? (
                               <Badge variant="secondary">
-                                {material.kategori.blokknummer} - {material.kategori.kategori}
+                                {material.kategori.blokknummer} -{' '}
+                                {material.kategori.kategori}
                               </Badge>
                             ) : (
                               'No category'
@@ -465,7 +482,10 @@ export default function MemoAdminPage() {
                                 </Badge>
                               )}
                               {material.discontinued && (
-                                <Badge variant="destructive" className="text-xs">
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
                                   ⚠
                                 </Badge>
                               )}
