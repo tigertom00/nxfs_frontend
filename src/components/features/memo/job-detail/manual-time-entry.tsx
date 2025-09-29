@@ -32,7 +32,7 @@ interface ManualTimeEntryProps {
   onCancel?: () => void;
 }
 
-const TIME_INCREMENTS = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+const TIME_INCREMENTS = [8.0];
 
 export function ManualTimeEntry({
   jobId,
@@ -164,27 +164,9 @@ export function ManualTimeEntry({
             </Popover>
           </div>
 
-          {/* Quick Time Buttons */}
+          {/* Time Input */}
           <div className="space-y-2">
-            <Label>Quick Time (30-min increments)</Label>
-            <div className="grid grid-cols-4 gap-2">
-              {TIME_INCREMENTS.map((timeHours) => (
-                <Button
-                  key={timeHours}
-                  type="button"
-                  variant={hours === timeHours ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleQuickTime(timeHours)}
-                >
-                  {timeHours}h
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom Time Input */}
-          <div className="space-y-2">
-            <Label>Custom Time</Label>
+            <Label>Time Entry</Label>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
@@ -214,6 +196,15 @@ export function ManualTimeEntry({
               >
                 <Plus className="h-4 w-4" />
               </Button>
+              <Button
+                type="button"
+                variant={hours === 8.0 ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleQuickTime(8.0)}
+                className="ml-2"
+              >
+                8h
+              </Button>
             </div>
           </div>
 
@@ -235,17 +226,6 @@ export function ManualTimeEntry({
               </div>
             </div>
           )}
-
-          {/* Time Summary */}
-          <div className="p-3 bg-card border rounded-lg">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Final time:</span>
-              <span className="font-medium text-foreground">
-                {roundingDetails.roundedFormatted} (
-                {formatMinutesToDecimalHours(roundingDetails.roundedMinutes)}h)
-              </span>
-            </div>
-          </div>
 
           {/* Description */}
           <div className="space-y-2">

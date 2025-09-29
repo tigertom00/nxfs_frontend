@@ -202,7 +202,9 @@ export type GetJobResponse = Job;
 export type CreateJobResponse = Job;
 export type UpdateJobResponse = Job;
 
-export type GetJobMaterialsResponse = JobMaterial[] | PaginatedResponse<JobMaterial>;
+export type GetJobMaterialsResponse =
+  | JobMaterial[]
+  | PaginatedResponse<JobMaterial>;
 export type GetJobMaterialResponse = JobMaterial;
 export type CreateJobMaterialResponse = JobMaterial;
 export type UpdateJobMaterialResponse = JobMaterial;
@@ -212,13 +214,57 @@ export type GetSupplierResponse = Supplier;
 export type CreateSupplierResponse = Supplier;
 export type UpdateSupplierResponse = Supplier;
 
-export type GetMemoCategoriesResponse = ElectricalCategory[] | PaginatedResponse<ElectricalCategory>;
+export type GetMemoCategoriesResponse =
+  | ElectricalCategory[]
+  | PaginatedResponse<ElectricalCategory>;
 export type GetMemoCategoryResponse = ElectricalCategory;
 
 export type GetTimeEntriesResponse = TimeEntry[] | PaginatedResponse<TimeEntry>;
 export type GetTimeEntryResponse = TimeEntry;
 export type CreateTimeEntryResponse = TimeEntry;
 export type UpdateTimeEntryResponse = TimeEntry;
+
+// New enhanced time tracking types
+export interface UserTimeStats {
+  today: {
+    hours: number;
+    entries: number;
+  };
+  yesterday: {
+    hours: number;
+    entries: number;
+  };
+  total_user: {
+    hours: number;
+    entries: number;
+  };
+  total_all_users: {
+    hours: number;
+    entries: number;
+  };
+}
+
+export interface TimeEntryWithJob extends TimeEntry {
+  jobb_details?: {
+    ordre_nr: string;
+    tittel?: string;
+  };
+}
+
+export interface DateGroupedTimeEntries {
+  [date: string]: {
+    date: string;
+    total_hours: number;
+    entries: TimeEntryWithJob[];
+  };
+}
+
+export interface GetTimeEntriesByDateParams {
+  start_date?: string;
+  end_date?: string;
+  user_id?: number;
+  jobb?: string;
+}
 
 // Dashboard types
 export interface DashboardStats {

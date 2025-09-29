@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { timeEntriesAPI } from '@/lib/api';
+import { timeEntriesAPI, timeTrackingAPI } from '@/lib/api';
+import { UserTimeStats } from '@/lib/api';
 import { useAuthStore } from '@/stores';
-import { Play, Square, Clock, PlusCircle, List } from 'lucide-react';
+import { Play, Square, Clock, PlusCircle, List, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ManualTimeEntry } from './manual-time-entry';
 import { TimeEntriesList } from './time-entries-list';
@@ -39,6 +40,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const [activeTab, setActiveTab] = useState('timer');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showStopModal, setShowStopModal] = useState(false);
+  const [userStats, setUserStats] = useState<UserTimeStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout>();
   const notificationRef = useRef<Notification>();
@@ -166,6 +169,28 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     return formatSecondsToTimeString(seconds);
   };
 
+  const loadUserStats = async () => {
+    if (!user) return;
+
+    try {
+      setStatsLoading(true);
+      const stats = await timeTrackingAPI.getUserStats();
+      setUserStats(stats);
+    } catch (error) {
+      console.error('Failed to load user stats:', error);
+      // Don't show error toast for stats - it's supplementary information
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // Load user stats on mount and when user changes
+  useEffect(() => {
+    if (user) {
+      loadUserStats();
+    }
+  }, [user]);
+
   const startTimer = () => {
     try {
       console.log('Starting timer for job:', jobId, 'user:', user?.id);
@@ -244,8 +269,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         description: `${formatTime(roundedSeconds)} saved to Job #${jobId}${roundedSeconds !== timer.elapsed ? ' (rounded)' : ''}`,
       });
 
-      // Trigger refresh of time entries list
+      // Trigger refresh of time entries list and user stats
       setRefreshTrigger((prev) => prev + 1);
+      loadUserStats(); // Refresh stats after saving
 
       // Stop timer and reset
       handleTimerReset();
@@ -296,6 +322,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
 
   const handleManualEntrySuccess = () => {
     setRefreshTrigger((prev) => prev + 1);
+    loadUserStats(); // Refresh stats after manual entry
     setActiveTab('entries'); // Switch to entries tab after adding
   };
 
@@ -319,6 +346,63 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
 
         <TabsContent value="timer" className="space-y-0">
           <div className="bg-card border rounded-lg p-4 space-y-4">
+            {/* User Statistics */}
+            {userStats && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground">
+                    TIME OVERVIEW
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="text-center p-2 bg-muted/30 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Today</div>
+                    <div className="text-sm font-semibold">
+                      {userStats.today.hours.toFixed(1)}h
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {userStats.today.entries} entries
+                    </div>
+                  </div>
+                  <div className="text-center p-2 bg-muted/30 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Yesterday</div>
+                    <div className="text-sm font-semibold">
+                      {userStats.yesterday.hours.toFixed(1)}h
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {userStats.yesterday.entries} entries
+                    </div>
+                  </div>
+                  <div className="text-center p-2 bg-muted/30 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Your Total</div>
+                    <div className="text-sm font-semibold">
+                      {userStats.total_user.hours.toFixed(0)}h
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {userStats.total_user.entries} entries
+                    </div>
+                  </div>
+                  <div className="text-center p-2 bg-muted/30 rounded-lg">
+                    <div className="text-xs text-muted-foreground">All Users</div>
+                    <div className="text-sm font-semibold">
+                      {userStats.total_all_users.hours.toFixed(0)}h
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {userStats.total_all_users.entries} entries
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {statsLoading && (
+              <div className="flex items-center justify-center py-3">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                <span className="ml-2 text-xs text-muted-foreground">Loading stats...</span>
+              </div>
+            )}
+
             {/* Timer Display */}
             <div className="text-center">
               <div className="flex items-center justify-center gap-2 mb-2">

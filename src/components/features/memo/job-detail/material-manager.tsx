@@ -77,7 +77,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     useState<Material | null>(null);
   const [displayMaterials, setDisplayMaterials] = useState<Material[]>([]);
   const [showingSearchResults, setShowingSearchResults] = useState(false);
-  const [activeTab, setActiveTab] = useState('recent');
+  const [activeTab, setActiveTab] = useState('search');
   const [materialTab, setMaterialTab] = useState('view');
   const [elNumberInput, setElNumberInput] = useState('');
   const [elLookupResult, setElLookupResult] = useState<any>(null);
@@ -742,9 +742,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
               className="space-y-2"
             >
               <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="search">Search</TabsTrigger>
                 <TabsTrigger value="recent">Recent</TabsTrigger>
                 <TabsTrigger value="favorites">Favorites</TabsTrigger>
-                <TabsTrigger value="search">Search</TabsTrigger>
               </TabsList>
 
               <TabsContent value="recent" className="space-y-2">

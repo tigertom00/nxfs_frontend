@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { timeEntriesAPI } from '@/lib/api';
+import { timeEntriesAPI, timeTrackingAPI } from '@/lib/api';
+import { DateGroupedTimeEntries, TimeEntryWithJob } from '@/lib/api';
 import { useAuthStore } from '@/stores';
-import { Clock, Edit2, Trash2, Calendar } from 'lucide-react';
+import { Clock, Edit2, Trash2, Calendar, ChevronDown, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { TimeEntry } from '@/lib/api';
@@ -45,72 +46,43 @@ export function TimeEntriesList({
 }: TimeEntriesListProps) {
   const { toast } = useToast();
   const { user } = useAuthStore();
-  const [timeEntries, setTimeEntries] = useState<GroupedTimeEntry[]>([]);
+  const [groupedEntries, setGroupedEntries] = useState<DateGroupedTimeEntries>({});
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
 
   const loadTimeEntries = async () => {
     try {
       setLoading(true);
       // API expects numeric job ID
       const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
-      console.log('Loading time entries with params:', {
-        jobb: jobIdToUse,
-        user: parseInt(user?.id || '0'),
+
+      console.log('Loading grouped time entries with params:', {
+        jobb: jobIdToUse.toString(),
+        user_id: parseInt(user?.id || '0'),
       });
 
-      const entries = await timeEntriesAPI.getTimeEntries({
-        jobb: jobIdToUse,
-        user: parseInt(user?.id || '0'),
+      const groupedData = await timeTrackingAPI.getTimeEntriesByDate({
+        jobb: jobIdToUse.toString(),
+        user_id: parseInt(user?.id || '0'),
       });
 
-      console.log('Raw time entries response:', entries);
-      console.log('Type of entries:', typeof entries, 'Is array:', Array.isArray(entries));
+      console.log('Grouped time entries response:', groupedData);
+      setGroupedEntries(groupedData);
 
-      // Handle paginated response - extract results array
-      const entriesArray = Array.isArray(entries)
-        ? entries
-        : (entries?.results && Array.isArray(entries.results))
-          ? entries.results
-          : [];
-
-      console.log('Entries array length:', entriesArray.length);
-
-      // Additional client-side filtering for safety (compare as numbers)
-      const jobEntries = entriesArray.filter(
-        (entry) => {
-          console.log('Filtering entry:', entry, 'Job match:', entry.jobb, 'vs', jobIdToUse);
-          return entry.jobb === jobIdToUse && entry.user === parseInt(user?.id || '0');
-        }
-      );
-
-      console.log('Filtered job entries:', jobEntries);
-
-      // Transform entries to include calculated fields
-      const transformedEntries: GroupedTimeEntry[] = jobEntries.map((entry) => {
-        const totalMinutes = entry.timer || 0;
-        return {
-          ...entry,
-          totalMinutes,
-          formattedTime: formatMinutesToHourString(totalMinutes),
-          decimalHours: formatMinutesToDecimalHours(totalMinutes),
-        };
-      });
-
-      // Sort by date (most recent first)
-      transformedEntries.sort((a, b) => {
-        if (!a.dato || !b.dato) return 0;
-        return new Date(b.dato).getTime() - new Date(a.dato).getTime();
-      });
-
-      setTimeEntries(transformedEntries);
+      // Auto-expand today's date if it exists
+      const today = new Date().toISOString().split('T')[0];
+      if (groupedData[today]) {
+        setExpandedDates(new Set([today]));
+      }
     } catch (error) {
-      console.error('Failed to load time entries:', error);
+      console.error('Failed to load grouped time entries:', error);
       toast({
         title: 'Failed to load time entries',
         description: 'Could not load existing time entries for this job',
         variant: 'destructive',
       });
+      setGroupedEntries({});
     } finally {
       setLoading(false);
     }
@@ -123,13 +95,25 @@ export function TimeEntriesList({
     }
   }, [jobId, user, refreshTrigger]);
 
+  const toggleDateExpansion = (date: string) => {
+    setExpandedDates(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(date)) {
+        newSet.delete(date);
+      } else {
+        newSet.add(date);
+      }
+      return newSet;
+    });
+  };
+
   const handleDelete = async (entryId: number) => {
     try {
       setDeleting(entryId);
       await timeEntriesAPI.deleteTimeEntry(entryId);
 
-      // Remove from local state
-      setTimeEntries((prev) => prev.filter((entry) => entry.id !== entryId));
+      // Reload the grouped data after deletion
+      loadTimeEntries();
 
       toast({
         title: 'Time entry deleted',
@@ -148,8 +132,8 @@ export function TimeEntriesList({
   };
 
   const getTotalHours = () => {
-    const totalMinutes = timeEntries.reduce(
-      (sum, entry) => sum + entry.totalMinutes,
+    const totalMinutes = Object.values(groupedEntries).reduce(
+      (sum, dateGroup) => sum + (dateGroup.total_hours * 60),
       0
     );
     return {
@@ -157,6 +141,13 @@ export function TimeEntriesList({
       formatted: formatMinutesToHourString(totalMinutes),
       decimal: formatMinutesToDecimalHours(totalMinutes),
     };
+  };
+
+  const getTotalEntries = () => {
+    return Object.values(groupedEntries).reduce(
+      (sum, dateGroup) => sum + dateGroup.entries.length,
+      0
+    );
   };
 
   if (loading) {
@@ -172,7 +163,7 @@ export function TimeEntriesList({
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="h-16 bg-muted rounded-lg"></div>
+                <div className="h-12 bg-muted rounded-lg"></div>
               </div>
             ))}
           </div>
@@ -182,6 +173,10 @@ export function TimeEntriesList({
   }
 
   const totalHours = getTotalHours();
+  const totalEntries = getTotalEntries();
+  const sortedDates = Object.keys(groupedEntries).sort((a, b) =>
+    new Date(b).getTime() - new Date(a).getTime()
+  );
 
   return (
     <Card>
@@ -189,7 +184,7 @@ export function TimeEntriesList({
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
           Time Entries
-          {timeEntries.length > 0 && (
+          {totalEntries > 0 && (
             <span className="text-sm font-normal text-muted-foreground ml-auto">
               Total: {totalHours.formatted} ({totalHours.decimal}h)
             </span>
@@ -197,7 +192,7 @@ export function TimeEntriesList({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {timeEntries.length === 0 ? (
+        {sortedDates.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No time entries recorded yet</p>
@@ -206,92 +201,134 @@ export function TimeEntriesList({
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {timeEntries.map((entry) => (
-              <div
-                key={entry.id}
-                className="flex items-center justify-between p-3 border rounded-lg bg-card hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="font-medium text-foreground">
-                      {entry.formattedTime}
-                      <span className="text-sm text-muted-foreground ml-2">
-                        ({entry.decimalHours}h)
+          <div className="space-y-2">
+            {sortedDates.map((date) => {
+              const dateGroup = groupedEntries[date];
+              const isExpanded = expandedDates.has(date);
+              const isToday = date === new Date().toISOString().split('T')[0];
+              const isYesterday = date === new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+              let displayDate = format(parseISO(date), 'EEE. dd.MM.yyyy');
+              if (isToday) displayDate = `i dag. ${format(parseISO(date), 'dd.MM.yyyy')}`;
+              if (isYesterday) displayDate = `i går. ${format(parseISO(date), 'dd.MM.yyyy')}`;
+
+              return (
+                <div key={date} className="border rounded-lg overflow-hidden">
+                  {/* Date header */}
+                  <div
+                    onClick={() => toggleDateExpansion(date)}
+                    className="flex items-center justify-between p-3 bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <span className="font-medium text-sm">
+                        {displayDate}
                       </span>
                     </div>
-                    {entry.dato && (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {format(parseISO(entry.dato), 'MMM dd, yyyy')}
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-muted-foreground">
+                        {dateGroup.entries.length} entries
+                      </span>
+                      <div className="text-right">
+                        <div className="font-semibold text-sm">
+                          {formatMinutesToDecimalHours(dateGroup.total_hours * 60)}h
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </div>
-                  {entry.beskrivelse && (
-                    <p className="text-sm text-muted-foreground">
-                      {entry.beskrivelse}
-                    </p>
-                  )}
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Created:{' '}
-                    {format(parseISO(entry.created_at), 'MMM dd, yyyy HH:mm')}
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-2 ml-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    title="Edit time entry"
-                    disabled // TODO: Implement edit functionality
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        title="Delete time entry"
-                        disabled={deleting === entry.id}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Time Entry</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this time entry of{' '}
-                          {entry.formattedTime}? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(entry.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  {/* Entries list */}
+                  {isExpanded && (
+                    <div className="divide-y">
+                      {dateGroup.entries.map((entry) => (
+                        <div
+                          key={entry.id}
+                          className="flex items-center justify-between p-3 hover:bg-muted/20 transition-colors"
                         >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="font-medium text-sm">
+                                {formatMinutesToHourString(entry.timer)}
+                              </div>
+                              {entry.jobb_details?.tittel && (
+                                <span className="text-xs text-muted-foreground">
+                                  {entry.jobb_details.tittel}
+                                </span>
+                              )}
+                            </div>
+                            {entry.beskrivelse && (
+                              <p className="text-xs text-muted-foreground">
+                                {entry.beskrivelse}
+                              </p>
+                            )}
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Created: {format(parseISO(entry.created_at), 'HH:mm')}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 ml-4">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              title="Edit time entry"
+                              disabled // TODO: Implement edit functionality
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </Button>
+
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                  title="Delete time entry"
+                                  disabled={deleting === entry.id}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Time Entry</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this time entry of{' '}
+                                    {formatMinutesToHourString(entry.timer)}? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(entry.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {/* Summary for multiple entries */}
-        {timeEntries.length > 1 && (
+        {/* Summary for grouped entries */}
+        {totalEntries > 1 && (
           <div className="mt-4 pt-4 border-t">
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">
-                {timeEntries.length} entries
+                {totalEntries} entries across {sortedDates.length} days
               </span>
               <span className="font-medium text-foreground">
                 Total: {totalHours.formatted} ({totalHours.decimal}h)
