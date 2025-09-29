@@ -266,6 +266,24 @@ export interface GetTimeEntriesByDateParams {
   jobb?: string;
 }
 
+// Recent job materials types
+export interface RecentJobMaterial {
+  id: number;
+  matriell: Material;
+  jobb: Job;
+  antall: number;
+  transf: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GetRecentJobMaterialsParams {
+  days?: number;
+  jobb_id?: string;
+}
+
+export type GetRecentJobMaterialsResponse = RecentJobMaterial[];
+
 // Dashboard types
 export interface DashboardStats {
   materials: {

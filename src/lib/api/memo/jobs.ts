@@ -17,6 +17,9 @@ import {
   GetJobMaterialsResponse,
   GetJobMaterialResponse,
   CreateJobMaterialResponse,
+  RecentJobMaterial,
+  GetRecentJobMaterialsParams,
+  GetRecentJobMaterialsResponse,
 } from './types';
 
 export const jobsAPI = {
@@ -71,7 +74,9 @@ export const jobsAPI = {
   // Job lookup by ordre_nr
   lookupJob: async (ordreNr: string): Promise<GetJobResponse> => {
     try {
-      const response = await api.get(`/app/memo/jobber/lookup/?ordre_nr=${ordreNr}`);
+      const response = await api.get(
+        `/app/memo/jobber/lookup/?ordre_nr=${ordreNr}`
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Looking up job');
@@ -159,9 +164,12 @@ export const jobsAPI = {
     total_materials_in_job: number;
   }> => {
     try {
-      const response = await api.post(`/app/memo/jobber/${ordreNr}/add_materials/`, {
-        materials,
-      });
+      const response = await api.post(
+        `/app/memo/jobber/${ordreNr}/add_materials/`,
+        {
+          materials,
+        }
+      );
       showSuccessToast(`Added ${materials.length} materials to job ${ordreNr}`);
       return response.data;
     } catch (error) {
@@ -191,7 +199,9 @@ export const jobsAPI = {
   },
 
   // Get materials summary for job
-  getMaterialsSummary: async (ordreNr: string): Promise<{
+  getMaterialsSummary: async (
+    ordreNr: string
+  ): Promise<{
     jobb: {
       ordre_nr: string;
       tittel: string;
@@ -202,14 +212,19 @@ export const jobsAPI = {
       total_items: number;
       categories: number;
     };
-    category_breakdown: Record<string, {
-      count: number;
-      items: number;
-    }>;
+    category_breakdown: Record<
+      string,
+      {
+        count: number;
+        items: number;
+      }
+    >;
     materials: JobMaterial[];
   }> => {
     try {
-      const response = await api.get(`/app/memo/jobber/${ordreNr}/materials_summary/`);
+      const response = await api.get(
+        `/app/memo/jobber/${ordreNr}/materials_summary/`
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Getting materials summary');
@@ -253,7 +268,10 @@ export const jobMaterialsAPI = {
     jobMaterialData: CreateJobMaterialPayload
   ): Promise<CreateJobMaterialResponse> => {
     try {
-      const response = await api.post('/app/memo/jobbmatriell/', jobMaterialData);
+      const response = await api.post(
+        '/app/memo/jobbmatriell/',
+        jobMaterialData
+      );
       showSuccessToast('Material added to job successfully');
       return response.data;
     } catch (error) {
@@ -268,7 +286,10 @@ export const jobMaterialsAPI = {
     jobMaterialData: Partial<CreateJobMaterialPayload>
   ): Promise<CreateJobMaterialResponse> => {
     try {
-      const response = await api.patch(`/app/memo/jobbmatriell/${id}/`, jobMaterialData);
+      const response = await api.patch(
+        `/app/memo/jobbmatriell/${id}/`,
+        jobMaterialData
+      );
       showSuccessToast('Job material updated successfully');
       return response.data;
     } catch (error) {
@@ -284,6 +305,20 @@ export const jobMaterialsAPI = {
       showSuccessToast('Material removed from job successfully');
     } catch (error) {
       handleApiError(error, 'Deleting job material');
+      throw error;
+    }
+  },
+
+  // Get recent job materials
+  getRecentJobMaterials: async (
+    params?: GetRecentJobMaterialsParams
+  ): Promise<GetRecentJobMaterialsResponse> => {
+    try {
+      const url = createUrlWithParams('/app/memo/jobbmatriell/recent/', params);
+      const response = await api.get(url);
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      handleApiError(error, 'Getting recent job materials');
       throw error;
     }
   },

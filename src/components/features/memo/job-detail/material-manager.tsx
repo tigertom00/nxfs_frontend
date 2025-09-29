@@ -28,7 +28,7 @@ import {
   suppliersAPI,
   elNumberLookupAPI,
 } from '@/lib/api';
-import { Material, JobMaterial, Supplier } from '@/lib/api';
+import { Material, JobMaterial, Supplier, RecentJobMaterial } from '@/lib/api';
 import { BarcodeScanner } from '@/components/features/memo/shared/barcode-scanner';
 import { MaterialDetailModal } from '@/components/features/memo/shared/material-detail-modal';
 import { AdvancedMaterialSearch } from '@/components/features/memo/shared/advanced-material-search';
@@ -70,7 +70,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   >([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recentMaterials, setRecentMaterials] = useState<Material[]>([]);
+  const [recentMaterials, setRecentMaterials] = useState<RecentJobMaterial[]>([]);
   const [favoriteMaterials, setFavoriteMaterials] = useState<Material[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [selectedMaterialForDetail, setSelectedMaterialForDetail] =
@@ -87,7 +87,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   useEffect(() => {
     const loadData = async () => {
       await loadMaterials(); // Load materials first
-      loadRecentMaterials(); // Then load recent (depends on allMaterials)
+      await loadRecentMaterials(); // Load recent materials from server
     };
 
     loadData();
@@ -164,62 +164,24 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     }
   };
 
-  const loadRecentMaterials = () => {
-    // Load from localStorage - materials used in the last 30 days
-    const recentKey = 'memo-recent-materials';
-    const stored = localStorage.getItem(recentKey);
+  const loadRecentMaterials = async () => {
+    try {
+      // Load recent materials from server - last 30 days by default
+      const recentJobMaterials = await jobMaterialsAPI.getRecentJobMaterials({
+        days: 30,
+      });
 
-    if (stored) {
-      try {
-        const recent = JSON.parse(stored);
-        const recentArray = Array.isArray(recent) ? recent : [];
-
-        const validRecent = recentArray.filter(
-          (item: any) => Date.now() - item.lastUsed < 30 * 24 * 60 * 60 * 1000 // 30 days
-        );
-
-        const materialIds = validRecent.map((item: any) => item.materialId);
-        const materialsArray = Array.isArray(allMaterials) ? allMaterials : [];
-        const recentMats = materialsArray.filter((m) =>
-          materialIds.includes(m.id)
-        );
-        setRecentMaterials(recentMats);
-      } catch (error) {
-        console.error('Failed to load recent materials:', error);
-        setRecentMaterials([]);
-      }
-    } else {
+      console.log('Loaded recent job materials:', recentJobMaterials);
+      setRecentMaterials(recentJobMaterials);
+    } catch (error) {
+      console.error('Failed to load recent materials:', error);
       setRecentMaterials([]);
     }
   };
 
-  const addToRecent = (material: Material) => {
-    const recentKey = 'memo-recent-materials';
-    const stored = localStorage.getItem(recentKey);
-    let recent = [];
-
-    if (stored) {
-      try {
-        recent = JSON.parse(stored);
-      } catch (error) {
-        recent = [];
-      }
-    }
-
-    // Remove existing entry for this material
-    recent = recent.filter((item: any) => item.materialId !== material.id);
-
-    // Add to front
-    recent.unshift({
-      materialId: material.id,
-      lastUsed: Date.now(),
-    });
-
-    // Keep only last 20 items
-    recent = recent.slice(0, 20);
-
-    localStorage.setItem(recentKey, JSON.stringify(recent));
-    loadRecentMaterials();
+  // Refresh recent materials after adding materials to jobs
+  const refreshRecentMaterials = async () => {
+    await loadRecentMaterials();
   };
 
   const handleScanELNumber = () => {
@@ -441,12 +403,12 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
           antall: selectedMaterial.quantity,
         });
 
-        // Add to recent materials
-        addToRecent(selectedMaterial);
+        // Material will now appear in recent automatically via server
       }
 
-      // Reload job materials
+      // Reload job materials and refresh recent materials
       await loadJobMaterials();
+      await refreshRecentMaterials();
 
       // Clear selection
       setSelectedMaterials([]);
@@ -755,13 +717,18 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                   </div>
                 ) : (
                   <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {recentMaterials.map((material) => (
-                      <CompactMaterialCard
-                        key={material.id}
-                        material={material}
-                        onSelect={addMaterialToSelection}
-                        onViewDetail={setSelectedMaterialForDetail}
-                      />
+                    {recentMaterials.map((recentItem) => (
+                      <div key={recentItem.id} className="space-y-1">
+                        <CompactMaterialCard
+                          material={recentItem.matriell}
+                          onSelect={addMaterialToSelection}
+                          onViewDetail={setSelectedMaterialForDetail}
+                        />
+                        <div className="text-xs text-muted-foreground pl-2 pb-1">
+                          Used in: {recentItem.jobb.tittel || recentItem.jobb.ordre_nr}
+                          {recentItem.antall > 1 && ` • Qty: ${recentItem.antall}`}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
