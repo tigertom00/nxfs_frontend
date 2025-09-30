@@ -246,24 +246,53 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     try {
       setLoading(true);
 
+      // Format the data for EFObasen import
+      // Ensure leverandor is in the correct format (object with navn field)
+      const formattedData = {
+        el_nr: elData.el_nr,
+        tittel: elData.tittel,
+        varemerke: elData.varemerke,
+        info: elData.info,
+        teknisk_beskrivelse: elData.teknisk_beskrivelse,
+        varebetegnelse: elData.varebetegnelse,
+        kategori: elData.kategori,
+        // Format leverandor - handle both string and object formats
+        leverandor:
+          typeof elData.leverandor === 'string'
+            ? { navn: elData.leverandor }
+            : elData.leverandor?.navn
+              ? elData.leverandor
+              : { navn: 'Unknown Supplier' },
+      };
+
+      console.log('Importing material with data:', formattedData);
+
       // Use the EFObasen import endpoint which handles supplier creation
-      // Import material from EL lookup result
       const importedMaterial =
-        await elNumberLookupAPI.importFromEFObasen(elData);
+        await elNumberLookupAPI.importFromEFObasen(formattedData);
+
+      console.log('Imported material from API:', importedMaterial);
 
       if (importedMaterial) {
         // Reload materials to include the new one
         await loadMaterials();
 
-        // Find and add the newly imported material
-        const newMaterial = allMaterials.find((m) => m.el_nr === elData.el_nr);
-        if (newMaterial) {
-          addMaterialToSelection(newMaterial);
-        }
+        console.log('Adding imported material to selection:', {
+          id: importedMaterial.id,
+          tittel: importedMaterial.tittel,
+          el_nr: importedMaterial.el_nr,
+          leverandor: importedMaterial.leverandor,
+        });
+
+        // Add the imported material directly to selection
+        // importedMaterial is the Material object returned from the API
+        addMaterialToSelection(importedMaterial);
 
         setShowELResult(false);
         setElLookupResult(null);
         setElNumberInput('');
+        setSearchQuery('');
+        setShowingSearchResults(false);
 
         toast({
           title: 'Material Imported',
@@ -418,12 +447,30 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       return;
     }
 
+    // Validate that all materials have valid IDs
+    const invalidMaterials = selectedMaterials.filter((m) => !m.id || m.id <= 0);
+    if (invalidMaterials.length > 0) {
+      console.error('Materials with invalid IDs:', invalidMaterials);
+      toast({
+        title: 'Invalid Materials',
+        description: 'Some materials are missing valid IDs. Please try refreshing.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       let hasUpdates = false;
 
       // Add each selected material to the job
       for (const selectedMaterial of selectedMaterials) {
+        console.log('Adding material to job:', {
+          matriell_id: selectedMaterial.id,
+          jobb: jobId,
+          antall: selectedMaterial.quantity,
+        });
+
         // Check if this material already exists in the job
         const existingJobMaterial = jobMaterials.find(
           (jm) => jm.matriell.id === selectedMaterial.id
@@ -511,7 +558,17 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
 
       const materials = 'results' in result ? result.results : result;
       const materialsArray = Array.isArray(materials) ? materials : [];
-      setDisplayMaterials(materialsArray);
+
+      // Sort results: exact matches first, then others
+      const sortedMaterials = materialsArray.sort((a, b) => {
+        const aExact = a.el_nr === searchTerm.replace(/\s/g, '');
+        const bExact = b.el_nr === searchTerm.replace(/\s/g, '');
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+        return 0;
+      });
+
+      setDisplayMaterials(sortedMaterials);
       setShowingSearchResults(true);
     } catch (error) {
       console.error('Failed to perform optimized search:', error);
@@ -524,7 +581,17 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
           material.gtin_number?.includes(searchTerm) ||
           material.varenummer?.includes(searchTerm)
       );
-      setDisplayMaterials(searchResults);
+
+      // Sort results: exact matches first, then others
+      const sortedResults = searchResults.sort((a, b) => {
+        const aExact = a.el_nr === searchTerm.replace(/\s/g, '');
+        const bExact = b.el_nr === searchTerm.replace(/\s/g, '');
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+        return 0;
+      });
+
+      setDisplayMaterials(sortedResults);
       setShowingSearchResults(true);
     } finally {
       setLoading(false);
@@ -637,22 +704,13 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                       setActiveTab('search');
                       setSearchQuery(limitedValue);
 
-                      // Use choice endpoint for better performance on quick searches
-                      if (limitedValue.length >= 3) {
+                      // Only search when we have at least 5 digits for EL numbers to avoid too many partial matches
+                      if (limitedValue.length >= 5) {
+                        // Use optimized search to query the database
                         performOptimizedSearch(limitedValue);
                       } else {
-                        // Search local materials for short queries
-                        const searchResults = allMaterials.filter(
-                          (material) =>
-                            material.el_nr?.includes(limitedValue) ||
-                            material.tittel
-                              ?.toLowerCase()
-                              .includes(limitedValue.toLowerCase()) ||
-                            material.gtin_number?.includes(limitedValue) ||
-                            material.varenummer?.includes(limitedValue)
-                        );
-                        setDisplayMaterials(searchResults);
-                        setShowingSearchResults(true);
+                        setShowingSearchResults(false);
+                        setDisplayMaterials([]);
                       }
                     } else {
                       setShowingSearchResults(false);
@@ -794,6 +852,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                           material={recentItem.matriell}
                           onSelect={addMaterialToSelection}
                           onViewDetail={setSelectedMaterialForDetail}
+                          searchQuery={searchQuery}
                         />
                         <div className="text-xs text-muted-foreground pl-2 pb-1 flex items-center gap-2 justify-between">
                           <span>
@@ -835,6 +894,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                         material={material}
                         onSelect={addMaterialToSelection}
                         onViewDetail={setSelectedMaterialForDetail}
+                        searchQuery={searchQuery}
                       />
                     ))}
                   </div>
@@ -888,25 +948,36 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                         </Button>
                       </div>
 
-                      {displayMaterials.length > 0 ? (
-                        <div className="space-y-1 max-h-48 overflow-y-auto">
-                          {displayMaterials.map((material) => (
-                            <CompactMaterialCard
-                              key={material.id}
-                              material={material}
-                              onSelect={addMaterialToSelection}
-                              onViewDetail={setSelectedMaterialForDetail}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        // Show N8N lookup option when no results found
-                        elNumberInput.trim() && (
-                          <div className="text-center py-6 border rounded-lg bg-muted/20">
-                            <Package className="h-8 w-8 mx-auto mb-3 opacity-50" />
-                            <p className="text-sm text-muted-foreground mb-3">
-                              No materials found for "{elNumberInput}"
-                            </p>
+                      <div className="space-y-2">
+                        {displayMaterials.length > 0 && (
+                          <div className="space-y-1 max-h-48 overflow-y-auto">
+                            {displayMaterials.map((material) => (
+                              <CompactMaterialCard
+                                key={material.id}
+                                material={material}
+                                onSelect={addMaterialToSelection}
+                                onViewDetail={setSelectedMaterialForDetail}
+                                searchQuery={searchQuery}
+                              />
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Show EFObasen lookup option when we have an EL number search */}
+                        {elNumberInput.trim() && elNumberInput.replace(/\s/g, '').length >= 6 && (
+                          <div className="text-center py-4 border rounded-lg bg-muted/20">
+                            {displayMaterials.length === 0 ? (
+                              <>
+                                <Package className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                                <p className="text-sm text-muted-foreground mb-3">
+                                  No materials found for "{elNumberInput}"
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-sm text-muted-foreground mb-3">
+                                Not finding what you're looking for?
+                              </p>
+                            )}
                             <Button
                               size="sm"
                               onClick={handleELNumberLookup}
@@ -919,8 +990,8 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                               Look up in EFObasen
                             </Button>
                           </div>
-                        )
-                      )}
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -933,6 +1004,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                           material={material}
                           onSelect={addMaterialToSelection}
                           onViewDetail={setSelectedMaterialForDetail}
+                          searchQuery={searchQuery}
                         />
                       ))}
                     </div>
@@ -953,9 +1025,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {selectedMaterials.map((material) => (
+            {selectedMaterials.map((material, index) => (
               <div
-                key={material.id}
+                key={material.id || `temp-${index}`}
                 className="flex items-center justify-between p-2 bg-muted rounded"
               >
                 <div className="flex-1">
@@ -1172,23 +1244,33 @@ interface CompactMaterialCardProps {
   material: Material;
   onSelect: (material: Material) => void;
   onViewDetail?: (material: Material) => void;
+  searchQuery?: string;
 }
 
 function CompactMaterialCard({
   material,
   onSelect,
   onViewDetail,
+  searchQuery,
 }: CompactMaterialCardProps) {
+  // Check if this is an exact EL number match
+  const isExactMatch = searchQuery && material.el_nr === searchQuery.replace(/\s/g, '');
+
   return (
-    <div className="flex items-center justify-between p-2 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-colors">
+    <div className={`flex items-center justify-between p-2 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-colors ${isExactMatch ? 'border-primary bg-primary/10 shadow-sm' : ''}`}>
       <div
         className="flex-1 cursor-pointer"
         onClick={() => onViewDetail?.(material)}
       >
         <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">
+          <span className={`font-medium text-sm ${isExactMatch ? 'text-primary' : ''}`}>
             {material.el_nr || 'No EL#'}
           </span>
+          {isExactMatch && (
+            <Badge variant="default" className="text-xs">
+              Exact Match
+            </Badge>
+          )}
           <span className="text-sm text-muted-foreground truncate">
             {material.tittel || 'Untitled'}
           </span>
