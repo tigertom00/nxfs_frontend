@@ -6,9 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { jobImagesAPI, jobFilesAPI } from '@/lib/api';
 import { JobImage, JobFile } from '@/lib/api';
-import { Camera, FolderOpen, Upload, X, Loader2, Image as ImageIcon, FileText } from 'lucide-react';
+import { Camera, FolderOpen, Upload, X, Loader2, Image as ImageIcon, FileText, Edit3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useUIStore } from '@/stores';
+import { ImageEditorDialog } from '@/components/features/memo/shared/image-editor-dialog';
 
 interface PhotoGalleryProps {
   jobId: number;
@@ -24,6 +25,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('images');
   const [deleteTarget, setDeleteTarget] = useState<{type: 'image' | 'document'; item: JobImage | JobFile} | null>(null);
+  const [editingImage, setEditingImage] = useState<JobImage | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -272,6 +274,53 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
     return filename.split('.').pop()?.toUpperCase() || '?';
   };
 
+  const handleSaveEditedImage = async (dataUrl: string) => {
+    if (!editingImage) return;
+
+    try {
+      setUploading(true);
+
+      // Convert data URL to blob
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+
+      // Create file from blob
+      const file = new File([blob], `edited_${editingImage.name || `image_${Date.now()}.png`}`, {
+        type: 'image/png',
+      });
+
+      // Upload as new image
+      const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
+      const uploadedImage = await jobImagesAPI.uploadJobImage({
+        image: file,
+        jobb: jobIdToUse,
+      });
+
+      // Add to photos list
+      setPhotos((prev) => [...prev, uploadedImage]);
+
+      toast({
+        title: language === 'no' ? 'Bilde lagret' : 'Image saved',
+        description: language === 'no'
+          ? 'Det redigerte bildet er lastet opp'
+          : 'Edited image has been uploaded',
+      });
+
+      setEditingImage(null);
+    } catch (error) {
+      console.error('Failed to save edited image:', error);
+      toast({
+        title: language === 'no' ? 'Feil' : 'Error',
+        description: language === 'no'
+          ? 'Kunne ikke lagre redigert bilde'
+          : 'Failed to save edited image',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -327,13 +376,22 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                           'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDMuNVYyMC41SDNWMy41SDIxWk0yMiAySDJDMS40NSAyIDEgMi40NSAxIDNWMjFDMSAyMS41NSAxLjQ1IDIyIDIgMjJIMjJDMjIuNTUgMjIgMjMgMjEuNTUgMjMgMjFWM0MyMyAyLjQ1IDIyLjU1IDIgMjIgMloiIGZpbGw9IiNjY2MiLz4KPC9zdmc+';
                       }}
                     />
-                    <button
-                      onClick={() => setDeleteTarget({ type: 'image', item: photo })}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      aria-label="Delete photo"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
+                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => setEditingImage(photo)}
+                        className="bg-primary text-primary-foreground rounded-full p-1"
+                        aria-label="Edit photo"
+                      >
+                        <Edit3 className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget({ type: 'image', item: photo })}
+                        className="bg-red-500 text-white rounded-full p-1"
+                        aria-label="Delete photo"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -525,6 +583,16 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
         cancelText={language === 'no' ? 'Avbryt' : 'Cancel'}
         variant="destructive"
       />
+
+      {/* Image Editor Dialog */}
+      {editingImage && (
+        <ImageEditorDialog
+          open={!!editingImage}
+          onOpenChange={(open) => !open && setEditingImage(null)}
+          imageUrl={editingImage.image}
+          onSave={handleSaveEditedImage}
+        />
+      )}
     </div>
   );
 }
