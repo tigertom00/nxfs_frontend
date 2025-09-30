@@ -775,7 +775,12 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                   </div>
                 ) : (
                   <div className="space-y-1 max-h-44 overflow-y-auto">
-                    {recentMaterials.map((recentItem) => (
+                    {recentMaterials.map((recentItem) => {
+                      const userDisplay = recentItem.user && typeof recentItem.user !== 'number'
+                        ? getUserDisplay(recentItem.user)
+                        : null;
+
+                      return (
                       <div key={recentItem.id} className="space-y-1">
                         <CompactMaterialCard
                           material={recentItem.matriell}
@@ -787,22 +792,23 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                             Used in: {recentItem.jobb.tittel || recentItem.jobb.ordre_nr}
                             {recentItem.antall > 1 && ` • Qty: ${recentItem.antall}`}
                           </span>
-                          {recentItem.user && recentMaterialsFilter === 'all' && typeof recentItem.user !== 'number' && (
+                          {userDisplay && recentMaterialsFilter === 'all' && (
                             <span className="flex items-center gap-1.5 text-xs bg-muted px-2 py-1 rounded-full">
                               <Avatar className="h-4 w-4">
-                                <AvatarImage src={getUserDisplay(recentItem.user).avatar || undefined} />
+                                <AvatarImage src={userDisplay.avatar || undefined} />
                                 <AvatarFallback className="text-[8px]">
-                                  {getUserDisplay(recentItem.user).initials}
+                                  {userDisplay.initials}
                                 </AvatarFallback>
                               </Avatar>
                               <span className="font-medium">
-                                {getUserDisplay(recentItem.user).displayName}
+                                {userDisplay.displayName}
                               </span>
                             </span>
                           )}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </TabsContent>

@@ -264,7 +264,12 @@ export function TimeEntriesList({
                   {/* Entries list */}
                   {isExpanded && (
                     <div className="divide-y">
-                      {dateGroup.entries.map((entry) => (
+                      {dateGroup.entries.map((entry) => {
+                        const userDisplay = entry.user && typeof entry.user !== 'number'
+                          ? getUserDisplay(entry.user)
+                          : null;
+
+                        return (
                         <div
                           key={entry.id}
                           className="flex items-center justify-between p-3 hover:bg-muted/20 transition-colors"
@@ -279,15 +284,15 @@ export function TimeEntriesList({
                                   {entry.jobb_tittel || entry.jobb_details?.tittel}
                                 </span>
                               )}
-                              {entry.user && typeof entry.user !== 'number' && (
+                              {userDisplay && (
                                 <span className="flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full ml-auto">
                                   <Avatar className="h-3 w-3">
-                                    <AvatarImage src={getUserDisplay(entry.user).avatar || undefined} />
+                                    <AvatarImage src={userDisplay.avatar || undefined} />
                                     <AvatarFallback className="text-[6px]">
-                                      {getUserDisplay(entry.user).initials}
+                                      {userDisplay.initials}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <span>{getUserDisplay(entry.user).displayName}</span>
+                                  <span>{userDisplay.displayName}</span>
                                 </span>
                               )}
                             </div>
@@ -345,7 +350,8 @@ export function TimeEntriesList({
                             </AlertDialog>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
