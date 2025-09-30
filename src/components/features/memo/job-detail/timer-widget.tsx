@@ -347,7 +347,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
           </TabsTrigger>
           <TabsTrigger value="manual" className="flex items-center gap-2">
             <PlusCircle className="h-4 w-4" />
-            Add Time
+            Add Timer
           </TabsTrigger>
           <TabsTrigger value="entries" className="flex items-center gap-2">
             <List className="h-4 w-4" />

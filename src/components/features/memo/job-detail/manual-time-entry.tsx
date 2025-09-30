@@ -168,15 +168,6 @@ export function ManualTimeEntry({
           <div className="space-y-2">
             <Label>Time Entry</Label>
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => adjustTime(-0.5)}
-                disabled={hours <= 0.5}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
               <Input
                 type="number"
                 value={hours}
@@ -195,6 +186,15 @@ export function ManualTimeEntry({
                 disabled={hours >= 24}
               >
                 <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => adjustTime(-0.5)}
+                disabled={hours <= 0.5}
+              >
+                <Minus className="h-4 w-4" />
               </Button>
               <Button
                 type="button"
