@@ -370,7 +370,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">Today</div>
                     <div className="text-sm font-semibold">
-                      {userStats.today.hours.toFixed(1)}h
+                      {(userStats.today.hours / 60).toFixed(1)}h
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {userStats.today.entries} entries
@@ -379,7 +379,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">Yesterday</div>
                     <div className="text-sm font-semibold">
-                      {userStats.yesterday.hours.toFixed(1)}h
+                      {(userStats.yesterday.hours / 60).toFixed(1)}h
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {userStats.yesterday.entries} entries
@@ -388,7 +388,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">Your Total</div>
                     <div className="text-sm font-semibold">
-                      {userStats.total_user.hours.toFixed(0)}h
+                      {(userStats.total_user.hours / 60).toFixed(1)}h
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {userStats.total_user.entries} entries
@@ -397,7 +397,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">All Users</div>
                     <div className="text-sm font-semibold">
-                      {userStats.total_all_users.hours.toFixed(0)}h
+                      {(userStats.total_all_users.hours / 60).toFixed(1)}h
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {userStats.total_all_users.entries} entries
