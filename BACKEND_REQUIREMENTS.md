@@ -1,4 +1,5 @@
 # Backend Development Requirements
+
 ## NXFS Frontend Integration Needs
 
 **Document Version:** 1.0
@@ -11,11 +12,13 @@
 ## 🔥 High Priority - Missing API Endpoints
 
 ### 1. Blog Media API
+
 **Status:** Missing
 **Priority:** High
 **Frontend Impact:** Blog admin functionality incomplete
 
 #### Required Endpoints:
+
 ```
 POST /api/blog/media/upload/
 - File upload for blog images/attachments
@@ -37,6 +40,7 @@ GET /api/blog/media/{id}/
 ```
 
 #### Expected Response Format:
+
 ```typescript
 interface MediaFile {
   id: number;
@@ -52,11 +56,13 @@ interface MediaFile {
 ```
 
 ### 2. Advanced Task Filtering API
+
 **Status:** Basic CRUD exists, advanced filtering missing
 **Priority:** High
 **Frontend Impact:** Limited task management functionality
 
 #### Required Enhancements:
+
 ```
 GET /api/tasks/?category=web&project=nxfs&status=in_progress&priority=high&due_date_start=2025-01-01&due_date_end=2025-12-31&search=bug
 - Multiple category filtering
@@ -68,6 +74,7 @@ GET /api/tasks/?category=web&project=nxfs&status=in_progress&priority=high&due_d
 ```
 
 #### Expected Response Format:
+
 ```typescript
 interface TasksFilterResponse {
   count: number;
@@ -86,11 +93,13 @@ interface TasksFilterResponse {
 ```
 
 ### 3. Bulk Operations API
+
 **Status:** Missing
 **Priority:** Medium
 **Frontend Impact:** No batch operations available
 
 #### Required Endpoints:
+
 ```
 POST /api/tasks/bulk-update/
 Request: {
@@ -113,11 +122,13 @@ Response: { deleted_count: number; failed_deletes: number[] }
 ```
 
 ### 4. User Management API (Admin)
+
 **Status:** Basic auth exists, admin management missing
 **Priority:** Medium
 **Frontend Impact:** No admin user management
 
 #### Required Endpoints:
+
 ```
 GET /api/admin/users/
 - List all users with pagination
@@ -136,27 +147,31 @@ POST /api/admin/users/{id}/reset-password/
 ## 🏗️ API Response Standardization
 
 ### 1. Error Response Format
+
 **Status:** Inconsistent across endpoints
 **Priority:** High
 **Frontend Impact:** Error handling complexity
 
 #### Required Standard Format:
+
 ```typescript
 interface APIError {
   error: {
-    code: string;           // Machine-readable error code
-    message: string;        // User-friendly message
-    details?: any;          // Additional error context
-    field_errors?: {        // For validation errors
+    code: string; // Machine-readable error code
+    message: string; // User-friendly message
+    details?: any; // Additional error context
+    field_errors?: {
+      // For validation errors
       [field: string]: string[];
     };
   };
   timestamp: string;
-  request_id: string;       // For debugging
+  request_id: string; // For debugging
 }
 ```
 
 #### HTTP Status Code Standards:
+
 - `400` - Validation errors, malformed requests
 - `401` - Authentication required
 - `403` - Permission denied
@@ -166,11 +181,13 @@ interface APIError {
 - `500` - Server error
 
 ### 2. Pagination Response Standardization
+
 **Status:** Partially implemented
 **Priority:** Medium
 **Frontend Impact:** Inconsistent pagination handling
 
 #### Current Django REST Framework Format (Keep):
+
 ```typescript
 interface PaginatedResponse<T> {
   count: number;
@@ -181,6 +198,7 @@ interface PaginatedResponse<T> {
 ```
 
 #### Ensure ALL list endpoints support:
+
 - `page` and `page_size` query parameters
 - Consistent metadata in response
 - Maximum page_size limit (e.g., 100)
@@ -190,11 +208,13 @@ interface PaginatedResponse<T> {
 ## 🔄 Real-time Features Enhancement
 
 ### 1. Socket.IO Backend Implementation
+
 **Status:** Basic setup exists, business logic missing
 **Priority:** Medium
 **Frontend Impact:** Limited real-time functionality
 
 #### Required Socket.IO Events:
+
 ```typescript
 // Server -> Client Events
 'task_updated': { task_id: number; task: Task; updated_by: number }
@@ -211,16 +231,19 @@ interface PaginatedResponse<T> {
 ```
 
 #### Room Management:
+
 - `tasks` - Global task updates
 - `project_{id}` - Project-specific updates
 - `user_{id}` - User-specific notifications
 
 ### 2. User Presence Tracking
+
 **Status:** Missing
 **Priority:** Low
 **Frontend Impact:** No collaborative indicators
 
 #### Required Implementation:
+
 - Track online users per room/project
 - Emit presence updates on join/leave
 - Cleanup inactive connections
@@ -231,21 +254,25 @@ interface PaginatedResponse<T> {
 ## 📊 System Monitoring Improvements
 
 ### 1. System Stats Data Consistency
+
 **Status:** Fixed in frontend, verify backend
 **Priority:** Low
 **Context:** Frontend now handles missing `cpu_percent` gracefully
 
 #### Recommendations:
+
 - Ensure all SystemStats fields are populated consistently
 - Add data validation before saving stats
 - Handle hardware detection failures gracefully
 - Add logging for failed stat collection
 
 ### 2. Historical Data Cleanup
+
 **Status:** Unknown
 **Priority:** Low
 
 #### Suggested Features:
+
 - Automatic cleanup of old system stats (>30 days)
 - Data aggregation for long-term storage
 - Performance optimization for large datasets
@@ -255,20 +282,24 @@ interface PaginatedResponse<T> {
 ## 🔐 Security & Performance Requirements
 
 ### 1. Authentication Enhancements
+
 **Status:** JWT working, needs improvements
 **Priority:** Medium
 
 #### Required Features:
+
 - Token refresh mechanism (automatic)
 - Session timeout configuration
 - Rate limiting per user/endpoint
 - Audit logging for sensitive operations
 
 ### 2. API Performance
+
 **Status:** Good for small datasets
 **Priority:** Medium
 
 #### Optimization Needs:
+
 - Database query optimization for large datasets
 - Response caching for frequently accessed data
 - Async processing for heavy operations
@@ -279,6 +310,7 @@ interface PaginatedResponse<T> {
 ## 🌐 Integration Context
 
 ### Frontend API Client Structure
+
 The frontend uses a domain-driven API architecture:
 
 ```
@@ -294,19 +326,23 @@ src/lib/api/
 ```
 
 ### Current Authentication Flow
+
 - JWT tokens stored in Zustand store
 - Automatic token refresh via Axios interceptors
 - Global error handling with toast notifications
 - Authentication check on all protected routes
 
 ### Error Handling Expectations
+
 The frontend expects:
+
 - Consistent error response format
 - Proper HTTP status codes
 - Toast-friendly error messages
 - Field-level validation errors for forms
 
 ### TypeScript Integration
+
 - All API responses must match TypeScript interfaces
 - Domain-specific type definitions in each API module
 - Support for both direct arrays and paginated responses
@@ -317,21 +353,25 @@ The frontend expects:
 ## 📋 Implementation Priority
 
 ### Phase 1 (Week 2) - Critical Missing APIs
+
 1. Blog Media API endpoints
 2. Advanced Task Filtering
 3. Error response standardization
 
 ### Phase 2 (Week 3) - Bulk Operations & Admin
+
 1. Bulk task operations
 2. Admin user management API
 3. Performance optimizations
 
 ### Phase 3 (Week 4) - Real-time Features
+
 1. Socket.IO business logic implementation
 2. User presence tracking
 3. Live notification system
 
 ### Phase 4 (Week 5+) - Enhancements
+
 1. Advanced security features
 2. Analytics and reporting APIs
 3. Performance monitoring
@@ -341,12 +381,14 @@ The frontend expects:
 ## 🧪 Testing Requirements
 
 ### API Testing Expectations
+
 - Unit tests for all new endpoints
 - Integration tests for complex workflows
 - Performance testing for bulk operations
 - Error handling validation
 
 ### Frontend Integration Testing
+
 - Automated API contract testing
 - Frontend E2E tests depend on stable API
 - Consistent test data fixtures needed
@@ -356,17 +398,20 @@ The frontend expects:
 ## 📞 Communication & Handoff
 
 ### Questions for Backend Team
+
 1. **Timeline**: What's the estimated timeline for Phase 1 items?
 2. **Bulk Operations**: Any concerns about performance for large datasets?
 3. **Real-time**: Current Socket.IO infrastructure capacity?
 4. **Testing**: Preferred testing frameworks and patterns?
 
 ### Frontend Team Contact
+
 - **Primary Contact**: [Your Name]
 - **Technical Questions**: Available for API integration discussions
 - **Testing**: Can provide frontend integration testing support
 
 ### Documentation Updates Needed
+
 - Update API schema at `api.nxfs.no/schema/` after implementation
 - Provide example requests/responses for new endpoints
 - Document any breaking changes with migration guide
@@ -374,9 +419,10 @@ The frontend expects:
 ---
 
 **Next Steps:**
+
 1. Backend team review and estimate effort
 2. Prioritize items based on business needs
 3. Plan implementation sprints
 4. Set up regular sync meetings for integration testing
 
-*Generated from Frontend TODO.md analysis - 2025-09-28*
+_Generated from Frontend TODO.md analysis - 2025-09-28_

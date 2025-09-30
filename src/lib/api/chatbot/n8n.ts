@@ -2,10 +2,7 @@ import axios from 'axios';
 import { env } from '../../env';
 import { handleApiError } from '../shared/error-handler';
 import { getAccessToken } from '../shared/utils';
-import {
-  SendMessagePayload,
-  SendChatMessageResponse,
-} from './types';
+import { SendMessagePayload, SendChatMessageResponse } from './types';
 
 export const n8nAPI = {
   // Send message to N8N chatbot
@@ -80,7 +77,9 @@ export const n8nAPI = {
   },
 
   // Generic send message that handles both text and files
-  send: async (payload: SendMessagePayload): Promise<SendChatMessageResponse> => {
+  send: async (
+    payload: SendMessagePayload
+  ): Promise<SendChatMessageResponse> => {
     if (payload.files && payload.files.length > 0) {
       return n8nAPI.sendMessageWithFiles(
         payload.sessionId,

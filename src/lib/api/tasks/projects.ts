@@ -1,6 +1,10 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
-import { createUrlWithParams, createFormData, normalizeResponse } from '../shared/utils';
+import {
+  createUrlWithParams,
+  createFormData,
+  normalizeResponse,
+} from '../shared/utils';
 import {
   Project,
   ProjectImage,
@@ -18,7 +22,9 @@ import {
 
 export const projectsAPI = {
   // Get all projects
-  getProjects: async (params?: ProjectSearchParams): Promise<GetProjectsResponse> => {
+  getProjects: async (
+    params?: ProjectSearchParams
+  ): Promise<GetProjectsResponse> => {
     try {
       const url = createUrlWithParams('/app/tasks/projects/', params);
       const response = await api.get(url);
@@ -98,7 +104,9 @@ export const projectsAPI = {
   },
 
   // Project status management
-  markAsCompleted: async (projectId: string): Promise<UpdateProjectResponse> => {
+  markAsCompleted: async (
+    projectId: string
+  ): Promise<UpdateProjectResponse> => {
     try {
       const response = await api.patch(`/app/tasks/projects/${projectId}/`, {
         status: 'completed',
@@ -113,7 +121,9 @@ export const projectsAPI = {
     }
   },
 
-  markAsInProgress: async (projectId: string): Promise<UpdateProjectResponse> => {
+  markAsInProgress: async (
+    projectId: string
+  ): Promise<UpdateProjectResponse> => {
     try {
       const response = await api.patch(`/app/tasks/projects/${projectId}/`, {
         status: 'in_progress',
@@ -218,7 +228,9 @@ export const projectsAPI = {
   // Get project images
   getImages: async (projectId: string): Promise<ProjectImage[]> => {
     try {
-      const response = await api.get(`/app/tasks/projects/${projectId}/images/`);
+      const response = await api.get(
+        `/app/tasks/projects/${projectId}/images/`
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Getting project images');
@@ -246,9 +258,13 @@ export const projectsAPI = {
   },
 
   // Duplicate project
-  duplicateProject: async (projectId: string): Promise<CreateProjectResponse> => {
+  duplicateProject: async (
+    projectId: string
+  ): Promise<CreateProjectResponse> => {
     try {
-      const response = await api.post(`/app/tasks/projects/${projectId}/duplicate/`);
+      const response = await api.post(
+        `/app/tasks/projects/${projectId}/duplicate/`
+      );
       showSuccessToast('Project duplicated successfully');
       return response.data;
     } catch (error) {

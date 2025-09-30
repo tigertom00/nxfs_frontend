@@ -47,7 +47,7 @@ export function ReportGenerator({
     endDate: '',
   });
   const [filters, setFilters] = useState({
-    jobStatus: '',
+    jobStatus: 'all',
     materialCategories: [] as string[],
     suppliers: [] as string[],
     users: [] as string[],
@@ -184,7 +184,16 @@ export function ReportGenerator({
             created_before: dateRange.endDate,
           });
 
-          const jobsArray = Array.isArray(jobs) ? jobs : jobs.results || [];
+          let jobsArray = Array.isArray(jobs) ? jobs : jobs.results || [];
+
+          // Apply job status filter
+          if (filters.jobStatus === 'active') {
+            jobsArray = jobsArray.filter(job => !job.ferdig);
+          } else if (filters.jobStatus === 'completed') {
+            jobsArray = jobsArray.filter(job => job.ferdig);
+          }
+          // If filters.jobStatus === 'all', use all jobs (no filtering)
+
           const completedJobs = jobsArray.filter(job => job.ferdig);
           const activeJobs = jobsArray.filter(job => !job.ferdig);
 
@@ -558,7 +567,7 @@ export function ReportGenerator({
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="active">Active only</SelectItem>
                   <SelectItem value="completed">Completed only</SelectItem>
                 </SelectContent>

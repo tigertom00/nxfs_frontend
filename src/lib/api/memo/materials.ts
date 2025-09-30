@@ -1,7 +1,15 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
-import { createUrlWithParams, createFormData, normalizeResponse } from '../shared/utils';
-import { ChoiceItem, BulkOperationResponse, PaginatedResponse } from '../shared/types';
+import {
+  createUrlWithParams,
+  createFormData,
+  normalizeResponse,
+} from '../shared/utils';
+import {
+  ChoiceItem,
+  BulkOperationResponse,
+  PaginatedResponse,
+} from '../shared/types';
 import {
   Material,
   MaterialSearchParams,
@@ -96,7 +104,9 @@ export const materialsAPI = {
   // Quick material lookup by EL number
   lookupMaterial: async (elNr: string): Promise<GetMaterialResponse> => {
     try {
-      const response = await api.get(`/app/memo/matriell/lookup/?el_nr=${elNr}`);
+      const response = await api.get(
+        `/app/memo/matriell/lookup/?el_nr=${elNr}`
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Looking up material');
@@ -128,7 +138,9 @@ export const materialsAPI = {
   ): Promise<CreateMaterialResponse> => {
     try {
       // Check if we have file uploads
-      const hasFiles = Object.values(materialData).some(value => value instanceof File);
+      const hasFiles = Object.values(materialData).some(
+        (value) => value instanceof File
+      );
 
       if (hasFiles) {
         const formData = createFormData(materialData);
@@ -157,19 +169,28 @@ export const materialsAPI = {
   ): Promise<UpdateMaterialResponse> => {
     try {
       // Check if we have file uploads
-      const hasFiles = Object.values(materialData).some(value => value instanceof File);
+      const hasFiles = Object.values(materialData).some(
+        (value) => value instanceof File
+      );
 
       if (hasFiles) {
         const formData = createFormData(materialData);
-        const response = await api.patch(`/app/memo/matriell/${materialId}/`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const response = await api.patch(
+          `/app/memo/matriell/${materialId}/`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
         showSuccessToast('Material updated successfully');
         return response.data;
       } else {
-        const response = await api.patch(`/app/memo/matriell/${materialId}/`, materialData);
+        const response = await api.patch(
+          `/app/memo/matriell/${materialId}/`,
+          materialData
+        );
         showSuccessToast('Material updated successfully');
         return response.data;
       }
@@ -191,9 +212,13 @@ export const materialsAPI = {
   },
 
   // Favorite management
-  addToFavorites: async (materialId: number): Promise<UpdateMaterialResponse> => {
+  addToFavorites: async (
+    materialId: number
+  ): Promise<UpdateMaterialResponse> => {
     try {
-      const response = await api.post(`/app/memo/matriell/${materialId}/favorite/`);
+      const response = await api.post(
+        `/app/memo/matriell/${materialId}/favorite/`
+      );
       showSuccessToast('Material added to favorites');
       return response.data;
     } catch (error) {
@@ -212,9 +237,13 @@ export const materialsAPI = {
     }
   },
 
-  checkFavoriteStatus: async (materialId: number): Promise<{ is_favorite: boolean }> => {
+  checkFavoriteStatus: async (
+    materialId: number
+  ): Promise<{ is_favorite: boolean }> => {
     try {
-      const response = await api.get(`/app/memo/matriell/${materialId}/favorite/`);
+      const response = await api.get(
+        `/app/memo/matriell/${materialId}/favorite/`
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Checking favorite status');
@@ -222,7 +251,9 @@ export const materialsAPI = {
     }
   },
 
-  toggleFavorite: async (materialId: number): Promise<UpdateMaterialResponse> => {
+  toggleFavorite: async (
+    materialId: number
+  ): Promise<UpdateMaterialResponse> => {
     try {
       // Check current status first
       const status = await materialsAPI.checkFavoriteStatus(materialId);
@@ -256,9 +287,14 @@ export const materialsAPI = {
   },
 
   // Bulk operations
-  bulkUpdateMaterials: async (payload: BulkMaterialUpdatePayload): Promise<BulkOperationResponse> => {
+  bulkUpdateMaterials: async (
+    payload: BulkMaterialUpdatePayload
+  ): Promise<BulkOperationResponse> => {
     try {
-      const response = await api.post('/app/memo/matriell/bulk_operations/', payload);
+      const response = await api.post(
+        '/app/memo/matriell/bulk_operations/',
+        payload
+      );
       showSuccessToast(`Bulk operation completed: ${response.data.message}`);
       return response.data;
     } catch (error) {
@@ -267,9 +303,14 @@ export const materialsAPI = {
     }
   },
 
-  bulkFavoriteAction: async (payload: BulkFavoritePayload): Promise<BulkOperationResponse> => {
+  bulkFavoriteAction: async (
+    payload: BulkFavoritePayload
+  ): Promise<BulkOperationResponse> => {
     try {
-      const response = await api.post('/app/memo/matriell/bulk_favorite/', payload);
+      const response = await api.post(
+        '/app/memo/matriell/bulk_favorite/',
+        payload
+      );
       showSuccessToast(
         `Bulk favorite operation completed: ${response.data.affected_count} materials ${
           payload.action === 'add' ? 'added to' : 'removed from'
@@ -287,7 +328,10 @@ export const materialsAPI = {
     payload: MaterialValidationPayload
   ): Promise<MaterialValidationResponse> => {
     try {
-      const response = await api.post('/app/memo/matriell/validate_data/', payload);
+      const response = await api.post(
+        '/app/memo/matriell/validate_data/',
+        payload
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Validating material data');
@@ -303,7 +347,10 @@ export const materialsAPI = {
     limit?: number;
   }): Promise<Material[] | PaginatedResponse<Material>> => {
     try {
-      const url = createUrlWithParams('/app/memo/matriell/check_duplicates/', params);
+      const url = createUrlWithParams(
+        '/app/memo/matriell/check_duplicates/',
+        params
+      );
       const response = await api.get(url);
       return normalizeResponse<Material>(response.data);
     } catch (error) {
@@ -313,9 +360,14 @@ export const materialsAPI = {
   },
 
   // EFO Basen import
-  importFromEFObasen: async (efoData: EFOBasenImportPayload): Promise<CreateMaterialResponse> => {
+  importFromEFObasen: async (
+    efoData: EFOBasenImportPayload
+  ): Promise<CreateMaterialResponse> => {
     try {
-      const response = await api.post('/app/memo/matriell/efobasen_import/', efoData);
+      const response = await api.post(
+        '/app/memo/matriell/efobasen_import/',
+        efoData
+      );
       showSuccessToast('Material imported from EFObasen successfully');
       return response.data;
     } catch (error) {

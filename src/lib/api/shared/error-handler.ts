@@ -43,7 +43,9 @@ export class ErrorHandler {
       : error.error.message;
 
     // Log request ID for debugging
-    console.error(`API Error [${error.error.code}] Request ID: ${error.request_id}`);
+    console.error(
+      `API Error [${error.error.code}] Request ID: ${error.request_id}`
+    );
 
     // Show field-level validation errors if present
     if (error.error.field_errors) {
@@ -63,9 +65,7 @@ export class ErrorHandler {
   // Handle legacy ApiError format
   private static showLegacyToast(error: ApiError, context?: string) {
     const title = 'Error';
-    const description = context
-      ? `${context}: ${error.detail}`
-      : error.detail;
+    const description = context ? `${context}: ${error.detail}` : error.detail;
 
     toast({
       variant: 'destructive',

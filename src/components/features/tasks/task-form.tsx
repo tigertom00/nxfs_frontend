@@ -17,7 +17,12 @@ import {
 import { FileUpload } from '@/components/ui/file-upload';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useUIStore } from '@/stores/ui';
-import { Task, Category, Project, CreateTaskPayload as TaskFormData } from '@/lib/api';
+import {
+  Task,
+  Category,
+  Project,
+  CreateTaskPayload as TaskFormData,
+} from '@/lib/api';
 
 interface TaskFormProps {
   task?: Task;

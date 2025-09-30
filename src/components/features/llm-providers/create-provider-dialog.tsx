@@ -16,7 +16,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/stores';
-import { llmProvidersAPI, LLMProvider, CreateLLMProviderPayload } from '@/lib/api';
+import {
+  llmProvidersAPI,
+  LLMProvider,
+  CreateLLMProviderPayload,
+} from '@/lib/api';
 import { toast } from 'sonner';
 import { Plus, X, Upload } from 'lucide-react';
 

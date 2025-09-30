@@ -11,9 +11,14 @@ import {
 
 export const categoriesAPI = {
   // List electrical categories with search and pagination
-  getCategories: async (params?: MemoCategorySearchParams): Promise<GetMemoCategoriesResponse> => {
+  getCategories: async (
+    params?: MemoCategorySearchParams
+  ): Promise<GetMemoCategoriesResponse> => {
     try {
-      const url = createUrlWithParams('/app/memo/elektrisk-kategorier/', params);
+      const url = createUrlWithParams(
+        '/app/memo/elektrisk-kategorier/',
+        params
+      );
       const response = await api.get(url);
       return normalizeResponse<ElectricalCategory>(response.data);
     } catch (error) {
@@ -25,7 +30,9 @@ export const categoriesAPI = {
   // Get category by ID
   getCategory: async (categoryId: number): Promise<GetMemoCategoryResponse> => {
     try {
-      const response = await api.get(`/app/memo/elektrisk-kategorier/${categoryId}/`);
+      const response = await api.get(
+        `/app/memo/elektrisk-kategorier/${categoryId}/`
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Getting category');
@@ -39,10 +46,13 @@ export const categoriesAPI = {
     limit?: number;
   }): Promise<ChoiceItem[]> => {
     try {
-      const url = createUrlWithParams('/app/memo/elektrisk-kategorier/choices/', {
-        search: params?.search || '',
-        limit: params?.limit || 50,
-      });
+      const url = createUrlWithParams(
+        '/app/memo/elektrisk-kategorier/choices/',
+        {
+          search: params?.search || '',
+          limit: params?.limit || 50,
+        }
+      );
       const response = await api.get(url);
       return response.data;
     } catch (error) {

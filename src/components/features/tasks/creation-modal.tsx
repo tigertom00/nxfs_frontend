@@ -14,7 +14,13 @@ import { ProjectForm } from './project-form';
 import { ProjectManager } from './project-manager';
 import { CategoryManager } from './category-manager';
 import { useUIStore } from '@/stores';
-import { Task, Category, Project, CreateTaskPayload, CreateProjectPayload } from '@/lib/api';
+import {
+  Task,
+  Category,
+  Project,
+  CreateTaskPayload,
+  CreateProjectPayload,
+} from '@/lib/api';
 import { CheckSquare, FolderKanban, Settings } from 'lucide-react';
 
 interface CreationModalProps {

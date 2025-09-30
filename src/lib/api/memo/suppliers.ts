@@ -25,7 +25,9 @@ export type UpdateSupplierPayload = Partial<CreateSupplierPayload>;
 
 export const suppliersAPI = {
   // List suppliers with search and pagination
-  getSuppliers: async (params?: SupplierSearchParams): Promise<GetSuppliersResponse> => {
+  getSuppliers: async (
+    params?: SupplierSearchParams
+  ): Promise<GetSuppliersResponse> => {
     try {
       const url = createUrlWithParams('/app/memo/leverandorer/', params);
       const response = await api.get(url);
@@ -50,7 +52,9 @@ export const suppliersAPI = {
   // Supplier lookup by name
   lookupSupplier: async (name: string): Promise<GetSupplierResponse> => {
     try {
-      const response = await api.get(`/app/memo/leverandorer/lookup/?name=${encodeURIComponent(name)}`);
+      const response = await api.get(
+        `/app/memo/leverandorer/lookup/?name=${encodeURIComponent(name)}`
+      );
       return response.data;
     } catch (error) {
       handleApiError(error, 'Looking up supplier');
@@ -77,7 +81,9 @@ export const suppliersAPI = {
   },
 
   // Create supplier
-  createSupplier: async (supplierData: CreateSupplierPayload): Promise<CreateSupplierResponse> => {
+  createSupplier: async (
+    supplierData: CreateSupplierPayload
+  ): Promise<CreateSupplierResponse> => {
     try {
       const response = await api.post('/app/memo/leverandorer/', supplierData);
       showSuccessToast('Supplier created successfully');
@@ -94,7 +100,10 @@ export const suppliersAPI = {
     supplierData: UpdateSupplierPayload
   ): Promise<UpdateSupplierResponse> => {
     try {
-      const response = await api.patch(`/app/memo/leverandorer/${supplierId}/`, supplierData);
+      const response = await api.patch(
+        `/app/memo/leverandorer/${supplierId}/`,
+        supplierData
+      );
       showSuccessToast('Supplier updated successfully');
       return response.data;
     } catch (error) {

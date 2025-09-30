@@ -26,7 +26,12 @@ interface ProjectFormProps {
   onCancel: () => void;
 }
 
-export function ProjectForm({ project, userId, onSubmit, onCancel }: ProjectFormProps) {
+export function ProjectForm({
+  project,
+  userId,
+  onSubmit,
+  onCancel,
+}: ProjectFormProps) {
   const { language } = useUIStore();
   const [formData, setFormData] = useState<ProjectFormData>({
     name: project?.name || '',

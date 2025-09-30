@@ -66,7 +66,9 @@ export function MaterialSearchPagination({
 
   if (total_pages <= 1) {
     return (
-      <div className={`flex items-center justify-center px-4 py-2 ${className}`}>
+      <div
+        className={`flex items-center justify-center px-4 py-2 ${className}`}
+      >
         <div className="text-sm text-muted-foreground">
           {count} result{count !== 1 ? 's' : ''} found
         </div>
@@ -92,7 +94,9 @@ export function MaterialSearchPagination({
                 }
               }}
               className={
-                !has_previous ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                !has_previous
+                  ? 'pointer-events-none opacity-50'
+                  : 'cursor-pointer'
               }
             />
           </PaginationItem>

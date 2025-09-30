@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { systemAPI, SystemDashboard, GetLatestSystemStatsResponse } from '@/lib/api';
+import {
+  systemAPI,
+  SystemDashboard,
+  GetLatestSystemStatsResponse,
+} from '@/lib/api';
 import { useAuthStore } from '@/stores';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layouts/navbar';
@@ -265,8 +269,11 @@ const SystemMonitorPage = () => {
                                 Disk
                               </span>
                               <span className="text-foreground font-mono">
-                                {typeof hostData.current_system_stats.disk_percent === 'number'
-                                  ? hostData.current_system_stats.disk_percent.toFixed(1)
+                                {typeof hostData.current_system_stats
+                                  .disk_percent === 'number'
+                                  ? hostData.current_system_stats.disk_percent.toFixed(
+                                      1
+                                    )
                                   : 0}
                                 %
                               </span>
@@ -279,7 +286,11 @@ const SystemMonitorPage = () => {
                                   Temp
                                 </span>
                                 <span className="text-foreground font-mono">
-                                  {hostData.current_system_stats.cpu_temperature}°C
+                                  {
+                                    hostData.current_system_stats
+                                      .cpu_temperature
+                                  }
+                                  °C
                                 </span>
                               </div>
                             )}
@@ -442,7 +453,9 @@ const SystemMonitorPage = () => {
                     <CardContent>
                       <div className="space-y-3">
                         <div className="text-3xl font-bold text-foreground">
-                          {dashboard.current_system_stats.disk_percent.toFixed(1)}
+                          {dashboard.current_system_stats.disk_percent.toFixed(
+                            1
+                          )}
                           %
                         </div>
                         <Progress
@@ -450,13 +463,19 @@ const SystemMonitorPage = () => {
                           className="bg-purple-900/50"
                         />
                         <div className="text-sm text-muted-foreground">
-                          {formatBytes(dashboard.current_system_stats.disk_used)}{' '}
+                          {formatBytes(
+                            dashboard.current_system_stats.disk_used
+                          )}{' '}
                           /{' '}
-                          {formatBytes(dashboard.current_system_stats.disk_total)}
+                          {formatBytes(
+                            dashboard.current_system_stats.disk_total
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Free:{' '}
-                          {formatBytes(dashboard.current_system_stats.disk_free)}
+                          {formatBytes(
+                            dashboard.current_system_stats.disk_free
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -623,7 +642,8 @@ const SystemMonitorPage = () => {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold text-foreground font-mono">
-                        {typeof dashboard.current_system_stats.load_avg_1 === 'number'
+                        {typeof dashboard.current_system_stats.load_avg_1 ===
+                        'number'
                           ? dashboard.current_system_stats.load_avg_1.toFixed(2)
                           : '0.00'}
                       </div>
@@ -633,7 +653,8 @@ const SystemMonitorPage = () => {
                     </div>
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold text-foreground font-mono">
-                        {typeof dashboard.current_system_stats.load_avg_5 === 'number'
+                        {typeof dashboard.current_system_stats.load_avg_5 ===
+                        'number'
                           ? dashboard.current_system_stats.load_avg_5.toFixed(2)
                           : '0.00'}
                       </div>
@@ -643,8 +664,11 @@ const SystemMonitorPage = () => {
                     </div>
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold text-foreground font-mono">
-                        {typeof dashboard.current_system_stats.load_avg_15 === 'number'
-                          ? dashboard.current_system_stats.load_avg_15.toFixed(2)
+                        {typeof dashboard.current_system_stats.load_avg_15 ===
+                        'number'
+                          ? dashboard.current_system_stats.load_avg_15.toFixed(
+                              2
+                            )
                           : '0.00'}
                       </div>
                       <div className="text-sm text-muted-foreground">

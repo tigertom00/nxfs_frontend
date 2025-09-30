@@ -228,9 +228,17 @@ export function TimeEntriesList({
               const isToday = date === new Date().toISOString().split('T')[0];
               const isYesterday = date === new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-              let displayDate = format(parseISO(date), 'EEE. dd.MM.yyyy');
-              if (isToday) displayDate = `i dag. ${format(parseISO(date), 'dd.MM.yyyy')}`;
-              if (isYesterday) displayDate = `i går. ${format(parseISO(date), 'dd.MM.yyyy')}`;
+              // Parse date once and cache it
+              let displayDate: string;
+              try {
+                const parsedDate = parseISO(date);
+                displayDate = format(parsedDate, 'EEE. dd.MM.yyyy');
+                if (isToday) displayDate = `i dag. ${format(parsedDate, 'dd.MM.yyyy')}`;
+                if (isYesterday) displayDate = `i går. ${format(parsedDate, 'dd.MM.yyyy')}`;
+              } catch (error) {
+                console.error('Date parsing error:', error, 'for date:', date);
+                displayDate = date; // Fallback to raw date string
+              }
 
               return (
                 <div key={date} className="border rounded-lg overflow-hidden">
@@ -265,9 +273,26 @@ export function TimeEntriesList({
                   {isExpanded && (
                     <div className="divide-y">
                       {dateGroup.entries.map((entry) => {
-                        const userDisplay = entry.user && typeof entry.user !== 'number'
-                          ? getUserDisplay(entry.user)
-                          : null;
+                        // Safely get user display info
+                        let userDisplay = null;
+                        try {
+                          if (entry.user && typeof entry.user !== 'number') {
+                            userDisplay = getUserDisplay(entry.user);
+                          }
+                        } catch (error) {
+                          console.error('Error getting user display:', error);
+                        }
+
+                        // Safely format created_at time
+                        let createdTime = 'N/A';
+                        try {
+                          if (entry.created_at) {
+                            createdTime = format(parseISO(entry.created_at), 'HH:mm');
+                          }
+                        } catch (error) {
+                          console.error('Error formatting time:', error);
+                          createdTime = entry.created_at || 'N/A';
+                        }
 
                         return (
                         <div
@@ -302,7 +327,7 @@ export function TimeEntriesList({
                               </p>
                             )}
                             <div className="text-xs text-muted-foreground mt-1">
-                              Created: {format(parseISO(entry.created_at), 'HH:mm')}
+                              Created: {createdTime}
                             </div>
                           </div>
 

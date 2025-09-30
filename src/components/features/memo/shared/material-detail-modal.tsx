@@ -181,10 +181,7 @@ export function MaterialDetailModal({
                     size="sm"
                     variant="ghost"
                     onClick={() =>
-                      copyToClipboard(
-                        material.varenummer!,
-                        'Product Number'
-                      )
+                      copyToClipboard(material.varenummer!, 'Product Number')
                     }
                   >
                     <Copy className="h-3 w-3" />
@@ -209,15 +206,17 @@ export function MaterialDetailModal({
                 <div className="space-y-3">
                   {material.teknisk_beskrivelse && (
                     <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm mb-1">Technical Description</p>
-                      <p className="text-sm">
-                        {material.teknisk_beskrivelse}
+                      <p className="font-medium text-sm mb-1">
+                        Technical Description
                       </p>
+                      <p className="text-sm">{material.teknisk_beskrivelse}</p>
                     </div>
                   )}
                   {material.varebetegnelse && (
                     <div className="p-3 bg-muted rounded">
-                      <p className="font-medium text-sm mb-1">Product Designation</p>
+                      <p className="font-medium text-sm mb-1">
+                        Product Designation
+                      </p>
                       <p className="text-sm">{material.varebetegnelse}</p>
                     </div>
                   )}
@@ -253,7 +252,8 @@ export function MaterialDetailModal({
                     <div className="p-3 bg-muted rounded">
                       <p className="font-medium text-sm">Category</p>
                       <p className="text-sm text-muted-foreground">
-                        {material.kategori.blokknummer} - {material.kategori.kategori}
+                        {material.kategori.blokknummer} -{' '}
+                        {material.kategori.kategori}
                       </p>
                     </div>
                   )}
@@ -303,7 +303,6 @@ export function MaterialDetailModal({
             </>
           )}
 
-
           {/* Links and Documentation */}
           {(material.produktblad ||
             material.produkt_url ||
@@ -321,7 +320,9 @@ export function MaterialDetailModal({
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => window.open(material.produktblad, '_blank')}
+                      onClick={() =>
+                        window.open(material.produktblad, '_blank')
+                      }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Product Datasheet
@@ -331,7 +332,9 @@ export function MaterialDetailModal({
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => window.open(material.produkt_url, '_blank')}
+                      onClick={() =>
+                        window.open(material.produkt_url, '_blank')
+                      }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Manufacturer Page
@@ -351,7 +354,9 @@ export function MaterialDetailModal({
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => window.open(material.cpr_sertifikat, '_blank')}
+                      onClick={() =>
+                        window.open(material.cpr_sertifikat, '_blank')
+                      }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       CPR Certificate
@@ -361,7 +366,9 @@ export function MaterialDetailModal({
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => window.open(material.miljoinformasjon, '_blank')}
+                      onClick={() =>
+                        window.open(material.miljoinformasjon, '_blank')
+                      }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Environmental Info

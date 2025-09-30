@@ -23,7 +23,12 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Material, Supplier, MaterialSearchParams, PaginatedResponse } from '@/lib/api';
+import {
+  Material,
+  Supplier,
+  MaterialSearchParams,
+  PaginatedResponse,
+} from '@/lib/api';
 import { useIntl } from '@/hooks/use-intl';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -43,7 +48,10 @@ import { MaterialSearchPagination } from './material-search-pagination';
 
 interface AdvancedMaterialSearchProps {
   suppliers: Supplier[];
-  onResults: (filteredMaterials: Material[], pagination?: PaginatedResponse<Material>) => void;
+  onResults: (
+    filteredMaterials: Material[],
+    pagination?: PaginatedResponse<Material>
+  ) => void;
   trigger?: React.ReactNode;
   initialSearchParams?: MaterialSearchParams;
 }
@@ -82,7 +90,8 @@ export function AdvancedMaterialSearch({
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<Material[]>([]);
-  const [pagination, setPagination] = useState<PaginatedResponse<Material> | null>(null);
+  const [pagination, setPagination] =
+    useState<PaginatedResponse<Material> | null>(null);
   const [filters, setFilters] = useState<SearchFilters>({
     generalSearch: initialSearchParams?.search || '',
     elNumber: initialSearchParams?.el_nr || '',
@@ -109,7 +118,10 @@ export function AdvancedMaterialSearch({
   const debouncedFilters = useDebounce(filters, 500);
 
   // Perform search with backend API
-  const performSearch = async (searchFilters: SearchFilters, page: number = 1) => {
+  const performSearch = async (
+    searchFilters: SearchFilters,
+    page: number = 1
+  ) => {
     try {
       setLoading(true);
 
@@ -200,7 +212,6 @@ export function AdvancedMaterialSearch({
 
       // Also call parent callback
       onResults(result.results, result.pagination);
-
     } catch (error) {
       console.error('Search failed:', error);
       toast({
@@ -308,7 +319,8 @@ export function AdvancedMaterialSearch({
             Advanced Material Search
           </DialogTitle>
           <DialogDescription>
-            Search electrical components using multiple criteria with real-time backend filtering
+            Search electrical components using multiple criteria with real-time
+            backend filtering
           </DialogDescription>
         </DialogHeader>
 
@@ -325,7 +337,8 @@ export function AdvancedMaterialSearch({
               }
             />
             <p className="text-xs text-muted-foreground">
-              Searches in title, technical description, product designation, manufacturer, EL-number, GTIN, and product number
+              Searches in title, technical description, product designation,
+              manufacturer, EL-number, GTIN, and product number
             </p>
           </div>
 
@@ -605,7 +618,11 @@ export function AdvancedMaterialSearch({
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">
-            <Button onClick={applyFilters} disabled={loading} className="flex-1">
+            <Button
+              onClick={applyFilters}
+              disabled={loading}
+              className="flex-1"
+            >
               {loading ? (
                 <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-background border-t-foreground" />
               ) : (

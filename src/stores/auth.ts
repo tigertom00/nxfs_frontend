@@ -55,7 +55,9 @@ export const useAuthStore = create<AuthState>()(
             set({ isLoading: true, error: null });
             const userData = await usersAPI.getCurrentUser();
             // Handle both array and paginated response formats
-            const apiUser = Array.isArray(userData) ? userData[0] : userData.results?.[0];
+            const apiUser = Array.isArray(userData)
+              ? userData[0]
+              : userData.results?.[0];
             set({
               user: apiUser,
               isAuthenticated: true,
@@ -97,7 +99,9 @@ export const useAuthStore = create<AuthState>()(
 
           const userData = await usersAPI.getCurrentUser();
           // Handle both array and paginated response formats
-          const user = Array.isArray(userData) ? userData[0] : userData.results?.[0];
+          const user = Array.isArray(userData)
+            ? userData[0]
+            : userData.results?.[0];
 
           set({
             user,
@@ -156,7 +160,9 @@ export const useAuthStore = create<AuthState>()(
 
           const userData = await usersAPI.getCurrentUser();
           // Handle both array and paginated response formats
-          const user = Array.isArray(userData) ? userData[0] : userData.results?.[0];
+          const user = Array.isArray(userData)
+            ? userData[0]
+            : userData.results?.[0];
 
           set({
             user,

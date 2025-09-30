@@ -102,15 +102,19 @@ export type UpdateProjectPayload = Partial<CreateProjectPayload>;
 
 // Enhanced search and filter types with new backend capabilities
 export interface TaskSearchParams extends BaseSearchParams {
-  status?: 'todo' | 'in_progress' | 'completed' | ('todo' | 'in_progress' | 'completed')[];
+  status?:
+    | 'todo'
+    | 'in_progress'
+    | 'completed'
+    | ('todo' | 'in_progress' | 'completed')[];
   priority?: 'low' | 'medium' | 'high' | ('low' | 'medium' | 'high')[];
   category?: number[] | string[]; // Support both number and string arrays
   project?: number | string; // Support both number and string
   user_id?: string;
   due_date_start?: string; // New: start date filter
-  due_date_end?: string;   // New: end date filter
+  due_date_end?: string; // New: end date filter
   due_date_before?: string; // Legacy: keep for backward compatibility
-  due_date_after?: string;  // Legacy: keep for backward compatibility
+  due_date_after?: string; // Legacy: keep for backward compatibility
   completed?: boolean;
   search?: string; // Full-text search across title, description
 }
@@ -158,7 +162,10 @@ export interface CategorySearchParams extends BaseSearchParams {
 }
 
 // Response types
-export type GetTasksResponse = Task[] | PaginatedResponse<Task> | TasksFilterResponse;
+export type GetTasksResponse =
+  | Task[]
+  | PaginatedResponse<Task>
+  | TasksFilterResponse;
 export type GetTaskResponse = Task;
 export type CreateTaskResponse = Task;
 export type UpdateTaskResponse = Task;

@@ -32,12 +32,13 @@ class PerformanceTracker {
     }
   }
 
-  getStats(timePeriodMs = 30 * 60 * 1000): PerformanceStats { // Default: last 30 minutes
+  getStats(timePeriodMs = 30 * 60 * 1000): PerformanceStats {
+    // Default: last 30 minutes
     const now = new Date();
     const cutoff = new Date(now.getTime() - timePeriodMs);
 
     const recentMetrics = this.metrics.filter(
-      metric => new Date(metric.timestamp) > cutoff
+      (metric) => new Date(metric.timestamp) > cutoff
     );
 
     if (recentMetrics.length === 0) {
@@ -52,19 +53,20 @@ class PerformanceTracker {
     }
 
     const responseTimes = recentMetrics
-      .map(m => m.response_time)
+      .map((m) => m.response_time)
       .filter((time): time is number => time !== undefined);
 
     const totalRequests = recentMetrics.length;
-    const averageResponseTime = responseTimes.length > 0
-      ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
-      : 0;
-    const maxResponseTime = responseTimes.length > 0
-      ? Math.max(...responseTimes)
-      : 0;
-    const slowRequests = responseTimes.filter(time => time > 1.0).length;
+    const averageResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) /
+          responseTimes.length
+        : 0;
+    const maxResponseTime =
+      responseTimes.length > 0 ? Math.max(...responseTimes) : 0;
+    const slowRequests = responseTimes.filter((time) => time > 1.0).length;
     const heavyDBRequests = recentMetrics.filter(
-      m => m.db_queries && m.db_queries > 10
+      (m) => m.db_queries && m.db_queries > 10
     ).length;
 
     return {
@@ -79,13 +81,13 @@ class PerformanceTracker {
 
   getSlowRequests(threshold = 1.0): APIPerformanceMetric[] {
     return this.metrics.filter(
-      metric => metric.response_time && metric.response_time > threshold
+      (metric) => metric.response_time && metric.response_time > threshold
     );
   }
 
   getHeavyDBRequests(threshold = 10): APIPerformanceMetric[] {
     return this.metrics.filter(
-      metric => metric.db_queries && metric.db_queries > threshold
+      (metric) => metric.db_queries && metric.db_queries > threshold
     );
   }
 

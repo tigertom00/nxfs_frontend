@@ -60,6 +60,7 @@ src/lib/api/
 ```
 
 Each domain contains:
+
 - `types.ts` - TypeScript interfaces for requests/responses
 - `index.ts` - API client methods and exports
 - Domain-specific error handling and validation
@@ -145,8 +146,8 @@ The API supports multiple pagination patterns from Django REST Framework:
 ```typescript
 // Flexible response types for paginated data
 export type GetCategoriesResponse =
-  | ElectricalCategory[]  // Direct array
-  | PaginatedResponse<ElectricalCategory>;  // Paginated response
+  | ElectricalCategory[] // Direct array
+  | PaginatedResponse<ElectricalCategory>; // Paginated response
 
 // Usage pattern in components
 const categoriesArray = Array.isArray(response)

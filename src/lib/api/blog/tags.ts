@@ -122,7 +122,10 @@ export const tagsAPI = {
   },
 
   // Merge tags (combine multiple tags into one)
-  mergeTags: async (targetTagId: string, sourceTagIds: string[]): Promise<Tag> => {
+  mergeTags: async (
+    targetTagId: string,
+    sourceTagIds: string[]
+  ): Promise<Tag> => {
     try {
       const response = await api.post(`/app/blog/tags/${targetTagId}/merge/`, {
         source_tag_ids: sourceTagIds,

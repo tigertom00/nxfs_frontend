@@ -1,4 +1,9 @@
-import { User, LoginResponse, RefreshTokenResponse, PaginatedResponse } from '../shared/types';
+import {
+  User,
+  LoginResponse,
+  RefreshTokenResponse,
+  PaginatedResponse,
+} from '../shared/types';
 
 // User response types - can be either direct array or paginated response
 export type GetCurrentUserResponse = User[] | PaginatedResponse<User>;

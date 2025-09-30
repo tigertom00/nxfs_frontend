@@ -22,7 +22,13 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore, useUIStore } from '@/stores';
-import { categoriesAPI, projectsAPI, usersAPI, Category, Project } from '@/lib/api';
+import {
+  categoriesAPI,
+  projectsAPI,
+  usersAPI,
+  Category,
+  Project,
+} from '@/lib/api';
 import {
   Settings as SettingsIcon,
   Globe,
@@ -76,7 +82,9 @@ export default function SettingsPage() {
     try {
       const response = await projectsAPI.getProjects();
       // Extract array from potentially paginated response
-      const projectsArray = Array.isArray(response) ? response : response.results || [];
+      const projectsArray = Array.isArray(response)
+        ? response
+        : response.results || [];
       setProjects(projectsArray);
     } catch (err) {
       console.error('Failed to fetch projects:', err);
@@ -232,7 +240,10 @@ export default function SettingsPage() {
                     <Palette className="h-4 w-4" />
                     {texts.theme}
                   </Label>
-                  <Select value={theme || 'system'} onValueChange={handleThemeChange}>
+                  <Select
+                    value={theme || 'system'}
+                    onValueChange={handleThemeChange}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

@@ -23,7 +23,14 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/auth';
 import { useUIStore } from '@/stores/ui';
-import { tasksAPI, categoriesAPI, projectsAPI, Task, Category, Project } from '@/lib/api';
+import {
+  tasksAPI,
+  categoriesAPI,
+  projectsAPI,
+  Task,
+  Category,
+  Project,
+} from '@/lib/api';
 import { CreateTaskPayload as TaskFormData } from '@/lib/api';
 import {
   ArrowLeft,
@@ -105,9 +112,15 @@ export default function ProjectDetailPage() {
 
       setProject(projectResponse);
       // Extract arrays from potentially paginated responses
-      const tasksArray = Array.isArray(tasksResponse) ? tasksResponse : (tasksResponse as any).results || [];
-      const projectsArray = Array.isArray(projectsResponse) ? projectsResponse : (projectsResponse as any).results || [];
-      const categoriesArray = Array.isArray(categoriesResponse) ? categoriesResponse : (categoriesResponse as any).results || [];
+      const tasksArray = Array.isArray(tasksResponse)
+        ? tasksResponse
+        : (tasksResponse as any).results || [];
+      const projectsArray = Array.isArray(projectsResponse)
+        ? projectsResponse
+        : (projectsResponse as any).results || [];
+      const categoriesArray = Array.isArray(categoriesResponse)
+        ? categoriesResponse
+        : (categoriesResponse as any).results || [];
 
       setTasks(tasksArray);
       setCategories(categoriesArray);
@@ -254,7 +267,9 @@ export default function ProjectDetailPage() {
 
       await tasksAPI.updateTask(taskId, payload);
       const updatedTasks = await tasksAPI.getTasks();
-      const updatedTasksArray = Array.isArray(updatedTasks) ? updatedTasks : updatedTasks.results || [];
+      const updatedTasksArray = Array.isArray(updatedTasks)
+        ? updatedTasks
+        : updatedTasks.results || [];
       setTasks(updatedTasksArray);
     } catch (error) {
       setError(
@@ -290,7 +305,9 @@ export default function ProjectDetailPage() {
 
       await tasksAPI.updateTask(taskId, payload);
       const updatedTasks = await tasksAPI.getTasks();
-      const updatedTasksArray = Array.isArray(updatedTasks) ? updatedTasks : updatedTasks.results || [];
+      const updatedTasksArray = Array.isArray(updatedTasks)
+        ? updatedTasks
+        : updatedTasks.results || [];
       setTasks(updatedTasksArray);
     } catch (error) {
       setError(

@@ -16,7 +16,9 @@ import {
 
 export const postsAPI = {
   // Get public posts (no authentication required)
-  getPublicPosts: async (params?: PostSearchParams): Promise<GetPublicPostsResponse> => {
+  getPublicPosts: async (
+    params?: PostSearchParams
+  ): Promise<GetPublicPostsResponse> => {
     try {
       const url = createUrlWithParams('/app/blog/posts/public/', params);
       const response = await api.get(url);
@@ -62,7 +64,9 @@ export const postsAPI = {
   },
 
   // Create new post
-  createPost: async (postData: CreatePostPayload): Promise<CreatePostResponse> => {
+  createPost: async (
+    postData: CreatePostPayload
+  ): Promise<CreatePostResponse> => {
     try {
       // First try JSON payload for better compatibility with HTML content
       const response = await api.post('/app/blog/posts/', postData, {

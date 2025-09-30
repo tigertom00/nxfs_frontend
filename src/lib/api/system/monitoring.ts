@@ -13,7 +13,9 @@ import {
 
 export const monitoringAPI = {
   // System stats endpoints
-  getSystemStats: async (params?: SystemStatsQuery): Promise<GetSystemStatsResponse> => {
+  getSystemStats: async (
+    params?: SystemStatsQuery
+  ): Promise<GetSystemStatsResponse> => {
     try {
       const url = createUrlWithParams('/api/docker/system-stats/', params);
       const response = await api.get(url);

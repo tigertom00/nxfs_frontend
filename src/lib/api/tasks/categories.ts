@@ -15,7 +15,9 @@ import {
 
 export const categoriesAPI = {
   // Get all categories
-  getCategories: async (params?: CategorySearchParams): Promise<GetCategoriesResponse> => {
+  getCategories: async (
+    params?: CategorySearchParams
+  ): Promise<GetCategoriesResponse> => {
     try {
       const url = createUrlWithParams('/app/tasks/categories/', params);
       const response = await api.get(url);

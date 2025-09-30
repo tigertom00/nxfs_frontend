@@ -15,7 +15,7 @@ export const elNumberLookupAPI = {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': env.NEXT_PUBLIC_N8N_SECRET_KEY,
+            Authorization: env.NEXT_PUBLIC_N8N_SECRET_KEY,
           },
         }
       );
@@ -27,7 +27,9 @@ export const elNumberLookupAPI = {
   },
 
   // Import material from EFObasen using the new endpoint
-  importFromEFObasen: async (efoData: EFOBasenImportPayload): Promise<CreateMaterialResponse> => {
+  importFromEFObasen: async (
+    efoData: EFOBasenImportPayload
+  ): Promise<CreateMaterialResponse> => {
     try {
       // Use the materials API EFObasen import endpoint
       return await materialsAPI.importFromEFObasen(efoData);
