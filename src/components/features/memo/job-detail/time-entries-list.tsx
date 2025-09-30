@@ -69,12 +69,19 @@ export function TimeEntriesList({
       });
 
       console.log('Grouped time entries response:', groupedData);
-      setGroupedEntries(groupedData);
 
-      // Auto-expand today's date if it exists
-      const today = new Date().toISOString().split('T')[0];
-      if (groupedData[today]) {
-        setExpandedDates(new Set([today]));
+      // Ensure groupedData is valid
+      if (groupedData && typeof groupedData === 'object') {
+        setGroupedEntries(groupedData);
+
+        // Auto-expand today's date if it exists
+        const today = new Date().toISOString().split('T')[0];
+        if (groupedData[today]) {
+          setExpandedDates(new Set([today]));
+        }
+      } else {
+        console.warn('Invalid grouped data received:', groupedData);
+        setGroupedEntries({});
       }
     } catch (error) {
       console.error('Failed to load grouped time entries:', error);
@@ -134,7 +141,7 @@ export function TimeEntriesList({
 
   const getTotalHours = () => {
     const totalMinutes = Object.values(groupedEntries).reduce(
-      (sum, dateGroup) => sum + (dateGroup.total_hours * 60),
+      (sum, dateGroup) => sum + ((dateGroup?.total_hours || 0) * 60),
       0
     );
     return {
@@ -146,7 +153,7 @@ export function TimeEntriesList({
 
   const getTotalEntries = () => {
     return Object.values(groupedEntries).reduce(
-      (sum, dateGroup) => sum + dateGroup.entries.length,
+      (sum, dateGroup) => sum + (dateGroup?.entries?.length || 0),
       0
     );
   };
@@ -194,7 +201,7 @@ export function TimeEntriesList({
 
   const totalHours = getTotalHours();
   const totalEntries = getTotalEntries();
-  const sortedDates = Object.keys(groupedEntries).sort((a, b) =>
+  const sortedDates = Object.keys(groupedEntries || {}).sort((a, b) =>
     new Date(b).getTime() - new Date(a).getTime()
   );
 
@@ -259,18 +266,18 @@ export function TimeEntriesList({
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-muted-foreground">
-                        {dateGroup.entries.length} entries
+                        {dateGroup?.entries?.length || 0} entries
                       </span>
                       <div className="text-right">
                         <div className="font-semibold text-sm">
-                          {formatMinutesToDecimalHours(dateGroup.total_hours * 60)}h
+                          {formatMinutesToDecimalHours((dateGroup?.total_hours || 0) * 60)}h
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Entries list */}
-                  {isExpanded && (
+                  {isExpanded && dateGroup?.entries && (
                     <div className="divide-y">
                       {dateGroup.entries.map((entry) => {
                         // Safely get user display info
