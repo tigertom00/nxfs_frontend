@@ -68,15 +68,37 @@ export function TimeEntriesList({
         user_object: user,
       });
 
-      const groupedData = await timeTrackingAPI.getTimeEntriesByDate({
+      const response = await timeTrackingAPI.getTimeEntriesByDate({
         jobb: jobIdToUse.toString(),
         user_id: userId,
       });
 
-      console.log('Grouped time entries response:', groupedData);
+      console.log('Grouped time entries response:', response);
 
-      // Ensure groupedData is valid
-      if (groupedData && typeof groupedData === 'object') {
+      // Transform array response to object with dates as keys
+      let groupedData: DateGroupedTimeEntries = {};
+
+      if (response && typeof response === 'object') {
+        // Check if response has entries_by_date array (new backend format)
+        if ('entries_by_date' in response && Array.isArray(response.entries_by_date)) {
+          const entriesArray = response.entries_by_date as Array<{
+            date: string;
+            total_hours: number;
+            entries: TimeEntryWithJob[];
+          }>;
+
+          // Transform array to object with dates as keys
+          entriesArray.forEach((item) => {
+            if (item.date) {
+              groupedData[item.date] = item;
+            }
+          });
+        } else if (!Array.isArray(response)) {
+          // Old format: already an object with dates as keys
+          groupedData = response as DateGroupedTimeEntries;
+        }
+
+        console.log('Transformed grouped data:', groupedData);
         setGroupedEntries(groupedData);
 
         // Auto-expand today's date if it exists
@@ -85,7 +107,7 @@ export function TimeEntriesList({
           setExpandedDates(new Set([today]));
         }
       } else {
-        console.warn('Invalid grouped data received:', groupedData);
+        console.warn('Invalid grouped data received:', response);
         setGroupedEntries({});
       }
     } catch (error) {
@@ -236,6 +258,8 @@ export function TimeEntriesList({
           <div className="space-y-2">
             {sortedDates.map((date) => {
               const dateGroup = groupedEntries[date];
+              if (!dateGroup) return null; // Skip if no data
+
               const isExpanded = expandedDates.has(date);
               const isToday = date === new Date().toISOString().split('T')[0];
               const isYesterday = date === new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -243,7 +267,15 @@ export function TimeEntriesList({
               // Parse date once and cache it
               let displayDate: string;
               try {
+                // Validate date string before parsing
+                if (!date || typeof date !== 'string') {
+                  throw new Error('Invalid date format');
+                }
                 const parsedDate = parseISO(date);
+                // Check if date is valid
+                if (isNaN(parsedDate.getTime())) {
+                  throw new Error('Invalid date value');
+                }
                 displayDate = format(parsedDate, 'EEE. dd.MM.yyyy');
                 if (isToday) displayDate = `i dag. ${format(parsedDate, 'dd.MM.yyyy')}`;
                 if (isYesterday) displayDate = `i går. ${format(parsedDate, 'dd.MM.yyyy')}`;
