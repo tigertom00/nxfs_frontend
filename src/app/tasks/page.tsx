@@ -435,20 +435,15 @@ export default function TasksPage() {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (
-      !confirm(
-        language === 'no'
-          ? 'Er du sikker på at du vil slette denne oppgaven?'
-          : 'Are you sure you want to delete this task?'
-      )
-    ) {
-      return;
-    }
-
     try {
       setActionLoading(true);
       await tasksAPI.deleteTask(taskId);
-      await fetchTasks();
+
+      // Immediately remove from local state (no server refetch to avoid cache issues)
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+
+      setIsDialogOpen(false); // Close the edit dialog
+      setEditingTask(undefined); // Clear editing state
     } catch (err: any) {
       console.log(err.response?.data);
       const errorMessages = Object.values(err.response?.data ?? {}).flat();
@@ -459,6 +454,8 @@ export default function TasksPage() {
             ? 'Kunne ikke slette oppgave'
             : 'Failed to delete task'
       );
+      // On error, refresh to restore correct state
+      await fetchTasks();
     } finally {
       setActionLoading(false);
     }

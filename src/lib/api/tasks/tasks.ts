@@ -25,7 +25,14 @@ export const tasksAPI = {
   getTasks: async (params?: TaskSearchParams): Promise<GetTasksResponse> => {
     try {
       let allTasks: Task[] = [];
-      let nextUrl: string | null = createUrlWithParams('/app/tasks/tasks/', params);
+
+      // Add timestamp to params for cache-busting
+      const paramsWithTimestamp = {
+        ...params,
+        _t: Date.now(),
+      };
+
+      let nextUrl: string | null = createUrlWithParams('/app/tasks/tasks/', paramsWithTimestamp);
 
       // Fetch all pages
       while (nextUrl) {

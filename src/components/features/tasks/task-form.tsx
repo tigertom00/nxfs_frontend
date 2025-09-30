@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { FileUpload } from '@/components/ui/file-upload';
 import { DatePicker } from '@/components/ui/date-picker';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useUIStore } from '@/stores/ui';
 import {
   Task,
@@ -57,6 +58,7 @@ export function TaskForm({
   });
   const [loading, setLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +123,7 @@ export function TaskForm({
   };
 
   const handleDelete = () => {
-    if (task && onDelete && confirm(texts.deleteConfirm)) {
+    if (task && onDelete) {
       onDelete(task.id);
     }
   };
@@ -298,9 +300,10 @@ export function TaskForm({
           <Button
             type="button"
             variant="destructive"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteConfirm(true)}
             disabled={loading}
           >
+            <Trash2 className="mr-2 h-4 w-4" />
             {texts.delete}
           </Button>
         ) : (
@@ -324,6 +327,20 @@ export function TaskForm({
           </Button>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleDelete}
+        title={
+          language === 'no' ? 'Bekreft sletting' : 'Confirm deletion'
+        }
+        description={texts.deleteConfirm}
+        confirmText={language === 'no' ? 'Slett' : 'Delete'}
+        cancelText={texts.cancel}
+        variant="destructive"
+      />
     </form>
   );
 }
