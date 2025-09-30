@@ -242,9 +242,20 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       // API expects numeric job ID
       const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
 
+      // Parse user ID safely
+      const userId = parseInt(user.id);
+      if (isNaN(userId)) {
+        toast({
+          title: 'Invalid user ID',
+          description: 'Cannot save time entry - user ID is invalid',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       console.log('Creating time entry with data:', {
         jobb: jobIdToUse,
-        user: parseInt(user.id),
+        user: userId,
         timer: roundedMinutes,
         dato: new Date().toISOString().split('T')[0],
         original_seconds: timer.elapsed,
@@ -252,7 +263,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       });
       const timeEntryData = {
         jobb: jobIdToUse.toString(),
-        user: parseInt(user.id),
+        user: userId,
         timer: roundedMinutes, // Store as minutes
         dato: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
         beskrivelse:

@@ -58,14 +58,19 @@ export function TimeEntriesList({
       // API expects numeric job ID
       const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
 
+      // Parse user ID safely
+      const userId = parseInt(user?.id || '0');
+
       console.log('Loading grouped time entries with params:', {
         jobb: jobIdToUse.toString(),
-        user_id: parseInt(user?.id || '0'),
+        user_id: userId,
+        raw_user_id: user?.id,
+        user_object: user,
       });
 
       const groupedData = await timeTrackingAPI.getTimeEntriesByDate({
         jobb: jobIdToUse.toString(),
-        user_id: parseInt(user?.id || '0'),
+        user_id: userId,
       });
 
       console.log('Grouped time entries response:', groupedData);
