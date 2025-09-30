@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { jobImagesAPI, jobFilesAPI } from '@/lib/api';
 import { JobImage, JobFile } from '@/lib/api';
 import { Camera, FolderOpen, Upload, X, Loader2, Image as ImageIcon, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useUIStore } from '@/stores';
 
 interface PhotoGalleryProps {
   jobId: number;
@@ -15,11 +17,13 @@ interface PhotoGalleryProps {
 
 export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   const { toast } = useToast();
+  const { language } = useUIStore();
   const [photos, setPhotos] = useState<JobImage[]>([]);
   const [documents, setDocuments] = useState<JobFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('images');
+  const [deleteTarget, setDeleteTarget] = useState<{type: 'image' | 'document'; item: JobImage | JobFile} | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -226,37 +230,41 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
     }
   };
 
-  const handleDeleteImage = async (image: JobImage) => {
-    try {
-      await jobImagesAPI.deleteJobImage(image.id);
-      setPhotos((prev) => prev.filter((p) => p.id !== image.id));
-      toast({
-        title: 'Photo deleted',
-        description: 'Photo has been removed from the job',
-      });
-    } catch (error) {
-      toast({
-        title: 'Delete failed',
-        description: 'Failed to delete the photo',
-        variant: 'destructive',
-      });
-    }
-  };
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
 
-  const handleDeleteDocument = async (doc: JobFile) => {
     try {
-      await jobFilesAPI.deleteJobFile(doc.id);
-      setDocuments((prev) => prev.filter((p) => p.id !== doc.id));
-      toast({
-        title: 'File deleted',
-        description: 'File has been removed from the job',
-      });
+      if (deleteTarget.type === 'image') {
+        const image = deleteTarget.item as JobImage;
+        await jobImagesAPI.deleteJobImage(image.id);
+        setPhotos((prev) => prev.filter((p) => p.id !== image.id));
+        toast({
+          title: language === 'no' ? 'Bilde slettet' : 'Photo deleted',
+          description: language === 'no'
+            ? 'Bildet er fjernet fra jobben'
+            : 'Photo has been removed from the job',
+        });
+      } else {
+        const doc = deleteTarget.item as JobFile;
+        await jobFilesAPI.deleteJobFile(doc.id);
+        setDocuments((prev) => prev.filter((p) => p.id !== doc.id));
+        toast({
+          title: language === 'no' ? 'Fil slettet' : 'File deleted',
+          description: language === 'no'
+            ? 'Filen er fjernet fra jobben'
+            : 'File has been removed from the job',
+        });
+      }
     } catch (error) {
       toast({
-        title: 'Delete failed',
-        description: 'Failed to delete the file',
+        title: language === 'no' ? 'Sletting mislyktes' : 'Delete failed',
+        description: language === 'no'
+          ? 'Kunne ikke slette elementet'
+          : 'Failed to delete the item',
         variant: 'destructive',
       });
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -320,7 +328,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                       }}
                     />
                     <button
-                      onClick={() => handleDeleteImage(photo)}
+                      onClick={() => setDeleteTarget({ type: 'image', item: photo })}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       aria-label="Delete photo"
                     >
@@ -412,7 +420,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                       </div>
                     </div>
                     <button
-                      onClick={() => handleDeleteDocument(doc)}
+                      onClick={() => setDeleteTarget({ type: 'document', item: doc })}
                       className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
                       aria-label="Delete file"
                     >
@@ -493,6 +501,30 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       <div className="text-xs text-muted-foreground text-center mt-2">
         Max 10MB per file. Images and documents supported.
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title={
+          deleteTarget?.type === 'image'
+            ? language === 'no' ? 'Bekreft sletting av bilde' : 'Confirm photo deletion'
+            : language === 'no' ? 'Bekreft sletting av fil' : 'Confirm file deletion'
+        }
+        description={
+          deleteTarget?.type === 'image'
+            ? language === 'no'
+              ? 'Er du sikker på at du vil slette dette bildet? Denne handlingen kan ikke angres.'
+              : 'Are you sure you want to delete this photo? This action cannot be undone.'
+            : language === 'no'
+              ? 'Er du sikker på at du vil slette denne filen? Denne handlingen kan ikke angres.'
+              : 'Are you sure you want to delete this file? This action cannot be undone.'
+        }
+        confirmText={language === 'no' ? 'Slett' : 'Delete'}
+        cancelText={language === 'no' ? 'Avbryt' : 'Cancel'}
+        variant="destructive"
+      />
     </div>
   );
 }

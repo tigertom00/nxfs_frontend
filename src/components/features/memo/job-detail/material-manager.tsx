@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +37,7 @@ import { MaterialDetailModal } from '@/components/features/memo/shared/material-
 import { AdvancedMaterialSearch } from '@/components/features/memo/shared/advanced-material-search';
 import { efoService, parseElNumber } from '@/lib/efo-api';
 import { useToast } from '@/hooks/use-toast';
+import { useUIStore } from '@/stores';
 import {
   Package,
   Scan,
@@ -65,6 +67,7 @@ interface SelectedMaterial extends Material {
 
 export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   const { toast } = useToast();
+  const { language } = useUIStore();
   const [showScanner, setShowScanner] = useState(false);
   const [showMaterialDialog, setShowMaterialDialog] = useState(false);
   const [allMaterials, setAllMaterials] = useState<Material[]>([]);
@@ -87,6 +90,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   const [elLookupResult, setElLookupResult] = useState<any>(null);
   const [showELResult, setShowELResult] = useState(false);
   const [recentMaterialsFilter, setRecentMaterialsFilter] = useState<'my' | 'all'>('my');
+  const [materialToRemove, setMaterialToRemove] = useState<JobMaterial | null>(null);
 
   // Load materials and job materials
   useEffect(() => {
@@ -463,20 +467,24 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     }
   };
 
-  const handleRemoveFromJob = async (jobMaterial: JobMaterial) => {
+  const handleConfirmRemove = async () => {
+    if (!materialToRemove) return;
+
     try {
-      await jobMaterialsAPI.deleteJobMaterial(jobMaterial.id);
+      await jobMaterialsAPI.deleteJobMaterial(materialToRemove.id);
       await loadJobMaterials();
       toast({
-        title: 'Material Removed',
-        description: 'Material removed from job',
+        title: language === 'no' ? 'Materiale fjernet' : 'Material Removed',
+        description: language === 'no' ? 'Materialet er fjernet fra jobben' : 'Material removed from job',
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to remove material from job',
+        title: language === 'no' ? 'Feil' : 'Error',
+        description: language === 'no' ? 'Kunne ikke fjerne materiale fra jobben' : 'Failed to remove material from job',
         variant: 'destructive',
       });
+    } finally {
+      setMaterialToRemove(null);
     }
   };
 
@@ -567,7 +575,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                   <MaterialListItem
                     key={jobMaterial.id}
                     jobMaterial={jobMaterial}
-                    onRemove={handleRemoveFromJob}
+                    onRemove={setMaterialToRemove}
                     onViewDetail={setSelectedMaterialForDetail}
                     onEdit={handleEditMaterial}
                     onToggleFavorite={handleToggleFavorite}
@@ -1016,6 +1024,26 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         onClose={() => setSelectedMaterialForDetail(null)}
         onToggleFavorite={handleToggleFavorite}
         onSelect={addMaterialToSelection}
+      />
+
+      {/* Remove Material Confirmation Dialog */}
+      <ConfirmDialog
+        open={materialToRemove !== null}
+        onOpenChange={(open) => !open && setMaterialToRemove(null)}
+        onConfirm={handleConfirmRemove}
+        title={
+          language === 'no' ? 'Bekreft fjerning av materiale' : 'Confirm material removal'
+        }
+        description={
+          materialToRemove
+            ? language === 'no'
+              ? `Er du sikker på at du vil fjerne "${materialToRemove.matriell.tittel || 'Uten tittel'}" (${materialToRemove.matriell.el_nr || 'Ingen EL#'}) fra denne jobben? Denne handlingen kan ikke angres.`
+              : `Are you sure you want to remove "${materialToRemove.matriell.tittel || 'Untitled'}" (${materialToRemove.matriell.el_nr || 'No EL#'}) from this job? This action cannot be undone.`
+            : ''
+        }
+        confirmText={language === 'no' ? 'Fjern' : 'Remove'}
+        cancelText={language === 'no' ? 'Avbryt' : 'Cancel'}
+        variant="destructive"
       />
     </div>
   );
