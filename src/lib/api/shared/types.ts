@@ -1,6 +1,29 @@
 // Base API response types for type-safe API calls
 
 /**
+ * User profile information
+ * Returned by all memo endpoints for user tracking
+ */
+export interface UserBasic {
+  id: number;
+  username: string;
+  display_name: string;
+  email: string;
+  phone: string;
+  profile_picture: string | null;
+}
+
+/**
+ * Detailed user profile with additional fields
+ */
+export interface UserDetail extends UserBasic {
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  clerk_profile_image_url: string | null;
+}
+
+/**
  * Generic API response wrapper
  * Most of your API responses follow this pattern
  */
@@ -49,15 +72,16 @@ export interface PaginatedResponseWithMeta<T> {
  */
 export interface APIError {
   error: {
-    code: string;           // Machine-readable error code
-    message: string;        // User-friendly message
-    details?: any;          // Additional error context
-    field_errors?: {        // For validation errors
+    code: string; // Machine-readable error code
+    message: string; // User-friendly message
+    details?: any; // Additional error context
+    field_errors?: {
+      // For validation errors
       [field: string]: string[];
     };
   };
   timestamp: string;
-  request_id: string;       // For debugging
+  request_id: string; // For debugging
 }
 
 /**
@@ -193,7 +217,7 @@ export interface PerformanceMetrics {
  * Health monitoring interfaces
  */
 export interface HealthStatus {
-  status: "healthy" | "degraded" | "unhealthy";
+  status: 'healthy' | 'degraded' | 'unhealthy';
   timestamp: string;
   checks: {
     database: string;
@@ -208,6 +232,6 @@ export interface HealthStatus {
  * Response headers for performance tracking
  */
 export interface ResponseHeaders {
-  'X-Response-Time': string;  // e.g., "0.125s"
-  'X-DB-Queries': string;     // e.g., "3"
+  'X-Response-Time': string; // e.g., "0.125s"
+  'X-DB-Queries': string; // e.g., "3"
 }

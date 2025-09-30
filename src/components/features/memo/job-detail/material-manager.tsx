@@ -23,13 +23,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   materialsAPI,
   jobMaterialsAPI,
   suppliersAPI,
   elNumberLookupAPI,
 } from '@/lib/api';
-import { Material, JobMaterial, Supplier, RecentJobMaterial } from '@/lib/api';
+import { Material, JobMaterial, Supplier, RecentJobMaterial, UserBasic } from '@/lib/api';
 import { BarcodeScanner } from '@/components/features/memo/shared/barcode-scanner';
 import { MaterialDetailModal } from '@/components/features/memo/shared/material-detail-modal';
 import { AdvancedMaterialSearch } from '@/components/features/memo/shared/advanced-material-search';
@@ -195,6 +196,27 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   const handleRecentMaterialsFilterChange = async (filter: 'my' | 'all') => {
     setRecentMaterialsFilter(filter);
     await loadRecentMaterials(filter);
+  };
+
+  // Helper function to safely get user display info
+  const getUserDisplay = (user?: UserBasic | number) => {
+    if (!user || typeof user === 'number') {
+      return { displayName: 'Unknown', initials: '?', avatar: null };
+    }
+    const displayName = user.display_name || user.username;
+    const initials = displayName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+    return {
+      displayName,
+      initials,
+      avatar: user.profile_picture,
+      email: user.email,
+      phone: user.phone,
+    };
   };
 
   const handleScanELNumber = () => {
@@ -760,15 +782,22 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                           onSelect={addMaterialToSelection}
                           onViewDetail={setSelectedMaterialForDetail}
                         />
-                        <div className="text-xs text-muted-foreground pl-2 pb-1 flex items-center gap-2">
+                        <div className="text-xs text-muted-foreground pl-2 pb-1 flex items-center gap-2 justify-between">
                           <span>
                             Used in: {recentItem.jobb.tittel || recentItem.jobb.ordre_nr}
                             {recentItem.antall > 1 && ` • Qty: ${recentItem.antall}`}
                           </span>
-                          {recentItem.user_username && recentMaterialsFilter === 'all' && (
-                            <span className="flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded">
-                              <User className="h-2.5 w-2.5" />
-                              {recentItem.user_username}
+                          {recentItem.user && recentMaterialsFilter === 'all' && typeof recentItem.user !== 'number' && (
+                            <span className="flex items-center gap-1.5 text-xs bg-muted px-2 py-1 rounded-full">
+                              <Avatar className="h-4 w-4">
+                                <AvatarImage src={getUserDisplay(recentItem.user).avatar || undefined} />
+                                <AvatarFallback className="text-[8px]">
+                                  {getUserDisplay(recentItem.user).initials}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="font-medium">
+                                {getUserDisplay(recentItem.user).displayName}
+                              </span>
                             </span>
                           )}
                         </div>

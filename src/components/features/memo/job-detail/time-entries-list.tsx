@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { timeEntriesAPI, timeTrackingAPI } from '@/lib/api';
-import { DateGroupedTimeEntries, TimeEntryWithJob } from '@/lib/api';
+import { DateGroupedTimeEntries, TimeEntryWithJob, UserBasic } from '@/lib/api';
 import { useAuthStore } from '@/stores';
-import { Clock, Edit2, Trash2, Calendar, ChevronDown, ChevronRight } from 'lucide-react';
+import { Clock, Edit2, Trash2, Calendar, ChevronDown, ChevronRight, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { TimeEntry } from '@/lib/api';
@@ -150,6 +151,25 @@ export function TimeEntriesList({
     );
   };
 
+  // Helper function to safely get user display info
+  const getUserDisplay = (user?: UserBasic | number) => {
+    if (!user || typeof user === 'number') {
+      return { displayName: 'Unknown', initials: '?', avatar: null };
+    }
+    const displayName = user.display_name || user.username;
+    const initials = displayName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+    return {
+      displayName,
+      initials,
+      avatar: user.profile_picture,
+    };
+  };
+
   if (loading) {
     return (
       <Card>
@@ -254,9 +274,20 @@ export function TimeEntriesList({
                               <div className="font-medium text-sm">
                                 {formatMinutesToHourString(entry.timer)}
                               </div>
-                              {entry.jobb_details?.tittel && (
+                              {(entry.jobb_tittel || entry.jobb_details?.tittel) && (
                                 <span className="text-xs text-muted-foreground">
-                                  {entry.jobb_details.tittel}
+                                  {entry.jobb_tittel || entry.jobb_details?.tittel}
+                                </span>
+                              )}
+                              {entry.user && typeof entry.user !== 'number' && (
+                                <span className="flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full ml-auto">
+                                  <Avatar className="h-3 w-3">
+                                    <AvatarImage src={getUserDisplay(entry.user).avatar || undefined} />
+                                    <AvatarFallback className="text-[6px]">
+                                      {getUserDisplay(entry.user).initials}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span>{getUserDisplay(entry.user).displayName}</span>
                                 </span>
                               )}
                             </div>

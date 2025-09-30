@@ -1,4 +1,4 @@
-import { BaseSearchParams, PaginatedResponse } from '../shared/types';
+import { BaseSearchParams, PaginatedResponse, UserBasic } from '../shared/types';
 
 // Material types
 export interface Material {
@@ -76,8 +76,9 @@ export interface JobMaterial {
 // Time tracking types
 export interface TimeEntry {
   id: number;
-  user: number;
+  user: UserBasic | number; // Full user object or ID for backward compatibility
   jobb: string;
+  jobb_tittel?: string; // Job title for convenience
   timer: number;
   dato: string;
   beskrivelse: string | null;
@@ -273,8 +274,7 @@ export interface RecentJobMaterial {
   jobb: Job;
   antall: number;
   transf: boolean;
-  user?: number;
-  user_username?: string;
+  user?: UserBasic | number; // Full user object or ID for backward compatibility
   created_at: string;
   updated_at: string;
 }
