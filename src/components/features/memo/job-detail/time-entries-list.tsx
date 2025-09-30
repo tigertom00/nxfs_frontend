@@ -167,8 +167,9 @@ export function TimeEntriesList({
   };
 
   const getTotalHours = () => {
+    // Note: total_hours is actually in minutes despite the name
     const totalMinutes = Object.values(groupedEntries).reduce(
-      (sum, dateGroup) => sum + ((dateGroup?.total_hours || 0) * 60),
+      (sum, dateGroup) => sum + (dateGroup?.total_hours || 0),
       0
     );
     return {
@@ -240,7 +241,7 @@ export function TimeEntriesList({
           Time Entries
           {totalEntries > 0 && (
             <span className="text-sm font-normal text-muted-foreground ml-auto">
-              Total: {totalHours.formatted} ({totalHours.decimal}h)
+              Total: {totalHours.decimal}h
             </span>
           )}
         </CardTitle>
@@ -307,7 +308,7 @@ export function TimeEntriesList({
                       </span>
                       <div className="text-right">
                         <div className="font-semibold text-sm">
-                          {formatMinutesToDecimalHours((dateGroup?.total_hours || 0) * 60)}h
+                          {formatMinutesToDecimalHours(dateGroup?.total_hours || 0)}h
                         </div>
                       </div>
                     </div>
@@ -437,7 +438,7 @@ export function TimeEntriesList({
                 {totalEntries} entries across {sortedDates.length} days
               </span>
               <span className="font-medium text-foreground">
-                Total: {totalHours.formatted} ({totalHours.decimal}h)
+                Total: {totalHours.decimal}h
               </span>
             </div>
           </div>
