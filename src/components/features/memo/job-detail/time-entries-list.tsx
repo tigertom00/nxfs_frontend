@@ -346,7 +346,7 @@ export function TimeEntriesList({
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <div className="font-medium text-sm">
-                                {formatMinutesToHourString(entry.timer)}
+                                {formatMinutesToDecimalHours(entry.timer)}h
                               </div>
                               {(entry.jobb_tittel || entry.jobb_details?.tittel) && (
                                 <span className="text-xs text-muted-foreground">
@@ -403,7 +403,7 @@ export function TimeEntriesList({
                                   <AlertDialogTitle>Delete Time Entry</AlertDialogTitle>
                                   <AlertDialogDescription>
                                     Are you sure you want to delete this time entry of{' '}
-                                    {formatMinutesToHourString(entry.timer)}? This action cannot be undone.
+                                    {formatMinutesToDecimalHours(entry.timer)}h? This action cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
