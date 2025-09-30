@@ -316,7 +316,14 @@ export const jobMaterialsAPI = {
     try {
       const url = createUrlWithParams('/app/memo/jobbmatriell/recent/', params);
       const response = await api.get(url);
-      return Array.isArray(response.data) ? response.data : [];
+      // Handle both array and object with results
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      if (response.data && Array.isArray(response.data.results)) {
+        return response.data.results;
+      }
+      return [];
     } catch (error) {
       handleApiError(error, 'Getting recent job materials');
       throw error;

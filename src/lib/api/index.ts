@@ -56,6 +56,7 @@ export * from './memo/types';
 export { materialsAPI } from './memo/materials';
 export { jobsAPI, jobMaterialsAPI } from './memo/jobs';
 export { jobImagesAPI } from './memo/job-images';
+export { jobFilesAPI } from './memo/job-files';
 export { suppliersAPI } from './memo/suppliers';
 export { categoriesAPI as memoCategoriesAPI } from './memo/categories';
 export { timeTrackingAPI } from './memo/time-tracking';

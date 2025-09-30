@@ -78,7 +78,7 @@ export function MaterialDetailModal({
                 {material.tittel || 'Untitled Material'}
               </DialogTitle>
               <DialogDescription className="mt-1">
-                {material.leverandor?.name || 'Unknown Supplier'} •{' '}
+                {material.leverandor?.navn || 'Unknown Supplier'} •{' '}
                 {material.kategori?.kategori || 'Electrical Component'}
               </DialogDescription>
             </div>

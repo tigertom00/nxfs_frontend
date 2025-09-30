@@ -398,7 +398,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
             .includes(searchQuery.toLowerCase()) ||
           material.info?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           material.varemerke?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          material.leverandor?.name
+          material.leverandor?.navn
             ?.toLowerCase()
             .includes(searchQuery.toLowerCase())
       )
@@ -789,7 +789,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                         />
                         <div className="text-xs text-muted-foreground pl-2 pb-1 flex items-center gap-2 justify-between">
                           <span>
-                            Used in: {recentItem.jobb.tittel || recentItem.jobb.ordre_nr}
+                            Used in: {typeof recentItem.jobb === 'number' ? `Job #${recentItem.jobb}` : (recentItem.jobb.tittel || recentItem.jobb.ordre_nr)}
                             {recentItem.antall > 1 && ` • Qty: ${recentItem.antall}`}
                           </span>
                           {userDisplay && recentMaterialsFilter === 'all' && (
@@ -955,7 +955,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                     {material.tittel || 'Untitled'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {material.leverandor?.name ||
+                    {material.leverandor?.navn ||
                       (material.leverandor
                         ? `Supplier ID: ${material.leverandor.id}`
                         : 'Unknown Supplier')}
@@ -1070,7 +1070,7 @@ function MaterialListItem({
         <div className="px-3 pb-3 border-t bg-muted/20">
           <div className="space-y-2">
             <div className="text-xs text-muted-foreground">
-              {jobMaterial.matriell.leverandor?.name ||
+              {jobMaterial.matriell.leverandor?.navn ||
                 (jobMaterial.matriell.leverandor
                   ? `Supplier ID: ${jobMaterial.matriell.leverandor.id}`
                   : 'Unknown Supplier')}
@@ -1166,7 +1166,7 @@ function CompactMaterialCard({
           </span>
         </div>
         <div className="text-xs text-muted-foreground">
-          {material.leverandor?.name ||
+          {material.leverandor?.navn ||
             (material.leverandor
               ? `Supplier ID: ${material.leverandor.id}`
               : 'Unknown Supplier')}

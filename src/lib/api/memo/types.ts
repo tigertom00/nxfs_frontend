@@ -95,6 +95,18 @@ export interface JobImage {
   created_at: string;
 }
 
+// Job File types
+export interface JobFile {
+  id: number;
+  name: string;
+  file: string;
+  file_type?: string;
+  file_size?: number;
+  jobb: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Search parameters
 export interface MaterialSearchParams extends BaseSearchParams {
   el_nr?: string;
@@ -271,7 +283,7 @@ export interface GetTimeEntriesByDateParams {
 export interface RecentJobMaterial {
   id: number;
   matriell: Material;
-  jobb: Job;
+  jobb: Job | number; // Full job object or ID for backward compatibility
   antall: number;
   transf: boolean;
   user?: UserBasic | number; // Full user object or ID for backward compatibility
