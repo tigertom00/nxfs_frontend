@@ -43,8 +43,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const [userStats, setUserStats] = useState<UserTimeStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
 
-  const intervalRef = useRef<NodeJS.Timeout>();
-  const notificationRef = useRef<Notification>();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const notificationRef = useRef<Notification | null>(null);
 
   // Load saved timer state on mount
   useEffect(() => {
@@ -251,7 +251,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         rounded_seconds: roundedSeconds,
       });
       const timeEntryData = {
-        jobb: jobIdToUse,
+        jobb: jobIdToUse.toString(),
         user: parseInt(user.id),
         timer: roundedMinutes, // Store as minutes
         dato: new Date().toISOString().split('T')[0], // YYYY-MM-DD format

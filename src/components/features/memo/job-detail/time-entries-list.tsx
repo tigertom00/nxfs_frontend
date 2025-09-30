@@ -274,7 +274,7 @@ export function TimeEntriesList({
                     <div className="divide-y">
                       {dateGroup.entries.map((entry) => {
                         // Safely get user display info
-                        let userDisplay = null;
+                        let userDisplay: { displayName: string; initials: string; avatar: string | null } | null = null;
                         try {
                           if (entry.user && typeof entry.user !== 'number') {
                             userDisplay = getUserDisplay(entry.user);
