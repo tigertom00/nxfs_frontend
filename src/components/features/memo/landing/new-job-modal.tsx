@@ -43,6 +43,7 @@ export function NewJobModal({
   const [searchingAddress, setSearchingAddress] = useState(false);
   const [searchResults, setSearchResults] = useState<AddressData[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [addressSearchTimeout, setAddressSearchTimeout] = useState<NodeJS.Timeout | null>(null);
   const [existingOrderNumbers, setExistingOrderNumbers] = useState<number[]>(
     []
   );
@@ -267,7 +268,7 @@ export function NewJobModal({
     }
   };
 
-  const handleAddressLookup = async () => {
+  const handleAddressLookup = async (silent = false) => {
     console.log('🔍 [DEBUG] Starting address lookup...');
     setSearchingAddress(true);
     setShowResults(false);
@@ -276,29 +277,62 @@ export function NewJobModal({
       console.log('✅ [DEBUG] Search results:', results);
 
       if (results.length === 0) {
-        toast({
-          title: 'No results',
-          description: 'No addresses found matching your search. Try a different query.',
-          variant: 'destructive',
-        });
+        if (!silent) {
+          toast({
+            title: 'No results',
+            description: 'No addresses found matching your search. Try a different query.',
+            variant: 'destructive',
+          });
+        }
       } else {
         setSearchResults(results);
         setShowResults(true);
       }
     } catch (error) {
       console.error('❌ [DEBUG] Address lookup error:', error);
-      toast({
-        title: 'Search error',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Could not search for address. Please try again.',
-        variant: 'destructive',
-      });
+      if (!silent) {
+        toast({
+          title: 'Search error',
+          description:
+            error instanceof Error
+              ? error.message
+              : 'Could not search for address. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setSearchingAddress(false);
     }
   };
+
+  const handleAddressChange = (value: string) => {
+    handleInputChange('adresse', value);
+    setShowResults(false);
+
+    // Clear existing timeout
+    if (addressSearchTimeout) {
+      clearTimeout(addressSearchTimeout);
+    }
+
+    // Auto-search if user has typed 7+ characters
+    if (value.trim().length >= 7) {
+      console.log('🕐 [DEBUG] Setting auto-search timeout for:', value);
+      const timeout = setTimeout(() => {
+        console.log('🚀 [DEBUG] Auto-search triggered for:', value);
+        handleAddressLookup(true); // Silent mode - no error toasts
+      }, 2000); // 2 second delay
+      setAddressSearchTimeout(timeout);
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (addressSearchTimeout) {
+        clearTimeout(addressSearchTimeout);
+      }
+    };
+  }, [addressSearchTimeout]);
 
   const handleSelectAddress = (addressData: AddressData) => {
     console.log('✅ [DEBUG] Selected address:', addressData);
@@ -411,10 +445,7 @@ export function NewJobModal({
                     <Input
                       id="adresse"
                       value={formData.adresse}
-                      onChange={(e) => {
-                        handleInputChange('adresse', e.target.value);
-                        setShowResults(false); // Hide results when user types
-                      }}
+                      onChange={(e) => handleAddressChange(e.target.value)}
                       placeholder="e.g., Stortingsgata 4"
                       className="flex-1"
                     />
@@ -422,7 +453,7 @@ export function NewJobModal({
                       type="button"
                       variant="outline"
                       size="icon"
-                      onClick={handleAddressLookup}
+                      onClick={() => handleAddressLookup(false)}
                       disabled={searchingAddress || !formData.adresse || formData.adresse.trim().length < 3}
                       title="Search for postal code and city"
                     >
