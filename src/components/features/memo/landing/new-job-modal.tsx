@@ -439,7 +439,7 @@ export function NewJobModal({
               </Button>
 
               <div className="space-y-2 pt-2">
-                <div>
+                <div className="relative">
                   <Label htmlFor="adresse" className="text-sm">Street Address</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
@@ -464,6 +464,29 @@ export function NewJobModal({
                       )}
                     </Button>
                   </div>
+
+                  {/* Search Results Dropdown - directly below address field */}
+                  {showResults && searchResults.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      {searchResults.map((result, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleSelectAddress(result)}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors border-b border-border last:border-b-0 focus:outline-none focus:bg-muted"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-foreground truncate">
+                              {result.adresse}
+                            </span>
+                            <span className="text-muted-foreground whitespace-nowrap text-xs">
+                              {result.postnummer} {result.poststed}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -495,31 +518,6 @@ export function NewJobModal({
                     />
                   </div>
                 </div>
-
-                {/* Search Results Dropdown */}
-                {showResults && searchResults.length > 0 && (
-                  <div className="relative">
-                    <div className="absolute top-0 left-0 right-0 z-50 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                      {searchResults.map((result, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => handleSelectAddress(result)}
-                          className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors border-b border-border last:border-b-0 focus:outline-none focus:bg-muted"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-foreground truncate">
-                              {result.adresse}
-                            </span>
-                            <span className="text-muted-foreground whitespace-nowrap text-xs">
-                              {result.postnummer} {result.poststed}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
