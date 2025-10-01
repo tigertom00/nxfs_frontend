@@ -24,8 +24,8 @@ interface NewJobModalProps {
   onJobCreated: (job: Job) => void;
 }
 
-// Kartverket API for Norwegian addresses
-const KARTVERKET_API = 'https://ws.geonorge.no/adresser/v1/punkt';
+// Kartverket API for Norwegian addresses (punktsok = point search for reverse geocoding)
+const KARTVERKET_API = 'https://ws.geonorge.no/adresser/v1/punktsok';
 
 interface LocationCoords {
   latitude: number;
@@ -138,7 +138,8 @@ export function NewJobModal({
 
   const reverseGeocode = async (coords: LocationCoords): Promise<string> => {
     try {
-      const url = `${KARTVERKET_API}?lon=${coords.longitude}&lat=${coords.latitude}&utkoordsys=4258`;
+      // punktsok endpoint requires radius parameter, default to 100 meters
+      const url = `${KARTVERKET_API}?lat=${coords.latitude}&lon=${coords.longitude}&radius=100&treffPerSide=1`;
       console.log('🔍 [DEBUG] Fetching address from Kartverket:', url);
       console.log('🔍 [DEBUG] Coordinates:', coords);
 
@@ -166,7 +167,7 @@ export function NewJobModal({
       }
 
       console.error('❌ [DEBUG] No addresses in response data');
-      throw new Error('No address found');
+      throw new Error('No address found within 100m radius');
     } catch (error) {
       console.error('❌ [DEBUG] Reverse geocoding error:', error);
       throw error;
