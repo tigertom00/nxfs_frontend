@@ -56,6 +56,8 @@ export interface Job {
   ordre_nr: string;
   tittel?: string;
   adresse?: string;
+  postnummer?: string; // 4-digit postal code (e.g., "0158")
+  poststed?: string; // City/postal area (e.g., "Oslo")
   telefon_nr?: string;
   beskrivelse?: string;
   ferdig: boolean;
@@ -192,6 +194,11 @@ export type UpdateMaterialPayload = Partial<CreateMaterialPayload>;
 export interface CreateJobPayload {
   ordre_nr: string;
   tittel: string;
+  adresse?: string;
+  postnummer?: string; // 4-digit postal code
+  poststed?: string; // City/postal area
+  telefon_nr?: string;
+  beskrivelse?: string;
   ferdig?: boolean;
 }
 

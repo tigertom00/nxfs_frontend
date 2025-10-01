@@ -47,6 +47,8 @@ export function NewJobModal({
     ordre_nr: 0,
     tittel: '',
     adresse: '',
+    postnummer: '',
+    poststed: '',
     telefon_nr: '',
     beskrivelse: '',
     ferdig: false,
@@ -136,7 +138,13 @@ export function NewJobModal({
     });
   };
 
-  const reverseGeocode = async (coords: LocationCoords): Promise<string> => {
+  interface AddressData {
+    adresse: string;
+    postnummer: string;
+    poststed: string;
+  }
+
+  const reverseGeocode = async (coords: LocationCoords): Promise<AddressData> => {
     try {
       // punktsok endpoint requires radius parameter, default to 100 meters
       const url = `${KARTVERKET_API}?lat=${coords.latitude}&lon=${coords.longitude}&radius=100&treffPerSide=1`;
@@ -160,10 +168,15 @@ export function NewJobModal({
         const address = data.adresser[0];
         console.log('🔍 [DEBUG] First address object:', address);
 
-        // Format: Street number, Postal code City
-        const formattedAddress = `${address.adressetekst}, ${address.postnummer} ${address.poststed}`;
-        console.log('✅ [DEBUG] Formatted address:', formattedAddress);
-        return formattedAddress;
+        // Extract structured address data
+        const addressData: AddressData = {
+          adresse: address.adressetekst || '',
+          postnummer: address.postnummer || '',
+          poststed: address.poststed || '',
+        };
+
+        console.log('✅ [DEBUG] Extracted address data:', addressData);
+        return addressData;
       }
 
       console.error('❌ [DEBUG] No addresses in response data');
@@ -183,15 +196,20 @@ export function NewJobModal({
       console.log('✅ [DEBUG] Got coordinates:', coords);
 
       console.log('🗺️ [DEBUG] Starting reverse geocoding...');
-      const address = await reverseGeocode(coords);
-      console.log('✅ [DEBUG] Got address:', address);
+      const addressData = await reverseGeocode(coords);
+      console.log('✅ [DEBUG] Got address data:', addressData);
 
-      setFormData((prev) => ({ ...prev, adresse: address }));
-      console.log('✅ [DEBUG] Address set in form data');
+      setFormData((prev) => ({
+        ...prev,
+        adresse: addressData.adresse,
+        postnummer: addressData.postnummer,
+        poststed: addressData.poststed,
+      }));
+      console.log('✅ [DEBUG] Address data set in form');
 
       toast({
         title: 'Location detected',
-        description: 'Current address has been filled in',
+        description: `${addressData.adresse}, ${addressData.postnummer} ${addressData.poststed}`,
       });
     } catch (error) {
       console.error('❌ [DEBUG] Location error:', error);
@@ -234,6 +252,8 @@ export function NewJobModal({
         ordre_nr: 0,
         tittel: '',
         adresse: '',
+        postnummer: '',
+        poststed: '',
         telefon_nr: '',
         beskrivelse: '',
         ferdig: false,
@@ -280,30 +300,59 @@ export function NewJobModal({
               />
             </div>
 
-            {/* Address */}
+            {/* Address Section */}
             <div className="space-y-2">
-              <Label htmlFor="adresse">Address</Label>
-              <div className="space-y-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleUseCurrentLocation}
-                  disabled={gettingLocation}
-                  className="w-full transition-colors hover:bg-muted"
-                >
-                  {gettingLocation ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <MapPin className="h-4 w-4 mr-2" />
-                  )}
-                  Use Current Location
-                </Button>
-                <Input
-                  id="adresse"
-                  value={formData.adresse}
-                  onChange={(e) => handleInputChange('adresse', e.target.value)}
-                  placeholder="Or enter address manually"
-                />
+              <Label>Address Information</Label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleUseCurrentLocation}
+                disabled={gettingLocation}
+                className="w-full transition-colors hover:bg-muted"
+              >
+                {gettingLocation ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <MapPin className="h-4 w-4 mr-2" />
+                )}
+                Use Current Location
+              </Button>
+
+              <div className="space-y-2 pt-2">
+                <div>
+                  <Label htmlFor="adresse" className="text-sm">Street Address</Label>
+                  <Input
+                    id="adresse"
+                    value={formData.adresse}
+                    onChange={(e) => handleInputChange('adresse', e.target.value)}
+                    placeholder="e.g., Stortingsgata 4"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="postnummer" className="text-sm">Postal Code</Label>
+                    <Input
+                      id="postnummer"
+                      value={formData.postnummer}
+                      onChange={(e) => handleInputChange('postnummer', e.target.value)}
+                      placeholder="e.g., 0158"
+                      maxLength={4}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="poststed" className="text-sm">City</Label>
+                    <Input
+                      id="poststed"
+                      value={formData.poststed}
+                      onChange={(e) => handleInputChange('poststed', e.target.value)}
+                      placeholder="e.g., Oslo"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
