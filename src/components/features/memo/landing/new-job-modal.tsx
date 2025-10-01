@@ -57,7 +57,13 @@ export function NewJobModal({
     if (isOpen) {
       const loadExistingNumbers = async () => {
         try {
-          const jobs = await jobsAPI.getJobs();
+          const response = await jobsAPI.getJobs();
+          console.log('🔍 [DEBUG] Jobs API response:', response);
+
+          // Handle paginated response
+          const jobs = Array.isArray(response) ? response : response.results || [];
+          console.log('🔍 [DEBUG] Jobs array:', jobs);
+
           const orderNumbers = jobs.map((job) => job.ordre_nr);
           setExistingOrderNumbers(orderNumbers);
 
@@ -81,7 +87,17 @@ export function NewJobModal({
   const getCurrentLocation = async (): Promise<LocationCoords> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported'));
+        reject(new Error('Geolocation is not supported by your browser'));
+        return;
+      }
+
+      // Check if we're in a secure context
+      if (!window.isSecureContext) {
+        reject(
+          new Error(
+            'Geolocation requires HTTPS or localhost. Please access via localhost:3000 or use HTTPS.'
+          )
+        );
         return;
       }
 
@@ -93,7 +109,23 @@ export function NewJobModal({
           });
         },
         (error) => {
-          reject(error);
+          // Provide user-friendly error messages
+          let errorMessage = 'Could not get your location';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage =
+                'Location permission denied. Please enable location access in your browser settings.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage =
+                'Location information unavailable. Please check your device settings.';
+              break;
+            case error.TIMEOUT:
+              errorMessage =
+                'Location request timed out. Please try again.';
+              break;
+          }
+          reject(new Error(errorMessage));
         },
         {
           enableHighAccuracy: true,
@@ -106,51 +138,76 @@ export function NewJobModal({
 
   const reverseGeocode = async (coords: LocationCoords): Promise<string> => {
     try {
-      const response = await fetch(
-        `${KARTVERKET_API}?lon=${coords.longitude}&lat=${coords.latitude}&utkoordsys=4258`
-      );
+      const url = `${KARTVERKET_API}?lon=${coords.longitude}&lat=${coords.latitude}&utkoordsys=4258`;
+      console.log('🔍 [DEBUG] Fetching address from Kartverket:', url);
+      console.log('🔍 [DEBUG] Coordinates:', coords);
+
+      const response = await fetch(url);
+      console.log('🔍 [DEBUG] Response status:', response.status);
+      console.log('🔍 [DEBUG] Response ok:', response.ok);
 
       if (!response.ok) {
-        throw new Error('Failed to get address');
+        const errorText = await response.text();
+        console.error('❌ [DEBUG] API error response:', errorText);
+        throw new Error(`Failed to get address: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('🔍 [DEBUG] API response data:', JSON.stringify(data, null, 2));
 
       if (data.adresser && data.adresser.length > 0) {
         const address = data.adresser[0];
+        console.log('🔍 [DEBUG] First address object:', address);
+
         // Format: Street number, Postal code City
-        return `${address.adressetekst}, ${address.postnummer} ${address.poststed}`;
+        const formattedAddress = `${address.adressetekst}, ${address.postnummer} ${address.poststed}`;
+        console.log('✅ [DEBUG] Formatted address:', formattedAddress);
+        return formattedAddress;
       }
 
+      console.error('❌ [DEBUG] No addresses in response data');
       throw new Error('No address found');
     } catch (error) {
-      console.error('Reverse geocoding error:', error);
+      console.error('❌ [DEBUG] Reverse geocoding error:', error);
       throw error;
     }
   };
 
   const handleUseCurrentLocation = async () => {
+    console.log('🚀 [DEBUG] Starting location fetch...');
     setGettingLocation(true);
     try {
+      console.log('📍 [DEBUG] Getting current location...');
       const coords = await getCurrentLocation();
+      console.log('✅ [DEBUG] Got coordinates:', coords);
+
+      console.log('🗺️ [DEBUG] Starting reverse geocoding...');
       const address = await reverseGeocode(coords);
+      console.log('✅ [DEBUG] Got address:', address);
 
       setFormData((prev) => ({ ...prev, adresse: address }));
+      console.log('✅ [DEBUG] Address set in form data');
 
       toast({
         title: 'Location detected',
         description: 'Current address has been filled in',
       });
     } catch (error) {
-      console.error('Location error:', error);
+      console.error('❌ [DEBUG] Location error:', error);
+      console.error('❌ [DEBUG] Error type:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('❌ [DEBUG] Error message:', error instanceof Error ? error.message : String(error));
+
       toast({
         title: 'Location error',
         description:
-          'Could not get current location. Please enter address manually.',
+          error instanceof Error
+            ? error.message
+            : 'Could not get current location. Please enter address manually.',
         variant: 'destructive',
       });
     } finally {
       setGettingLocation(false);
+      console.log('🏁 [DEBUG] Location fetch completed');
     }
   };
 
