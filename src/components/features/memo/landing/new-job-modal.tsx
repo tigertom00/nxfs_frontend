@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { jobsAPI } from '@/lib/api';
 import { Job, CreateJobPayload } from '@/lib/api';
-import { MapPin, Loader2 } from 'lucide-react';
+import { MapPin, Loader2, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestNextJobOrderNumber } from '@/lib/time-utils';
 import { JobOrderValidator } from '../shared/job-order-validator';
@@ -40,6 +40,9 @@ export function NewJobModal({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [searchingAddress, setSearchingAddress] = useState(false);
+  const [searchResults, setSearchResults] = useState<AddressData[]>([]);
+  const [showResults, setShowResults] = useState(false);
   const [existingOrderNumbers, setExistingOrderNumbers] = useState<number[]>(
     []
   );
@@ -187,6 +190,40 @@ export function NewJobModal({
     }
   };
 
+  const searchAddress = async (searchText: string): Promise<AddressData[]> => {
+    try {
+      if (!searchText || searchText.trim().length < 3) {
+        return [];
+      }
+
+      const url = `https://ws.geonorge.no/adresser/v1/sok?sok=${encodeURIComponent(searchText)}&treffPerSide=5`;
+      console.log('🔍 [DEBUG] Searching address:', url);
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('🔍 [DEBUG] Search response:', data);
+
+      if (data.adresser && data.adresser.length > 0) {
+        const results: AddressData[] = data.adresser.map((address: any) => ({
+          adresse: address.adressetekst || '',
+          postnummer: address.postnummer || '',
+          poststed: address.poststed || '',
+        }));
+        console.log('✅ [DEBUG] Found addresses:', results);
+        return results;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('❌ [DEBUG] Address search error:', error);
+      throw error;
+    }
+  };
+
   const handleUseCurrentLocation = async () => {
     console.log('🚀 [DEBUG] Starting location fetch...');
     setGettingLocation(true);
@@ -228,6 +265,55 @@ export function NewJobModal({
       setGettingLocation(false);
       console.log('🏁 [DEBUG] Location fetch completed');
     }
+  };
+
+  const handleAddressLookup = async () => {
+    console.log('🔍 [DEBUG] Starting address lookup...');
+    setSearchingAddress(true);
+    setShowResults(false);
+    try {
+      const results = await searchAddress(formData.adresse || '');
+      console.log('✅ [DEBUG] Search results:', results);
+
+      if (results.length === 0) {
+        toast({
+          title: 'No results',
+          description: 'No addresses found matching your search. Try a different query.',
+          variant: 'destructive',
+        });
+      } else {
+        setSearchResults(results);
+        setShowResults(true);
+      }
+    } catch (error) {
+      console.error('❌ [DEBUG] Address lookup error:', error);
+      toast({
+        title: 'Search error',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Could not search for address. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSearchingAddress(false);
+    }
+  };
+
+  const handleSelectAddress = (addressData: AddressData) => {
+    console.log('✅ [DEBUG] Selected address:', addressData);
+    setFormData((prev) => ({
+      ...prev,
+      adresse: addressData.adresse,
+      postnummer: addressData.postnummer,
+      poststed: addressData.poststed,
+    }));
+    setShowResults(false);
+    setSearchResults([]);
+    toast({
+      title: 'Address selected',
+      description: `${addressData.adresse}, ${addressData.postnummer} ${addressData.poststed}`,
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -321,13 +407,32 @@ export function NewJobModal({
               <div className="space-y-2 pt-2">
                 <div>
                   <Label htmlFor="adresse" className="text-sm">Street Address</Label>
-                  <Input
-                    id="adresse"
-                    value={formData.adresse}
-                    onChange={(e) => handleInputChange('adresse', e.target.value)}
-                    placeholder="e.g., Stortingsgata 4"
-                    className="mt-1"
-                  />
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      id="adresse"
+                      value={formData.adresse}
+                      onChange={(e) => {
+                        handleInputChange('adresse', e.target.value);
+                        setShowResults(false); // Hide results when user types
+                      }}
+                      placeholder="e.g., Stortingsgata 4"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleAddressLookup}
+                      disabled={searchingAddress || !formData.adresse || formData.adresse.trim().length < 3}
+                      title="Search for postal code and city"
+                    >
+                      {searchingAddress ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -336,7 +441,10 @@ export function NewJobModal({
                     <Input
                       id="postnummer"
                       value={formData.postnummer}
-                      onChange={(e) => handleInputChange('postnummer', e.target.value)}
+                      onChange={(e) => {
+                        handleInputChange('postnummer', e.target.value);
+                        setShowResults(false); // Hide results when user manually edits
+                      }}
                       placeholder="e.g., 0158"
                       maxLength={4}
                       className="mt-1"
@@ -347,12 +455,40 @@ export function NewJobModal({
                     <Input
                       id="poststed"
                       value={formData.poststed}
-                      onChange={(e) => handleInputChange('poststed', e.target.value)}
+                      onChange={(e) => {
+                        handleInputChange('poststed', e.target.value);
+                        setShowResults(false); // Hide results when user manually edits
+                      }}
                       placeholder="e.g., Oslo"
                       className="mt-1"
                     />
                   </div>
                 </div>
+
+                {/* Search Results Dropdown */}
+                {showResults && searchResults.length > 0 && (
+                  <div className="relative">
+                    <div className="absolute top-0 left-0 right-0 z-50 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      {searchResults.map((result, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleSelectAddress(result)}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors border-b border-border last:border-b-0 focus:outline-none focus:bg-muted"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-foreground truncate">
+                              {result.adresse}
+                            </span>
+                            <span className="text-muted-foreground whitespace-nowrap text-xs">
+                              {result.postnummer} {result.poststed}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
