@@ -59,6 +59,11 @@ export interface Job {
   telefon_nr?: string;
   beskrivelse?: string;
   ferdig: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+  geocoded_at?: string | null;
+  geocode_accuracy?: 'exact' | 'approximate' | 'failed' | null;
+  distance?: number; // Distance in meters from user location (calculated by backend)
   total_hours?: number;
   created_at: string;
   updated_at: string;
@@ -125,6 +130,13 @@ export interface JobSearchParams extends BaseSearchParams {
   ferdig?: boolean;
   created_after?: string;
   created_before?: string;
+}
+
+export interface NearbyJobsParams {
+  lat: number;
+  lon: number;
+  radius?: number; // Default 100 meters
+  ferdig?: boolean;
 }
 
 export interface SupplierSearchParams extends BaseSearchParams {

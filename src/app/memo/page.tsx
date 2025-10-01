@@ -238,7 +238,7 @@ export default function MemoPage() {
     });
   };
 
-  // Find and enter nearest job
+  // Find and enter nearest job (using backend geocoding)
   const handleAutoEntry = async () => {
     setCheckingLocation(true);
     console.log('🚀 [AUTO-ENTRY] Starting location-based job search...');
@@ -249,7 +249,52 @@ export default function MemoPage() {
       const currentLocation = await getCurrentLocation();
       console.log('✅ [AUTO-ENTRY] Current location:', currentLocation);
 
-      // Filter jobs with addresses
+      // Try backend endpoint first (optimized, fast)
+      try {
+        console.log('🔥 [AUTO-ENTRY] Using backend /nearby/ endpoint...');
+        const nearbyJobs = await jobsAPI.getNearbyJobs({
+          lat: currentLocation.latitude,
+          lon: currentLocation.longitude,
+          radius: 100,
+          ferdig: false, // Only show incomplete jobs
+        });
+
+        console.log(`✅ [AUTO-ENTRY] Backend returned ${nearbyJobs.length} nearby jobs`);
+
+        if (nearbyJobs.length > 0) {
+          // Jobs are already sorted by distance from backend
+          const nearestJob = nearbyJobs[0];
+          const distance = nearestJob.distance || 0;
+
+          console.log(`✅ [AUTO-ENTRY] Found nearby job #${nearestJob.ordre_nr} at ${Math.round(distance)}m`);
+
+          toast({
+            title: 'Nearby job found!',
+            description: `Entering Job #${nearestJob.ordre_nr} - ${nearestJob.tittel} (${Math.round(distance)}m away)`,
+          });
+
+          // Navigate to job
+          setTimeout(() => {
+            router.push(`/memo/job/${nearestJob.ordre_nr}`);
+          }, 1000);
+        } else {
+          console.log('❌ [AUTO-ENTRY] No jobs within 100m radius');
+
+          toast({
+            title: 'No nearby jobs',
+            description: 'No jobs found within 100 meters of your location.',
+            variant: 'destructive',
+          });
+        }
+        return; // Success, exit early
+      } catch (backendError) {
+        console.warn('⚠️ [AUTO-ENTRY] Backend endpoint failed, falling back to client-side geocoding:', backendError);
+        // Fall through to client-side fallback
+      }
+
+      // FALLBACK: Client-side geocoding (slower, but works without backend)
+      console.log('🔄 [AUTO-ENTRY] Using client-side geocoding fallback...');
+
       const jobsWithAddresses = jobs.filter(job => job.adresse && job.adresse.trim() !== '');
       console.log(`🔍 [AUTO-ENTRY] Found ${jobsWithAddresses.length} jobs with addresses`);
 
@@ -262,7 +307,7 @@ export default function MemoPage() {
         return;
       }
 
-      // Check each job's proximity
+      // Check each job's proximity (client-side)
       let nearestJob: Job | null = null;
       let nearestDistance = Infinity;
 

@@ -6,6 +6,7 @@ import {
   Job,
   JobMaterial,
   JobSearchParams,
+  NearbyJobsParams,
   CreateJobPayload,
   UpdateJobPayload,
   CreateJobMaterialPayload,
@@ -228,6 +229,41 @@ export const jobsAPI = {
       return response.data;
     } catch (error) {
       handleApiError(error, 'Getting materials summary');
+      throw error;
+    }
+  },
+
+  // Get nearby jobs based on user location (backend geocoding)
+  getNearbyJobs: async (params: NearbyJobsParams): Promise<Job[]> => {
+    try {
+      const url = createUrlWithParams('/app/memo/jobber/nearby/', {
+        lat: params.lat,
+        lon: params.lon,
+        radius: params.radius || 100,
+        ferdig: params.ferdig,
+      });
+      const response = await api.get(url);
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      handleApiError(error, 'Getting nearby jobs');
+      throw error;
+    }
+  },
+
+  // Get job heatmap data (all job locations)
+  getJobHeatmap: async (params?: { ferdig?: boolean }): Promise<Array<{
+    lat: number;
+    lon: number;
+    ordre_nr: string;
+    tittel: string;
+    ferdig: boolean;
+  }>> => {
+    try {
+      const url = createUrlWithParams('/app/memo/jobber/heatmap/', params);
+      const response = await api.get(url);
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      handleApiError(error, 'Getting job heatmap');
       throw error;
     }
   },
