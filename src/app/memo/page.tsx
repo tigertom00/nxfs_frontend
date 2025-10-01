@@ -15,16 +15,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Grid, List, BarChart3, FileText } from 'lucide-react';
+import { Search, Plus, Grid, List, BarChart3, FileText, MapPin, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function MemoPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const { isAuthenticated, isInitialized } = useAuthStore();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [showNewJobModal, setShowNewJobModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'mobile' | 'list'>('mobile');
+  const [checkingLocation, setCheckingLocation] = useState(false);
 
   // Search and filter state
   const [searchParams, setSearchParams] = useState<JobSearchParams>({});
@@ -137,6 +140,198 @@ export default function MemoPage() {
     loadJobs(searchParams, currentPage);
   };
 
+  // Calculate distance between two coordinates using Haversine formula
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+  };
+
+  // Geocode address to coordinates using Kartverket API
+  const geocodeAddress = async (address: string): Promise<{ lat: number; lon: number } | null> => {
+    try {
+      // Use Kartverket address search API
+      const response = await fetch(
+        `https://ws.geonorge.no/adresser/v1/sok?sok=${encodeURIComponent(address)}&treffPerSide=1`
+      );
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+
+      if (data.adresser && data.adresser.length > 0) {
+        const addressData = data.adresser[0];
+        if (addressData.representasjonspunkt) {
+          return {
+            lat: addressData.representasjonspunkt.lat,
+            lon: addressData.representasjonspunkt.lon,
+          };
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return null;
+    }
+  };
+
+  // Get current location
+  const getCurrentLocation = async (): Promise<{ latitude: number; longitude: number }> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by your browser'));
+        return;
+      }
+
+      if (!window.isSecureContext) {
+        reject(
+          new Error('Geolocation requires HTTPS or localhost.')
+        );
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          let errorMessage = 'Could not get your location';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location permission denied.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Location information unavailable.';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Location request timed out.';
+              break;
+          }
+          reject(new Error(errorMessage));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000,
+        }
+      );
+    });
+  };
+
+  // Find and enter nearest job
+  const handleAutoEntry = async () => {
+    setCheckingLocation(true);
+    console.log('🚀 [AUTO-ENTRY] Starting location-based job search...');
+
+    try {
+      // Get current location
+      console.log('📍 [AUTO-ENTRY] Getting current location...');
+      const currentLocation = await getCurrentLocation();
+      console.log('✅ [AUTO-ENTRY] Current location:', currentLocation);
+
+      // Filter jobs with addresses
+      const jobsWithAddresses = jobs.filter(job => job.adresse && job.adresse.trim() !== '');
+      console.log(`🔍 [AUTO-ENTRY] Found ${jobsWithAddresses.length} jobs with addresses`);
+
+      if (jobsWithAddresses.length === 0) {
+        toast({
+          title: 'No jobs with addresses',
+          description: 'There are no jobs with valid addresses to check proximity.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Check each job's proximity
+      let nearestJob: Job | null = null;
+      let nearestDistance = Infinity;
+
+      for (const job of jobsWithAddresses) {
+        console.log(`🗺️ [AUTO-ENTRY] Geocoding job #${job.ordre_nr}: ${job.adresse}`);
+        const jobCoords = await geocodeAddress(job.adresse);
+
+        if (jobCoords) {
+          const distance = calculateDistance(
+            currentLocation.latitude,
+            currentLocation.longitude,
+            jobCoords.lat,
+            jobCoords.lon
+          );
+
+          console.log(`📏 [AUTO-ENTRY] Job #${job.ordre_nr} is ${Math.round(distance)}m away`);
+
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestJob = job;
+          }
+        } else {
+          console.warn(`⚠️ [AUTO-ENTRY] Could not geocode address for job #${job.ordre_nr}`);
+        }
+      }
+
+      // Check if nearest job is within 100m
+      if (nearestJob && nearestDistance <= 100) {
+        console.log(`✅ [AUTO-ENTRY] Found nearby job #${nearestJob.ordre_nr} at ${Math.round(nearestDistance)}m`);
+
+        toast({
+          title: 'Nearby job found!',
+          description: `Entering Job #${nearestJob.ordre_nr} - ${nearestJob.tittel} (${Math.round(nearestDistance)}m away)`,
+        });
+
+        // Navigate to job
+        setTimeout(() => {
+          router.push(`/memo/job/${nearestJob.ordre_nr}`);
+        }, 1000);
+      } else if (nearestJob) {
+        console.log(`❌ [AUTO-ENTRY] Nearest job is ${Math.round(nearestDistance)}m away (too far)`);
+
+        toast({
+          title: 'No nearby jobs',
+          description: `The nearest job is ${Math.round(nearestDistance)}m away. You need to be within 100m to auto-enter.`,
+          variant: 'destructive',
+        });
+      } else {
+        console.log('❌ [AUTO-ENTRY] Could not find any jobs with valid addresses');
+
+        toast({
+          title: 'No jobs found',
+          description: 'Could not locate any jobs near your current position.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('❌ [AUTO-ENTRY] Error:', error);
+      toast({
+        title: 'Location error',
+        description: error instanceof Error ? error.message : 'Could not check your location.',
+        variant: 'destructive',
+      });
+    } finally {
+      setCheckingLocation(false);
+      console.log('🏁 [AUTO-ENTRY] Completed');
+    }
+  };
+
   // Get stats for current filter
   const getJobStats = () => {
     const activeJobs = jobs.filter(job => !job.ferdig).length;
@@ -172,7 +367,7 @@ export default function MemoPage() {
               </h1>
               <p className="text-muted-foreground">Work Order Management</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant={viewMode === 'mobile' ? 'default' : 'outline'}
                 size="sm"
@@ -191,6 +386,26 @@ export default function MemoPage() {
               </Button>
               <Button
                 variant="outline"
+                size="sm"
+                onClick={handleAutoEntry}
+                disabled={checkingLocation || jobs.length === 0}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 border-0"
+              >
+                {checkingLocation ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Auto-Enter Nearby Job
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => router.push('/memo/dashboard')}
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
@@ -198,12 +413,13 @@ export default function MemoPage() {
               </Button>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => router.push('/memo/reports')}
               >
                 <FileText className="h-4 w-4 mr-2" />
                 Reports
               </Button>
-              <Button onClick={handleNewJob}>
+              <Button size="sm" onClick={handleNewJob}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Job
               </Button>
