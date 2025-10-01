@@ -236,15 +236,24 @@ export const jobsAPI = {
   // Get nearby jobs based on user location (backend geocoding)
   getNearbyJobs: async (params: NearbyJobsParams): Promise<Job[]> => {
     try {
+      console.log('[DEBUG] getNearbyJobs called with params:', params);
       const url = createUrlWithParams('/app/memo/jobber/nearby/', {
         lat: params.lat,
         lon: params.lon,
         radius: params.radius || 100,
         ferdig: params.ferdig,
       });
+      console.log('[DEBUG] Making request to:', url);
       const response = await api.get(url);
+      console.log('[DEBUG] Response received:', response.data);
       return Array.isArray(response.data) ? response.data : [];
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[DEBUG] getNearbyJobs error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
       handleApiError(error, 'Getting nearby jobs');
       throw error;
     }
