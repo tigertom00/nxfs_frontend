@@ -246,6 +246,13 @@ export const jobsAPI = {
       console.log('[DEBUG] Making request to:', url);
       const response = await api.get(url);
       console.log('[DEBUG] Response received:', response.data);
+
+      // Handle both paginated and direct array responses
+      if (response.data && typeof response.data === 'object' && 'results' in response.data) {
+        console.log('[DEBUG] Paginated response, returning results array');
+        return response.data.results || [];
+      }
+
       return Array.isArray(response.data) ? response.data : [];
     } catch (error: any) {
       console.error('[DEBUG] getNearbyJobs error:', {
