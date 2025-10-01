@@ -28,6 +28,7 @@ import {
   Palette,
   Monitor,
   Heart,
+  Gamepad2,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -113,7 +114,24 @@ export default function Navbar() {
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <Link href="/memo/admin" className="w-full">
-                        ⚙️ {language === 'no' ? 'Administrasjon' : 'Administration'}
+                        ⚙️{' '}
+                        {language === 'no'
+                          ? 'Administrasjon'
+                          : 'Administration'}
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Gamepad2 className="mr-2 h-4 w-4" />
+                    {language === 'no' ? 'Spill' : 'Games'}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem>
+                      <Link href="/game" className="w-full">
+                        🧠 {language === 'no' ? 'Minnespill' : 'Memory Game'}
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>

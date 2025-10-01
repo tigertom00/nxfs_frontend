@@ -14,3 +14,6 @@ export { TagManager } from './blog/admin/tag-manager';
 
 // Chat feature
 export { default as ChatBot } from './chat/chatbot';
+
+// Game feature
+export { default as MemoryGame } from './game/memory-game';

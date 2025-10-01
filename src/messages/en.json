@@ -230,5 +230,23 @@
     "permissionDenied": "Permission Denied",
     "permissionDeniedDesc": "You don't have permission to access this resource.",
     "contactAdmin": "Contact Administrator"
+  },
+  "game": {
+    "title": "Memory Card Game",
+    "subtitle": "Test your memory with our electrical-themed card matching game. Find all the pairs to win!",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "newGame": "New Game",
+    "moves": "Moves",
+    "time": "Time",
+    "games": "Games",
+    "best": "Best",
+    "congratulations": "Congratulations!",
+    "completed": "You completed the {difficulty} game in {time} with {moves} moves!",
+    "newBestTime": "New Best Time!",
+    "playAgain": "Play Again",
+    "close": "Close",
+    "loading": "Loading game..."
   }
 }

@@ -230,5 +230,23 @@
     "permissionDenied": "Tilgang Nektet",
     "permissionDeniedDesc": "Du har ikke tillatelse til å få tilgang til denne ressursen.",
     "contactAdmin": "Kontakt Administrator"
+  },
+  "game": {
+    "title": "Minnekortspill",
+    "subtitle": "Test hukommelsen din med vårt elektriske temakortspill. Finn alle parene for å vinne!",
+    "easy": "Lett",
+    "medium": "Middels",
+    "hard": "Vanskelig",
+    "newGame": "Nytt Spill",
+    "moves": "Trekk",
+    "time": "Tid",
+    "games": "Spill",
+    "best": "Beste",
+    "congratulations": "Gratulerer!",
+    "completed": "Du fullførte {difficulty} spillet på {time} med {moves} trekk!",
+    "newBestTime": "Ny Beste Tid!",
+    "playAgain": "Spill Igjen",
+    "close": "Lukk",
+    "loading": "Laster spill..."
   }
 }
