@@ -70,6 +70,12 @@ export function ManualTimeEntry({
     setShowRoundingInfo(true);
   };
 
+  const adjustDate = (days: number) => {
+    const newDate = new Date(date);
+    newDate.setDate(newDate.getDate() + days);
+    setDate(newDate);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -139,28 +145,46 @@ export function ManualTimeEntry({
           {/* Date Picker */}
           <div className="space-y-2">
             <Label>Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !date && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, 'PPP') : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={(date) => date && setDate(date)}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'flex-1 justify-start text-left font-normal',
+                      !date && 'text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(date) => date && setDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => adjustDate(-1)}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => adjustDate(1)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Time Input */}
@@ -179,12 +203,11 @@ export function ManualTimeEntry({
               <span className="text-sm text-muted-foreground">hours</span>
               <Button
                 type="button"
-                variant="outline"
+                variant={hours === 8.0 ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => adjustTime(0.5)}
-                disabled={hours >= 24}
+                onClick={() => handleQuickTime(8.0)}
               >
-                <Plus className="h-4 w-4" />
+                8h
               </Button>
               <Button
                 type="button"
@@ -197,12 +220,12 @@ export function ManualTimeEntry({
               </Button>
               <Button
                 type="button"
-                variant={hours === 8.0 ? 'default' : 'outline'}
+                variant="outline"
                 size="sm"
-                onClick={() => handleQuickTime(8.0)}
-                className="ml-2"
+                onClick={() => adjustTime(0.5)}
+                disabled={hours >= 24}
               >
-                8h
+                <Plus className="h-4 w-4" />
               </Button>
             </div>
           </div>

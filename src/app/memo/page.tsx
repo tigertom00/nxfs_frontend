@@ -7,6 +7,7 @@ import Navbar from '@/components/layouts/navbar';
 import { useAuthStore } from '@/stores';
 import { jobsAPI, Job } from '@/lib/api';
 import { NewJobModal } from '@/components/features/memo/landing/new-job-modal';
+import { EditJobModal } from '@/components/features/memo/landing/edit-job-modal';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
 import ChatBot from '@/components/features/chat/chatbot';
 import { Button } from '@/components/ui/button';
@@ -17,22 +18,18 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Plus, MapPin, Loader2, Search, ExternalLink } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import {
+  Plus,
+  MapPin,
+  Loader2,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { useDebounce } from '@/hooks';
 
 export default function MemoPage() {
   const router = useRouter();
@@ -44,12 +41,18 @@ export default function MemoPage() {
   const [checkingLocation, setCheckingLocation] = useState(false);
   const [locationChecked, setLocationChecked] = useState(false);
   const [showNewJobModal, setShowNewJobModal] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [showEditJobModal, setShowEditJobModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<
-    Array<{ value: string; label: string }>
-  >([]);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 10;
+
+  // Debounce search query
+  const debouncedSearch = useDebounce(searchQuery, 500);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -140,46 +143,122 @@ export default function MemoPage() {
     checkNearbyJobs();
   }, [isAuthenticated, locationChecked, toast]);
 
-  // Search for jobs
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
+  // Fetch jobs with search and pagination
+  useEffect(() => {
+    const fetchJobs = async () => {
+      if (!isAuthenticated) return;
 
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
+      setLoading(true);
+      try {
+        const isNumericSearch = debouncedSearch && /^\d+$/.test(debouncedSearch);
 
-    setSearchLoading(true);
-    try {
-      const choices = await jobsAPI.getJobChoices({
-        search: query,
-        limit: 50,
-        ferdig: false,
-      });
+        // If searching by number, fetch all jobs to filter client-side
+        const response = await jobsAPI.getJobs({
+          search: !isNumericSearch ? debouncedSearch || undefined : undefined,
+          page: isNumericSearch ? undefined : currentPage,
+          page_size: isNumericSearch ? 100 : pageSize, // Get more results for numeric search
+          ferdig: false,
+          ordering: '-ordre_nr', // Sort by ordre_nr descending (highest first)
+        });
 
-      setSearchResults(
-        choices.map((choice) => ({
-          value: choice.value.toString(),
-          label: choice.label,
-        }))
-      );
-    } catch (error) {
-      setSearchResults([]);
-    } finally {
-      setSearchLoading(false);
-    }
+        // Handle both paginated and array responses
+        let jobs: Job[] = [];
+        if (Array.isArray(response)) {
+          jobs = response;
+        } else {
+          jobs = response.results || [];
+        }
+
+        // If search query is numeric, filter client-side for partial matches
+        if (isNumericSearch) {
+          jobs = jobs.filter((job) =>
+            job.ordre_nr.toString().includes(debouncedSearch)
+          );
+
+          // For numeric search, implement client-side pagination
+          const startIdx = (currentPage - 1) * pageSize;
+          const endIdx = startIdx + pageSize;
+          const totalFiltered = jobs.length;
+          jobs = jobs.slice(startIdx, endIdx);
+
+          setAllJobs(jobs);
+          setTotalCount(totalFiltered);
+          setTotalPages(Math.ceil(totalFiltered / pageSize));
+        } else {
+          // Sort by ordre_nr (highest to lowest)
+          jobs.sort((a, b) => {
+            const numA = parseInt(a.ordre_nr.toString());
+            const numB = parseInt(b.ordre_nr.toString());
+            return numB - numA;
+          });
+
+          setAllJobs(jobs);
+          if (Array.isArray(response)) {
+            setTotalCount(jobs.length);
+            setTotalPages(Math.ceil(jobs.length / pageSize));
+          } else {
+            setTotalCount(response.count || 0);
+            setTotalPages(response.page_info?.total_pages || 1);
+          }
+        }
+      } catch (error) {
+        setAllJobs([]);
+        setTotalCount(0);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, [isAuthenticated, debouncedSearch, currentPage]);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
+
+  // Handle job selection
+  const handleJobSelect = (ordreNr: string | number) => {
+    router.push(`/memo/job/${ordreNr}`);
   };
 
-  // Handle job selection from search
-  const handleJobSelect = (ordreNr: string) => {
-    setSearchOpen(false);
-    router.push(`/memo/job/${ordreNr}`);
+  // Handle edit job
+  const handleEditJob = (job: Job, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedJob(job);
+    setShowEditJobModal(true);
   };
 
   // Handle new job creation
   const handleJobCreated = (newJob: Job) => {
     setShowNewJobModal(false);
     router.push(`/memo/job/${newJob.ordre_nr}`);
+  };
+
+  // Handle job updated
+  const handleJobUpdated = (updatedJob: Job) => {
+    setAllJobs((prev) =>
+      prev.map((job) =>
+        job.ordre_nr === updatedJob.ordre_nr ? updatedJob : job
+      )
+    );
+    setShowEditJobModal(false);
+    toast({
+      title: 'Job updated',
+      description: `Job #${updatedJob.ordre_nr} has been updated successfully`,
+    });
+  };
+
+  // Handle job deleted
+  const handleJobDeleted = (ordreNr: string) => {
+    setAllJobs((prev) => prev.filter((job) => job.ordre_nr !== ordreNr));
+    setTotalCount((prev) => prev - 1);
+    setShowEditJobModal(false);
+    toast({
+      title: 'Job deleted',
+      description: `Job #${ordreNr} has been deleted successfully`,
+    });
   };
 
   // Show loading or redirect while checking auth
@@ -198,8 +277,8 @@ export default function MemoPage() {
     <>
       <ThemeInitializer />
       <Navbar />
-      <div className="min-h-screen bg-background">
-        <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="min-h-screen bg-background pb-24">
+        <main className="container mx-auto px-4 py-8 max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -249,17 +328,27 @@ export default function MemoPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card className="bg-card border-border hover-lift cursor-pointer group">
-                      <CardHeader>
+                    <Card
+                      className="bg-card border-border hover-lift cursor-pointer"
+                      onClick={() => handleJobSelect(job.ordre_nr)}
+                    >
+                      <CardContent className="pt-6">
                         <div className="flex items-start justify-between">
                           <div className="space-y-1 flex-1">
-                            <CardTitle className="text-xl">
-                              Job #{job.ordre_nr}
-                            </CardTitle>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-lg font-semibold">
+                                Job #{job.ordre_nr}
+                              </h3>
+                              {job.distance !== undefined && (
+                                <span className="text-sm font-medium text-green-600">
+                                  {Math.round(job.distance)}m away
+                                </span>
+                              )}
+                            </div>
                             {job.tittel && (
-                              <CardDescription className="text-base">
+                              <p className="text-muted-foreground">
                                 {job.tittel}
-                              </CardDescription>
+                              </p>
                             )}
                             {job.adresse && (
                               <p className="text-sm text-muted-foreground flex items-center gap-1 mt-2">
@@ -267,23 +356,8 @@ export default function MemoPage() {
                                 {job.adresse}
                               </p>
                             )}
-                            {job.distance !== undefined && (
-                              <p className="text-sm font-medium text-green-600 mt-1">
-                                {Math.round(job.distance)}m away
-                              </p>
-                            )}
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <Button
-                          onClick={() => handleJobSelect(job.ordre_nr)}
-                          className="w-full"
-                          size="lg"
-                        >
-                          Enter Job
-                          <ExternalLink className="h-4 w-4 ml-2" />
-                        </Button>
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -291,102 +365,136 @@ export default function MemoPage() {
               </motion.div>
             )}
 
-            {/* Main Actions */}
+            {/* Jobs List with Search */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
-              className="space-y-6"
             >
-              {/* Search Job */}
               <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Search className="h-5 w-5" />
-                    Search for Job
+                    All Jobs
                   </CardTitle>
                   <CardDescription>
                     Search by job number, title, or address
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Popover open={searchOpen} onOpenChange={setSearchOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={searchOpen}
-                        className="w-full justify-between h-12 text-left"
-                      >
-                        <span
-                          className={cn(
-                            'truncate',
-                            !searchQuery && 'text-muted-foreground'
-                          )}
-                        >
-                          {searchQuery || 'Type to search jobs...'}
-                        </span>
-                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                      <Command shouldFilter={false}>
-                        <CommandInput
-                          placeholder="Search jobs..."
-                          value={searchQuery}
-                          onValueChange={handleSearch}
-                        />
-                        <CommandList>
-                          {searchLoading && (
-                            <div className="p-4 text-center text-sm text-muted-foreground">
-                              <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
-                              Searching...
-                            </div>
-                          )}
-                          {!searchLoading &&
-                            searchQuery &&
-                            searchResults.length === 0 && (
-                              <CommandEmpty>No jobs found.</CommandEmpty>
-                            )}
-                          {!searchLoading && searchResults.length > 0 && (
-                            <CommandGroup heading="Jobs">
-                              {searchResults.map((result) => (
-                                <CommandItem
-                                  key={result.value}
-                                  value={result.value}
-                                  onSelect={() => handleJobSelect(result.value)}
-                                  className="cursor-pointer"
-                                >
-                                  {result.label}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          )}
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </CardContent>
-              </Card>
+                <CardContent className="space-y-4">
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search jobs..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
 
-              {/* Create New Job */}
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5" />
-                    Create New Job
-                  </CardTitle>
-                  <CardDescription>Start a new work order</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    onClick={() => setShowNewJobModal(true)}
-                    className="w-full"
-                    size="lg"
-                  >
-                    <Plus className="h-5 w-5 mr-2" />
-                    New Job
-                  </Button>
+                  {/* Loading State */}
+                  {loading && (
+                    <div className="py-8 text-center text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                      <p>Loading jobs...</p>
+                    </div>
+                  )}
+
+                  {/* Jobs List */}
+                  {!loading && allJobs.length > 0 && (
+                    <div className="space-y-2">
+                      {allJobs.map((job, index) => (
+                        <motion.div
+                          key={job.ordre_nr}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="p-4 border border-border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group"
+                          onClick={() => handleJobSelect(job.ordre_nr)}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-foreground">
+                                  Job #{job.ordre_nr}
+                                </h3>
+                                {job.total_hours > 0 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {Math.round(job.total_hours / 60)}h
+                                  </span>
+                                )}
+                              </div>
+                              {job.tittel && (
+                                <p className="text-sm text-foreground truncate">
+                                  {job.tittel}
+                                </p>
+                              )}
+                              {job.adresse && (
+                                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {job.adresse}
+                                  {job.poststed && `, ${job.poststed}`}
+                                </p>
+                              )}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => handleEditJob(job, e)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Empty State */}
+                  {!loading && allJobs.length === 0 && (
+                    <div className="py-8 text-center text-muted-foreground">
+                      <Search className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                      <p>No jobs found</p>
+                      {searchQuery && (
+                        <p className="text-sm mt-2">
+                          Try a different search term
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Pagination */}
+                  {!loading && totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-4 border-t border-border">
+                      <p className="text-sm text-muted-foreground">
+                        Page {currentPage} of {totalPages} ({totalCount} total)
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setCurrentPage((p) => Math.max(1, p - 1))
+                          }
+                          disabled={currentPage === 1}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setCurrentPage((p) => Math.min(totalPages, p + 1))
+                          }
+                          disabled={currentPage === totalPages}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -394,11 +502,36 @@ export default function MemoPage() {
         </main>
       </div>
 
+      {/* Floating Action Button */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.5, type: 'spring' }}
+        className="fixed bottom-6 left-6 z-40"
+      >
+        <Button
+          onClick={() => setShowNewJobModal(true)}
+          size="lg"
+          className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </motion.div>
+
       {/* New Job Modal */}
       <NewJobModal
         isOpen={showNewJobModal}
         onClose={() => setShowNewJobModal(false)}
         onJobCreated={handleJobCreated}
+      />
+
+      {/* Edit Job Modal */}
+      <EditJobModal
+        isOpen={showEditJobModal}
+        onClose={() => setShowEditJobModal(false)}
+        onJobUpdated={handleJobUpdated}
+        onJobDeleted={handleJobDeleted}
+        job={selectedJob}
       />
 
       <ChatBot />

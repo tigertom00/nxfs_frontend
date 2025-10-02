@@ -4,13 +4,10 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, AlertCircle, RefreshCw, Calendar } from 'lucide-react';
+import { CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import {
   validateJobOrderNumber,
   suggestNextJobOrderNumber,
-  generateJobOrderNumber,
 } from '@/lib/time-utils';
 
 interface JobOrderValidatorProps {
@@ -89,20 +86,6 @@ export function JobOrderValidator({
     }
   };
 
-  const getYearCodeInfo = () => {
-    const currentYear = new Date().getFullYear();
-    const codes = [];
-
-    for (let year = 2025; year <= currentYear + 2; year++) {
-      const code = (year - 2017) % 10;
-      codes.push({ year, code });
-    }
-
-    return codes;
-  };
-
-  const yearCodes = getYearCodeInfo();
-
   return (
     <div className={className}>
       <div className="space-y-2">
@@ -152,56 +135,12 @@ export function JobOrderValidator({
           </div>
         )}
 
-        {validation.isValid && validation.year && validation.sequence && (
+        {validation.isValid && (
           <div className="flex items-center gap-2 text-sm text-green-600">
             <CheckCircle className="h-4 w-4" />
-            Valid order number for {validation.year} (sequence #
-            {validation.sequence})
+            Valid order number
           </div>
         )}
-
-        {/* Year Code Reference */}
-        <Card className="bg-muted/50">
-          <CardContent className="p-3">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Calendar className="h-4 w-4" />
-                Year Code Reference
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {yearCodes.map(({ year, code }) => (
-                  <Badge
-                    key={year}
-                    variant={
-                      year === new Date().getFullYear()
-                        ? 'default'
-                        : 'secondary'
-                    }
-                    className="text-xs"
-                  >
-                    {year}: {code}xxx
-                  </Badge>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Order format: YXXX where Y is year code and XXX is sequence
-                (001-999)
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Examples */}
-        <div className="text-xs text-muted-foreground">
-          <p>
-            <strong>Examples:</strong>
-          </p>
-          <ul className="list-disc list-inside space-y-1 mt-1">
-            <li>8001-8999: Jobs from 2025</li>
-            <li>9001-9999: Jobs from 2026</li>
-            <li>0001-0999: Jobs from 2027</li>
-          </ul>
-        </div>
       </div>
     </div>
   );

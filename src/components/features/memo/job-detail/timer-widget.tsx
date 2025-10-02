@@ -167,7 +167,88 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
 
     try {
       setStatsLoading(true);
-      const stats = await timeTrackingAPI.getUserStats();
+
+      // API expects ordre_nr string
+      const jobIdToUse = ordreNr || jobId.toString();
+      const userId = parseInt(user.id);
+
+      // Get time entries for this job (current user)
+      const userJobEntries = await timeTrackingAPI.getTimeEntriesByDate({
+        jobb: jobIdToUse,
+        user_id: userId,
+      });
+
+      // Get time entries for this job (all users)
+      const allUsersJobEntries = await timeTrackingAPI.getTimeEntriesByDate({
+        jobb: jobIdToUse,
+      });
+
+      // Calculate stats from the entries
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0];
+
+      const calculateStats = (entries: any) => {
+        if (!entries || !entries.entries_by_date) {
+          return { hours: 0, entries: 0 };
+        }
+
+        const entriesArray = Array.isArray(entries.entries_by_date)
+          ? entries.entries_by_date
+          : Object.values(entries.entries_by_date || {});
+
+        return entriesArray.reduce(
+          (acc: any, dateGroup: any) => {
+            return {
+              hours: acc.hours + (dateGroup.total_hours || 0),
+              entries: acc.entries + (dateGroup.entries?.length || 0),
+            };
+          },
+          { hours: 0, entries: 0 }
+        );
+      };
+
+      const getTodayStats = (entries: any) => {
+        if (!entries || !entries.entries_by_date) {
+          return { hours: 0, entries: 0 };
+        }
+
+        const entriesArray = Array.isArray(entries.entries_by_date)
+          ? entries.entries_by_date
+          : Object.values(entries.entries_by_date || {});
+
+        const todayGroup = entriesArray.find((g: any) => g.date === today);
+        return {
+          hours: todayGroup?.total_hours || 0,
+          entries: todayGroup?.entries?.length || 0,
+        };
+      };
+
+      const getYesterdayStats = (entries: any) => {
+        if (!entries || !entries.entries_by_date) {
+          return { hours: 0, entries: 0 };
+        }
+
+        const entriesArray = Array.isArray(entries.entries_by_date)
+          ? entries.entries_by_date
+          : Object.values(entries.entries_by_date || {});
+
+        const yesterdayGroup = entriesArray.find((g: any) => g.date === yesterday);
+        return {
+          hours: yesterdayGroup?.total_hours || 0,
+          entries: yesterdayGroup?.entries?.length || 0,
+        };
+      };
+
+      // Build stats object for this job
+      const stats = {
+        today: getTodayStats(userJobEntries),
+        yesterday: getYesterdayStats(userJobEntries),
+        total_user: calculateStats(userJobEntries),
+        total_all_users: calculateStats(allUsersJobEntries),
+      };
+
       setUserStats(stats);
     } catch (error) {
       // Don't show error toast for stats - it's supplementary information
@@ -176,12 +257,12 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     }
   };
 
-  // Load user stats on mount and when user changes
+  // Load user stats on mount and when user/job changes
   useEffect(() => {
     if (user) {
       loadUserStats();
     }
-  }, [user]);
+  }, [user, jobId, ordreNr]);
 
   const startTimer = () => {
     try {
@@ -336,12 +417,14 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs font-medium text-muted-foreground">
-                    TIME OVERVIEW
+                    TIME OVERVIEW (THIS JOB)
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
-                    <div className="text-xs text-muted-foreground">Today</div>
+                    <div className="text-xs text-muted-foreground">
+                      Today (You)
+                    </div>
                     <div className="text-sm font-semibold">
                       {(userStats.today.hours / 60).toFixed(1)}h
                     </div>
@@ -351,7 +434,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   </div>
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">
-                      Yesterday
+                      Yesterday (You)
                     </div>
                     <div className="text-sm font-semibold">
                       {(userStats.yesterday.hours / 60).toFixed(1)}h

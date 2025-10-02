@@ -15,10 +15,14 @@ import {
   Image as ImageIcon,
   FileText,
   Edit3,
+  Trash2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useUIStore } from '@/stores';
 import { ImageEditorDialog } from '@/components/features/memo/shared/image-editor-dialog';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 
 interface PhotoGalleryProps {
   jobId: number;
@@ -38,6 +42,8 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
     item: JobImage | JobFile;
   } | null>(null);
   const [editingImage, setEditingImage] = useState<JobImage | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -95,12 +101,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   };
 
   const handleChooseFromGallery = () => {
-    // Trigger file input
-    imageInputRef.current?.click();
-  };
-
-  const handleBulkUpload = () => {
-    // For bulk upload, just trigger the regular file input with multiple selection
+    // Trigger file input (supports multiple files)
     imageInputRef.current?.click();
   };
 
@@ -377,36 +378,52 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
             </div>
             {/* Photo Grid */}
             {photos.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
-                {photos.map((photo) => (
-                  <div key={photo.id} className="aspect-square relative group">
-                    <img
-                      src={photo.image}
-                      alt={photo.name || `Photo ${photo.id}`}
-                      className="w-full h-full object-cover rounded-lg"
-                      onError={(e) => {
-                        // Handle broken image
-                        e.currentTarget.src =
-                          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDMuNVYyMC41SDNWMy41SDIxWk0yMiAySDJDMS40NSAyIDEgMi40NSAxIDNWMjFDMSAyMS41NSAxLjQ1IDIyIDIgMjJIMjJDMjIuNTUgMjIgMjMgMjEuNTUgMjMgMjFWM0MyMyAyLjQ1IDIyLjU1IDIgMjIgMloiIGZpbGw9IiNjY2MiLz4KPC9zdmc+';
+              <div className="grid grid-cols-3 gap-3">
+                {photos.map((photo, index) => (
+                  <div key={photo.id} className="space-y-2">
+                    <div
+                      className="aspect-square relative cursor-pointer overflow-hidden rounded-lg border-2 border-transparent hover:border-primary transition-colors"
+                      onClick={() => {
+                        setLightboxIndex(index);
+                        setLightboxOpen(true);
                       }}
-                    />
-                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => setEditingImage(photo)}
-                        className="bg-primary text-primary-foreground rounded-full p-1"
+                    >
+                      <img
+                        src={photo.image}
+                        alt={photo.name || `Photo ${photo.id}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Handle broken image
+                          e.currentTarget.src =
+                            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDMuNVYyMC41SDNWMy41SDIxWk0yMiAySDJDMS40NSAyIDEgMi40NSAxIDNWMjFDMSAyMS41NSAxLjQ1IDIyIDIgMjJIMjJDMjIuNTUgMjIgMjMgMjEuNTUgMjMgMjFWM0MyMyAyLjQ1IDIyLjU1IDIgMjIgMloiIGZpbGw9IiNjY2MiLz4KPC9zdmc+';
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingImage(photo);
+                        }}
+                        className="h-8 w-8 p-0"
                         aria-label="Edit photo"
                       >
-                        <Edit3 className="h-3 w-3" />
-                      </button>
-                      <button
-                        onClick={() =>
-                          setDeleteTarget({ type: 'image', item: photo })
-                        }
-                        className="bg-red-500 text-white rounded-full p-1"
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget({ type: 'image', item: photo });
+                        }}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                         aria-label="Delete photo"
                       >
-                        <X className="h-3 w-3" />
-                      </button>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -423,7 +440,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
             )}
 
             {/* Photo Controls */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={handleTakePhoto}
                 variant="outline"
@@ -444,17 +461,6 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
               >
                 <FolderOpen className="h-4 w-4 mb-1" />
                 <span className="text-xs">Gallery</span>
-              </Button>
-
-              <Button
-                onClick={handleBulkUpload}
-                variant="outline"
-                size="sm"
-                className="h-12 flex flex-col items-center justify-center"
-                disabled={uploading}
-              >
-                <Upload className="h-4 w-4 mb-1" />
-                <span className="text-xs">Bulk</span>
               </Button>
             </div>
           </div>
@@ -622,6 +628,22 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
           onSave={handleSaveEditedImage}
         />
       )}
+
+      {/* Lightbox for full-screen image viewing */}
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={lightboxIndex}
+        slides={photos.map((photo) => ({
+          src: photo.image,
+          alt: photo.name || `Photo ${photo.id}`,
+        }))}
+        plugins={[Zoom]}
+        zoom={{
+          maxZoomPixelRatio: 3,
+          scrollToZoom: true,
+        }}
+      />
     </div>
   );
 }

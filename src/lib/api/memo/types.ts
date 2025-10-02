@@ -132,10 +132,12 @@ export interface MaterialSearchParams extends BaseSearchParams {
 }
 
 export interface JobSearchParams extends BaseSearchParams {
+  ordre_nr?: string;
   tittel?: string;
   ferdig?: boolean;
   created_after?: string;
   created_before?: string;
+  ordering?: string; // e.g., '-ordre_nr' for descending, 'ordre_nr' for ascending
 }
 
 export interface NearbyJobsParams {
