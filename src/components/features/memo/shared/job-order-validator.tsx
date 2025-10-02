@@ -86,7 +86,6 @@ export function JobOrderValidator({
       setInputValue(suggested.toString());
       onChange(suggested);
     } catch (error) {
-      console.error('Failed to suggest next order number:', error);
     }
   };
 

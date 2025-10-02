@@ -115,7 +115,6 @@ export function ManualTimeEntry({
         onSuccess();
       }
     } catch (error) {
-      console.error('Failed to create time entry:', error);
       toast({
         title: 'Failed to add time entry',
         description:

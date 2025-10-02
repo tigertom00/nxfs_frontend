@@ -137,7 +137,9 @@ api.interceptors.response.use(
 
     // Handle rate limiting (429) errors
     if (error.response?.status === 429) {
-      console.warn('Rate limit exceeded, please wait before making more requests');
+      console.warn(
+        'Rate limit exceeded, please wait before making more requests'
+      );
       // Don't show error toast for rate limiting to avoid spam
       return Promise.reject(error);
     }

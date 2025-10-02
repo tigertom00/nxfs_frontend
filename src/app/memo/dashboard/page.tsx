@@ -23,15 +23,19 @@ import {
   Zap,
   RefreshCw,
   ExternalLink,
-  FileText
+  FileText,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function MemoDashboardPage() {
   const router = useRouter();
   const { isAuthenticated, isInitialized } = useAuthStore();
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
-  const [recentActivity, setRecentActivity] = useState<RecentActivity | null>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
+    null
+  );
+  const [recentActivity, setRecentActivity] = useState<RecentActivity | null>(
+    null
+  );
   const [quickAccess, setQuickAccess] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,7 +62,7 @@ export default function MemoDashboardPage() {
       setRecentActivity(activityData);
       setQuickAccess(quickAccessData);
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      // Error handled by API layer
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -141,7 +145,9 @@ export default function MemoDashboardPage() {
                 disabled={refreshing}
                 className="flex items-center gap-2"
               >
-                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`}
+                />
                 Refresh
               </Button>
               <Button
@@ -164,9 +170,7 @@ export default function MemoDashboardPage() {
           </div>
 
           {/* Dashboard Overview Stats */}
-          {dashboardStats && (
-            <DashboardOverview stats={dashboardStats} />
-          )}
+          {dashboardStats && <DashboardOverview stats={dashboardStats} />}
 
           {/* Main Dashboard Content */}
           <Tabs defaultValue="overview" className="space-y-4">
@@ -175,7 +179,10 @@ export default function MemoDashboardPage() {
                 <BarChart3 className="h-4 w-4" />
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="performance" className="flex items-center gap-2">
+              <TabsTrigger
+                value="performance"
+                className="flex items-center gap-2"
+              >
                 <TrendingUp className="h-4 w-4" />
                 Performance
               </TabsTrigger>
@@ -183,7 +190,10 @@ export default function MemoDashboardPage() {
                 <Activity className="h-4 w-4" />
                 Activity
               </TabsTrigger>
-              <TabsTrigger value="quickactions" className="flex items-center gap-2">
+              <TabsTrigger
+                value="quickactions"
+                className="flex items-center gap-2"
+              >
                 <Zap className="h-4 w-4" />
                 Quick Actions
               </TabsTrigger>
@@ -206,9 +216,7 @@ export default function MemoDashboardPage() {
 
             {/* Performance Tab */}
             <TabsContent value="performance" className="space-y-6">
-              {dashboardStats && (
-                <PerformanceMetrics stats={dashboardStats} />
-              )}
+              {dashboardStats && <PerformanceMetrics stats={dashboardStats} />}
             </TabsContent>
 
             {/* Activity Tab */}
@@ -222,9 +230,7 @@ export default function MemoDashboardPage() {
 
             {/* Quick Actions Tab */}
             <TabsContent value="quickactions" className="space-y-6">
-              {quickAccess && (
-                <QuickActionsPanel quickAccess={quickAccess} />
-              )}
+              {quickAccess && <QuickActionsPanel quickAccess={quickAccess} />}
             </TabsContent>
           </Tabs>
         </motion.div>

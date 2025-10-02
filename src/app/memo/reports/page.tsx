@@ -96,7 +96,9 @@ export default function MemoReportsPage() {
                 disabled={refreshing}
                 className="flex items-center gap-2"
               >
-                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`}
+                />
                 Refresh
               </Button>
               <Button
@@ -122,7 +124,9 @@ export default function MemoReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Available Reports</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Available Reports
+                </CardTitle>
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -132,7 +136,9 @@ export default function MemoReportsPage() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Export Formats</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Export Formats
+                </CardTitle>
                 <Download className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -142,12 +148,16 @@ export default function MemoReportsPage() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Date Range</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Date Range
+                </CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">Custom</div>
-                <p className="text-xs text-muted-foreground">Flexible periods</p>
+                <p className="text-xs text-muted-foreground">
+                  Flexible periods
+                </p>
               </CardContent>
             </Card>
             <Card>
@@ -165,15 +175,25 @@ export default function MemoReportsPage() {
           {/* Main Reports Interface */}
           <Tabs defaultValue="generator" className="space-y-4">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="generator" className="flex items-center gap-2">
+              <TabsTrigger
+                value="generator"
+                className="flex items-center gap-2"
+              >
                 <BarChart3 className="h-4 w-4" />
                 Generate Reports
               </TabsTrigger>
-              <TabsTrigger value="templates" className="flex items-center gap-2">
+              <TabsTrigger
+                value="templates"
+                className="flex items-center gap-2"
+              >
                 <FileText className="h-4 w-4" />
                 Templates
               </TabsTrigger>
-              <TabsTrigger value="viewer" className="flex items-center gap-2" disabled={!reportData}>
+              <TabsTrigger
+                value="viewer"
+                className="flex items-center gap-2"
+                disabled={!reportData}
+              >
                 <Download className="h-4 w-4" />
                 View Results
                 {reportData && (
@@ -198,7 +218,6 @@ export default function MemoReportsPage() {
               <ReportTemplates
                 onTemplateSelected={(template) => {
                   // Handle template selection
-                  console.log('Template selected:', template);
                 }}
               />
             </TabsContent>
@@ -210,7 +229,6 @@ export default function MemoReportsPage() {
                   reportType={selectedReport}
                   reportData={reportData}
                   onExport={(format) => {
-                    console.log('Export format:', format);
                     // Handle export
                   }}
                 />
@@ -219,13 +237,17 @@ export default function MemoReportsPage() {
                   <CardContent className="flex items-center justify-center py-12">
                     <div className="text-center">
                       <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Report Generated</h3>
+                      <h3 className="text-lg font-semibold mb-2">
+                        No Report Generated
+                      </h3>
                       <p className="text-muted-foreground mb-4">
                         Generate a report first to view and export results.
                       </p>
                       <Button
                         onClick={() => {
-                          const tabs = document.querySelector('[value="generator"]') as HTMLElement;
+                          const tabs = document.querySelector(
+                            '[value="generator"]'
+                          ) as HTMLElement;
                           tabs?.click();
                         }}
                       >

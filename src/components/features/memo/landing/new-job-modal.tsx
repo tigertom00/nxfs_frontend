@@ -43,7 +43,8 @@ export function NewJobModal({
   const [searchingAddress, setSearchingAddress] = useState(false);
   const [searchResults, setSearchResults] = useState<AddressData[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [addressSearchTimeout, setAddressSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [addressSearchTimeout, setAddressSearchTimeout] =
+    useState<NodeJS.Timeout | null>(null);
   const [existingOrderNumbers, setExistingOrderNumbers] = useState<number[]>(
     []
   );
@@ -64,11 +65,11 @@ export function NewJobModal({
       const loadExistingNumbers = async () => {
         try {
           const response = await jobsAPI.getJobs();
-          console.log('🔍 [DEBUG] Jobs API response:', response);
 
           // Handle paginated response
-          const jobs = Array.isArray(response) ? response : response.results || [];
-          console.log('🔍 [DEBUG] Jobs array:', jobs);
+          const jobs = Array.isArray(response)
+            ? response
+            : response.results || [];
 
           const orderNumbers = jobs.map((job) => job.ordre_nr);
           setExistingOrderNumbers(orderNumbers);
@@ -77,7 +78,6 @@ export function NewJobModal({
           const nextOrderNr = suggestNextJobOrderNumber(orderNumbers);
           setFormData((prev) => ({ ...prev, ordre_nr: nextOrderNr }));
         } catch (error) {
-          console.error('Failed to load existing jobs:', error);
           // Fallback to simple generation
           const currentYear = new Date().getFullYear();
           const yearCode = (currentYear - 2017) % 10;
@@ -127,8 +127,7 @@ export function NewJobModal({
                 'Location information unavailable. Please check your device settings.';
               break;
             case error.TIMEOUT:
-              errorMessage =
-                'Location request timed out. Please try again.';
+              errorMessage = 'Location request timed out. Please try again.';
               break;
           }
           reject(new Error(errorMessage));
@@ -148,29 +147,29 @@ export function NewJobModal({
     poststed: string;
   }
 
-  const reverseGeocode = async (coords: LocationCoords): Promise<AddressData> => {
+  const reverseGeocode = async (
+    coords: LocationCoords
+  ): Promise<AddressData> => {
     try {
       // punktsok endpoint requires radius parameter, default to 100 meters
       const url = `${KARTVERKET_API}?lat=${coords.latitude}&lon=${coords.longitude}&radius=100&treffPerSide=1`;
-      console.log('🔍 [DEBUG] Fetching address from Kartverket:', url);
-      console.log('🔍 [DEBUG] Coordinates:', coords);
 
       const response = await fetch(url);
-      console.log('🔍 [DEBUG] Response status:', response.status);
-      console.log('🔍 [DEBUG] Response ok:', response.ok);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ [DEBUG] API error response:', errorText);
-        throw new Error(`Failed to get address: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to get address: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
-      console.log('🔍 [DEBUG] API response data:', JSON.stringify(data, null, 2));
+        '🔍 [DEBUG] API response data:',
+        JSON.stringify(data, null, 2)
+      );
 
       if (data.adresser && data.adresser.length > 0) {
         const address = data.adresser[0];
-        console.log('🔍 [DEBUG] First address object:', address);
 
         // Extract structured address data
         const addressData: AddressData = {
@@ -179,14 +178,11 @@ export function NewJobModal({
           poststed: address.poststed || '',
         };
 
-        console.log('✅ [DEBUG] Extracted address data:', addressData);
         return addressData;
       }
 
-      console.error('❌ [DEBUG] No addresses in response data');
       throw new Error('No address found within 100m radius');
     } catch (error) {
-      console.error('❌ [DEBUG] Reverse geocoding error:', error);
       throw error;
     }
   };
@@ -198,15 +194,15 @@ export function NewJobModal({
       }
 
       const url = `https://ws.geonorge.no/adresser/v1/sok?sok=${encodeURIComponent(searchText)}&treffPerSide=5`;
-      console.log('🔍 [DEBUG] Searching address:', url);
 
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`Search failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Search failed: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
-      console.log('🔍 [DEBUG] Search response:', data);
 
       if (data.adresser && data.adresser.length > 0) {
         const results: AddressData[] = data.adresser.map((address: any) => ({
@@ -214,28 +210,21 @@ export function NewJobModal({
           postnummer: address.postnummer || '',
           poststed: address.poststed || '',
         }));
-        console.log('✅ [DEBUG] Found addresses:', results);
         return results;
       }
 
       return [];
     } catch (error) {
-      console.error('❌ [DEBUG] Address search error:', error);
       throw error;
     }
   };
 
   const handleUseCurrentLocation = async () => {
-    console.log('🚀 [DEBUG] Starting location fetch...');
     setGettingLocation(true);
     try {
-      console.log('📍 [DEBUG] Getting current location...');
       const coords = await getCurrentLocation();
-      console.log('✅ [DEBUG] Got coordinates:', coords);
 
-      console.log('🗺️ [DEBUG] Starting reverse geocoding...');
       const addressData = await reverseGeocode(coords);
-      console.log('✅ [DEBUG] Got address data:', addressData);
 
       setFormData((prev) => ({
         ...prev,
@@ -243,16 +232,18 @@ export function NewJobModal({
         postnummer: addressData.postnummer,
         poststed: addressData.poststed,
       }));
-      console.log('✅ [DEBUG] Address data set in form');
 
       toast({
         title: 'Location detected',
         description: `${addressData.adresse}, ${addressData.postnummer} ${addressData.poststed}`,
       });
     } catch (error) {
-      console.error('❌ [DEBUG] Location error:', error);
-      console.error('❌ [DEBUG] Error type:', error instanceof Error ? error.constructor.name : typeof error);
-      console.error('❌ [DEBUG] Error message:', error instanceof Error ? error.message : String(error));
+        '❌ [DEBUG] Error type:',
+        error instanceof Error ? error.constructor.name : typeof error
+      );
+        '❌ [DEBUG] Error message:',
+        error instanceof Error ? error.message : String(error)
+      );
 
       toast({
         title: 'Location error',
@@ -264,23 +255,21 @@ export function NewJobModal({
       });
     } finally {
       setGettingLocation(false);
-      console.log('🏁 [DEBUG] Location fetch completed');
     }
   };
 
   const handleAddressLookup = async (silent = false) => {
-    console.log('🔍 [DEBUG] Starting address lookup...');
     setSearchingAddress(true);
     setShowResults(false);
     try {
       const results = await searchAddress(formData.adresse || '');
-      console.log('✅ [DEBUG] Search results:', results);
 
       if (results.length === 0) {
         if (!silent) {
           toast({
             title: 'No results',
-            description: 'No addresses found matching your search. Try a different query.',
+            description:
+              'No addresses found matching your search. Try a different query.',
             variant: 'destructive',
           });
         }
@@ -289,7 +278,6 @@ export function NewJobModal({
         setShowResults(true);
       }
     } catch (error) {
-      console.error('❌ [DEBUG] Address lookup error:', error);
       if (!silent) {
         toast({
           title: 'Search error',
@@ -316,9 +304,7 @@ export function NewJobModal({
 
     // Auto-search if user has typed 7+ characters
     if (value.trim().length >= 7) {
-      console.log('🕐 [DEBUG] Setting auto-search timeout for:', value);
       const timeout = setTimeout(() => {
-        console.log('🚀 [DEBUG] Auto-search triggered for:', value);
         handleAddressLookup(true); // Silent mode - no error toasts
       }, 2000); // 2 second delay
       setAddressSearchTimeout(timeout);
@@ -335,7 +321,6 @@ export function NewJobModal({
   }, [addressSearchTimeout]);
 
   const handleSelectAddress = (addressData: AddressData) => {
-    console.log('✅ [DEBUG] Selected address:', addressData);
     setFormData((prev) => ({
       ...prev,
       adresse: addressData.adresse,
@@ -379,7 +364,6 @@ export function NewJobModal({
         ferdig: false,
       });
     } catch (error) {
-      console.error('Failed to create job:', error);
     } finally {
       setLoading(false);
     }
@@ -440,7 +424,9 @@ export function NewJobModal({
 
               <div className="space-y-2 pt-2">
                 <div className="relative">
-                  <Label htmlFor="adresse" className="text-sm">Street Address</Label>
+                  <Label htmlFor="adresse" className="text-sm">
+                    Street Address
+                  </Label>
                   <div className="flex gap-2 mt-1">
                     <Input
                       id="adresse"
@@ -454,7 +440,11 @@ export function NewJobModal({
                       variant="outline"
                       size="icon"
                       onClick={() => handleAddressLookup(false)}
-                      disabled={searchingAddress || !formData.adresse || formData.adresse.trim().length < 3}
+                      disabled={
+                        searchingAddress ||
+                        !formData.adresse ||
+                        formData.adresse.trim().length < 3
+                      }
                       title="Search for postal code and city"
                     >
                       {searchingAddress ? (
@@ -491,7 +481,9 @@ export function NewJobModal({
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label htmlFor="postnummer" className="text-sm">Postal Code</Label>
+                    <Label htmlFor="postnummer" className="text-sm">
+                      Postal Code
+                    </Label>
                     <Input
                       id="postnummer"
                       value={formData.postnummer}
@@ -505,7 +497,9 @@ export function NewJobModal({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="poststed" className="text-sm">City</Label>
+                    <Label htmlFor="poststed" className="text-sm">
+                      City
+                    </Label>
                     <Input
                       id="poststed"
                       value={formData.poststed}

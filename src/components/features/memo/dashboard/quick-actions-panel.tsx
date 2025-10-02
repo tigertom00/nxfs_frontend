@@ -80,15 +80,27 @@ export function QuickActionsPanel({ quickAccess }: QuickActionsPanelProps) {
               <Plus className="h-4 w-4" />
               New Job
             </Button>
-            <Button variant="outline" onClick={handleSearchMaterials} className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleSearchMaterials}
+              className="flex items-center gap-2"
+            >
               <Search className="h-4 w-4" />
               Search Materials
             </Button>
-            <Button variant="outline" onClick={() => router.push('/memo/admin')} className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/memo/admin')}
+              className="flex items-center gap-2"
+            >
               <Briefcase className="h-4 w-4" />
               Admin Panel
             </Button>
-            <Button variant="outline" onClick={() => router.push('/memo')} className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/memo')}
+              className="flex items-center gap-2"
+            >
               <ExternalLink className="h-4 w-4" />
               View All Jobs
             </Button>
@@ -114,7 +126,9 @@ export function QuickActionsPanel({ quickAccess }: QuickActionsPanelProps) {
                     onClick={() => handleJobClick(job.ordre_nr)}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">#{job.ordre_nr}</span>
+                      <span className="font-medium text-sm">
+                        #{job.ordre_nr}
+                      </span>
                       <span className="text-sm text-muted-foreground truncate">
                         {job.tittel || 'Untitled'}
                       </span>
@@ -124,7 +138,11 @@ export function QuickActionsPanel({ quickAccess }: QuickActionsPanelProps) {
                 ))}
               </div>
               {quickAccess.active_jobs.length > 3 && (
-                <Button variant="ghost" size="sm" onClick={() => router.push('/memo')}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/memo')}
+                >
                   View {quickAccess.active_jobs.length - 3} more jobs
                 </Button>
               )}
@@ -161,7 +179,9 @@ export function QuickActionsPanel({ quickAccess }: QuickActionsPanelProps) {
                           {material.el_nr}
                         </Badge>
                       )}
-                      <span className="text-sm truncate">{material.tittel}</span>
+                      <span className="text-sm truncate">
+                        {material.tittel}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="text-xs">
@@ -174,9 +194,8 @@ export function QuickActionsPanel({ quickAccess }: QuickActionsPanelProps) {
             </div>
           )}
 
-          {quickAccess.popular_materials.length > 0 && quickAccess.favorite_materials.length > 0 && (
-            <Separator />
-          )}
+          {quickAccess.popular_materials.length > 0 &&
+            quickAccess.favorite_materials.length > 0 && <Separator />}
 
           {/* Favorite Materials */}
           {quickAccess.favorite_materials.length > 0 && (
@@ -197,7 +216,9 @@ export function QuickActionsPanel({ quickAccess }: QuickActionsPanelProps) {
                           {material.el_nr}
                         </Badge>
                       )}
-                      <span className="text-sm truncate">{material.tittel}</span>
+                      <span className="text-sm truncate">
+                        {material.tittel}
+                      </span>
                     </div>
                     <Star className="h-3 w-3 text-yellow-600" />
                   </div>
@@ -206,10 +227,9 @@ export function QuickActionsPanel({ quickAccess }: QuickActionsPanelProps) {
             </div>
           )}
 
-          {(quickAccess.favorite_materials.length > 0 || quickAccess.popular_materials.length > 0) &&
-           quickAccess.popular_suppliers.length > 0 && (
-            <Separator />
-          )}
+          {(quickAccess.favorite_materials.length > 0 ||
+            quickAccess.popular_materials.length > 0) &&
+            quickAccess.popular_suppliers.length > 0 && <Separator />}
 
           {/* Popular Suppliers */}
           {quickAccess.popular_suppliers.length > 0 && (
@@ -236,13 +256,15 @@ export function QuickActionsPanel({ quickAccess }: QuickActionsPanelProps) {
 
           {/* Empty State */}
           {quickAccess.popular_materials.length === 0 &&
-           quickAccess.favorite_materials.length === 0 &&
-           quickAccess.popular_suppliers.length === 0 && (
-            <div className="text-center py-4">
-              <TrendingUp className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No popular items yet</p>
-            </div>
-          )}
+            quickAccess.favorite_materials.length === 0 &&
+            quickAccess.popular_suppliers.length === 0 && (
+              <div className="text-center py-4">
+                <TrendingUp className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  No popular items yet
+                </p>
+              </div>
+            )}
         </CardContent>
       </Card>
     </div>

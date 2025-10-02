@@ -1,13 +1,7 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
 import { createUrlWithParams } from '../shared/utils';
-import {
-  Job,
-  Material,
-  TimeEntry,
-  JobMaterial,
-  DashboardStats,
-} from './types';
+import { Job, Material, TimeEntry, JobMaterial, DashboardStats } from './types';
 
 // Report types
 export interface JobCompletionReport {
@@ -120,7 +114,10 @@ export const reportsAPI = {
   ): Promise<JobCompletionReport> => {
     try {
       const params = { start_date: startDate, end_date: endDate };
-      const url = createUrlWithParams('/app/memo/reports/job_completion/', params);
+      const url = createUrlWithParams(
+        '/app/memo/reports/job_completion/',
+        params
+      );
       const response = await api.get(url);
       return response.data;
     } catch (error) {
@@ -136,7 +133,10 @@ export const reportsAPI = {
   ): Promise<MaterialUsageReport> => {
     try {
       const params = { start_date: startDate, end_date: endDate };
-      const url = createUrlWithParams('/app/memo/reports/material_usage/', params);
+      const url = createUrlWithParams(
+        '/app/memo/reports/material_usage/',
+        params
+      );
       const response = await api.get(url);
       return response.data;
     } catch (error) {
@@ -152,7 +152,10 @@ export const reportsAPI = {
   ): Promise<TimeTrackingReport> => {
     try {
       const params = { start_date: startDate, end_date: endDate };
-      const url = createUrlWithParams('/app/memo/reports/time_tracking/', params);
+      const url = createUrlWithParams(
+        '/app/memo/reports/time_tracking/',
+        params
+      );
       const response = await api.get(url);
       return response.data;
     } catch (error) {
@@ -162,9 +165,7 @@ export const reportsAPI = {
   },
 
   // Generate custom report
-  generateCustomReport: async (
-    params: CustomReportParams
-  ): Promise<any> => {
+  generateCustomReport: async (params: CustomReportParams): Promise<any> => {
     try {
       const response = await api.post('/app/memo/reports/custom/', params);
       showSuccessToast('Custom report generated successfully');
@@ -202,13 +203,15 @@ export const reportsAPI = {
   },
 
   // Get available report templates
-  getReportTemplates: async (): Promise<Array<{
-    id: string;
-    name: string;
-    description: string;
-    type: string;
-    parameters: any;
-  }>> => {
+  getReportTemplates: async (): Promise<
+    Array<{
+      id: string;
+      name: string;
+      description: string;
+      type: string;
+      parameters: any;
+    }>
+  > => {
     try {
       const response = await api.get('/app/memo/reports/templates/');
       return response.data;

@@ -32,15 +32,17 @@ export function ImageEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 overflow-hidden flex flex-col">
         <DialogHeader className="sr-only">
           <DialogTitle>Edit Image</DialogTitle>
         </DialogHeader>
-        <ImageEditor
-          imageUrl={imageUrl}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
+        <div className="flex-1 overflow-auto">
+          <ImageEditor
+            imageUrl={imageUrl}
+            onSave={handleSave}
+            onCancel={handleCancel}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

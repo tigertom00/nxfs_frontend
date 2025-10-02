@@ -333,9 +333,7 @@ export function TaskForm({
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
         onConfirm={handleDelete}
-        title={
-          language === 'no' ? 'Bekreft sletting' : 'Confirm deletion'
-        }
+        title={language === 'no' ? 'Bekreft sletting' : 'Confirm deletion'}
         description={texts.deleteConfirm}
         confirmText={language === 'no' ? 'Slett' : 'Delete'}
         cancelText={texts.cancel}

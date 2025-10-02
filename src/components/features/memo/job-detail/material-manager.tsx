@@ -31,7 +31,13 @@ import {
   suppliersAPI,
   elNumberLookupAPI,
 } from '@/lib/api';
-import { Material, JobMaterial, Supplier, RecentJobMaterial, UserBasic } from '@/lib/api';
+import {
+  Material,
+  JobMaterial,
+  Supplier,
+  RecentJobMaterial,
+  UserBasic,
+} from '@/lib/api';
 import { BarcodeScanner } from '@/components/features/memo/shared/barcode-scanner';
 import { MaterialDetailModal } from '@/components/features/memo/shared/material-detail-modal';
 import { AdvancedMaterialSearch } from '@/components/features/memo/shared/advanced-material-search';
@@ -77,7 +83,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   >([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recentMaterials, setRecentMaterials] = useState<RecentJobMaterial[]>([]);
+  const [recentMaterials, setRecentMaterials] = useState<RecentJobMaterial[]>(
+    []
+  );
   const [favoriteMaterials, setFavoriteMaterials] = useState<Material[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [selectedMaterialForDetail, setSelectedMaterialForDetail] =
@@ -89,8 +97,12 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   const [elNumberInput, setElNumberInput] = useState('');
   const [elLookupResult, setElLookupResult] = useState<any>(null);
   const [showELResult, setShowELResult] = useState(false);
-  const [recentMaterialsFilter, setRecentMaterialsFilter] = useState<'my' | 'all'>('my');
-  const [materialToRemove, setMaterialToRemove] = useState<JobMaterial | null>(null);
+  const [recentMaterialsFilter, setRecentMaterialsFilter] = useState<
+    'my' | 'all'
+  >('my');
+  const [materialToRemove, setMaterialToRemove] = useState<JobMaterial | null>(
+    null
+  );
 
   // Load materials and job materials
   useEffect(() => {
@@ -112,7 +124,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       setAllMaterials(materials);
       setDisplayMaterials(materials); // Initialize display materials
     } catch (error) {
-      console.error('Failed to load materials:', error);
       // Set empty arrays on error to prevent map errors
       setAllMaterials([]);
       setDisplayMaterials([]);
@@ -126,13 +137,12 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       // Handle paginated response - extract results array
       const favoritesArray = Array.isArray(favorites)
         ? favorites
-        : (favorites?.results && Array.isArray(favorites.results))
+        : favorites?.results && Array.isArray(favorites.results)
           ? favorites.results
           : [];
 
       setFavoriteMaterials(favoritesArray);
     } catch (error) {
-      console.error('Failed to load favorite materials:', error);
       setFavoriteMaterials([]);
     }
   };
@@ -149,7 +159,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       // Handle paginated response - extract results array
       const jobMaterialsArray = Array.isArray(jobMaterials)
         ? jobMaterials
-        : (jobMaterials?.results && Array.isArray(jobMaterials.results))
+        : jobMaterials?.results && Array.isArray(jobMaterials.results)
           ? jobMaterials.results
           : [];
       const jobSpecificMaterials = jobMaterialsArray.filter(
@@ -157,7 +167,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       );
       setJobMaterials(jobSpecificMaterials);
     } catch (error) {
-      console.error('Failed to load job materials:', error);
       setJobMaterials([]);
     }
   };
@@ -168,7 +177,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       const suppliersArray = Array.isArray(suppliersData) ? suppliersData : [];
       setSuppliers(suppliersArray);
     } catch (error) {
-      console.error('Failed to load suppliers:', error);
       setSuppliers([]);
     }
   };
@@ -183,10 +191,8 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         all_users: filterToUse === 'all',
       });
 
-      console.log('Loaded recent job materials:', recentJobMaterials);
       setRecentMaterials(recentJobMaterials);
     } catch (error) {
-      console.error('Failed to load recent materials:', error);
       setRecentMaterials([]);
     }
   };
@@ -265,19 +271,16 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
               : { navn: 'Unknown Supplier' },
       };
 
-      console.log('Importing material with data:', formattedData);
 
       // Use the EFObasen import endpoint which handles supplier creation
       const importedMaterial =
         await elNumberLookupAPI.importFromEFObasen(formattedData);
 
-      console.log('Imported material from API:', importedMaterial);
 
       if (importedMaterial) {
         // Reload materials to include the new one
         await loadMaterials();
 
-        console.log('Adding imported material to selection:', {
           id: importedMaterial.id,
           tittel: importedMaterial.tittel,
           el_nr: importedMaterial.el_nr,
@@ -300,7 +303,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         });
       }
     } catch (error) {
-      console.error('Failed to import material:', error);
       toast({
         title: 'Import Failed',
         description: 'Failed to import material. Please try again.',
@@ -370,7 +372,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         });
       }
     } catch (error) {
-      console.error('Failed to lookup EL-number:', error);
       toast({
         title: 'Lookup Failed',
         description: 'Failed to search for material. Please try again.',
@@ -430,7 +431,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
             ?.toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
           material.info?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          material.varemerke?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          material.varemerke
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           material.leverandor?.navn
             ?.toLowerCase()
             .includes(searchQuery.toLowerCase())
@@ -448,12 +451,14 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     }
 
     // Validate that all materials have valid IDs
-    const invalidMaterials = selectedMaterials.filter((m) => !m.id || m.id <= 0);
+    const invalidMaterials = selectedMaterials.filter(
+      (m) => !m.id || m.id <= 0
+    );
     if (invalidMaterials.length > 0) {
-      console.error('Materials with invalid IDs:', invalidMaterials);
       toast({
         title: 'Invalid Materials',
-        description: 'Some materials are missing valid IDs. Please try refreshing.',
+        description:
+          'Some materials are missing valid IDs. Please try refreshing.',
         variant: 'destructive',
       });
       return;
@@ -465,7 +470,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
 
       // Add each selected material to the job
       for (const selectedMaterial of selectedMaterials) {
-        console.log('Adding material to job:', {
           matriell_id: selectedMaterial.id,
           jobb: jobId,
           antall: selectedMaterial.quantity,
@@ -522,12 +526,18 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       await loadJobMaterials();
       toast({
         title: language === 'no' ? 'Materiale fjernet' : 'Material Removed',
-        description: language === 'no' ? 'Materialet er fjernet fra jobben' : 'Material removed from job',
+        description:
+          language === 'no'
+            ? 'Materialet er fjernet fra jobben'
+            : 'Material removed from job',
       });
     } catch (error) {
       toast({
         title: language === 'no' ? 'Feil' : 'Error',
-        description: language === 'no' ? 'Kunne ikke fjerne materiale fra jobben' : 'Failed to remove material from job',
+        description:
+          language === 'no'
+            ? 'Kunne ikke fjerne materiale fra jobben'
+            : 'Failed to remove material from job',
         variant: 'destructive',
       });
     } finally {
@@ -571,7 +581,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       setDisplayMaterials(sortedMaterials);
       setShowingSearchResults(true);
     } catch (error) {
-      console.error('Failed to perform optimized search:', error);
       // Fallback to local search
       const materialsArray = Array.isArray(allMaterials) ? allMaterials : [];
       const searchResults = materialsArray.filter(
@@ -813,11 +822,16 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
               <TabsContent value="recent" className="space-y-2">
                 {/* Filter Toggle */}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">Filter:</span>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Filter:
+                  </span>
                   <ToggleGroup
                     type="single"
                     value={recentMaterialsFilter}
-                    onValueChange={(value) => value && handleRecentMaterialsFilterChange(value as 'my' | 'all')}
+                    onValueChange={(value) =>
+                      value &&
+                      handleRecentMaterialsFilterChange(value as 'my' | 'all')
+                    }
                     className="h-7"
                   >
                     <ToggleGroupItem value="my" className="h-7 px-2 text-xs">
@@ -836,44 +850,55 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                     <Clock className="h-6 w-6 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No recent materials</p>
                     <p className="text-xs mt-1">
-                      {recentMaterialsFilter === 'my' ? 'You haven\'t' : 'No one has'} used materials recently
+                      {recentMaterialsFilter === 'my'
+                        ? "You haven't"
+                        : 'No one has'}{' '}
+                      used materials recently
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-1 max-h-44 overflow-y-auto">
                     {recentMaterials.map((recentItem) => {
-                      const userDisplay = recentItem.user && typeof recentItem.user !== 'number'
-                        ? getUserDisplay(recentItem.user)
-                        : null;
+                      const userDisplay =
+                        recentItem.user && typeof recentItem.user !== 'number'
+                          ? getUserDisplay(recentItem.user)
+                          : null;
 
                       return (
-                      <div key={recentItem.id} className="space-y-1">
-                        <CompactMaterialCard
-                          material={recentItem.matriell}
-                          onSelect={addMaterialToSelection}
-                          onViewDetail={setSelectedMaterialForDetail}
-                          searchQuery={searchQuery}
-                        />
-                        <div className="text-xs text-muted-foreground pl-2 pb-1 flex items-center gap-2 justify-between">
-                          <span>
-                            Used in: {typeof recentItem.jobb === 'number' ? `Job #${recentItem.jobb}` : (recentItem.jobb.tittel || recentItem.jobb.ordre_nr)}
-                            {recentItem.antall > 1 && ` • Qty: ${recentItem.antall}`}
-                          </span>
-                          {userDisplay && recentMaterialsFilter === 'all' && (
-                            <span className="flex items-center gap-1.5 text-xs bg-muted px-2 py-1 rounded-full">
-                              <Avatar className="h-4 w-4">
-                                <AvatarImage src={userDisplay.avatar || undefined} />
-                                <AvatarFallback className="text-[8px]">
-                                  {userDisplay.initials}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="font-medium">
-                                {userDisplay.displayName}
-                              </span>
+                        <div key={recentItem.id} className="space-y-1">
+                          <CompactMaterialCard
+                            material={recentItem.matriell}
+                            onSelect={addMaterialToSelection}
+                            onViewDetail={setSelectedMaterialForDetail}
+                            searchQuery={searchQuery}
+                          />
+                          <div className="text-xs text-muted-foreground pl-2 pb-1 flex items-center gap-2 justify-between">
+                            <span>
+                              Used in:{' '}
+                              {typeof recentItem.jobb === 'number'
+                                ? `Job #${recentItem.jobb}`
+                                : recentItem.jobb.tittel ||
+                                  recentItem.jobb.ordre_nr}
+                              {recentItem.antall > 1 &&
+                                ` • Qty: ${recentItem.antall}`}
                             </span>
-                          )}
+                            {userDisplay && recentMaterialsFilter === 'all' && (
+                              <span className="flex items-center gap-1.5 text-xs bg-muted px-2 py-1 rounded-full">
+                                <Avatar className="h-4 w-4">
+                                  <AvatarImage
+                                    src={userDisplay.avatar || undefined}
+                                  />
+                                  <AvatarFallback className="text-[8px]">
+                                    {userDisplay.initials}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium">
+                                  {userDisplay.displayName}
+                                </span>
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
                       );
                     })}
                   </div>
@@ -964,33 +989,34 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                         )}
 
                         {/* Show EFObasen lookup option when we have an EL number search */}
-                        {elNumberInput.trim() && elNumberInput.replace(/\s/g, '').length >= 6 && (
-                          <div className="text-center py-4 border rounded-lg bg-muted/20">
-                            {displayMaterials.length === 0 ? (
-                              <>
-                                <Package className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                        {elNumberInput.trim() &&
+                          elNumberInput.replace(/\s/g, '').length >= 6 && (
+                            <div className="text-center py-4 border rounded-lg bg-muted/20">
+                              {displayMaterials.length === 0 ? (
+                                <>
+                                  <Package className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                                  <p className="text-sm text-muted-foreground mb-3">
+                                    No materials found for "{elNumberInput}"
+                                  </p>
+                                </>
+                              ) : (
                                 <p className="text-sm text-muted-foreground mb-3">
-                                  No materials found for "{elNumberInput}"
+                                  Not finding what you're looking for?
                                 </p>
-                              </>
-                            ) : (
-                              <p className="text-sm text-muted-foreground mb-3">
-                                Not finding what you're looking for?
-                              </p>
-                            )}
-                            <Button
-                              size="sm"
-                              onClick={handleELNumberLookup}
-                              disabled={loading}
-                            >
-                              {loading && (
-                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                               )}
-                              <Search className="h-3 w-3 mr-1" />
-                              Look up in EFObasen
-                            </Button>
-                          </div>
-                        )}
+                              <Button
+                                size="sm"
+                                onClick={handleELNumberLookup}
+                                disabled={loading}
+                              >
+                                {loading && (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                )}
+                                <Search className="h-3 w-3 mr-1" />
+                                Look up in EFObasen
+                              </Button>
+                            </div>
+                          )}
                       </div>
                     </div>
                   )}
@@ -1104,7 +1130,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         onOpenChange={(open) => !open && setMaterialToRemove(null)}
         onConfirm={handleConfirmRemove}
         title={
-          language === 'no' ? 'Bekreft fjerning av materiale' : 'Confirm material removal'
+          language === 'no'
+            ? 'Bekreft fjerning av materiale'
+            : 'Confirm material removal'
         }
         description={
           materialToRemove
@@ -1254,16 +1282,21 @@ function CompactMaterialCard({
   searchQuery,
 }: CompactMaterialCardProps) {
   // Check if this is an exact EL number match
-  const isExactMatch = searchQuery && material.el_nr === searchQuery.replace(/\s/g, '');
+  const isExactMatch =
+    searchQuery && material.el_nr === searchQuery.replace(/\s/g, '');
 
   return (
-    <div className={`flex items-center justify-between p-2 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-colors ${isExactMatch ? 'border-primary bg-primary/10 shadow-sm' : ''}`}>
+    <div
+      className={`flex items-center justify-between p-2 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-colors ${isExactMatch ? 'border-primary bg-primary/10 shadow-sm' : ''}`}
+    >
       <div
         className="flex-1 cursor-pointer"
         onClick={() => onViewDetail?.(material)}
       >
         <div className="flex items-center gap-2">
-          <span className={`font-medium text-sm ${isExactMatch ? 'text-primary' : ''}`}>
+          <span
+            className={`font-medium text-sm ${isExactMatch ? 'text-primary' : ''}`}
+          >
             {material.el_nr || 'No EL#'}
           </span>
           {isExactMatch && (

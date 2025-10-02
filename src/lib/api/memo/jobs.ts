@@ -236,44 +236,42 @@ export const jobsAPI = {
   // Get nearby jobs based on user location (backend geocoding)
   getNearbyJobs: async (params: NearbyJobsParams): Promise<Job[]> => {
     try {
-      console.log('[DEBUG] getNearbyJobs called with params:', params);
       const url = createUrlWithParams('/app/memo/jobber/nearby/', {
         lat: params.lat,
         lon: params.lon,
         radius: params.radius || 100,
         ferdig: params.ferdig,
       });
-      console.log('[DEBUG] Making request to:', url);
       const response = await api.get(url);
-      console.log('[DEBUG] Response received:', response.data);
 
       // Handle both paginated and direct array responses
-      if (response.data && typeof response.data === 'object' && 'results' in response.data) {
-        console.log('[DEBUG] Paginated response, returning results array');
+      if (
+        response.data &&
+        typeof response.data === 'object' &&
+        'results' in response.data
+      ) {
         return response.data.results || [];
       }
 
       return Array.isArray(response.data) ? response.data : [];
-    } catch (error: any) {
-      console.error('[DEBUG] getNearbyJobs error:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
+    } catch (error) {
       handleApiError(error, 'Getting nearby jobs');
       throw error;
     }
   },
 
   // Get job heatmap data (all job locations)
-  getJobHeatmap: async (params?: { ferdig?: boolean }): Promise<Array<{
-    lat: number;
-    lon: number;
-    ordre_nr: string;
-    tittel: string;
-    ferdig: boolean;
-  }>> => {
+  getJobHeatmap: async (params?: {
+    ferdig?: boolean;
+  }): Promise<
+    Array<{
+      lat: number;
+      lon: number;
+      ordre_nr: string;
+      tittel: string;
+      ferdig: boolean;
+    }>
+  > => {
     try {
       const url = createUrlWithParams('/app/memo/jobber/heatmap/', params);
       const response = await api.get(url);

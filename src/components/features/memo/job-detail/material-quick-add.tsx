@@ -32,7 +32,6 @@ export function MaterialQuickAdd({ jobId }: MaterialQuickAddProps) {
       title: 'EL-Number Scanned',
       description: `EL-Number: ${elNumber}. Material lookup will be implemented soon!`,
     });
-    console.log('Scanned EL-number:', elNumber, 'for job:', jobId);
   };
 
   const handleAddFromFavorites = () => {

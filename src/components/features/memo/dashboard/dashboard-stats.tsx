@@ -49,7 +49,9 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total Jobs</span>
+                <span className="text-sm text-muted-foreground">
+                  Total Jobs
+                </span>
                 <Badge variant="outline">{stats.jobs.total}</Badge>
               </div>
               <div className="flex items-center justify-between">
@@ -66,12 +68,19 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
               </div>
             </div>
             <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Completion Rate</div>
+              <div className="text-sm text-muted-foreground">
+                Completion Rate
+              </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold">{formatPercentage(stats.jobs.completion_rate)}</span>
+                  <span className="text-lg font-bold">
+                    {formatPercentage(stats.jobs.completion_rate)}
+                  </span>
                 </div>
-                <Progress value={stats.jobs.completion_rate * 100} className="h-2" />
+                <Progress
+                  value={stats.jobs.completion_rate * 100}
+                  className="h-2"
+                />
               </div>
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Clock className="h-3 w-3" />
@@ -92,7 +101,9 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total Materials</span>
+                <span className="text-sm text-muted-foreground">
+                  Total Materials
+                </span>
                 <Badge variant="outline">{stats.materials.total}</Badge>
               </div>
               <div className="flex items-center justify-between">
@@ -116,7 +127,9 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Discontinued</span>
+                <span className="text-sm text-muted-foreground">
+                  Discontinued
+                </span>
                 <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                   <AlertTriangle className="h-3 w-3 mr-1" />
                   {stats.materials.discontinued}
@@ -126,11 +139,19 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
             <div className="space-y-2">
               <div className="text-sm text-muted-foreground">Approval Rate</div>
               <div className="space-y-1">
-                <div className="text-lg font-bold">{formatPercentage(stats.materials.approval_rate)}</div>
-                <Progress value={stats.materials.approval_rate * 100} className="h-2" />
+                <div className="text-lg font-bold">
+                  {formatPercentage(stats.materials.approval_rate)}
+                </div>
+                <Progress
+                  value={stats.materials.approval_rate * 100}
+                  className="h-2"
+                />
               </div>
               <div className="text-sm text-muted-foreground">
-                Stock Rate: {formatPercentage(stats.materials.in_stock / stats.materials.total)}
+                Stock Rate:{' '}
+                {formatPercentage(
+                  stats.materials.in_stock / stats.materials.total
+                )}
               </div>
             </div>
           </div>
@@ -151,13 +172,24 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
                 <Badge variant="outline">{stats.suppliers.total}</Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">With Materials</span>
-                <Badge variant="secondary">{stats.suppliers.with_materials}</Badge>
+                <span className="text-sm text-muted-foreground">
+                  With Materials
+                </span>
+                <Badge variant="secondary">
+                  {stats.suppliers.with_materials}
+                </Badge>
               </div>
               <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Utilization Rate</div>
-                <Progress value={stats.suppliers.utilization_rate * 100} className="h-2" />
-                <div className="text-xs text-right">{formatPercentage(stats.suppliers.utilization_rate)}</div>
+                <div className="text-sm text-muted-foreground">
+                  Utilization Rate
+                </div>
+                <Progress
+                  value={stats.suppliers.utilization_rate * 100}
+                  className="h-2"
+                />
+                <div className="text-xs text-right">
+                  {formatPercentage(stats.suppliers.utilization_rate)}
+                </div>
               </div>
             </div>
           </div>
@@ -173,13 +205,22 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
                 <Badge variant="outline">{stats.categories.total}</Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">With Materials</span>
-                <Badge variant="secondary">{stats.categories.with_materials}</Badge>
+                <span className="text-sm text-muted-foreground">
+                  With Materials
+                </span>
+                <Badge variant="secondary">
+                  {stats.categories.with_materials}
+                </Badge>
               </div>
               <div className="space-y-1">
                 <div className="text-sm text-muted-foreground">Coverage</div>
-                <Progress value={stats.categories.utilization_rate * 100} className="h-2" />
-                <div className="text-xs text-right">{formatPercentage(stats.categories.utilization_rate)}</div>
+                <Progress
+                  value={stats.categories.utilization_rate * 100}
+                  className="h-2"
+                />
+                <div className="text-xs text-right">
+                  {formatPercentage(stats.categories.utilization_rate)}
+                </div>
               </div>
             </div>
           </div>
@@ -194,8 +235,12 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Total Entries</span>
-              <Badge variant="outline">{stats.time_tracking.total_entries}</Badge>
+              <span className="text-sm text-muted-foreground">
+                Total Entries
+              </span>
+              <Badge variant="outline">
+                {stats.time_tracking.total_entries}
+              </Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">This Month</span>

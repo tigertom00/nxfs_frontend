@@ -213,7 +213,6 @@ export function AdvancedMaterialSearch({
       // Also call parent callback
       onResults(result.results, result.pagination);
     } catch (error) {
-      console.error('Search failed:', error);
       toast({
         title: 'Search Failed',
         description: 'Failed to search materials. Please try again.',

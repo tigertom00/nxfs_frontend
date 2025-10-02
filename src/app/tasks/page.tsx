@@ -245,11 +245,13 @@ export default function TasksPage() {
       setEditingTask(undefined);
     } catch (err: any) {
       const errorMessages = Object.values(err.response?.data ?? {}).flat();
-      const errorText = errorMessages.length > 0
-        ? errorMessages.join('\n')
-        : err.message || (language === 'no'
-          ? 'Kunne ikke opprette oppgave'
-          : 'Failed to create task');
+      const errorText =
+        errorMessages.length > 0
+          ? errorMessages.join('\n')
+          : err.message ||
+            (language === 'no'
+              ? 'Kunne ikke opprette oppgave'
+              : 'Failed to create task');
 
       setError(errorText);
     } finally {

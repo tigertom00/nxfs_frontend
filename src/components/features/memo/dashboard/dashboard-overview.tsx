@@ -89,7 +89,10 @@ export function DashboardOverview({ stats }: DashboardOverviewProps) {
       icon: Activity,
       color: 'text-teal-600',
       bgColor: 'bg-teal-100 dark:bg-teal-900',
-      progress: Math.min(100, (stats.time_tracking.entries_this_month / 100) * 100),
+      progress: Math.min(
+        100,
+        (stats.time_tracking.entries_this_month / 100) * 100
+      ),
       progressLabel: 'Monthly Activity',
     },
     {
@@ -125,7 +128,9 @@ export function DashboardOverview({ stats }: DashboardOverviewProps) {
         >
           <Card className="hover-lift">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {card.title}
+              </CardTitle>
               <div className={`p-2 rounded-full ${card.bgColor}`}>
                 <card.icon className={`h-4 w-4 ${card.color}`} />
               </div>
@@ -134,18 +139,21 @@ export function DashboardOverview({ stats }: DashboardOverviewProps) {
               <div className="space-y-3">
                 <div>
                   <div className="text-2xl font-bold">{card.value}</div>
-                  <p className="text-xs text-muted-foreground">{card.subtitle}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {card.subtitle}
+                  </p>
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{card.progressLabel}</span>
-                    <span className="font-medium">{Math.round(card.progress)}%</span>
+                    <span className="text-muted-foreground">
+                      {card.progressLabel}
+                    </span>
+                    <span className="font-medium">
+                      {Math.round(card.progress)}%
+                    </span>
                   </div>
-                  <Progress
-                    value={card.progress}
-                    className="h-2"
-                  />
+                  <Progress value={card.progress} className="h-2" />
                 </div>
               </div>
             </CardContent>

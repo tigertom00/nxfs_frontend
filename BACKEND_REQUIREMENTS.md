@@ -648,6 +648,7 @@ def geocode_job_address(sender, instance, **kwargs):
 **URL:** `GET /api/memo/jobs/nearby/`
 
 **Query Parameters:**
+
 - `lat` (required): User's latitude
 - `lon` (required): User's longitude
 - `radius` (optional, default=100): Search radius in meters
@@ -864,6 +865,7 @@ python manage.py geocode_jobs --force
 ## 7. Performance Benefits
 
 ### Before (Current Frontend Implementation)
+
 - 20 jobs = 20 Kartverket API calls
 - Average response time: **4-10 seconds**
 - No caching
@@ -871,6 +873,7 @@ python manage.py geocode_jobs --force
 - Poor mobile experience
 
 ### After (Backend Implementation)
+
 - 20 jobs = **1 database query**
 - Average response time: **< 100ms**
 - 30-day caching
@@ -888,14 +891,14 @@ Once backend is deployed, frontend will update to:
 ```typescript
 // Before: Geocode all jobs client-side (slow)
 const nearbyJobs = await Promise.all(
-  jobs.map(job => geocodeAndCalculateDistance(job))
+  jobs.map((job) => geocodeAndCalculateDistance(job))
 );
 
 // After: Single API call (fast)
 const nearbyJobs = await jobsAPI.getNearbyJobs({
   lat: location.latitude,
   lon: location.longitude,
-  radius: 100
+  radius: 100,
 });
 ```
 

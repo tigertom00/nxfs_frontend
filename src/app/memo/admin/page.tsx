@@ -121,7 +121,7 @@ export default function MemoAdminPage() {
           totalMaterials: materialsArray.length,
         });
       } catch (error) {
-        console.error('Failed to load admin data:', error);
+        // Error handled by API layer
       } finally {
         setLoading(false);
       }
@@ -188,11 +188,17 @@ export default function MemoAdminPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => router.push('/memo/dashboard')} variant="outline">
+              <Button
+                onClick={() => router.push('/memo/dashboard')}
+                variant="outline"
+              >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Dashboard
               </Button>
-              <Button onClick={() => router.push('/memo/reports')} variant="outline">
+              <Button
+                onClick={() => router.push('/memo/reports')}
+                variant="outline"
+              >
                 <FileText className="h-4 w-4 mr-2" />
                 Reports
               </Button>

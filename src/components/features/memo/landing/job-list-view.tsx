@@ -77,7 +77,9 @@ export function JobListView({
       rangeWithDots.push(totalPages);
     }
 
-    return rangeWithDots.filter((item, index, array) => array.indexOf(item) === index);
+    return rangeWithDots.filter(
+      (item, index, array) => array.indexOf(item) === index
+    );
   };
 
   if (loading) {
@@ -135,10 +137,16 @@ export function JobListView({
                 <TableRow>
                   <TableHead className="w-[100px]">Order #</TableHead>
                   <TableHead>Title</TableHead>
-                  <TableHead className="hidden md:table-cell">Address</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Address
+                  </TableHead>
                   <TableHead className="w-[100px]">Status</TableHead>
-                  <TableHead className="w-[100px] hidden sm:table-cell">Hours</TableHead>
-                  <TableHead className="w-[120px] hidden lg:table-cell">Created</TableHead>
+                  <TableHead className="w-[100px] hidden sm:table-cell">
+                    Hours
+                  </TableHead>
+                  <TableHead className="w-[120px] hidden lg:table-cell">
+                    Created
+                  </TableHead>
                   <TableHead className="w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -245,7 +253,10 @@ export function JobListView({
                   {getPaginationRange().map((page, index) => {
                     if (page === '...') {
                       return (
-                        <span key={`dots-${index}`} className="px-2 text-muted-foreground">
+                        <span
+                          key={`dots-${index}`}
+                          className="px-2 text-muted-foreground"
+                        >
                           ...
                         </span>
                       );
@@ -255,7 +266,9 @@ export function JobListView({
                     return (
                       <Button
                         key={pageNum}
-                        variant={currentPage === pageNum ? 'default' : 'outline'}
+                        variant={
+                          currentPage === pageNum ? 'default' : 'outline'
+                        }
                         size="sm"
                         onClick={() => onPageChange(pageNum)}
                         className="w-8 h-8 p-0"

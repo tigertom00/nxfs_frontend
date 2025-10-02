@@ -1,4 +1,8 @@
-import { BaseSearchParams, PaginatedResponse, UserBasic } from '../shared/types';
+import {
+  BaseSearchParams,
+  PaginatedResponse,
+  UserBasic,
+} from '../shared/types';
 
 // Material types
 export interface Material {

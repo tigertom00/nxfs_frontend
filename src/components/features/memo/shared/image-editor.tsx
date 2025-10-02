@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Stage, Layer, Line, Text as KonvaText, Image as KonvaImage, Transformer, Rect } from 'react-konva';
+import {
+  Stage,
+  Layer,
+  Line,
+  Text as KonvaText,
+  Image as KonvaImage,
+  Transformer,
+  Rect,
+} from 'react-konva';
 import Konva from 'konva';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -23,7 +31,14 @@ import {
   Crop,
 } from 'lucide-react';
 
-export type Tool = 'pen' | 'text' | 'rectangle' | 'circle' | 'eraser' | 'select' | 'crop';
+export type Tool =
+  | 'pen'
+  | 'text'
+  | 'rectangle'
+  | 'circle'
+  | 'eraser'
+  | 'select'
+  | 'crop';
 
 export interface DrawingElement {
   id: string;
@@ -61,7 +76,12 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
   const [scaleX, setScaleX] = useState(1);
   const [scaleY, setScaleY] = useState(1);
   const [cropMode, setCropMode] = useState(false);
-  const [cropRect, setCropRect] = useState({ x: 50, y: 50, width: 200, height: 200 });
+  const [cropRect, setCropRect] = useState({
+    x: 50,
+    y: 50,
+    width: 200,
+    height: 200,
+  });
 
   const stageRef = useRef<Konva.Stage>(null);
   const currentLineRef = useRef<DrawingElement | null>(null);
@@ -98,8 +118,8 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
         height: img.height * scale,
       });
     };
-    img.onerror = (error) => {
-      console.error('Failed to load image:', error);
+    img.onerror = () => {
+      // Image load error - silently fail
     };
   }, [imageUrl]);
 
@@ -148,7 +168,8 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
   };
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!isDrawing || tool === 'text' || tool === 'select' || tool === 'crop') return;
+    if (!isDrawing || tool === 'text' || tool === 'select' || tool === 'crop')
+      return;
 
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos || !currentLineRef.current) return;
@@ -280,8 +301,16 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
   };
 
   const colors = [
-    '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
-    '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
+    '#000000',
+    '#FFFFFF',
+    '#FF0000',
+    '#00FF00',
+    '#0000FF',
+    '#FFFF00',
+    '#FF00FF',
+    '#00FFFF',
+    '#FFA500',
+    '#800080',
   ];
 
   return (
@@ -294,7 +323,10 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
           <Button
             size="sm"
             variant={tool === 'pen' ? 'default' : 'outline'}
-            onClick={() => { setTool('pen'); setCropMode(false); }}
+            onClick={() => {
+              setTool('pen');
+              setCropMode(false);
+            }}
             disabled={cropMode}
           >
             <Pen className="h-4 w-4" />
@@ -302,7 +334,10 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
           <Button
             size="sm"
             variant={tool === 'text' ? 'default' : 'outline'}
-            onClick={() => { setTool('text'); setCropMode(false); }}
+            onClick={() => {
+              setTool('text');
+              setCropMode(false);
+            }}
             disabled={cropMode}
           >
             <Type className="h-4 w-4" />
@@ -310,7 +345,10 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
           <Button
             size="sm"
             variant={tool === 'eraser' ? 'default' : 'outline'}
-            onClick={() => { setTool('eraser'); setCropMode(false); }}
+            onClick={() => {
+              setTool('eraser');
+              setCropMode(false);
+            }}
             disabled={cropMode}
           >
             <Eraser className="h-4 w-4" />
@@ -383,10 +421,7 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
             {cropMode ? 'Cancel Crop' : 'Crop'}
           </Button>
           {cropMode && (
-            <Button
-              size="sm"
-              onClick={handleApplyCrop}
-            >
+            <Button size="sm" onClick={handleApplyCrop}>
               Apply Crop
             </Button>
           )}
@@ -470,37 +505,40 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
               )}
 
               {/* Drawing Elements (only show when not in crop mode) */}
-              {!cropMode && elements.map((element) => {
-                if (element.type === 'pen' || element.type === 'eraser') {
-                  return (
-                    <Line
-                      key={element.id}
-                      points={element.points}
-                      stroke={element.stroke}
-                      strokeWidth={element.strokeWidth}
-                      tension={0.5}
-                      lineCap="round"
-                      lineJoin="round"
-                      globalCompositeOperation={
-                        element.type === 'eraser' ? 'destination-out' : 'source-over'
-                      }
-                    />
-                  );
-                } else if (element.type === 'text') {
-                  return (
-                    <KonvaText
-                      key={element.id}
-                      text={element.text}
-                      x={element.x}
-                      y={element.y}
-                      fill={element.fill}
-                      fontSize={element.fontSize}
-                      draggable
-                    />
-                  );
-                }
-                return null;
-              })}
+              {!cropMode &&
+                elements.map((element) => {
+                  if (element.type === 'pen' || element.type === 'eraser') {
+                    return (
+                      <Line
+                        key={element.id}
+                        points={element.points}
+                        stroke={element.stroke}
+                        strokeWidth={element.strokeWidth}
+                        tension={0.5}
+                        lineCap="round"
+                        lineJoin="round"
+                        globalCompositeOperation={
+                          element.type === 'eraser'
+                            ? 'destination-out'
+                            : 'source-over'
+                        }
+                      />
+                    );
+                  } else if (element.type === 'text') {
+                    return (
+                      <KonvaText
+                        key={element.id}
+                        text={element.text}
+                        x={element.x}
+                        y={element.y}
+                        fill={element.fill}
+                        fontSize={element.fontSize}
+                        draggable
+                      />
+                    );
+                  }
+                  return null;
+                })}
 
               {/* Crop Mode Elements */}
               {cropMode && (

@@ -38,7 +38,7 @@ interface ReportGeneratorProps {
 export function ReportGenerator({
   onReportGenerated,
   loading,
-  setLoading
+  setLoading,
 }: ReportGeneratorProps) {
   const { toast } = useToast();
   const [reportType, setReportType] = useState<string>('');
@@ -188,14 +188,14 @@ export function ReportGenerator({
 
           // Apply job status filter
           if (filters.jobStatus === 'active') {
-            jobsArray = jobsArray.filter(job => !job.ferdig);
+            jobsArray = jobsArray.filter((job) => !job.ferdig);
           } else if (filters.jobStatus === 'completed') {
-            jobsArray = jobsArray.filter(job => job.ferdig);
+            jobsArray = jobsArray.filter((job) => job.ferdig);
           }
           // If filters.jobStatus === 'all', use all jobs (no filtering)
 
-          const completedJobs = jobsArray.filter(job => job.ferdig);
-          const activeJobs = jobsArray.filter(job => !job.ferdig);
+          const completedJobs = jobsArray.filter((job) => job.ferdig);
+          const activeJobs = jobsArray.filter((job) => !job.ferdig);
 
           reportData = {
             period: {
@@ -206,17 +206,31 @@ export function ReportGenerator({
               total_jobs: jobsArray.length,
               completed_jobs: completedJobs.length,
               active_jobs: activeJobs.length,
-              completion_rate: jobsArray.length > 0 ? completedJobs.length / jobsArray.length : 0,
-              total_hours: jobsArray.reduce((sum, job) => sum + (job.total_hours || 0), 0),
-              average_completion_time: completedJobs.length > 0 ?
-                completedJobs.reduce((sum, job) => sum + (job.total_hours || 0), 0) / completedJobs.length : 0,
+              completion_rate:
+                jobsArray.length > 0
+                  ? completedJobs.length / jobsArray.length
+                  : 0,
+              total_hours: jobsArray.reduce(
+                (sum, job) => sum + (job.total_hours || 0),
+                0
+              ),
+              average_completion_time:
+                completedJobs.length > 0
+                  ? completedJobs.reduce(
+                      (sum, job) => sum + (job.total_hours || 0),
+                      0
+                    ) / completedJobs.length
+                  : 0,
             },
             jobs_by_status: {
               completed: completedJobs,
               active: activeJobs,
             },
             trends: {
-              daily_completions: generateMockTrendData(dateRange.startDate, dateRange.endDate),
+              daily_completions: generateMockTrendData(
+                dateRange.startDate,
+                dateRange.endDate
+              ),
             },
           };
           break;
@@ -224,7 +238,9 @@ export function ReportGenerator({
         case 'material_usage':
           // Fetch materials data and create usage report
           const materials = await materialsAPI.getMaterials();
-          const materialsArray = Array.isArray(materials) ? materials : materials.results || [];
+          const materialsArray = Array.isArray(materials)
+            ? materials
+            : materials.results || [];
 
           reportData = {
             period: {
@@ -234,17 +250,20 @@ export function ReportGenerator({
             summary: {
               total_materials_used: materialsArray.length,
               unique_materials: materialsArray.length,
-              total_cost: materialsArray.length * 125.50, // Mock cost
-              most_used_category: materialsArray[0]?.kategori?.kategori || 'Unknown',
+              total_cost: materialsArray.length * 125.5, // Mock cost
+              most_used_category:
+                materialsArray[0]?.kategori?.kategori || 'Unknown',
             },
-            top_materials: materialsArray.slice(0, 10).map((material, index) => ({
-              material,
-              usage_count: Math.floor(Math.random() * 50) + 1,
-              total_quantity: Math.floor(Math.random() * 100) + 10,
-              jobs_used_in: Math.floor(Math.random() * 20) + 1,
-            })),
+            top_materials: materialsArray
+              .slice(0, 10)
+              .map((material, index) => ({
+                material,
+                usage_count: Math.floor(Math.random() * 50) + 1,
+                total_quantity: Math.floor(Math.random() * 100) + 10,
+                jobs_used_in: Math.floor(Math.random() * 20) + 1,
+              })),
             usage_by_category: generateMockCategoryUsage(materialsArray),
-            cost_analysis: materialsArray.slice(0, 5).map(material => ({
+            cost_analysis: materialsArray.slice(0, 5).map((material) => ({
               material_id: material.id,
               material_name: material.tittel || 'Unknown',
               total_cost: Math.random() * 1000 + 100,
@@ -261,8 +280,13 @@ export function ReportGenerator({
             dato_before: dateRange.endDate,
           });
 
-          const timeArray = Array.isArray(timeEntries) ? timeEntries : timeEntries.results || [];
-          const totalHours = timeArray.reduce((sum, entry) => sum + (entry.timer || 0), 0);
+          const timeArray = Array.isArray(timeEntries)
+            ? timeEntries
+            : timeEntries.results || [];
+          const totalHours = timeArray.reduce(
+            (sum, entry) => sum + (entry.timer || 0),
+            0
+          );
 
           reportData = {
             period: {
@@ -272,12 +296,18 @@ export function ReportGenerator({
             summary: {
               total_hours: totalHours,
               total_entries: timeArray.length,
-              average_daily_hours: totalHours / getDaysBetweenDates(dateRange.startDate, dateRange.endDate),
+              average_daily_hours:
+                totalHours /
+                getDaysBetweenDates(dateRange.startDate, dateRange.endDate),
               most_productive_day: getMostProductiveDay(timeArray),
             },
             time_by_job: generateTimeByJobData(timeArray),
             time_by_user: generateTimeByUserData(timeArray),
-            daily_breakdown: generateDailyTimeBreakdown(timeArray, dateRange.startDate, dateRange.endDate),
+            daily_breakdown: generateDailyTimeBreakdown(
+              timeArray,
+              dateRange.startDate,
+              dateRange.endDate
+            ),
           };
           break;
 
@@ -296,7 +326,10 @@ export function ReportGenerator({
               overall_efficiency: 0.85,
             },
             key_metrics: generateMockKeyMetrics(),
-            trends: generateMockTrendData(dateRange.startDate, dateRange.endDate),
+            trends: generateMockTrendData(
+              dateRange.startDate,
+              dateRange.endDate
+            ),
             recommendations: [
               'Increase material inventory for high-usage items',
               'Optimize job scheduling to improve completion rates',
@@ -313,11 +346,9 @@ export function ReportGenerator({
       onReportGenerated(type, reportData);
       toast({
         title: 'Report Generated',
-        description: `${reportTypes.find(r => r.id === type)?.name} has been generated successfully.`,
+        description: `${reportTypes.find((r) => r.id === type)?.name} has been generated successfully.`,
       });
-
     } catch (error) {
-      console.error('Error generating report:', error);
       toast({
         title: 'Error',
         description: 'Failed to generate report. Please try again.',
@@ -345,10 +376,13 @@ export function ReportGenerator({
   };
 
   const generateMockCategoryUsage = (materials: any[]) => {
-    const categories = [...new Set(materials.map(m => m.kategori?.kategori).filter(Boolean))];
-    return categories.map(category => ({
+    const categories = [
+      ...new Set(materials.map((m) => m.kategori?.kategori).filter(Boolean)),
+    ];
+    return categories.map((category) => ({
       category: category || 'Unknown',
-      material_count: materials.filter(m => m.kategori?.kategori === category).length,
+      material_count: materials.filter((m) => m.kategori?.kategori === category)
+        .length,
       usage_count: Math.floor(Math.random() * 100) + 10,
     }));
   };
@@ -391,7 +425,11 @@ export function ReportGenerator({
     }));
   };
 
-  const generateDailyTimeBreakdown = (timeEntries: any[], startDate: string, endDate: string) => {
+  const generateDailyTimeBreakdown = (
+    timeEntries: any[],
+    startDate: string,
+    endDate: string
+  ) => {
     const days = getDaysBetweenDates(startDate, endDate);
     const breakdown = [];
 
@@ -400,8 +438,11 @@ export function ReportGenerator({
       date.setDate(date.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
 
-      const dayEntries = timeEntries.filter(entry => entry.dato === dateStr);
-      const dayHours = dayEntries.reduce((sum, entry) => sum + (entry.timer || 0), 0);
+      const dayEntries = timeEntries.filter((entry) => entry.dato === dateStr);
+      const dayHours = dayEntries.reduce(
+        (sum, entry) => sum + (entry.timer || 0),
+        0
+      );
 
       breakdown.push({
         date: dateStr,
@@ -415,7 +456,12 @@ export function ReportGenerator({
 
   const generateMockKeyMetrics = () => [
     { name: 'Job Completion Rate', value: '78%', trend: 'up', change: '+5%' },
-    { name: 'Average Hours per Job', value: '6.9h', trend: 'down', change: '-2%' },
+    {
+      name: 'Average Hours per Job',
+      value: '6.9h',
+      trend: 'down',
+      change: '-2%',
+    },
     { name: 'Material Efficiency', value: '92%', trend: 'up', change: '+3%' },
     { name: 'Cost per Job', value: '€1,245', trend: 'down', change: '-8%' },
   ];
@@ -429,14 +475,18 @@ export function ReportGenerator({
 
   const getMostProductiveDay = (timeEntries: any[]) => {
     const dayGroups = timeEntries.reduce((acc, entry) => {
-      const day = new Date(entry.dato).toLocaleDateString('en-US', { weekday: 'long' });
+      const day = new Date(entry.dato).toLocaleDateString('en-US', {
+        weekday: 'long',
+      });
       acc[day] = (acc[day] || 0) + (entry.timer || 0);
       return acc;
     }, {});
 
-    return Object.entries(dayGroups).reduce((a, b) =>
-      dayGroups[a[0]] > dayGroups[b[0]] ? a : b
-    )[0] || 'Monday';
+    return (
+      Object.entries(dayGroups).reduce((a, b) =>
+        dayGroups[a[0]] > dayGroups[b[0]] ? a : b
+      )[0] || 'Monday'
+    );
   };
 
   const canGenerateReport = () => {
@@ -472,7 +522,9 @@ export function ReportGenerator({
                     </div>
                     <span className="font-medium">{type.name}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{type.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {type.description}
+                  </p>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {type.metrics.slice(0, 3).map((metric) => (
                       <Badge key={metric} variant="outline" className="text-xs">
@@ -507,7 +559,12 @@ export function ReportGenerator({
                   id="startDate"
                   type="date"
                   value={dateRange.startDate}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({
+                      ...prev,
+                      startDate: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -516,7 +573,12 @@ export function ReportGenerator({
                   id="endDate"
                   type="date"
                   value={dateRange.endDate}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({
+                      ...prev,
+                      endDate: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -561,7 +623,9 @@ export function ReportGenerator({
               <Label>Job Status</Label>
               <Select
                 value={filters.jobStatus}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, jobStatus: value }))}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, jobStatus: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All statuses" />
@@ -577,24 +641,31 @@ export function ReportGenerator({
             <div className="space-y-2">
               <Label>Include Metrics</Label>
               <div className="space-y-2">
-                {reportType && reportTypes.find(r => r.id === reportType)?.metrics.map((metric) => (
-                  <div key={metric} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={metric}
-                      checked={selectedMetrics.includes(metric)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedMetrics(prev => [...prev, metric]);
-                        } else {
-                          setSelectedMetrics(prev => prev.filter(m => m !== metric));
-                        }
-                      }}
-                    />
-                    <Label htmlFor={metric} className="text-sm">
-                      {metric.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </Label>
-                  </div>
-                ))}
+                {reportType &&
+                  reportTypes
+                    .find((r) => r.id === reportType)
+                    ?.metrics.map((metric) => (
+                      <div key={metric} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={metric}
+                          checked={selectedMetrics.includes(metric)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedMetrics((prev) => [...prev, metric]);
+                            } else {
+                              setSelectedMetrics((prev) =>
+                                prev.filter((m) => m !== metric)
+                              );
+                            }
+                          }}
+                        />
+                        <Label htmlFor={metric} className="text-sm">
+                          {metric
+                            .replace('_', ' ')
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
+                        </Label>
+                      </div>
+                    ))}
               </div>
             </div>
           </CardContent>

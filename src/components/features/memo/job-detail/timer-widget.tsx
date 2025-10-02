@@ -6,7 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { timeEntriesAPI, timeTrackingAPI } from '@/lib/api';
 import { UserTimeStats } from '@/lib/api';
 import { useAuthStore } from '@/stores';
-import { Play, Square, Clock, PlusCircle, List, TrendingUp } from 'lucide-react';
+import {
+  Play,
+  Square,
+  Clock,
+  PlusCircle,
+  List,
+  TrendingUp,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ManualTimeEntry } from './manual-time-entry';
 import { TimeEntriesList } from './time-entries-list';
@@ -51,7 +58,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     try {
       // Check if localStorage is available (mobile-safe)
       if (typeof Storage === 'undefined') {
-        console.warn('localStorage not available');
         return;
       }
 
@@ -59,7 +65,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       if (savedTimer) {
         try {
           const parsed = JSON.parse(savedTimer);
-          console.log('Loaded saved timer:', parsed);
           setTimer(parsed);
 
           // If timer was running, calculate elapsed time since last save
@@ -68,7 +73,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             const additionalElapsed = Math.floor(
               (now - parsed.startTime) / 1000
             );
-            console.log(
               'Resuming timer with additional elapsed time:',
               additionalElapsed
             );
@@ -79,13 +83,11 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             }));
           }
         } catch (parseError) {
-          console.error('Failed to parse saved timer:', parseError);
           // Clear corrupted data
           localStorage.removeItem(`timer-${jobId}`);
         }
       }
     } catch (storageError) {
-      console.error('Failed to access localStorage:', storageError);
     }
   }, [jobId]);
 
@@ -94,10 +96,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     try {
       if (typeof Storage !== 'undefined') {
         localStorage.setItem(`timer-${jobId}`, JSON.stringify(timer));
-        console.log('Saved timer state:', timer);
       }
     } catch (storageError) {
-      console.error('Failed to save timer state:', storageError);
     }
   }, [timer, jobId]);
 
@@ -125,7 +125,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       // Request notification permission (mobile-safe)
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission().catch((error) => {
-          console.warn('Notification permission request failed:', error);
         });
       }
 
@@ -140,7 +139,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             silent: false,
           });
         } catch (error) {
-          console.warn('Failed to create notification:', error);
         }
       }
     } else {
@@ -149,7 +147,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         try {
           notificationRef.current.close();
         } catch (error) {
-          console.warn('Failed to close notification:', error);
         }
       }
     }
@@ -159,7 +156,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         try {
           notificationRef.current.close();
         } catch (error) {
-          console.warn('Failed to close notification in cleanup:', error);
         }
       }
     };
@@ -177,7 +173,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       const stats = await timeTrackingAPI.getUserStats();
       setUserStats(stats);
     } catch (error) {
-      console.error('Failed to load user stats:', error);
       // Don't show error toast for stats - it's supplementary information
     } finally {
       setStatsLoading(false);
@@ -193,7 +188,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
 
   const startTimer = () => {
     try {
-      console.log('Starting timer for job:', jobId, 'user:', user?.id);
       const now = Date.now();
       const sessionId = `${user?.id}-${jobId}-${now}`;
 
@@ -209,9 +203,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         description: `Started tracking time for Job #${jobId}`,
       });
 
-      console.log('Timer started successfully');
     } catch (error) {
-      console.error('Error starting timer:', error);
       toast({
         title: 'Failed to start timer',
         description:
@@ -223,11 +215,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
 
   const stopTimer = async () => {
     if (!timer.isRunning || !user) {
-      console.warn('Cannot stop timer - not running or no user');
       return;
     }
 
-    console.log('Stopping timer - elapsed:', timer.elapsed, 'seconds');
     setShowStopModal(true);
   };
 
@@ -253,7 +243,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         return;
       }
 
-      console.log('Creating time entry with data:', {
         jobb: jobIdToUse,
         user: userId,
         timer: roundedMinutes,
@@ -271,9 +260,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
           `Timer session - ${formatTime(roundedSeconds)}${roundedSeconds !== timer.elapsed ? ` (rounded from ${formatTime(timer.elapsed)})` : ''}`,
       };
 
-      console.log('Sending time entry request:', timeEntryData);
       const result = await timeEntriesAPI.createTimeEntry(timeEntryData);
-      console.log('Time entry created successfully:', result);
 
       toast({
         title: 'Time saved',
@@ -288,7 +275,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       handleTimerReset();
       setShowStopModal(false);
     } catch (error) {
-      console.error('Failed to save time entry:', error);
 
       toast({
         title: 'Failed to save time',
@@ -312,7 +298,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   };
 
   const handleTimerReset = () => {
-    console.log('Resetting timer state');
     setTimer({
       isRunning: false,
       startTime: null,
@@ -324,10 +309,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     try {
       if (typeof Storage !== 'undefined') {
         localStorage.removeItem(`timer-${jobId}`);
-        console.log('Cleared saved timer from localStorage');
       }
     } catch (storageError) {
-      console.error('Failed to clear saved timer:', storageError);
     }
   };
 
@@ -377,7 +360,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                     </div>
                   </div>
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
-                    <div className="text-xs text-muted-foreground">Yesterday</div>
+                    <div className="text-xs text-muted-foreground">
+                      Yesterday
+                    </div>
                     <div className="text-sm font-semibold">
                       {(userStats.yesterday.hours / 60).toFixed(1)}h
                     </div>
@@ -386,7 +371,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                     </div>
                   </div>
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
-                    <div className="text-xs text-muted-foreground">Your Total</div>
+                    <div className="text-xs text-muted-foreground">
+                      Your Total
+                    </div>
                     <div className="text-sm font-semibold">
                       {(userStats.total_user.hours / 60).toFixed(1)}h
                     </div>
@@ -395,7 +382,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                     </div>
                   </div>
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
-                    <div className="text-xs text-muted-foreground">All Users</div>
+                    <div className="text-xs text-muted-foreground">
+                      All Users
+                    </div>
                     <div className="text-sm font-semibold">
                       {(userStats.total_all_users.hours / 60).toFixed(1)}h
                     </div>
@@ -410,7 +399,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             {statsLoading && (
               <div className="flex items-center justify-center py-3">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                <span className="ml-2 text-xs text-muted-foreground">Loading stats...</span>
+                <span className="ml-2 text-xs text-muted-foreground">
+                  Loading stats...
+                </span>
               </div>
             )}
 
@@ -469,7 +460,11 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         </TabsContent>
 
         <TabsContent value="entries" className="space-y-0">
-          <TimeEntriesList jobId={jobId} ordreNr={ordreNr} refreshTrigger={refreshTrigger} />
+          <TimeEntriesList
+            jobId={jobId}
+            ordreNr={ordreNr}
+            refreshTrigger={refreshTrigger}
+          />
         </TabsContent>
       </Tabs>
 

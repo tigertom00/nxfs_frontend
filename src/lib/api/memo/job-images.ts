@@ -22,7 +22,9 @@ export const jobImagesAPI = {
   // Get images by job ID using the specific endpoint
   getImagesByJob: async (jobId: string | number): Promise<JobImage[]> => {
     try {
-      const response = await api.get(`/app/memo/jobb-images/by_job/?jobb_id=${jobId}`);
+      const response = await api.get(
+        `/app/memo/jobb-images/by_job/?jobb_id=${jobId}`
+      );
       // This endpoint returns {jobb: {...}, image_count: number, images: [...]}
       // Don't use normalizeResponse since it has a unique structure
       return response.data;
@@ -88,11 +90,15 @@ export const jobImagesAPI = {
       });
       formData.append('jobb', payload.jobb.toString());
 
-      const response = await api.post('/app/memo/jobb-images/bulk_upload/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post(
+        '/app/memo/jobb-images/bulk_upload/',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
       showSuccessToast(`${payload.images.length} images uploaded successfully`);
       return response.data;
@@ -105,7 +111,9 @@ export const jobImagesAPI = {
   // Set primary image
   setPrimaryImage: async (id: number): Promise<JobImage> => {
     try {
-      const response = await api.post(`/app/memo/jobb-images/${id}/set_primary/`);
+      const response = await api.post(
+        `/app/memo/jobb-images/${id}/set_primary/`
+      );
       showSuccessToast('Primary image set successfully');
       return response.data;
     } catch (error) {

@@ -45,19 +45,26 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
     {
       id: 'weekly_summary',
       name: 'Weekly Summary',
-      description: 'Comprehensive weekly overview of jobs, materials, and time tracking',
+      description:
+        'Comprehensive weekly overview of jobs, materials, and time tracking',
       type: 'comprehensive',
       icon: Calendar,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100 dark:bg-blue-900',
-      metrics: ['job_completion', 'material_usage', 'time_tracking', 'efficiency'],
+      metrics: [
+        'job_completion',
+        'material_usage',
+        'time_tracking',
+        'efficiency',
+      ],
       schedule: 'Weekly - Monday mornings',
       popular: true,
     },
     {
       id: 'monthly_performance',
       name: 'Monthly Performance',
-      description: 'Detailed monthly performance analysis with trends and recommendations',
+      description:
+        'Detailed monthly performance analysis with trends and recommendations',
       type: 'comprehensive',
       icon: BarChart3,
       color: 'text-green-600',
@@ -105,7 +112,8 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
     {
       id: 'quarterly_executive',
       name: 'Quarterly Executive Summary',
-      description: 'High-level overview for management with key insights and trends',
+      description:
+        'High-level overview for management with key insights and trends',
       type: 'comprehensive',
       icon: BarChart3,
       color: 'text-indigo-600',
@@ -131,7 +139,7 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
       custom: true,
     };
 
-    setCustomTemplates(prev => [...prev, template]);
+    setCustomTemplates((prev) => [...prev, template]);
     setNewTemplate({ name: '', description: '', type: '', schedule: '' });
     setShowCreateDialog(false);
   };
@@ -186,7 +194,9 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setCustomTemplates(prev => prev.filter(t => t.id !== template.id));
+                  setCustomTemplates((prev) =>
+                    prev.filter((t) => t.id !== template.id)
+                  );
                 }}
               >
                 <Trash2 className="h-3 w-3" />
@@ -196,7 +206,9 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-3">{template.description}</p>
+        <p className="text-sm text-muted-foreground mb-3">
+          {template.description}
+        </p>
 
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -251,7 +263,12 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
                 <Input
                   id="templateName"
                   value={newTemplate.name}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setNewTemplate((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
                   placeholder="e.g., Custom Weekly Report"
                 />
               </div>
@@ -260,7 +277,12 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
                 <Textarea
                   id="templateDescription"
                   value={newTemplate.description}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setNewTemplate((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                   placeholder="Describe what this template covers..."
                   rows={3}
                 />
@@ -270,7 +292,12 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
                 <select
                   id="templateType"
                   value={newTemplate.type}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, type: e.target.value }))}
+                  onChange={(e) =>
+                    setNewTemplate((prev) => ({
+                      ...prev,
+                      type: e.target.value,
+                    }))
+                  }
                   className="w-full border border-border rounded px-3 py-2"
                 >
                   <option value="">Select type...</option>
@@ -285,12 +312,20 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
                 <Input
                   id="templateSchedule"
                   value={newTemplate.schedule}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, schedule: e.target.value }))}
+                  onChange={(e) =>
+                    setNewTemplate((prev) => ({
+                      ...prev,
+                      schedule: e.target.value,
+                    }))
+                  }
                   placeholder="e.g., Weekly, Monthly, On-demand"
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCreateDialog(false)}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -312,7 +347,7 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
           <h3 className="text-lg font-semibold">Popular Templates</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates.filter(t => t.popular).map(renderTemplateCard)}
+          {templates.filter((t) => t.popular).map(renderTemplateCard)}
         </div>
       </div>
 
@@ -320,7 +355,7 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">All Templates</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates.filter(t => !t.popular).map(renderTemplateCard)}
+          {templates.filter((t) => !t.popular).map(renderTemplateCard)}
         </div>
       </div>
 
@@ -344,36 +379,54 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
             <Button
               variant="outline"
               className="flex items-center gap-2 h-auto p-4"
-              onClick={() => handleTemplateSelect(templates.find(t => t.id === 'weekly_summary'))}
+              onClick={() =>
+                handleTemplateSelect(
+                  templates.find((t) => t.id === 'weekly_summary')
+                )
+              }
             >
               <Calendar className="h-5 w-5" />
               <div className="text-left">
                 <div className="font-medium">Generate Weekly Report</div>
-                <div className="text-xs text-muted-foreground">Last 7 days summary</div>
+                <div className="text-xs text-muted-foreground">
+                  Last 7 days summary
+                </div>
               </div>
             </Button>
 
             <Button
               variant="outline"
               className="flex items-center gap-2 h-auto p-4"
-              onClick={() => handleTemplateSelect(templates.find(t => t.id === 'monthly_performance'))}
+              onClick={() =>
+                handleTemplateSelect(
+                  templates.find((t) => t.id === 'monthly_performance')
+                )
+              }
             >
               <BarChart3 className="h-5 w-5" />
               <div className="text-left">
                 <div className="font-medium">Monthly Performance</div>
-                <div className="text-xs text-muted-foreground">Current month analysis</div>
+                <div className="text-xs text-muted-foreground">
+                  Current month analysis
+                </div>
               </div>
             </Button>
 
             <Button
               variant="outline"
               className="flex items-center gap-2 h-auto p-4"
-              onClick={() => handleTemplateSelect(templates.find(t => t.id === 'quarterly_executive'))}
+              onClick={() =>
+                handleTemplateSelect(
+                  templates.find((t) => t.id === 'quarterly_executive')
+                )
+              }
             >
               <Users className="h-5 w-5" />
               <div className="text-left">
                 <div className="font-medium">Executive Summary</div>
-                <div className="text-xs text-muted-foreground">High-level overview</div>
+                <div className="text-xs text-muted-foreground">
+                  High-level overview
+                </div>
               </div>
             </Button>
           </div>

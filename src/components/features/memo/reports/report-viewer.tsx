@@ -34,8 +34,14 @@ interface ReportViewerProps {
   onExport: (format: 'csv' | 'pdf' | 'excel') => void;
 }
 
-export function ReportViewer({ reportType, reportData, onExport }: ReportViewerProps) {
-  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf' | 'excel'>('pdf');
+export function ReportViewer({
+  reportType,
+  reportData,
+  onExport,
+}: ReportViewerProps) {
+  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf' | 'excel'>(
+    'pdf'
+  );
 
   const formatPercentage = (value: number) => {
     return `${Math.round(value * 100)}%`;
@@ -90,21 +96,31 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{reportData.summary.total_jobs}</div>
+            <div className="text-2xl font-bold">
+              {reportData.summary.total_jobs}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {reportData.summary.completed_jobs} completed, {reportData.summary.active_jobs} active
+              {reportData.summary.completed_jobs} completed,{' '}
+              {reportData.summary.active_jobs} active
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Completion Rate
+            </CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPercentage(reportData.summary.completion_rate)}</div>
-            <Progress value={reportData.summary.completion_rate * 100} className="mt-2" />
+            <div className="text-2xl font-bold">
+              {formatPercentage(reportData.summary.completion_rate)}
+            </div>
+            <Progress
+              value={reportData.summary.completion_rate * 100}
+              className="mt-2"
+            />
           </CardContent>
         </Card>
 
@@ -114,18 +130,24 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatHours(reportData.summary.total_hours)}</div>
+            <div className="text-2xl font-bold">
+              {formatHours(reportData.summary.total_hours)}
+            </div>
             <p className="text-xs text-muted-foreground">Across all jobs</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Completion Time</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg. Completion Time
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatHours(reportData.summary.average_completion_time)}</div>
+            <div className="text-2xl font-bold">
+              {formatHours(reportData.summary.average_completion_time)}
+            </div>
             <p className="text-xs text-muted-foreground">Per job</p>
           </CardContent>
         </Card>
@@ -148,21 +170,26 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[...reportData.jobs_by_status.completed, ...reportData.jobs_by_status.active]
+              {[
+                ...reportData.jobs_by_status.completed,
+                ...reportData.jobs_by_status.active,
+              ]
                 .slice(0, 10)
                 .map((job) => (
-                <TableRow key={job.ordre_nr}>
-                  <TableCell className="font-medium">#{job.ordre_nr}</TableCell>
-                  <TableCell>{job.tittel || 'Untitled'}</TableCell>
-                  <TableCell>
-                    <Badge variant={job.ferdig ? 'default' : 'secondary'}>
-                      {job.ferdig ? 'Completed' : 'Active'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatHours(job.total_hours || 0)}</TableCell>
-                  <TableCell>{formatDate(job.created_at)}</TableCell>
-                </TableRow>
-              ))}
+                  <TableRow key={job.ordre_nr}>
+                    <TableCell className="font-medium">
+                      #{job.ordre_nr}
+                    </TableCell>
+                    <TableCell>{job.tittel || 'Untitled'}</TableCell>
+                    <TableCell>
+                      <Badge variant={job.ferdig ? 'default' : 'secondary'}>
+                        {job.ferdig ? 'Completed' : 'Active'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{formatHours(job.total_hours || 0)}</TableCell>
+                    <TableCell>{formatDate(job.created_at)}</TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </CardContent>
@@ -176,11 +203,15 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Materials Used</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Materials Used
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{reportData.summary.total_materials_used}</div>
+            <div className="text-2xl font-bold">
+              {reportData.summary.total_materials_used}
+            </div>
             <p className="text-xs text-muted-foreground">
               {reportData.summary.unique_materials} unique items
             </p>
@@ -193,7 +224,9 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(reportData.summary.total_cost)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(reportData.summary.total_cost)}
+            </div>
             <p className="text-xs text-muted-foreground">Material costs</p>
           </CardContent>
         </Card>
@@ -204,7 +237,9 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold">{reportData.summary.most_used_category}</div>
+            <div className="text-lg font-bold">
+              {reportData.summary.most_used_category}
+            </div>
             <p className="text-xs text-muted-foreground">Most used</p>
           </CardContent>
         </Card>
@@ -276,7 +311,9 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
             <TableBody>
               {reportData.cost_analysis.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{item.material_name}</TableCell>
+                  <TableCell className="font-medium">
+                    {item.material_name}
+                  </TableCell>
                   <TableCell>{formatCurrency(item.total_cost)}</TableCell>
                   <TableCell>{item.usage_count}</TableCell>
                   <TableCell>{formatCurrency(item.cost_per_use)}</TableCell>
@@ -299,7 +336,9 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatHours(reportData.summary.total_hours)}</div>
+            <div className="text-2xl font-bold">
+              {formatHours(reportData.summary.total_hours)}
+            </div>
             <p className="text-xs text-muted-foreground">
               {reportData.summary.total_entries} entries
             </p>
@@ -321,11 +360,15 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Most Productive</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Most Productive
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">{reportData.summary.most_productive_day}</div>
+            <div className="text-xl font-bold">
+              {reportData.summary.most_productive_day}
+            </div>
             <p className="text-xs text-muted-foreground">Day of week</p>
           </CardContent>
         </Card>
@@ -368,7 +411,10 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <span>{formatPercentage(item.efficiency_score)}</span>
-                      <Progress value={item.efficiency_score * 100} className="w-16 h-2" />
+                      <Progress
+                        value={item.efficiency_score * 100}
+                        className="w-16 h-2"
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -390,17 +436,23 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold">{reportData.executive_summary.total_jobs}</div>
+              <div className="text-2xl font-bold">
+                {reportData.executive_summary.total_jobs}
+              </div>
               <div className="text-sm text-muted-foreground">Total Jobs</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold">
                 {formatPercentage(reportData.executive_summary.completion_rate)}
               </div>
-              <div className="text-sm text-muted-foreground">Completion Rate</div>
+              <div className="text-sm text-muted-foreground">
+                Completion Rate
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{reportData.executive_summary.total_materials}</div>
+              <div className="text-2xl font-bold">
+                {reportData.executive_summary.total_materials}
+              </div>
               <div className="text-sm text-muted-foreground">Materials</div>
             </div>
             <div className="text-center">
@@ -411,7 +463,9 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold">
-                {formatPercentage(reportData.executive_summary.overall_efficiency)}
+                {formatPercentage(
+                  reportData.executive_summary.overall_efficiency
+                )}
               </div>
               <div className="text-sm text-muted-foreground">Efficiency</div>
             </div>
@@ -427,16 +481,21 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {reportData.key_metrics.map((metric, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between p-4 border rounded-lg"
+              >
                 <div>
                   <div className="font-medium">{metric.name}</div>
                   <div className="text-2xl font-bold">{metric.value}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   {getTrendIcon(metric.trend)}
-                  <span className={`text-sm font-medium ${
-                    metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <span
+                    className={`text-sm font-medium ${
+                      metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
                     {metric.change}
                   </span>
                 </div>
@@ -454,7 +513,10 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
         <CardContent>
           <div className="space-y-3">
             {reportData.recommendations.map((recommendation, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+              <div
+                key={index}
+                className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
+              >
                 <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">
                   {index + 1}
                 </div>
@@ -504,20 +566,26 @@ export function ReportViewer({ reportType, reportData, onExport }: ReportViewerP
                 {getReportTitle()}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Period: {formatDate(reportData.period.start_date)} - {formatDate(reportData.period.end_date)}
+                Period: {formatDate(reportData.period.start_date)} -{' '}
+                {formatDate(reportData.period.end_date)}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <select
                 value={exportFormat}
-                onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf' | 'excel')}
+                onChange={(e) =>
+                  setExportFormat(e.target.value as 'csv' | 'pdf' | 'excel')
+                }
                 className="border border-border rounded px-3 py-1 text-sm"
               >
                 <option value="pdf">PDF</option>
                 <option value="csv">CSV</option>
                 <option value="excel">Excel</option>
               </select>
-              <Button onClick={handleExport} className="flex items-center gap-2">
+              <Button
+                onClick={handleExport}
+                className="flex items-center gap-2"
+              >
                 <Download className="h-4 w-4" />
                 Export {exportFormat.toUpperCase()}
               </Button>

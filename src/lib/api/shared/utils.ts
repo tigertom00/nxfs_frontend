@@ -145,7 +145,9 @@ export function useApiTokenForTesting(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
-  console.log('JWT tokens cleared - API requests will now use NEXT_PUBLIC_API_TOKEN');
+  console.log(
+    'JWT tokens cleared - API requests will now use NEXT_PUBLIC_API_TOKEN'
+  );
 }
 
 /**

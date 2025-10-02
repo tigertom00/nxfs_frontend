@@ -32,7 +32,10 @@ export const tasksAPI = {
         _t: Date.now(),
       };
 
-      let nextUrl: string | null = createUrlWithParams('/app/tasks/tasks/', paramsWithTimestamp);
+      let nextUrl: string | null = createUrlWithParams(
+        '/app/tasks/tasks/',
+        paramsWithTimestamp
+      );
 
       // Fetch all pages
       while (nextUrl) {
@@ -41,7 +44,7 @@ export const tasksAPI = {
         // Extract tasks from current page
         const currentPageTasks = Array.isArray(response.data)
           ? response.data
-          : (response.data?.results && Array.isArray(response.data.results))
+          : response.data?.results && Array.isArray(response.data.results)
             ? response.data.results
             : [];
 

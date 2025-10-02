@@ -40,7 +40,6 @@ export default function JobDetailPage() {
         const jobData = await jobsAPI.getJob(orderNumber);
         setJob(jobData);
       } catch (error) {
-        console.error('Failed to load job:', error);
         setError('Failed to load job details');
       } finally {
         setLoading(false);
@@ -112,7 +111,10 @@ export default function JobDetailPage() {
           <TimerWidget jobId={parseInt(job.ordre_nr)} ordreNr={job.ordre_nr} />
 
           {/* Material Manager */}
-          <MaterialManager jobId={parseInt(job.ordre_nr)} ordreNr={job.ordre_nr} />
+          <MaterialManager
+            jobId={parseInt(job.ordre_nr)}
+            ordreNr={job.ordre_nr}
+          />
 
           {/* Photo Gallery */}
           <PhotoGallery jobId={parseInt(job.ordre_nr)} ordreNr={job.ordre_nr} />

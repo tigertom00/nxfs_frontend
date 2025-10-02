@@ -6,7 +6,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { jobImagesAPI, jobFilesAPI } from '@/lib/api';
 import { JobImage, JobFile } from '@/lib/api';
-import { Camera, FolderOpen, Upload, X, Loader2, Image as ImageIcon, FileText, Edit3 } from 'lucide-react';
+import {
+  Camera,
+  FolderOpen,
+  Upload,
+  X,
+  Loader2,
+  Image as ImageIcon,
+  FileText,
+  Edit3,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useUIStore } from '@/stores';
 import { ImageEditorDialog } from '@/components/features/memo/shared/image-editor-dialog';
@@ -24,7 +33,10 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('images');
-  const [deleteTarget, setDeleteTarget] = useState<{type: 'image' | 'document'; item: JobImage | JobFile} | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: 'image' | 'document';
+    item: JobImage | JobFile;
+  } | null>(null);
   const [editingImage, setEditingImage] = useState<JobImage | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -36,45 +48,46 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       try {
         // API expects numeric job ID
         const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
-        console.log('Loading job data with jobIdToUse:', jobIdToUse, 'ordreNr:', ordreNr, 'jobId:', jobId);
+          'Loading job data with jobIdToUse:',
+          jobIdToUse,
+          'ordreNr:',
+          ordreNr,
+          'jobId:',
+          jobId
+        );
 
         // Load images
         const jobPhotos = await jobImagesAPI.getImagesByJob(jobIdToUse);
-        console.log('Raw job photos response:', jobPhotos);
         const photosArray = Array.isArray(jobPhotos)
           ? jobPhotos
-          : (jobPhotos?.images && Array.isArray(jobPhotos.images))
+          : jobPhotos?.images && Array.isArray(jobPhotos.images)
             ? jobPhotos.images
             : [];
 
         // Fix HTTP URLs to HTTPS for proper loading
-        const photosWithHttps = photosArray.map(photo => ({
+        const photosWithHttps = photosArray.map((photo) => ({
           ...photo,
-          image: photo.image?.replace('http://', 'https://') || photo.image
+          image: photo.image?.replace('http://', 'https://') || photo.image,
         }));
 
-        console.log('Processed photos for display:', photosWithHttps);
         setPhotos(photosWithHttps);
 
         // Load files
         const jobFiles = await jobFilesAPI.getFilesByJob(jobIdToUse);
-        console.log('Raw job files response:', jobFiles);
         const filesArray = Array.isArray(jobFiles)
           ? jobFiles
-          : (jobFiles?.files && Array.isArray(jobFiles.files))
+          : jobFiles?.files && Array.isArray(jobFiles.files)
             ? jobFiles.files
             : [];
 
         // Fix HTTP URLs to HTTPS for proper loading
-        const filesWithHttps = filesArray.map(file => ({
+        const filesWithHttps = filesArray.map((file) => ({
           ...file,
-          file: file.file?.replace('http://', 'https://') || file.file
+          file: file.file?.replace('http://', 'https://') || file.file,
         }));
 
-        console.log('Processed files for display:', filesWithHttps);
         setDocuments(filesWithHttps);
       } catch (error) {
-        console.error('Failed to load data:', error);
       } finally {
         setLoading(false);
       }
@@ -113,7 +126,6 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       });
       return uploadedImage;
     } catch (error) {
-      console.error('Failed to upload image:', file.name, error);
       throw error;
     }
   };
@@ -128,7 +140,6 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       });
       return uploadedFile;
     } catch (error) {
-      console.error('Failed to upload file:', file.name, error);
       throw error;
     }
   };
@@ -242,9 +253,10 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
         setPhotos((prev) => prev.filter((p) => p.id !== image.id));
         toast({
           title: language === 'no' ? 'Bilde slettet' : 'Photo deleted',
-          description: language === 'no'
-            ? 'Bildet er fjernet fra jobben'
-            : 'Photo has been removed from the job',
+          description:
+            language === 'no'
+              ? 'Bildet er fjernet fra jobben'
+              : 'Photo has been removed from the job',
         });
       } else {
         const doc = deleteTarget.item as JobFile;
@@ -252,17 +264,19 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
         setDocuments((prev) => prev.filter((p) => p.id !== doc.id));
         toast({
           title: language === 'no' ? 'Fil slettet' : 'File deleted',
-          description: language === 'no'
-            ? 'Filen er fjernet fra jobben'
-            : 'File has been removed from the job',
+          description:
+            language === 'no'
+              ? 'Filen er fjernet fra jobben'
+              : 'File has been removed from the job',
         });
       }
     } catch (error) {
       toast({
         title: language === 'no' ? 'Sletting mislyktes' : 'Delete failed',
-        description: language === 'no'
-          ? 'Kunne ikke slette elementet'
-          : 'Failed to delete the item',
+        description:
+          language === 'no'
+            ? 'Kunne ikke slette elementet'
+            : 'Failed to delete the item',
         variant: 'destructive',
       });
     } finally {
@@ -285,9 +299,13 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       const blob = await response.blob();
 
       // Create file from blob
-      const file = new File([blob], `edited_${editingImage.name || `image_${Date.now()}.png`}`, {
-        type: 'image/png',
-      });
+      const file = new File(
+        [blob],
+        `edited_${editingImage.name || `image_${Date.now()}.png`}`,
+        {
+          type: 'image/png',
+        }
+      );
 
       // Upload as new image
       const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
@@ -301,19 +319,20 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
 
       toast({
         title: language === 'no' ? 'Bilde lagret' : 'Image saved',
-        description: language === 'no'
-          ? 'Det redigerte bildet er lastet opp'
-          : 'Edited image has been uploaded',
+        description:
+          language === 'no'
+            ? 'Det redigerte bildet er lastet opp'
+            : 'Edited image has been uploaded',
       });
 
       setEditingImage(null);
     } catch (error) {
-      console.error('Failed to save edited image:', error);
       toast({
         title: language === 'no' ? 'Feil' : 'Error',
-        description: language === 'no'
-          ? 'Kunne ikke lagre redigert bilde'
-          : 'Failed to save edited image',
+        description:
+          language === 'no'
+            ? 'Kunne ikke lagre redigert bilde'
+            : 'Failed to save edited image',
         variant: 'destructive',
       });
     } finally {
@@ -356,7 +375,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
           <div className="bg-card border rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-center gap-2">
               <Camera className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-semibold">Photos & Files ({photos.length})</h3>
+              <h3 className="font-semibold">
+                Photos & Files ({photos.length})
+              </h3>
               {uploading && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground ml-auto" />
               )}
@@ -385,7 +406,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                         <Edit3 className="h-3 w-3" />
                       </button>
                       <button
-                        onClick={() => setDeleteTarget({ type: 'image', item: photo })}
+                        onClick={() =>
+                          setDeleteTarget({ type: 'image', item: photo })
+                        }
                         className="bg-red-500 text-white rounded-full p-1"
                         aria-label="Delete photo"
                       >
@@ -449,7 +472,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
           <div className="bg-card border rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-center gap-2">
               <FileText className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-semibold">Photos & Files ({documents.length})</h3>
+              <h3 className="font-semibold">
+                Photos & Files ({documents.length})
+              </h3>
               {uploading && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground ml-auto" />
               )}
@@ -458,7 +483,10 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
             {documents.length > 0 && (
               <div className="space-y-2">
                 {documents.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group">
+                  <div
+                    key={doc.id}
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group"
+                  >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded flex items-center justify-center">
                         <span className="text-xs font-bold text-primary">
@@ -466,7 +494,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{doc.name}</p>
+                        <p className="text-sm font-medium truncate">
+                          {doc.name}
+                        </p>
                         <a
                           href={doc.file}
                           target="_blank"
@@ -478,7 +508,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                       </div>
                     </div>
                     <button
-                      onClick={() => setDeleteTarget({ type: 'document', item: doc })}
+                      onClick={() =>
+                        setDeleteTarget({ type: 'document', item: doc })
+                      }
                       className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
                       aria-label="Delete file"
                     >
@@ -567,8 +599,12 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
         onConfirm={handleConfirmDelete}
         title={
           deleteTarget?.type === 'image'
-            ? language === 'no' ? 'Bekreft sletting av bilde' : 'Confirm photo deletion'
-            : language === 'no' ? 'Bekreft sletting av fil' : 'Confirm file deletion'
+            ? language === 'no'
+              ? 'Bekreft sletting av bilde'
+              : 'Confirm photo deletion'
+            : language === 'no'
+              ? 'Bekreft sletting av fil'
+              : 'Confirm file deletion'
         }
         description={
           deleteTarget?.type === 'image'

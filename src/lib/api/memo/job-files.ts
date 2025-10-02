@@ -22,7 +22,9 @@ export const jobFilesAPI = {
   // Get files by job ID using the specific endpoint
   getFilesByJob: async (jobId: string | number): Promise<JobFile[]> => {
     try {
-      const response = await api.get(`/app/memo/jobb-files/by_job/?jobb_id=${jobId}`);
+      const response = await api.get(
+        `/app/memo/jobb-files/by_job/?jobb_id=${jobId}`
+      );
       // This endpoint returns {jobb: {...}, file_count: number, files: [...]}
       // Don't use normalizeResponse since it has a unique structure
       return response.data;
@@ -93,11 +95,15 @@ export const jobFilesAPI = {
       });
       formData.append('jobb', payload.jobb.toString());
 
-      const response = await api.post('/app/memo/jobb-files/bulk_upload/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post(
+        '/app/memo/jobb-files/bulk_upload/',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
       showSuccessToast(`${payload.files.length} files uploaded successfully`);
       return response.data;

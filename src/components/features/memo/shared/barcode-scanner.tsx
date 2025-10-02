@@ -53,7 +53,6 @@ export function BarcodeScanner({
         );
         setIsWebCamSupported(hasCamera);
       } catch (error) {
-        console.log('Camera check failed:', error);
         setIsWebCamSupported(false);
       }
     };
@@ -130,7 +129,6 @@ export function BarcodeScanner({
           'Point camera at the EL-number barcode. Note: Web-based barcode scanning has limited accuracy.',
       });
     } catch (error) {
-      console.error('Camera access failed:', error);
       setIsScanning(false);
       toast({
         title: 'Camera access failed',

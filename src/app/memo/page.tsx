@@ -2,43 +2,54 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/layouts/navbar';
 import { useAuthStore } from '@/stores';
-import { jobsAPI, Job, JobSearchParams } from '@/lib/api';
-import { JobSelector } from '@/components/features/memo/landing/job-selector';
+import { jobsAPI, Job } from '@/lib/api';
 import { NewJobModal } from '@/components/features/memo/landing/new-job-modal';
-import { JobSearchFilters } from '@/components/features/memo/landing/job-search-filters';
-import { JobListView } from '@/components/features/memo/landing/job-list-view';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
 import ChatBot from '@/components/features/chat/chatbot';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Grid, List, BarChart3, FileText, MapPin, Loader2 } from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import { Plus, MapPin, Loader2, Search, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export default function MemoPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { isAuthenticated, isInitialized } = useAuthStore();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [showNewJobModal, setShowNewJobModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'mobile' | 'list'>('mobile');
+
+  // State
+  const [nearbyJobs, setNearbyJobs] = useState<Job[]>([]);
   const [checkingLocation, setCheckingLocation] = useState(false);
-
-  // Search and filter state
-  const [searchParams, setSearchParams] = useState<JobSearchParams>({});
+  const [locationChecked, setLocationChecked] = useState(false);
+  const [showNewJobModal, setShowNewJobModal] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed'>('all');
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const pageSize = 20;
+  const [searchResults, setSearchResults] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -47,153 +58,11 @@ export default function MemoPage() {
     }
   }, [isAuthenticated, isInitialized, router]);
 
-  // Load jobs with search/filter parameters
-  const loadJobs = async (params: JobSearchParams = {}, page: number = 1) => {
-    try {
-      setLoading(true);
-
-      // Build search parameters
-      const searchParameters: JobSearchParams = {
-        ...params,
-        page,
-        page_size: pageSize,
-      };
-
-      // Add status filter
-      if (statusFilter !== 'all') {
-        searchParameters.ferdig = statusFilter === 'completed';
-      }
-
-      // Add search query
-      if (searchQuery.trim()) {
-        searchParameters.search = searchQuery.trim();
-      }
-
-      const jobsData = await jobsAPI.getJobs(searchParameters);
-
-      // Handle paginated vs non-paginated response
-      if (typeof jobsData === 'object' && 'results' in jobsData) {
-        // Paginated response
-        setJobs(jobsData.results);
-        setTotalCount(jobsData.count);
-        setTotalPages(Math.ceil(jobsData.count / pageSize));
-      } else {
-        // Direct array response
-        setJobs(Array.isArray(jobsData) ? jobsData : []);
-        setTotalCount(jobsData.length);
-        setTotalPages(1);
-      }
-
-      // Auto-select most recent job if available and in mobile mode
-      if (viewMode === 'mobile' && jobs.length > 0) {
-        setSelectedJob(jobs[0]);
-      }
-    } catch (error) {
-      console.error('Failed to load jobs:', error);
-      setJobs([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Load jobs on component mount and when parameters change
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadJobs(searchParams, currentPage);
-    }
-  }, [isAuthenticated, searchParams, currentPage, searchQuery, statusFilter]);
-
-  const handleJobSelect = (job: Job) => {
-    setSelectedJob(job);
-    // Navigate to job detail view
-    router.push(`/memo/job/${job.ordre_nr}`);
-  };
-
-  const handleNewJob = () => {
-    setShowNewJobModal(true);
-  };
-
-  const handleJobCreated = (newJob: Job) => {
-    setJobs([newJob, ...jobs]);
-    setSelectedJob(newJob);
-    setShowNewJobModal(false);
-    // Navigate to the new job
-    router.push(`/memo/job/${newJob.ordre_nr}`);
-  };
-
-  // Search and filter handlers
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page on new search
-  };
-
-  const handleStatusFilter = (status: 'all' | 'active' | 'completed') => {
-    setStatusFilter(status);
-    setCurrentPage(1); // Reset to first page on filter change
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleRefresh = () => {
-    loadJobs(searchParams, currentPage);
-  };
-
-  // Calculate distance between two coordinates using Haversine formula
-  const calculateDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number => {
-    const R = 6371e3; // Earth's radius in meters
-    const φ1 = (lat1 * Math.PI) / 180;
-    const φ2 = (lat2 * Math.PI) / 180;
-    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // Distance in meters
-  };
-
-  // Geocode address to coordinates using Kartverket API
-  const geocodeAddress = async (address: string): Promise<{ lat: number; lon: number } | null> => {
-    try {
-      // Use Kartverket address search API
-      const response = await fetch(
-        `https://ws.geonorge.no/adresser/v1/sok?sok=${encodeURIComponent(address)}&treffPerSide=1`
-      );
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
-
-      if (data.adresser && data.adresser.length > 0) {
-        const addressData = data.adresser[0];
-        if (addressData.representasjonspunkt) {
-          return {
-            lat: addressData.representasjonspunkt.lat,
-            lon: addressData.representasjonspunkt.lon,
-          };
-        }
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Geocoding error:', error);
-      return null;
-    }
-  };
-
   // Get current location
-  const getCurrentLocation = async (): Promise<{ latitude: number; longitude: number }> => {
+  const getCurrentLocation = async (): Promise<{
+    latitude: number;
+    longitude: number;
+  }> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation is not supported by your browser'));
@@ -201,9 +70,7 @@ export default function MemoPage() {
       }
 
       if (!window.isSecureContext) {
-        reject(
-          new Error('Geolocation requires HTTPS or localhost.')
-        );
+        reject(new Error('Geolocation requires HTTPS or localhost.'));
         return;
       }
 
@@ -238,150 +105,81 @@ export default function MemoPage() {
     });
   };
 
-  // Find and enter nearest job (using backend geocoding)
-  const handleAutoEntry = async () => {
-    setCheckingLocation(true);
-    console.log('🚀 [AUTO-ENTRY] Starting location-based job search...');
+  // Check for nearby jobs on page load
+  useEffect(() => {
+    const checkNearbyJobs = async () => {
+      if (!isAuthenticated || locationChecked) return;
 
-    try {
-      // Get current location
-      console.log('📍 [AUTO-ENTRY] Getting current location...');
-      const currentLocation = await getCurrentLocation();
-      console.log('✅ [AUTO-ENTRY] Current location:', currentLocation);
+      setCheckingLocation(true);
+      setLocationChecked(true);
 
-      // Try backend endpoint first (optimized, fast)
       try {
-        console.log('🔥 [AUTO-ENTRY] Using backend /nearby/ endpoint...');
-        const nearbyJobs = await jobsAPI.getNearbyJobs({
+        const currentLocation = await getCurrentLocation();
+        const nearby = await jobsAPI.getNearbyJobs({
           lat: currentLocation.latitude,
           lon: currentLocation.longitude,
           radius: 100,
-          ferdig: false, // Only show incomplete jobs
+          ferdig: false,
         });
 
-        console.log(`✅ [AUTO-ENTRY] Backend returned ${nearbyJobs.length} nearby jobs`);
+        setNearbyJobs(nearby);
 
-        if (nearbyJobs.length > 0) {
-          // Jobs are already sorted by distance from backend
-          const nearestJob = nearbyJobs[0];
-          const distance = nearestJob.distance || 0;
-
-          console.log(`✅ [AUTO-ENTRY] Found nearby job #${nearestJob.ordre_nr} at ${Math.round(distance)}m`);
-
+        if (nearby.length > 0) {
           toast({
-            title: 'Nearby job found!',
-            description: `Entering Job #${nearestJob.ordre_nr} - ${nearestJob.tittel} (${Math.round(distance)}m away)`,
-          });
-
-          // Navigate to job
-          setTimeout(() => {
-            router.push(`/memo/job/${nearestJob.ordre_nr}`);
-          }, 1000);
-        } else {
-          console.log('❌ [AUTO-ENTRY] No jobs within 100m radius');
-
-          toast({
-            title: 'No nearby jobs',
-            description: 'No jobs found within 100 meters of your location.',
-            variant: 'destructive',
+            title: 'Nearby jobs found!',
+            description: `Found ${nearby.length} job${nearby.length > 1 ? 's' : ''} within 100m`,
           });
         }
-        return; // Success, exit early
-      } catch (backendError) {
-        console.warn('⚠️ [AUTO-ENTRY] Backend endpoint failed, falling back to client-side geocoding:', backendError);
-        // Fall through to client-side fallback
+      } catch (error) {
+        // Silently fail - location is optional
+      } finally {
+        setCheckingLocation(false);
       }
+    };
 
-      // FALLBACK: Client-side geocoding (slower, but works without backend)
-      console.log('🔄 [AUTO-ENTRY] Using client-side geocoding fallback...');
+    checkNearbyJobs();
+  }, [isAuthenticated, locationChecked, toast]);
 
-      const jobsWithAddresses = jobs.filter(job => job.adresse && job.adresse.trim() !== '');
-      console.log(`🔍 [AUTO-ENTRY] Found ${jobsWithAddresses.length} jobs with addresses`);
+  // Search for jobs
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
 
-      if (jobsWithAddresses.length === 0) {
-        toast({
-          title: 'No jobs with addresses',
-          description: 'There are no jobs with valid addresses to check proximity.',
-          variant: 'destructive',
-        });
-        return;
-      }
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
-      // Check each job's proximity (client-side)
-      let nearestJob: Job | null = null;
-      let nearestDistance = Infinity;
-
-      for (const job of jobsWithAddresses) {
-        console.log(`🗺️ [AUTO-ENTRY] Geocoding job #${job.ordre_nr}: ${job.adresse}`);
-        const jobCoords = await geocodeAddress(job.adresse);
-
-        if (jobCoords) {
-          const distance = calculateDistance(
-            currentLocation.latitude,
-            currentLocation.longitude,
-            jobCoords.lat,
-            jobCoords.lon
-          );
-
-          console.log(`📏 [AUTO-ENTRY] Job #${job.ordre_nr} is ${Math.round(distance)}m away`);
-
-          if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nearestJob = job;
-          }
-        } else {
-          console.warn(`⚠️ [AUTO-ENTRY] Could not geocode address for job #${job.ordre_nr}`);
-        }
-      }
-
-      // Check if nearest job is within 100m
-      if (nearestJob && nearestDistance <= 100) {
-        console.log(`✅ [AUTO-ENTRY] Found nearby job #${nearestJob.ordre_nr} at ${Math.round(nearestDistance)}m`);
-
-        toast({
-          title: 'Nearby job found!',
-          description: `Entering Job #${nearestJob.ordre_nr} - ${nearestJob.tittel} (${Math.round(nearestDistance)}m away)`,
-        });
-
-        // Navigate to job
-        setTimeout(() => {
-          router.push(`/memo/job/${nearestJob.ordre_nr}`);
-        }, 1000);
-      } else if (nearestJob) {
-        console.log(`❌ [AUTO-ENTRY] Nearest job is ${Math.round(nearestDistance)}m away (too far)`);
-
-        toast({
-          title: 'No nearby jobs',
-          description: `The nearest job is ${Math.round(nearestDistance)}m away. You need to be within 100m to auto-enter.`,
-          variant: 'destructive',
-        });
-      } else {
-        console.log('❌ [AUTO-ENTRY] Could not find any jobs with valid addresses');
-
-        toast({
-          title: 'No jobs found',
-          description: 'Could not locate any jobs near your current position.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      console.error('❌ [AUTO-ENTRY] Error:', error);
-      toast({
-        title: 'Location error',
-        description: error instanceof Error ? error.message : 'Could not check your location.',
-        variant: 'destructive',
+    setSearchLoading(true);
+    try {
+      const choices = await jobsAPI.getJobChoices({
+        search: query,
+        limit: 50,
+        ferdig: false,
       });
+
+      setSearchResults(
+        choices.map((choice) => ({
+          value: choice.value.toString(),
+          label: choice.label,
+        }))
+      );
+    } catch (error) {
+      setSearchResults([]);
     } finally {
-      setCheckingLocation(false);
-      console.log('🏁 [AUTO-ENTRY] Completed');
+      setSearchLoading(false);
     }
   };
 
-  // Get stats for current filter
-  const getJobStats = () => {
-    const activeJobs = jobs.filter(job => !job.ferdig).length;
-    const completedJobs = jobs.filter(job => job.ferdig).length;
-    return { activeJobs, completedJobs, totalJobs: jobs.length };
+  // Handle job selection from search
+  const handleJobSelect = (ordreNr: string) => {
+    setSearchOpen(false);
+    router.push(`/memo/job/${ordreNr}`);
+  };
+
+  // Handle new job creation
+  const handleJobCreated = (newJob: Job) => {
+    setShowNewJobModal(false);
+    router.push(`/memo/job/${newJob.ordre_nr}`);
   };
 
   // Show loading or redirect while checking auth
@@ -390,203 +188,219 @@ export default function MemoPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
   }
 
-  const stats = getJobStats();
-
   return (
     <>
       <ThemeInitializer />
       <Navbar />
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                📱 NXFS Memo
-              </h1>
+      <div className="min-h-screen bg-background">
+        <main className="container mx-auto px-4 py-8 max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
+          >
+            {/* Header */}
+            <div className="text-center space-y-2">
+              <h1 className="text-4xl font-bold text-foreground">NXFS Memo</h1>
               <p className="text-muted-foreground">Work Order Management</p>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant={viewMode === 'mobile' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('mobile')}
-              >
-                <Grid className="h-4 w-4 mr-2" />
-                Mobile View
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-4 w-4 mr-2" />
-                List View
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAutoEntry}
-                disabled={checkingLocation || jobs.length === 0}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 border-0"
-              >
-                {checkingLocation ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Checking...
-                  </>
-                ) : (
-                  <>
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Auto-Enter Nearby Job
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/memo/dashboard')}
-              >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/memo/reports')}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Reports
-              </Button>
-              <Button size="sm" onClick={handleNewJob}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Job
-              </Button>
-            </div>
-          </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalCount}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.totalJobs} in current view
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-yellow-600">{stats.activeJobs}</div>
-                <p className="text-xs text-muted-foreground">In progress</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completed</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">{stats.completedJobs}</div>
-                <p className="text-xs text-muted-foreground">Finished</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Page</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{currentPage}</div>
-                <p className="text-xs text-muted-foreground">of {totalPages}</p>
-              </CardContent>
-            </Card>
-          </div>
+            {/* Nearby Jobs Section */}
+            {checkingLocation && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Card className="bg-card border-border">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-center gap-3 text-muted-foreground">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Checking for nearby jobs...</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
 
-          {/* Search and Filters */}
-          <JobSearchFilters
-            searchQuery={searchQuery}
-            onSearchChange={handleSearch}
-            statusFilter={statusFilter}
-            onStatusFilterChange={handleStatusFilter}
-            totalCount={totalCount}
-            loading={loading}
-            onRefresh={handleRefresh}
-          />
+            {!checkingLocation && nearbyJobs.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center gap-2 text-green-600">
+                  <MapPin className="h-5 w-5" />
+                  <h2 className="text-lg font-semibold">Nearby Jobs</h2>
+                </div>
 
-          {/* View Content */}
-          {viewMode === 'mobile' ? (
-            <div className="max-w-md mx-auto">
-              {/* Mobile View - Original Design */}
-              <JobSelector
-                jobs={jobs}
-                selectedJob={selectedJob}
-                onJobSelect={handleJobSelect}
-                onNewJob={handleNewJob}
-                loading={loading}
-              />
-
-              {/* Recent Jobs */}
-              {jobs.length > 0 && (
-                <div className="space-y-3 mt-6">
-                  <h3 className="text-lg font-semibold">Recent Jobs</h3>
-                  <div className="space-y-2">
-                    {jobs.slice(0, 5).map((job) => (
-                      <button
-                        key={job.ordre_nr}
-                        onClick={() => handleJobSelect(job)}
-                        className="w-full text-left p-3 border rounded-lg hover:bg-muted transition-colors hover-lift"
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <span className="font-medium">Job #{job.ordre_nr}</span>
+                {nearbyJobs.map((job, index) => (
+                  <motion.div
+                    key={job.ordre_nr}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="bg-card border-border hover-lift cursor-pointer group">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1 flex-1">
+                            <CardTitle className="text-xl">
+                              Job #{job.ordre_nr}
+                            </CardTitle>
                             {job.tittel && (
-                              <span className="text-muted-foreground">
-                                {' '}
-                                - {job.tittel}
-                              </span>
+                              <CardDescription className="text-base">
+                                {job.tittel}
+                              </CardDescription>
+                            )}
+                            {job.adresse && (
+                              <p className="text-sm text-muted-foreground flex items-center gap-1 mt-2">
+                                <MapPin className="h-3 w-3" />
+                                {job.adresse}
+                              </p>
+                            )}
+                            {job.distance !== undefined && (
+                              <p className="text-sm font-medium text-green-600 mt-1">
+                                {Math.round(job.distance)}m away
+                              </p>
                             )}
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {job.adresse && job.adresse.split(',')[0]}
-                          </div>
                         </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* List View - Advanced Table */
-            <JobListView
-              jobs={jobs}
-              loading={loading}
-              onJobSelect={handleJobSelect}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          )}
+                      </CardHeader>
+                      <CardContent>
+                        <Button
+                          onClick={() => handleJobSelect(job.ordre_nr)}
+                          className="w-full"
+                          size="lg"
+                        >
+                          Enter Job
+                          <ExternalLink className="h-4 w-4 ml-2" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
 
-          {/* New Job Modal */}
-          <NewJobModal
-            isOpen={showNewJobModal}
-            onClose={() => setShowNewJobModal(false)}
-            onJobCreated={handleJobCreated}
-          />
-        </div>
+            {/* Main Actions */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              className="space-y-6"
+            >
+              {/* Search Job */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Search className="h-5 w-5" />
+                    Search for Job
+                  </CardTitle>
+                  <CardDescription>
+                    Search by job number, title, or address
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={searchOpen}
+                        className="w-full justify-between h-12 text-left"
+                      >
+                        <span
+                          className={cn(
+                            'truncate',
+                            !searchQuery && 'text-muted-foreground'
+                          )}
+                        >
+                          {searchQuery || 'Type to search jobs...'}
+                        </span>
+                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                      <Command shouldFilter={false}>
+                        <CommandInput
+                          placeholder="Search jobs..."
+                          value={searchQuery}
+                          onValueChange={handleSearch}
+                        />
+                        <CommandList>
+                          {searchLoading && (
+                            <div className="p-4 text-center text-sm text-muted-foreground">
+                              <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+                              Searching...
+                            </div>
+                          )}
+                          {!searchLoading &&
+                            searchQuery &&
+                            searchResults.length === 0 && (
+                              <CommandEmpty>No jobs found.</CommandEmpty>
+                            )}
+                          {!searchLoading && searchResults.length > 0 && (
+                            <CommandGroup heading="Jobs">
+                              {searchResults.map((result) => (
+                                <CommandItem
+                                  key={result.value}
+                                  value={result.value}
+                                  onSelect={() => handleJobSelect(result.value)}
+                                  className="cursor-pointer"
+                                >
+                                  {result.label}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </CardContent>
+              </Card>
+
+              {/* Create New Job */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="h-5 w-5" />
+                    Create New Job
+                  </CardTitle>
+                  <CardDescription>Start a new work order</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    onClick={() => setShowNewJobModal(true)}
+                    className="w-full"
+                    size="lg"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    New Job
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
+        </main>
       </div>
+
+      {/* New Job Modal */}
+      <NewJobModal
+        isOpen={showNewJobModal}
+        onClose={() => setShowNewJobModal(false)}
+        onJobCreated={handleJobCreated}
+      />
+
       <ChatBot />
     </>
   );
