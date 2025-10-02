@@ -135,8 +135,8 @@ export default function ChatBot() {
     setError(null);
 
     try {
-      // Use session_id from user data, fallback to user.id
-      const sessionId = (user as any).session_id || user.id;
+      // Use chat_session_id from user data, fallback to user.id
+      const sessionId = user.chat_session_id || user.id;
       // Get user's preferred name (first_name or display_name as fallback)
       const userName = user.first_name || user.display_name || user.username;
 

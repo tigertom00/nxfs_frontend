@@ -170,7 +170,7 @@ export interface User {
   last_login?: string;
   language: 'en' | 'no';
   theme: 'light' | 'dark' | 'purple' | 'pink' | 'system';
-  session_id?: string; // For chatbot session management
+  chat_session_id?: string; // For N8N chatbot session management
 }
 
 /**

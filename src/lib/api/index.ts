@@ -43,9 +43,13 @@ export * from './llm/types';
 export { providersAPI } from './llm/providers';
 export { providersAPI as llmProvidersAPI } from './llm/providers';
 
-// Chatbot integration domain
+// Chatbot integration domain (N8N)
 export * from './chatbot/types';
 export { n8nAPI as chatbotAPI } from './chatbot/n8n';
+
+// Chat domain (real-time messaging)
+export * from './chat/types';
+export { chatAPI } from './chat';
 
 // Admin domain
 export * from './admin/types';
@@ -60,6 +64,7 @@ export { jobFilesAPI } from './memo/job-files';
 export { suppliersAPI } from './memo/suppliers';
 export { categoriesAPI as memoCategoriesAPI } from './memo/categories';
 export { timeTrackingAPI } from './memo/time-tracking';
+export { timerSessionAPI } from './memo/timer-sessions';
 export { dashboardAPI } from './memo/dashboard';
 export { reportsAPI } from './memo/reports';
 export { elNumberLookupAPI } from './memo/n8n-lookup';
