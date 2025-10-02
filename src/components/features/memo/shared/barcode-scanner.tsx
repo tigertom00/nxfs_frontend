@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Scan, X, Camera, Keyboard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
 
 interface BarcodeScannerProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ export function BarcodeScanner({
   const [isScanning, setIsScanning] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
 
   // Check if camera is available
   useEffect(() => {
@@ -64,9 +66,14 @@ export function BarcodeScanner({
 
   // Clean up camera stream when modal closes
   useEffect(() => {
-    if (!isOpen && streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
+    if (!isOpen) {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      if (codeReaderRef.current) {
+        codeReaderRef.current.reset();
+      }
       setIsScanning(false);
     }
   }, [isOpen]);
@@ -108,27 +115,70 @@ export function BarcodeScanner({
     try {
       setIsScanning(true);
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment', // Use back camera on mobile
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      });
+      // Initialize the barcode reader
+      const codeReader = new BrowserMultiFormatReader();
+      codeReaderRef.current = codeReader;
 
-      streamRef.current = stream;
+      // Get available video devices
+      const videoInputDevices =
+        await codeReader.listVideoInputDevices();
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
+      if (videoInputDevices.length === 0) {
+        throw new Error('No camera found');
       }
+
+      // Prefer back camera on mobile devices
+      const backCamera = videoInputDevices.find((device) =>
+        device.label.toLowerCase().includes('back')
+      );
+      const selectedDeviceId = backCamera
+        ? backCamera.deviceId
+        : videoInputDevices[0].deviceId;
 
       toast({
         title: 'Camera started',
-        description:
-          'Point camera at the EL-number barcode. Note: Web-based barcode scanning has limited accuracy.',
+        description: 'Point camera at the EL-number barcode',
       });
+
+      // Start continuous barcode scanning
+      if (videoRef.current) {
+        await codeReader.decodeFromVideoDevice(
+          selectedDeviceId,
+          videoRef.current,
+          (result, error) => {
+            if (result) {
+              const scannedCode = result.getText();
+
+              // Stop scanning and process the code
+              stopCamera();
+
+              if (validateELNumber(scannedCode)) {
+                toast({
+                  title: 'Barcode scanned successfully',
+                  description: `EL-Number: ${scannedCode}`,
+                });
+                onScan(scannedCode);
+                setManualInput('');
+                onClose();
+              } else {
+                toast({
+                  title: 'Invalid EL-number format',
+                  description: `Scanned: ${scannedCode}. Please try again or use manual input.`,
+                  variant: 'destructive',
+                });
+                setManualInput(scannedCode); // Pre-fill manual input for editing
+              }
+            }
+
+            // Ignore NotFoundException errors (no barcode in frame yet)
+            if (error && !(error instanceof NotFoundException)) {
+              console.error('Barcode scanning error:', error);
+            }
+          }
+        );
+      }
     } catch (error) {
+      console.error('Camera initialization error:', error);
       setIsScanning(false);
       toast({
         title: 'Camera access failed',
@@ -139,6 +189,10 @@ export function BarcodeScanner({
   };
 
   const stopCamera = () => {
+    if (codeReaderRef.current) {
+      codeReaderRef.current.reset();
+      codeReaderRef.current = null;
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -198,8 +252,8 @@ export function BarcodeScanner({
                     Stop Camera
                   </Button>
                   <p className="text-xs text-muted-foreground text-center">
-                    Note: Web-based scanning has limited accuracy. Consider
-                    using manual input for better results.
+                    Hold the barcode steady in the frame. Scanning will happen
+                    automatically.
                   </p>
                 </div>
               )}
