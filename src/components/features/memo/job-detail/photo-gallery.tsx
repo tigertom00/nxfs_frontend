@@ -48,13 +48,6 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       try {
         // API expects numeric job ID
         const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
-          'Loading job data with jobIdToUse:',
-          jobIdToUse,
-          'ordreNr:',
-          ordreNr,
-          'jobId:',
-          jobId
-        );
 
         // Load images
         const jobPhotos = await jobImagesAPI.getImagesByJob(jobIdToUse);

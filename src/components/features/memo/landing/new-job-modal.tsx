@@ -164,9 +164,6 @@ export function NewJobModal({
       }
 
       const data = await response.json();
-        '🔍 [DEBUG] API response data:',
-        JSON.stringify(data, null, 2)
-      );
 
       if (data.adresser && data.adresser.length > 0) {
         const address = data.adresser[0];
@@ -238,13 +235,6 @@ export function NewJobModal({
         description: `${addressData.adresse}, ${addressData.postnummer} ${addressData.poststed}`,
       });
     } catch (error) {
-        '❌ [DEBUG] Error type:',
-        error instanceof Error ? error.constructor.name : typeof error
-      );
-        '❌ [DEBUG] Error message:',
-        error instanceof Error ? error.message : String(error)
-      );
-
       toast({
         title: 'Location error',
         description:

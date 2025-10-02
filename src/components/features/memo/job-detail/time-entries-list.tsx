@@ -71,12 +71,6 @@ export function TimeEntriesList({
       // Parse user ID safely
       const userId = parseInt(user?.id || '0');
 
-        jobb: jobIdToUse.toString(),
-        user_id: userId,
-        raw_user_id: user?.id,
-        user_object: user,
-      });
-
       const response = await timeTrackingAPI.getTimeEntriesByDate({
         jobb: jobIdToUse.toString(),
         user_id: userId,

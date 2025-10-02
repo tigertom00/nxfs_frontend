@@ -73,9 +73,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             const additionalElapsed = Math.floor(
               (now - parsed.startTime) / 1000
             );
-              'Resuming timer with additional elapsed time:',
-              additionalElapsed
-            );
             setTimer((prev) => ({
               ...prev,
               elapsed: prev.elapsed + additionalElapsed,
@@ -243,13 +240,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         return;
       }
 
-        jobb: jobIdToUse,
-        user: userId,
-        timer: roundedMinutes,
-        dato: new Date().toISOString().split('T')[0],
-        original_seconds: timer.elapsed,
-        rounded_seconds: roundedSeconds,
-      });
       const timeEntryData = {
         jobb: jobIdToUse.toString(),
         user: userId,

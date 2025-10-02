@@ -281,12 +281,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         // Reload materials to include the new one
         await loadMaterials();
 
-          id: importedMaterial.id,
-          tittel: importedMaterial.tittel,
-          el_nr: importedMaterial.el_nr,
-          leverandor: importedMaterial.leverandor,
-        });
-
         // Add the imported material directly to selection
         // importedMaterial is the Material object returned from the API
         addMaterialToSelection(importedMaterial);
@@ -470,11 +464,6 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
 
       // Add each selected material to the job
       for (const selectedMaterial of selectedMaterials) {
-          matriell_id: selectedMaterial.id,
-          jobb: jobId,
-          antall: selectedMaterial.quantity,
-        });
-
         // Check if this material already exists in the job
         const existingJobMaterial = jobMaterials.find(
           (jm) => jm.matriell.id === selectedMaterial.id
