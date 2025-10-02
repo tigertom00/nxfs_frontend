@@ -1,4 +1,4 @@
-import apiClient from '../shared/api-client';
+import api from '../base';
 import type {
   ChatRoom,
   Message,
@@ -49,7 +49,7 @@ export const getChatRooms = async (
   page = 1,
   pageSize = 50
 ): Promise<GetChatRoomsResponse> => {
-  const response = await apiClient.get<GetChatRoomsResponse>(
+  const response = await api.get<GetChatRoomsResponse>(
     `${BASE_PATH}/rooms/`,
     {
       params: { page, page_size: pageSize },
@@ -64,7 +64,7 @@ export const getChatRooms = async (
 export const getChatRoom = async (
   roomId: string
 ): Promise<GetChatRoomResponse> => {
-  const response = await apiClient.get<GetChatRoomResponse>(
+  const response = await api.get<GetChatRoomResponse>(
     `${BASE_PATH}/rooms/${roomId}/`
   );
   return response.data;
@@ -76,7 +76,7 @@ export const getChatRoom = async (
 export const createChatRoom = async (
   payload: CreateChatRoomPayload
 ): Promise<CreateChatRoomResponse> => {
-  const response = await apiClient.post<CreateChatRoomResponse>(
+  const response = await api.post<CreateChatRoomResponse>(
     `${BASE_PATH}/rooms/`,
     payload
   );
@@ -90,7 +90,7 @@ export const updateChatRoom = async (
   roomId: string,
   payload: UpdateChatRoomPayload
 ): Promise<UpdateChatRoomResponse> => {
-  const response = await apiClient.patch<UpdateChatRoomResponse>(
+  const response = await api.patch<UpdateChatRoomResponse>(
     `${BASE_PATH}/rooms/${roomId}/`,
     payload
   );
@@ -101,7 +101,7 @@ export const updateChatRoom = async (
  * Delete a chat room
  */
 export const deleteChatRoom = async (roomId: string): Promise<void> => {
-  await apiClient.delete(`${BASE_PATH}/rooms/${roomId}/`);
+  await api.delete(`${BASE_PATH}/rooms/${roomId}/`);
 };
 
 /**
@@ -110,7 +110,7 @@ export const deleteChatRoom = async (roomId: string): Promise<void> => {
 export const createDirectMessage = async (
   payload: CreateDirectMessagePayload
 ): Promise<CreateDirectMessageResponse> => {
-  const response = await apiClient.post<CreateDirectMessageResponse>(
+  const response = await api.post<CreateDirectMessageResponse>(
     `${BASE_PATH}/rooms/direct_message/`,
     payload
   );
@@ -123,7 +123,7 @@ export const createDirectMessage = async (
 export const markRoomAsRead = async (
   roomId: string
 ): Promise<MarkReadResponse> => {
-  const response = await apiClient.post<MarkReadResponse>(
+  const response = await api.post<MarkReadResponse>(
     `${BASE_PATH}/rooms/${roomId}/mark_read/`
   );
   return response.data;
@@ -135,7 +135,7 @@ export const markRoomAsRead = async (
 export const getTypingUsers = async (
   roomId: string
 ): Promise<TypingIndicator[]> => {
-  const response = await apiClient.get<TypingIndicator[]>(
+  const response = await api.get<TypingIndicator[]>(
     `${BASE_PATH}/rooms/${roomId}/typing_users/`
   );
   return response.data;
@@ -145,7 +145,7 @@ export const getTypingUsers = async (
  * Leave a chat room
  */
 export const leaveRoom = async (roomId: string): Promise<LeaveRoomResponse> => {
-  const response = await apiClient.post<LeaveRoomResponse>(
+  const response = await api.post<LeaveRoomResponse>(
     `${BASE_PATH}/rooms/${roomId}/leave/`
   );
   return response.data;
@@ -163,7 +163,7 @@ export const getMessages = async (
   page = 1,
   pageSize = 50
 ): Promise<GetMessagesResponse> => {
-  const response = await apiClient.get<GetMessagesResponse>(
+  const response = await api.get<GetMessagesResponse>(
     `${BASE_PATH}/rooms/${roomId}/messages/`,
     {
       params: { page, page_size: pageSize },
@@ -179,7 +179,7 @@ export const getMessage = async (
   roomId: string,
   messageId: string
 ): Promise<GetMessageResponse> => {
-  const response = await apiClient.get<GetMessageResponse>(
+  const response = await api.get<GetMessageResponse>(
     `${BASE_PATH}/rooms/${roomId}/messages/${messageId}/`
   );
   return response.data;
@@ -202,7 +202,7 @@ export const sendMessage = async (
     }
     formData.append('file_attachment', payload.file_attachment);
 
-    const response = await apiClient.post<SendMessageResponse>(
+    const response = await api.post<SendMessageResponse>(
       `${BASE_PATH}/rooms/${roomId}/messages/`,
       formData,
       {
@@ -215,7 +215,7 @@ export const sendMessage = async (
   }
 
   // Text-only message
-  const response = await apiClient.post<SendMessageResponse>(
+  const response = await api.post<SendMessageResponse>(
     `${BASE_PATH}/rooms/${roomId}/messages/`,
     payload
   );
@@ -230,7 +230,7 @@ export const updateMessage = async (
   messageId: string,
   payload: UpdateMessagePayload
 ): Promise<UpdateMessageResponse> => {
-  const response = await apiClient.patch<UpdateMessageResponse>(
+  const response = await api.patch<UpdateMessageResponse>(
     `${BASE_PATH}/rooms/${roomId}/messages/${messageId}/`,
     payload
   );
@@ -244,7 +244,7 @@ export const deleteMessage = async (
   roomId: string,
   messageId: string
 ): Promise<void> => {
-  await apiClient.delete(`${BASE_PATH}/rooms/${roomId}/messages/${messageId}/`);
+  await api.delete(`${BASE_PATH}/rooms/${roomId}/messages/${messageId}/`);
 };
 
 /**
@@ -255,7 +255,7 @@ export const reactToMessage = async (
   messageId: string,
   payload: ReactToMessagePayload
 ): Promise<ReactToMessageResponse> => {
-  const response = await apiClient.post<ReactToMessageResponse>(
+  const response = await api.post<ReactToMessageResponse>(
     `${BASE_PATH}/rooms/${roomId}/messages/${messageId}/react/`,
     payload
   );
@@ -269,7 +269,7 @@ export const markMessageAsRead = async (
   roomId: string,
   messageId: string
 ): Promise<MarkMessageReadResponse> => {
-  const response = await apiClient.post<MarkMessageReadResponse>(
+  const response = await api.post<MarkMessageReadResponse>(
     `${BASE_PATH}/rooms/${roomId}/messages/${messageId}/mark_read/`
   );
   return response.data;
@@ -285,7 +285,7 @@ export const markMessageAsRead = async (
 export const searchMessages = async (
   params: SearchMessagesParams
 ): Promise<SearchMessagesResponse> => {
-  const response = await apiClient.get<SearchMessagesResponse>(
+  const response = await api.get<SearchMessagesResponse>(
     `${BASE_PATH}/search/messages/`,
     { params }
   );
@@ -298,7 +298,7 @@ export const searchMessages = async (
 export const searchRooms = async (
   params: SearchRoomsParams
 ): Promise<SearchRoomsResponse> => {
-  const response = await apiClient.get<SearchRoomsResponse>(
+  const response = await api.get<SearchRoomsResponse>(
     `${BASE_PATH}/search/rooms/`,
     { params }
   );
@@ -314,7 +314,7 @@ export const searchRooms = async (
  */
 export const getActiveSessions =
   async (): Promise<GetActiveSessionsResponse> => {
-    const response = await apiClient.get<GetActiveSessionsResponse>(
+    const response = await api.get<GetActiveSessionsResponse>(
       `${BASE_PATH}/sessions/active_sessions/`
     );
     return response.data;
@@ -324,7 +324,7 @@ export const getActiveSessions =
  * Cleanup old inactive sessions
  */
 export const cleanupOldSessions = async (): Promise<CleanupSessionsResponse> => {
-  const response = await apiClient.post<CleanupSessionsResponse>(
+  const response = await api.post<CleanupSessionsResponse>(
     `${BASE_PATH}/sessions/cleanup_old_sessions/`
   );
   return response.data;
