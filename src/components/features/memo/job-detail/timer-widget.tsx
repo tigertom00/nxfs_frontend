@@ -3,7 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { timeEntriesAPI, timeTrackingAPI } from '@/lib/api';
+import {
+  timeEntriesAPI,
+  timeTrackingAPI,
+  timerSessionAPI,
+  ActiveTimerSession,
+} from '@/lib/api';
 import { UserTimeStats } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 import {
@@ -32,7 +37,8 @@ interface TimerState {
   isRunning: boolean;
   startTime: number | null;
   elapsed: number; // seconds
-  sessionId: string | null;
+  serverSessionId: number | null; // Server session ID
+  serverStartTime: string | null; // ISO timestamp from server
 }
 
 export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
@@ -42,7 +48,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     isRunning: false,
     startTime: null,
     elapsed: 0,
-    sessionId: null,
+    serverSessionId: null,
+    serverStartTime: null,
   });
   const [activeTab, setActiveTab] = useState('timer');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -51,42 +58,71 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const [statsLoading, setStatsLoading] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const notificationRef = useRef<Notification | null>(null);
 
-  // Load saved timer state on mount
+  // Load active timer session from server on mount
   useEffect(() => {
-    try {
-      // Check if localStorage is available (mobile-safe)
-      if (typeof Storage === 'undefined') {
-        return;
-      }
+    const loadActiveSession = async () => {
+      if (!user) return;
 
-      const savedTimer = localStorage.getItem(`timer-${jobId}`);
-      if (savedTimer) {
-        try {
-          const parsed = JSON.parse(savedTimer);
-          setTimer(parsed);
+      try {
+        const activeSession = await timerSessionAPI.getActiveTimerSession();
 
-          // If timer was running, calculate elapsed time since last save
-          if (parsed.isRunning && parsed.startTime) {
-            const now = Date.now();
-            const additionalElapsed = Math.floor(
-              (now - parsed.startTime) / 1000
-            );
-            setTimer((prev) => ({
-              ...prev,
-              elapsed: prev.elapsed + additionalElapsed,
-              startTime: now,
-            }));
+        if (activeSession) {
+          // Check if this session is for the current job
+          const sessionJobId =
+            ordreNr || jobId.toString();
+
+          if (activeSession.jobb === sessionJobId) {
+            // Restore timer from server session
+            setTimer({
+              isRunning: true,
+              startTime: Date.now(), // Local timestamp for display updates
+              elapsed: activeSession.elapsed_seconds,
+              serverSessionId: activeSession.id,
+              serverStartTime: activeSession.start_time,
+            });
+
+            toast({
+              title: 'Timer resumed',
+              description: `Resumed timer from server (${formatSecondsToTimeString(activeSession.elapsed_seconds)} elapsed)`,
+            });
+          } else {
+            // Active session for a different job - inform user
+            toast({
+              title: 'Active timer on another job',
+              description: `You have an active timer on job ${activeSession.jobb}. Stop it before starting a new one.`,
+              variant: 'destructive',
+            });
           }
-        } catch (parseError) {
-          // Clear corrupted data
-          localStorage.removeItem(`timer-${jobId}`);
+        } else {
+          // No active session - try to restore from localStorage as fallback
+          try {
+            if (typeof Storage !== 'undefined') {
+              const savedTimer = localStorage.getItem(`timer-${jobId}`);
+              if (savedTimer) {
+                const parsed = JSON.parse(savedTimer);
+                // Only restore if it has a server session ID (old format without server ID is ignored)
+                if (parsed.serverSessionId) {
+                  // Verify with server that this session still exists
+                  // If not, clear localStorage
+                  localStorage.removeItem(`timer-${jobId}`);
+                }
+              }
+            }
+          } catch (storageError) {
+            // Ignore localStorage errors
+          }
         }
+      } catch (error) {
+        // Failed to load from server - not critical
+        console.error('Failed to load active timer session:', error);
       }
-    } catch (storageError) {
-    }
-  }, [jobId]);
+    };
+
+    loadActiveSession();
+  }, [jobId, ordreNr, user]);
 
   // Save timer state whenever it changes
   useEffect(() => {
@@ -115,6 +151,30 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       };
     }
   }, [timer.isRunning, timer.startTime]);
+
+  // Periodic ping to keep server session alive (every 30 seconds)
+  useEffect(() => {
+    if (timer.isRunning && timer.serverSessionId) {
+      // Start ping interval
+      pingIntervalRef.current = setInterval(async () => {
+        try {
+          if (timer.serverSessionId) {
+            await timerSessionAPI.pingTimerSession(timer.serverSessionId);
+          }
+        } catch (error) {
+          console.error('Failed to ping timer session:', error);
+          // Don't show error to user - this is a background operation
+          // If ping fails repeatedly, the session may become stale
+        }
+      }, 30000); // 30 seconds
+
+      return () => {
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current);
+        }
+      };
+    }
+  }, [timer.isRunning, timer.serverSessionId]);
 
   // Browser notification for running timer
   useEffect(() => {
@@ -264,28 +324,75 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     }
   }, [user, jobId, ordreNr]);
 
-  const startTimer = () => {
+  const startTimer = async () => {
+    if (!user) {
+      toast({
+        title: 'Not authenticated',
+        description: 'Please log in to start the timer',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
+      const jobIdToUse = ordreNr || jobId.toString();
+
+      // First, check if there's an active session on the server
+      const activeSession = await timerSessionAPI.getActiveTimerSession();
+
+      if (activeSession) {
+        // If it's for this job, resume it
+        if (activeSession.jobb === jobIdToUse) {
+          setTimer({
+            isRunning: true,
+            startTime: Date.now(),
+            elapsed: activeSession.elapsed_seconds,
+            serverSessionId: activeSession.id,
+            serverStartTime: activeSession.start_time,
+          });
+
+          toast({
+            title: 'Timer resumed',
+            description: `Resumed existing timer (${formatSecondsToTimeString(activeSession.elapsed_seconds)} elapsed)`,
+          });
+          return;
+        } else {
+          // Active session for different job - user needs to stop it first
+          toast({
+            title: 'Active timer on another job',
+            description: `You have an active timer on job ${activeSession.jobb}. Please stop it before starting a new one.`,
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      // No active session - create a new one
+      const session = await timerSessionAPI.startTimerSession({
+        jobb: jobIdToUse,
+      });
+
       const now = Date.now();
-      const sessionId = `${user?.id}-${jobId}-${now}`;
 
       setTimer({
         isRunning: true,
         startTime: now,
         elapsed: 0,
-        sessionId,
+        serverSessionId: session.id,
+        serverStartTime: session.start_time,
       });
 
       toast({
         title: 'Timer started',
         description: `Started tracking time for Job #${jobId}`,
       });
-
     } catch (error) {
       toast({
         title: 'Failed to start timer',
         description:
-          'An error occurred while starting the timer. Please try again.',
+          error instanceof Error
+            ? error.message
+            : 'An error occurred while starting the timer. Please try again.',
         variant: 'destructive',
       });
     }
@@ -300,42 +407,23 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   };
 
   const handleTimerSave = async (description?: string) => {
-    if (!user) return;
+    if (!user || !timer.serverSessionId) return;
 
     try {
-      // Apply smart rounding to elapsed time
-      const roundedSeconds = roundSecondsToNearestHalfHour(timer.elapsed);
-      const roundedMinutes = Math.round(roundedSeconds / 60);
-
-      // API expects numeric job ID
-      const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
-
-      // Parse user ID safely
-      const userId = parseInt(user.id);
-      if (isNaN(userId)) {
-        toast({
-          title: 'Invalid user ID',
-          description: 'Cannot save time entry - user ID is invalid',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const timeEntryData = {
-        jobb: jobIdToUse.toString(),
-        user: userId,
-        timer: roundedMinutes, // Store as minutes
-        dato: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
-        beskrivelse:
-          description ||
-          `Timer session - ${formatTime(roundedSeconds)}${roundedSeconds !== timer.elapsed ? ` (rounded from ${formatTime(timer.elapsed)})` : ''}`,
-      };
-
-      const result = await timeEntriesAPI.createTimeEntry(timeEntryData);
+      // Stop the server timer session
+      // The backend will handle:
+      // 1. Calculate elapsed time
+      // 2. Round to nearest 0.5 hours
+      // 3. Create time entry
+      // 4. Delete active session
+      const timeEntry = await timerSessionAPI.stopTimerSession(
+        timer.serverSessionId,
+        description ? { beskrivelse: description } : undefined
+      );
 
       toast({
         title: 'Time saved',
-        description: `${formatTime(roundedSeconds)} saved to Job #${jobId}${roundedSeconds !== timer.elapsed ? ' (rounded)' : ''}`,
+        description: `Time entry created successfully`,
       });
 
       // Trigger refresh of time entries list and user stats
@@ -346,7 +434,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       handleTimerReset();
       setShowStopModal(false);
     } catch (error) {
-
       toast({
         title: 'Failed to save time',
         description: `Time entry could not be saved. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -356,14 +443,26 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     }
   };
 
-  const handleTimerCancel = () => {
-    // Don't save, just stop the timer
+  const handleTimerCancel = async () => {
+    // When canceling, we need to delete the server session without creating a time entry
+    if (timer.serverSessionId) {
+      try {
+        // Delete the server session by stopping it (this will still create a time entry on backend)
+        // TODO: Backend should have a separate cancel/delete endpoint
+        // For now, we'll just reset locally and let the session remain on server
+        // The backend can clean up stale sessions periodically
+      } catch (error) {
+        console.error('Failed to cancel timer session:', error);
+      }
+    }
+
+    // Reset timer locally
     handleTimerReset();
     setShowStopModal(false);
 
     toast({
-      title: 'Timer stopped',
-      description: 'Time was not saved',
+      title: 'Timer cancelled',
+      description: 'Time was not saved. Session remains active on server.',
       variant: 'destructive',
     });
   };
@@ -373,15 +472,23 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       isRunning: false,
       startTime: null,
       elapsed: 0,
-      sessionId: null,
+      serverSessionId: null,
+      serverStartTime: null,
     });
 
-    // Clear saved timer
+    // Clear saved timer from localStorage
     try {
       if (typeof Storage !== 'undefined') {
         localStorage.removeItem(`timer-${jobId}`);
       }
     } catch (storageError) {
+      // Ignore localStorage errors
+    }
+
+    // Clear ping interval
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
     }
   };
 

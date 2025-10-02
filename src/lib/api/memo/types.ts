@@ -97,6 +97,28 @@ export interface TimeEntry {
   updated_at: string;
 }
 
+// Active Timer Session types
+export interface ActiveTimerSession {
+  id: number;
+  user: number;
+  jobb: string;
+  start_time: string; // ISO timestamp
+  last_ping: string; // ISO timestamp
+  elapsed_seconds: number; // Calculated by server
+}
+
+export interface StartTimerSessionPayload {
+  jobb: string; // Order number
+}
+
+export interface StopTimerSessionPayload {
+  beskrivelse?: string; // Optional description for time entry
+}
+
+export type StartTimerSessionResponse = ActiveTimerSession;
+export type GetActiveTimerSessionResponse = ActiveTimerSession | null;
+export type StopTimerSessionResponse = TimeEntry; // Returns created time entry
+
 // Job Image types
 export interface JobImage {
   id: number;
