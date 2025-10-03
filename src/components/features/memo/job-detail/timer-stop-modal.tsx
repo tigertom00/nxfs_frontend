@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Clock, Save, X } from 'lucide-react';
+import { Clock, Save, Pause, Trash2, Plus, Minus } from 'lucide-react';
 import {
   formatSecondsToTimeString,
   roundSecondsToNearestHalfHour,
@@ -19,8 +19,9 @@ import {
 interface TimerStopModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (description?: string) => void;
+  onConfirm: (description?: string, adjustedSeconds?: number) => void;
   onCancel: () => void;
+  onDelete: () => void;
   elapsedSeconds: number;
   jobId: number;
 }
@@ -30,23 +31,32 @@ export function TimerStopModal({
   onClose,
   onConfirm,
   onCancel,
+  onDelete,
   elapsedSeconds,
   jobId,
 }: TimerStopModalProps) {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [adjustedSeconds, setAdjustedSeconds] = useState<number>(elapsedSeconds);
+
+  // Reset adjusted time when elapsed seconds changes
+  useEffect(() => {
+    setAdjustedSeconds(elapsedSeconds);
+  }, [elapsedSeconds]);
 
   const originalTime = formatSecondsToTimeString(elapsedSeconds);
-  const roundedSeconds = roundSecondsToNearestHalfHour(elapsedSeconds);
+  const roundedSeconds = roundSecondsToNearestHalfHour(adjustedSeconds);
   const roundedTime = formatSecondsToTimeString(roundedSeconds);
-  const wasRounded = roundedSeconds !== elapsedSeconds;
+  const wasRounded = roundedSeconds !== adjustedSeconds;
+  const wasAdjusted = adjustedSeconds !== elapsedSeconds;
 
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      await onConfirm(description.trim() || undefined);
+      await onConfirm(description.trim() || undefined, adjustedSeconds);
       // Reset state
       setDescription('');
+      setAdjustedSeconds(elapsedSeconds);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -54,14 +64,33 @@ export function TimerStopModal({
     }
   };
 
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await onDelete();
+      setDescription('');
+      setAdjustedSeconds(elapsedSeconds);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
+  const adjustTime = (minutes: number) => {
+    const newSeconds = Math.max(0, adjustedSeconds + minutes * 60);
+    setAdjustedSeconds(newSeconds);
+  };
+
   const handleCancel = () => {
     onCancel();
     setDescription('');
+    setAdjustedSeconds(elapsedSeconds);
   };
 
   const handleClose = () => {
     onClose();
     setDescription('');
+    setAdjustedSeconds(elapsedSeconds);
   };
 
   return (
@@ -76,23 +105,32 @@ export function TimerStopModal({
 
         <div className="space-y-4">
           {/* Actions at top for mobile */}
-          <div className="flex gap-3">
+          <div className="grid grid-cols-3 gap-2">
             <Button
               variant="outline"
               onClick={handleCancel}
-              className="flex-1"
               disabled={loading}
+              className="w-full"
             >
-              <X className="h-4 w-4 mr-2" />
-              Don't Save
+              <Pause className="h-4 w-4 mr-1" />
+              Pause
             </Button>
             <Button
               onClick={handleConfirm}
-              className="flex-1"
               disabled={loading}
+              className="w-full"
             >
-              <Save className="h-4 w-4 mr-2" />
-              {loading ? 'Saving...' : 'Save Time'}
+              <Save className="h-4 w-4 mr-1" />
+              Save
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={loading}
+              className="w-full"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete
             </Button>
           </div>
 
@@ -105,8 +143,44 @@ export function TimerStopModal({
               <span className="font-mono font-medium">{originalTime}</span>
             </div>
 
+            {/* Time adjustment controls */}
+            <div className="flex items-center justify-between pt-2 border-t border-border">
+              <span className="text-sm font-medium">Adjust time:</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => adjustTime(-30)}
+                  disabled={loading || adjustedSeconds === 0}
+                >
+                  <Minus className="h-3 w-3" />
+                  30m
+                </Button>
+                <span className="font-mono font-bold text-lg min-w-[80px] text-center">
+                  {formatSecondsToTimeString(adjustedSeconds)}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => adjustTime(30)}
+                  disabled={loading}
+                >
+                  <Plus className="h-3 w-3" />
+                  30m
+                </Button>
+              </div>
+            </div>
+
+            {wasAdjusted && (
+              <p className="text-xs text-muted-foreground text-center">
+                Time adjusted by{' '}
+                {adjustedSeconds > elapsedSeconds ? '+' : ''}
+                {((adjustedSeconds - elapsedSeconds) / 60).toFixed(0)} minutes
+              </p>
+            )}
+
             {wasRounded && (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center pt-2 border-t border-border">
                 <span className="text-sm text-muted-foreground">
                   Rounded time:
                 </span>
@@ -119,14 +193,14 @@ export function TimerStopModal({
             <div className="flex justify-between items-center pt-2 border-t border-border">
               <span className="text-sm font-medium">Time to save:</span>
               <span className="font-mono font-bold text-lg">
-                {wasRounded ? roundedTime : originalTime}
+                {wasRounded ? roundedTime : formatSecondsToTimeString(adjustedSeconds)}
               </span>
             </div>
 
             {wasRounded && (
               <p className="text-xs text-muted-foreground">
                 Time has been{' '}
-                {roundedSeconds > elapsedSeconds
+                {roundedSeconds > adjustedSeconds
                   ? 'rounded up'
                   : 'rounded down'}{' '}
                 to the nearest 30-minute increment

@@ -35,6 +35,7 @@ interface TimerWidgetProps {
 
 interface TimerState {
   isRunning: boolean;
+  isPaused: boolean;
   startTime: number | null;
   elapsed: number; // seconds
   serverSessionId: number | null; // Server session ID
@@ -46,6 +47,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const { user } = useAuthStore();
   const [timer, setTimer] = useState<TimerState>({
     isRunning: false,
+    isPaused: false,
     startTime: null,
     elapsed: 0,
     serverSessionId: null,
@@ -78,6 +80,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             // Restore timer from server session
             setTimer({
               isRunning: true,
+              isPaused: activeSession.is_paused || false,
               startTime: Date.now(), // Local timestamp for display updates
               elapsed: activeSession.elapsed_seconds,
               serverSessionId: activeSession.id,
@@ -134,9 +137,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     }
   }, [timer, jobId]);
 
-  // Update timer display every second when running
+  // Update timer display every second when running (but not when paused)
   useEffect(() => {
-    if (timer.isRunning && timer.startTime) {
+    if (timer.isRunning && !timer.isPaused && timer.startTime) {
       intervalRef.current = setInterval(() => {
         setTimer((prev) => ({
           ...prev,
@@ -149,8 +152,12 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
           clearInterval(intervalRef.current);
         }
       };
+    } else if (intervalRef.current) {
+      // Clear interval when paused
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  }, [timer.isRunning, timer.startTime]);
+  }, [timer.isRunning, timer.isPaused, timer.startTime]);
 
   // Periodic ping to keep server session alive (every 30 seconds)
   useEffect(() => {
@@ -334,6 +341,32 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       return;
     }
 
+    // If timer is paused, resume it
+    if (timer.isPaused && timer.serverSessionId) {
+      try {
+        const updatedSession = await timerSessionAPI.resumeTimerSession(timer.serverSessionId);
+
+        setTimer((prev) => ({
+          ...prev,
+          isPaused: false,
+          elapsed: updatedSession.elapsed_seconds,
+        }));
+
+        toast({
+          title: 'Timer resumed',
+          description: 'Timer is now running again',
+        });
+        return;
+      } catch (error) {
+        toast({
+          title: 'Failed to resume timer',
+          description: error instanceof Error ? error.message : 'Could not resume timer',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     try {
       const jobIdToUse = ordreNr || jobId.toString();
 
@@ -345,6 +378,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         if (activeSession.jobb === jobIdToUse) {
           setTimer({
             isRunning: true,
+            isPaused: activeSession.is_paused || false,
             startTime: Date.now(),
             elapsed: activeSession.elapsed_seconds,
             serverSessionId: activeSession.id,
@@ -376,6 +410,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
 
       setTimer({
         isRunning: true,
+        isPaused: false,
         startTime: now,
         elapsed: 0,
         serverSessionId: session.id,
@@ -406,19 +441,26 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     setShowStopModal(true);
   };
 
-  const handleTimerSave = async (description?: string) => {
+  const handleTimerSave = async (description?: string, adjustedSeconds?: number) => {
     if (!user || !timer.serverSessionId) return;
 
     try {
       // Stop the server timer session
       // The backend will handle:
-      // 1. Calculate elapsed time
+      // 1. Calculate elapsed time (or use adjusted time)
       // 2. Round to nearest 0.5 hours
       // 3. Create time entry
       // 4. Delete active session
+      const payload: any = description ? { beskrivelse: description } : {};
+
+      // If time was adjusted, pass it to the backend
+      if (adjustedSeconds !== undefined && adjustedSeconds !== timer.elapsed) {
+        payload.elapsed_seconds = adjustedSeconds;
+      }
+
       const timeEntry = await timerSessionAPI.stopTimerSession(
         timer.serverSessionId,
-        description ? { beskrivelse: description } : undefined
+        Object.keys(payload).length > 0 ? payload : undefined
       );
 
       toast({
@@ -443,16 +485,47 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     }
   };
 
-  const handleTimerCancel = async () => {
-    // When canceling, we need to delete the server session without creating a time entry
+  const handleTimerPause = async () => {
+    // Pause the timer on the backend
+    if (!timer.serverSessionId) {
+      setShowStopModal(false);
+      return;
+    }
+
+    try {
+      const updatedSession = await timerSessionAPI.pauseTimerSession(timer.serverSessionId);
+
+      // Update local state to reflect pause
+      setTimer((prev) => ({
+        ...prev,
+        isPaused: true,
+      }));
+
+      setShowStopModal(false);
+
+      toast({
+        title: 'Timer paused',
+        description: 'Timer paused on server. You can resume it later.',
+      });
+    } catch (error) {
+      console.error('Failed to pause timer:', error);
+      // Error toast already shown by API
+    }
+  };
+
+  const handleTimerDelete = async () => {
+    // When deleting, remove the server session without creating a time entry
     if (timer.serverSessionId) {
       try {
-        // Delete the server session by stopping it (this will still create a time entry on backend)
-        // TODO: Backend should have a separate cancel/delete endpoint
-        // For now, we'll just reset locally and let the session remain on server
-        // The backend can clean up stale sessions periodically
+        await timerSessionAPI.deleteTimerSession(timer.serverSessionId);
       } catch (error) {
-        console.error('Failed to cancel timer session:', error);
+        console.error('Failed to delete timer session:', error);
+        toast({
+          title: 'Failed to delete timer',
+          description: 'Could not delete timer session',
+          variant: 'destructive',
+        });
+        throw error;
       }
     }
 
@@ -461,15 +534,15 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     setShowStopModal(false);
 
     toast({
-      title: 'Timer cancelled',
-      description: 'Time was not saved. Session remains active on server.',
-      variant: 'destructive',
+      title: 'Timer deleted',
+      description: 'Time was not saved. Timer has been deleted.',
     });
   };
 
   const handleTimerReset = () => {
     setTimer({
       isRunning: false,
+      isPaused: false,
       startTime: null,
       elapsed: 0,
       serverSessionId: null,
@@ -508,7 +581,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
           </TabsTrigger>
           <TabsTrigger value="manual" className="flex items-center gap-2">
             <PlusCircle className="h-4 w-4" />
-            Add Timer
+            Add Time Entry
           </TabsTrigger>
           <TabsTrigger value="entries" className="flex items-center gap-2">
             <List className="h-4 w-4" />
@@ -518,6 +591,70 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
 
         <TabsContent value="timer" className="space-y-0">
           <div className="bg-card border rounded-lg p-4 space-y-4">
+            {/* Timer Display - Moved to top */}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  TIMER
+                </span>
+              </div>
+              <div className="text-3xl font-mono font-bold">
+                {formatTime(timer.elapsed)}
+              </div>
+              {timer.isRunning && !timer.isPaused && (
+                <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1 animate-pulse">
+                  ● Running
+                </div>
+              )}
+              {timer.isPaused && (
+                <div className="text-sm text-orange-600 dark:text-orange-400 font-medium mt-1">
+                  ⏸ Paused
+                </div>
+              )}
+            </div>
+
+            {/* Timer Controls - Moved to top */}
+            <div className="flex gap-3">
+              {!timer.isRunning ? (
+                <Button
+                  onClick={startTimer}
+                  className="flex-1 h-12"
+                  variant="default"
+                >
+                  <Play className="h-5 w-5 mr-2" />
+                  Start Timer
+                </Button>
+              ) : timer.isPaused ? (
+                <Button
+                  onClick={startTimer}
+                  className="flex-1 h-12"
+                  variant="default"
+                >
+                  <Play className="h-5 w-5 mr-2" />
+                  Resume Timer
+                </Button>
+              ) : (
+                <Button
+                  onClick={stopTimer}
+                  className="flex-1 h-12"
+                  variant="destructive"
+                >
+                  <Square className="h-5 w-5 mr-2" />
+                  Stop & Save
+                </Button>
+              )}
+            </div>
+
+            {/* Auto-save Status */}
+            <div className="text-center text-xs text-muted-foreground">
+              {timer.isPaused
+                ? 'Timer is paused. Click Resume to continue or Stop & Save to finish.'
+                : timer.isRunning
+                  ? 'Timer will auto-save when stopped (with 30-min rounding)'
+                  : 'Click start to begin tracking time'}
+            </div>
+
             {/* User Statistics */}
             {userStats && (
               <div className="space-y-3">
@@ -584,54 +721,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                 </span>
               </div>
             )}
-
-            {/* Timer Display */}
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  TIMER
-                </span>
-              </div>
-              <div className="text-3xl font-mono font-bold">
-                {formatTime(timer.elapsed)}
-              </div>
-              {timer.isRunning && (
-                <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1 animate-pulse">
-                  ● Running
-                </div>
-              )}
-            </div>
-
-            {/* Timer Controls */}
-            <div className="flex gap-3">
-              {!timer.isRunning ? (
-                <Button
-                  onClick={startTimer}
-                  className="flex-1 h-12"
-                  variant="default"
-                >
-                  <Play className="h-5 w-5 mr-2" />
-                  Start Timer
-                </Button>
-              ) : (
-                <Button
-                  onClick={stopTimer}
-                  className="flex-1 h-12"
-                  variant="destructive"
-                >
-                  <Square className="h-5 w-5 mr-2" />
-                  Stop & Save
-                </Button>
-              )}
-            </div>
-
-            {/* Auto-save Status */}
-            <div className="text-center text-xs text-muted-foreground">
-              {timer.isRunning
-                ? 'Timer will auto-save when stopped (with 30-min rounding)'
-                : 'Click start to begin tracking time'}
-            </div>
           </div>
         </TabsContent>
 
@@ -653,7 +742,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         isOpen={showStopModal}
         onClose={() => setShowStopModal(false)}
         onConfirm={handleTimerSave}
-        onCancel={handleTimerCancel}
+        onCancel={handleTimerPause}
+        onDelete={handleTimerDelete}
         elapsedSeconds={timer.elapsed}
         jobId={jobId}
       />

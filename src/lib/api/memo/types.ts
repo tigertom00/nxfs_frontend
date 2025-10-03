@@ -105,6 +105,9 @@ export interface ActiveTimerSession {
   start_time: string; // ISO timestamp
   last_ping: string; // ISO timestamp
   elapsed_seconds: number; // Calculated by server
+  is_paused?: boolean; // Pause state
+  paused_at?: string; // ISO timestamp when paused
+  total_paused_seconds?: number; // Total accumulated pause time
 }
 
 export interface StartTimerSessionPayload {

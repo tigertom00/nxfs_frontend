@@ -85,4 +85,48 @@ export const timerSessionAPI = {
       throw error;
     }
   },
+
+  /**
+   * Delete an active timer session without creating a time entry
+   * Used when user wants to discard the timer
+   */
+  deleteTimerSession: async (sessionId: number): Promise<void> => {
+    try {
+      await api.delete(`/app/memo/timer/${sessionId}/`);
+      showSuccessToast('Timer deleted successfully');
+    } catch (error) {
+      handleApiError(error, 'Deleting timer session');
+      throw error;
+    }
+  },
+
+  /**
+   * Pause an active timer session
+   * Marks the timer as paused and records the timestamp
+   */
+  pauseTimerSession: async (sessionId: number): Promise<ActiveTimerSession> => {
+    try {
+      const response = await api.post(`/app/memo/timer/${sessionId}/pause/`, {});
+      showSuccessToast('Timer paused');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Pausing timer session');
+      throw error;
+    }
+  },
+
+  /**
+   * Resume a paused timer session
+   * Accumulates pause duration and resumes counting
+   */
+  resumeTimerSession: async (sessionId: number): Promise<ActiveTimerSession> => {
+    try {
+      const response = await api.post(`/app/memo/timer/${sessionId}/resume/`, {});
+      showSuccessToast('Timer resumed');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Resuming timer session');
+      throw error;
+    }
+  },
 };
