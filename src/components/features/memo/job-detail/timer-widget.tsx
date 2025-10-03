@@ -642,14 +642,24 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   Start Timer
                 </Button>
               ) : timer.isPaused ? (
-                <Button
-                  onClick={startTimer}
-                  className="flex-1 h-12"
-                  variant="default"
-                >
-                  <Play className="h-5 w-5 mr-2" />
-                  Resume Timer
-                </Button>
+                <>
+                  <Button
+                    onClick={startTimer}
+                    className="flex-1 h-12"
+                    variant="default"
+                  >
+                    <Play className="h-5 w-5 mr-2" />
+                    Resume
+                  </Button>
+                  <Button
+                    onClick={stopTimer}
+                    className="flex-1 h-12"
+                    variant="destructive"
+                  >
+                    <Square className="h-5 w-5 mr-2" />
+                    Stop & Save
+                  </Button>
+                </>
               ) : (
                 <Button
                   onClick={stopTimer}
