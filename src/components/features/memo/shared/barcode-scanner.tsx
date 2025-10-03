@@ -56,11 +56,13 @@ export function BarcodeScanner({
   const [isScanning, setIsScanning] = useState(false);
   const [scanMode, setScanMode] = useState<'barcode' | 'text'>('barcode');
   const [isOCRProcessing, setIsOCRProcessing] = useState(false);
+  const [detectedText, setDetectedText] = useState<string>('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
   const ocrIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const ocrWorkerRef = useRef<any>(null);
 
   // Check if camera is available
   useEffect(() => {
@@ -95,8 +97,13 @@ export function BarcodeScanner({
         clearInterval(ocrIntervalRef.current);
         ocrIntervalRef.current = null;
       }
+      if (ocrWorkerRef.current) {
+        ocrWorkerRef.current.terminate();
+        ocrWorkerRef.current = null;
+      }
       setIsScanning(false);
       setIsOCRProcessing(false);
+      setDetectedText('');
     }
   }, [isOpen]);
 
@@ -230,7 +237,14 @@ export function BarcodeScanner({
   const startOCRScanning = async () => {
     try {
       setIsScanning(true);
-      setIsOCRProcessing(false);
+      setIsOCRProcessing(true);
+      setDetectedText('Initializing OCR...');
+
+      // Initialize Tesseract worker once
+      if (!ocrWorkerRef.current) {
+        ocrWorkerRef.current = await createWorker('eng'); // English is faster and works for numbers
+        setDetectedText('OCR ready');
+      }
 
       // Request camera access
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -248,14 +262,17 @@ export function BarcodeScanner({
           description: 'Point camera at Norwegian EL-number (NO XX XXX XX)',
         });
 
-        // Start OCR processing every 2 seconds
+        setIsOCRProcessing(false);
+
+        // Start OCR processing every 3 seconds (give more time for processing)
         ocrIntervalRef.current = setInterval(async () => {
           await processOCRFrame();
-        }, 2000);
+        }, 3000);
       }
     } catch (error) {
       console.error('Camera initialization error:', error);
       setIsScanning(false);
+      setIsOCRProcessing(false);
       toast({
         title: 'Camera access failed',
         description: 'Unable to access camera. Please use manual input.',
@@ -269,13 +286,15 @@ export function BarcodeScanner({
       !videoRef.current ||
       !canvasRef.current ||
       isOCRProcessing ||
-      !isScanning
+      !isScanning ||
+      !ocrWorkerRef.current
     ) {
       return;
     }
 
     try {
       setIsOCRProcessing(true);
+      setDetectedText('Processing...');
 
       // Capture current video frame to canvas
       const canvas = canvasRef.current;
@@ -284,25 +303,28 @@ export function BarcodeScanner({
 
       if (!context) return;
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      // Use smaller resolution for faster processing
+      const scale = 0.5;
+      canvas.width = video.videoWidth * scale;
+      canvas.height = video.videoHeight * scale;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Convert canvas to blob
-      const blob = await new Promise<Blob>((resolve) => {
-        canvas.toBlob((b) => resolve(b!), 'image/png');
-      });
+      // Enhance contrast for better OCR
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      context.putImageData(imageData, 0, 0);
 
-      // Run OCR on the image
-      const worker = await createWorker('nor'); // Norwegian language
+      // Run OCR using persistent worker
       const {
         data: { text },
-      } = await worker.recognize(blob);
-      await worker.terminate();
+      } = await ocrWorkerRef.current.recognize(canvas);
+
+      console.log('OCR detected text:', text);
 
       // Normalize and extract Norwegian EL-number
       const normalizedText = normalizeOCRText(text);
       const elNumber = extractNorwegianELNumber(normalizedText);
+
+      setDetectedText(text.substring(0, 50)); // Show first 50 chars for debugging
 
       if (elNumber) {
         // Found Norwegian EL-number!
@@ -320,6 +342,7 @@ export function BarcodeScanner({
       }
     } catch (error) {
       console.error('OCR processing error:', error);
+      setDetectedText('Error: ' + (error as Error).message);
     } finally {
       setIsOCRProcessing(false);
     }
@@ -415,8 +438,13 @@ export function BarcodeScanner({
                         </div>
                       </div>
                     </div>
+                    {scanMode === 'text' && detectedText && (
+                      <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded max-h-16 overflow-hidden">
+                        {detectedText}
+                      </div>
+                    )}
                     {isOCRProcessing && (
-                      <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
                         Processing...
                       </div>
                     )}
@@ -432,7 +460,7 @@ export function BarcodeScanner({
                   <p className="text-xs text-muted-foreground text-center">
                     {scanMode === 'barcode'
                       ? 'Hold the barcode steady in the frame. Scanning will happen automatically.'
-                      : 'Point at Norwegian EL-number (NO XX XXX XX). Processing every 2 seconds.'}
+                      : 'Point at Norwegian EL-number (NO XX XXX XX). Processing every 3 seconds.'}
                   </p>
                 </div>
               )}
