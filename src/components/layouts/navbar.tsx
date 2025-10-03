@@ -29,6 +29,7 @@ import {
   Monitor,
   Heart,
   Gamepad2,
+  MessageSquare,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -138,6 +139,12 @@ export default function Navbar() {
                 </DropdownMenuSub>
 
                 <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href="/chat" className="w-full">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    {language === 'no' ? 'Meldinger' : 'Messages'}
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link href="/tasks" className="w-full">
                     {language === 'no' ? 'Oppgaver' : 'Tasks'}
