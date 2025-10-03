@@ -214,6 +214,72 @@
     "image": "Bilde",
     "file": "Fil"
   },
+  "messaging": {
+    "title": "Meldinger",
+    "newChat": "Ny Chat",
+    "searchConversations": "Søk samtaler...",
+    "noConversations": "Ingen samtaler ennå",
+    "noConversationsDesc": "Start en samtale for å komme i gang",
+    "startConversation": "Start en samtale",
+    "noMessages": "Ingen meldinger ennå",
+    "noMessagesDesc": "Start samtalen!",
+    "typeMessage": "Skriv en melding...",
+    "sendMessage": "Send melding",
+    "pressEnter": "Trykk Enter for å sende, Shift + Enter for ny linje",
+    "today": "I dag",
+    "yesterday": "I går",
+    "online": "Pålogget",
+    "offline": "Frakoblet",
+    "typing": "{name} skriver...",
+    "typingMultiple": "{name} og {count} andre skriver...",
+    "edited": "redigert",
+    "deleted": "Melding slettet",
+    "you": "Du",
+    "members": "{count} medlemmer",
+    "selectConversation": "Velg en samtale",
+    "welcome": "Velkommen til Meldinger",
+    "welcomeDesc": "Velg en samtale eller start en ny chat",
+    "roomTypes": {
+      "direct": "Direkte",
+      "group": "Gruppe",
+      "project": "Prosjekt",
+      "public": "Offentlig"
+    },
+    "actions": {
+      "edit": "Rediger melding",
+      "delete": "Slett melding",
+      "reply": "Svar",
+      "react": "Reager",
+      "copy": "Kopier tekst",
+      "forward": "Videresend"
+    },
+    "errors": {
+      "sendFailed": "Kunne ikke sende melding",
+      "loadFailed": "Kunne ikke laste meldinger",
+      "deleteFailed": "Kunne ikke slette melding",
+      "editFailed": "Kunne ikke redigere melding",
+      "reactionFailed": "Kunne ikke legge til reaksjon",
+      "uploadFailed": "Kunne ikke laste opp fil",
+      "fileTooLarge": "Filen er for stor. Maksimal størrelse er 10MB",
+      "createRoomFailed": "Kunne ikke opprette chatrom",
+      "leaveFailed": "Kunne ikke forlate rom"
+    },
+    "success": {
+      "messageSent": "Melding sendt",
+      "messageDeleted": "Melding slettet",
+      "messageEdited": "Melding redigert",
+      "fileSent": "Fil sendt",
+      "leftRoom": "Forlot chatrom",
+      "roomCreated": "Chatrom opprettet"
+    },
+    "file": {
+      "upload": "Last opp fil",
+      "select": "Velg fil",
+      "download": "Last ned",
+      "preview": "Forhåndsvisning",
+      "size": "Størrelse"
+    }
+  },
   "home": {
     "title": "Velkommen til nxfs.no",
     "subtitle": "En moderne plattform for å dele ideer og kunnskap",

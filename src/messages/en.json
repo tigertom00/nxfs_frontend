@@ -214,6 +214,72 @@
     "image": "Image",
     "file": "File"
   },
+  "messaging": {
+    "title": "Messages",
+    "newChat": "New Chat",
+    "searchConversations": "Search conversations...",
+    "noConversations": "No conversations yet",
+    "noConversationsDesc": "Start a conversation to get started",
+    "startConversation": "Start a conversation",
+    "noMessages": "No messages yet",
+    "noMessagesDesc": "Start the conversation!",
+    "typeMessage": "Type a message...",
+    "sendMessage": "Send message",
+    "pressEnter": "Press Enter to send, Shift + Enter for new line",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "online": "Online",
+    "offline": "Offline",
+    "typing": "{name} is typing...",
+    "typingMultiple": "{name} and {count} others are typing...",
+    "edited": "edited",
+    "deleted": "Message deleted",
+    "you": "You",
+    "members": "{count} members",
+    "selectConversation": "Select a conversation",
+    "welcome": "Welcome to Messages",
+    "welcomeDesc": "Select a conversation or start a new chat",
+    "roomTypes": {
+      "direct": "Direct",
+      "group": "Group",
+      "project": "Project",
+      "public": "Public"
+    },
+    "actions": {
+      "edit": "Edit message",
+      "delete": "Delete message",
+      "reply": "Reply",
+      "react": "React",
+      "copy": "Copy text",
+      "forward": "Forward"
+    },
+    "errors": {
+      "sendFailed": "Failed to send message",
+      "loadFailed": "Failed to load messages",
+      "deleteFailed": "Failed to delete message",
+      "editFailed": "Failed to edit message",
+      "reactionFailed": "Failed to add reaction",
+      "uploadFailed": "Failed to upload file",
+      "fileTooLarge": "File too large. Maximum size is 10MB",
+      "createRoomFailed": "Failed to create chat room",
+      "leaveFailed": "Failed to leave room"
+    },
+    "success": {
+      "messageSent": "Message sent",
+      "messageDeleted": "Message deleted",
+      "messageEdited": "Message edited",
+      "fileSent": "File sent",
+      "leftRoom": "Left chat room",
+      "roomCreated": "Chat room created"
+    },
+    "file": {
+      "upload": "Upload file",
+      "select": "Select file",
+      "download": "Download",
+      "preview": "Preview",
+      "size": "Size"
+    }
+  },
   "home": {
     "title": "Welcome to nxfs.no",
     "subtitle": "A modern platform for sharing ideas and knowledge",
