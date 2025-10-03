@@ -17,9 +17,10 @@ import {
   ChevronRight,
   User,
   Briefcase,
+  Filter,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subWeeks, subMonths } from 'date-fns';
 import { TimeEntry } from '@/lib/api';
 import {
   formatMinutesToHourString,
@@ -38,6 +39,13 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { EditTimeEntryDialog } from './edit-time-entry-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface TimeEntriesListProps {
   jobId: number;
@@ -50,6 +58,40 @@ interface GroupedTimeEntry extends TimeEntry {
   formattedTime: string;
   decimalHours: number;
 }
+
+type DateFilter = 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'all';
+
+const getDateRange = (filter: DateFilter): { start_date?: string; end_date?: string } => {
+  const now = new Date();
+
+  switch (filter) {
+    case 'this_week':
+      return {
+        start_date: format(startOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
+        end_date: format(endOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
+      };
+    case 'last_week':
+      const lastWeek = subWeeks(now, 1);
+      return {
+        start_date: format(startOfWeek(lastWeek, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
+        end_date: format(endOfWeek(lastWeek, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
+      };
+    case 'this_month':
+      return {
+        start_date: format(startOfMonth(now), 'yyyy-MM-dd'),
+        end_date: format(endOfMonth(now), 'yyyy-MM-dd'),
+      };
+    case 'last_month':
+      const lastMonth = subMonths(now, 1);
+      return {
+        start_date: format(startOfMonth(lastMonth), 'yyyy-MM-dd'),
+        end_date: format(endOfMonth(lastMonth), 'yyyy-MM-dd'),
+      };
+    case 'all':
+    default:
+      return {};
+  }
+};
 
 export function TimeEntriesList({
   jobId,
@@ -66,6 +108,7 @@ export function TimeEntriesList({
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [dateFilter, setDateFilter] = useState<DateFilter>('this_week');
 
   const loadTimeEntries = async () => {
     try {
@@ -76,15 +119,19 @@ export function TimeEntriesList({
       // Parse user ID safely
       const userId = parseInt(user?.id || '0');
 
+      // Get date range based on selected filter
+      const dateRange = getDateRange(dateFilter);
+
       // Load both job-specific entries and all user entries in parallel
       const [jobResponse, userResponse] = await Promise.all([
         // Job-specific entries (all users for this job)
         timeTrackingAPI.getTimeEntriesByDate({
           jobb: jobIdToUse,
         }),
-        // All user entries (current user only, all jobs)
+        // All user entries (current user only, all jobs) with date filter
         timeTrackingAPI.getTimeEntriesByDate({
           user_id: userId,
+          ...dateRange,
         }),
       ]);
 
@@ -143,12 +190,12 @@ export function TimeEntriesList({
     }
   };
 
-  // Load entries on mount and when refresh trigger changes
+  // Load entries on mount and when refresh trigger or date filter changes
   useEffect(() => {
     if (user) {
       loadTimeEntries();
     }
-  }, [jobId, user, refreshTrigger]);
+  }, [jobId, user, refreshTrigger, dateFilter]);
 
   const toggleDateExpansion = (date: string) => {
     setExpandedDates((prev) => {
@@ -516,6 +563,28 @@ export function TimeEntriesList({
             </TabsContent>
 
             <TabsContent value="user" className="mt-4">
+              <div className="mb-4 flex items-center gap-3">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <Select value={dateFilter} onValueChange={(value) => setDateFilter(value as DateFilter)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="last_week">Last Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
+                    <SelectItem value="last_month">Last Month</SelectItem>
+                    <SelectItem value="all">All Time</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-xs text-muted-foreground">
+                  {dateFilter === 'this_week' && `${format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                  {dateFilter === 'last_week' && `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                  {dateFilter === 'this_month' && format(new Date(), 'MMMM yyyy')}
+                  {dateFilter === 'last_month' && format(subMonths(new Date(), 1), 'MMMM yyyy')}
+                  {dateFilter === 'all' && 'All entries'}
+                </span>
+              </div>
               {renderEntriesList(userEntries, 'No time entries recorded yet')}
             </TabsContent>
           </Tabs>
