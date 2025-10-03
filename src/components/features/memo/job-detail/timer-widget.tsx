@@ -349,6 +349,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         setTimer((prev) => ({
           ...prev,
           isPaused: false,
+          isRunning: true,
+          startTime: Date.now(), // Reset local start time for display updates
           elapsed: updatedSession.elapsed_seconds,
         }));
 
