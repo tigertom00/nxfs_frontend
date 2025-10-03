@@ -150,7 +150,8 @@ export default function MemoPage() {
 
       setLoading(true);
       try {
-        const isNumericSearch = debouncedSearch && /^\d+$/.test(debouncedSearch);
+        const isNumericSearch =
+          debouncedSearch && /^\d+$/.test(debouncedSearch);
 
         // If searching by number, fetch all jobs to filter client-side
         const response = await jobsAPI.getJobs({

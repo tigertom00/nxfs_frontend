@@ -10,9 +10,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Scan, X, Camera, Keyboard } from 'lucide-react';
+import { Scan, X, Camera, Keyboard, Type } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
+import { createWorker } from 'tesseract.js';
+import {
+  extractNorwegianELNumber,
+  normalizeOCRText,
+  formatELNumber,
+} from '@/lib/ocr-utils';
 
 interface BarcodeScannerProps {
   isOpen: boolean;
@@ -48,9 +54,13 @@ export function BarcodeScanner({
   const [manualInput, setManualInput] = useState('');
   const [isWebCamSupported, setIsWebCamSupported] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanMode, setScanMode] = useState<'barcode' | 'text'>('barcode');
+  const [isOCRProcessing, setIsOCRProcessing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const ocrIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if camera is available
   useEffect(() => {
@@ -81,7 +91,12 @@ export function BarcodeScanner({
       if (codeReaderRef.current) {
         codeReaderRef.current.reset();
       }
+      if (ocrIntervalRef.current) {
+        clearInterval(ocrIntervalRef.current);
+        ocrIntervalRef.current = null;
+      }
       setIsScanning(false);
+      setIsOCRProcessing(false);
     }
   }, [isOpen]);
 
@@ -212,6 +227,104 @@ export function BarcodeScanner({
     }
   };
 
+  const startOCRScanning = async () => {
+    try {
+      setIsScanning(true);
+      setIsOCRProcessing(false);
+
+      // Request camera access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+      });
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+
+        toast({
+          title: 'OCR Scanner Started',
+          description: 'Point camera at Norwegian EL-number (NO XX XXX XX)',
+        });
+
+        // Start OCR processing every 2 seconds
+        ocrIntervalRef.current = setInterval(async () => {
+          await processOCRFrame();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Camera initialization error:', error);
+      setIsScanning(false);
+      toast({
+        title: 'Camera access failed',
+        description: 'Unable to access camera. Please use manual input.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const processOCRFrame = async () => {
+    if (
+      !videoRef.current ||
+      !canvasRef.current ||
+      isOCRProcessing ||
+      !isScanning
+    ) {
+      return;
+    }
+
+    try {
+      setIsOCRProcessing(true);
+
+      // Capture current video frame to canvas
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      const context = canvas.getContext('2d');
+
+      if (!context) return;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert canvas to blob
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((b) => resolve(b!), 'image/png');
+      });
+
+      // Run OCR on the image
+      const worker = await createWorker('nor'); // Norwegian language
+      const {
+        data: { text },
+      } = await worker.recognize(blob);
+      await worker.terminate();
+
+      // Normalize and extract Norwegian EL-number
+      const normalizedText = normalizeOCRText(text);
+      const elNumber = extractNorwegianELNumber(normalizedText);
+
+      if (elNumber) {
+        // Found Norwegian EL-number!
+        stopCamera();
+        const formattedNumber = formatELNumber(elNumber);
+
+        toast({
+          title: 'Norwegian EL-Number Found',
+          description: `Detected: NO ${formattedNumber}`,
+        });
+
+        onScan(elNumber);
+        setManualInput('');
+        onClose();
+      }
+    } catch (error) {
+      console.error('OCR processing error:', error);
+    } finally {
+      setIsOCRProcessing(false);
+    }
+  };
+
   const stopCamera = () => {
     if (codeReaderRef.current) {
       codeReaderRef.current.reset();
@@ -221,7 +334,12 @@ export function BarcodeScanner({
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    if (ocrIntervalRef.current) {
+      clearInterval(ocrIntervalRef.current);
+      ocrIntervalRef.current = null;
+    }
     setIsScanning(false);
+    setIsOCRProcessing(false);
   };
 
   return (
@@ -240,14 +358,42 @@ export function BarcodeScanner({
             <div className="space-y-3">
               <h3 className="text-sm font-medium">Camera Scanning</h3>
 
+              {/* Scan Mode Toggle */}
+              {!isScanning && (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setScanMode('barcode')}
+                    variant={scanMode === 'barcode' ? 'default' : 'outline'}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    <Scan className="h-4 w-4 mr-2" />
+                    Barcode
+                  </Button>
+                  <Button
+                    onClick={() => setScanMode('text')}
+                    variant={scanMode === 'text' ? 'default' : 'outline'}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    <Type className="h-4 w-4 mr-2" />
+                    Text (NO)
+                  </Button>
+                </div>
+              )}
+
               {!isScanning ? (
                 <Button
-                  onClick={startCamera}
+                  onClick={
+                    scanMode === 'barcode' ? startCamera : startOCRScanning
+                  }
                   variant="outline"
                   className="w-full"
                 >
                   <Camera className="h-4 w-4 mr-2" />
-                  Start Camera
+                  {scanMode === 'barcode'
+                    ? 'Scan Barcode'
+                    : 'Scan Norwegian Text'}
                 </Button>
               ) : (
                 <div className="space-y-3">
@@ -259,13 +405,21 @@ export function BarcodeScanner({
                       playsInline
                       muted
                     />
+                    <canvas ref={canvasRef} className="hidden" />
                     <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none">
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3/4 h-20 border-2 border-red-500 rounded">
                         <div className="text-xs text-white bg-black bg-opacity-50 px-2 py-1 absolute -top-6 left-0 rounded">
-                          Align barcode here
+                          {scanMode === 'barcode'
+                            ? 'Align barcode here'
+                            : 'Align NO text here'}
                         </div>
                       </div>
                     </div>
+                    {isOCRProcessing && (
+                      <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                        Processing...
+                      </div>
+                    )}
                   </div>
                   <Button
                     onClick={stopCamera}
@@ -276,8 +430,9 @@ export function BarcodeScanner({
                     Stop Camera
                   </Button>
                   <p className="text-xs text-muted-foreground text-center">
-                    Hold the barcode steady in the frame. Scanning will happen
-                    automatically.
+                    {scanMode === 'barcode'
+                      ? 'Hold the barcode steady in the frame. Scanning will happen automatically.'
+                      : 'Point at Norwegian EL-number (NO XX XXX XX). Processing every 2 seconds.'}
                   </p>
                 </div>
               )}

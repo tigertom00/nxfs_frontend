@@ -82,8 +82,7 @@ export function JobOrderValidator({
       const suggested = suggestNextJobOrderNumber(existingOrderNumbers);
       setInputValue(suggested.toString());
       onChange(suggested);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   return (

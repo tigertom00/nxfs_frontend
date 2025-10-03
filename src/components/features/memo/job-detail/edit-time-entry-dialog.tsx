@@ -158,12 +158,12 @@ export function EditTimeEntryDialog({
               <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
                 <p>
                   {formatMinutesToDecimalHours(currentMinutes)}h will be rounded
-                  to {formatMinutesToDecimalHours(roundingDetails.roundedMinutes)}
-                  h ({roundingDetails.roundedMinutes} minutes)
+                  to{' '}
+                  {formatMinutesToDecimalHours(roundingDetails.roundedMinutes)}h
+                  ({roundingDetails.roundedMinutes} minutes)
                 </p>
                 <p className="mt-1">
-                  Difference:{' '}
-                  {roundingDetails.difference > 0 ? '+' : ''}
+                  Difference: {roundingDetails.difference > 0 ? '+' : ''}
                   {roundingDetails.difference} minutes
                 </p>
               </div>

@@ -9,11 +9,13 @@ This is a real-time chat application built with Django Channels (WebSockets) and
 ## Architecture
 
 ### WebSocket Communication
+
 - **Django Channels**: Handles real-time WebSocket connections
 - **Channel Layers**: Broadcasts messages to room participants
 - **Async Consumers**: Two consumer types for different chat scenarios
 
 ### REST API
+
 - **Django REST Framework**: Handles HTTP requests for CRUD operations
 - **JWT Authentication**: All endpoints require authentication
 - **Pagination**: 50 items per page (configurable up to 100)
@@ -23,9 +25,11 @@ This is a real-time chat application built with Django Channels (WebSockets) and
 ## Data Models
 
 ### ChatRoom
+
 Represents a conversation space between users.
 
 **Fields:**
+
 - `id` (UUID): Primary key
 - `name` (string, optional): Room display name
 - `room_type` (choice): `"direct"`, `"group"`, `"project"`, or `"public"`
@@ -37,15 +41,18 @@ Represents a conversation space between users.
 - `direct_user1`, `direct_user2` (FK, optional): For direct message rooms only
 
 **Room Types:**
+
 - **direct**: One-on-one conversations
 - **group**: Multi-user group chats
 - **project**: Project-specific discussions
 - **public**: Public channels anyone can join
 
 ### Message
+
 Individual chat messages within a room.
 
 **Fields:**
+
 - `id` (UUID): Primary key
 - `room` (FK): Associated chat room
 - `sender` (FK): User who sent the message
@@ -61,9 +68,11 @@ Individual chat messages within a room.
 - `reactions` (JSON): Emoji reactions `{"emoji": ["user_id1", "user_id2"]}`
 
 ### MessageReadStatus
+
 Tracks which users have read which messages.
 
 **Fields:**
+
 - `message` (FK): The message
 - `user` (FK): User who read it
 - `read_at` (datetime): When it was read
@@ -71,9 +80,11 @@ Tracks which users have read which messages.
 **Unique together:** `(message, user)`
 
 ### TypingIndicator
+
 Shows who is currently typing in a room.
 
 **Fields:**
+
 - `room` (FK): Chat room
 - `user` (FK): User who is typing
 - `is_typing` (boolean): Current typing status
@@ -86,10 +97,13 @@ Shows who is currently typing in a room.
 ## REST API Endpoints
 
 ### Base URL
+
 All chat endpoints are prefixed with `/api/chat/`
 
 ### Authentication
+
 Include JWT token in Authorization header:
+
 ```
 Authorization: Bearer <your_jwt_token>
 ```
@@ -99,11 +113,13 @@ Authorization: Bearer <your_jwt_token>
 ### Chat Rooms
 
 #### **List User's Chat Rooms**
+
 ```http
 GET /api/chat/rooms/
 ```
 
 **Response:**
+
 ```json
 {
   "count": 10,
@@ -123,29 +139,35 @@ GET /api/chat/rooms/
           "clerk_profile_image_url": "url"
         }
       ],
-      "created_by": { /* user object */ },
+      "created_by": {
+        /* user object */
+      },
       "created_at": "2025-10-01T10:00:00Z",
       "updated_at": "2025-10-02T14:30:00Z",
       "is_active": true,
       "last_message": {
         "id": "uuid",
         "content": "Last message text",
-        "sender": { /* user object */ },
+        "sender": {
+          /* user object */
+        },
         "timestamp": "2025-10-02T14:30:00Z"
       },
       "unread_count": 5,
-      "other_user": null  // Only populated for direct messages
+      "other_user": null // Only populated for direct messages
     }
   ]
 }
 ```
 
 #### **Create Chat Room**
+
 ```http
 POST /api/chat/rooms/
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Team Discussion",
@@ -157,6 +179,7 @@ POST /api/chat/rooms/
 **Response:** Same as room object above
 
 #### **Get/Update/Delete Chat Room**
+
 ```http
 GET    /api/chat/rooms/{room_id}/
 PATCH  /api/chat/rooms/{room_id}/
@@ -164,11 +187,13 @@ DELETE /api/chat/rooms/{room_id}/
 ```
 
 #### **Create or Get Direct Message Room**
+
 ```http
 POST /api/chat/rooms/direct_message/
 ```
 
 **Request Body:**
+
 ```json
 {
   "user_id": "uuid-of-other-user"
@@ -180,11 +205,13 @@ POST /api/chat/rooms/direct_message/
 **Note:** You cannot create a DM with yourself. The endpoint automatically finds existing DM rooms between two users regardless of who initiated it.
 
 #### **Mark All Messages as Read**
+
 ```http
 POST /api/chat/rooms/{room_id}/mark_read/
 ```
 
 **Response:**
+
 ```json
 {
   "status": "marked as read",
@@ -193,16 +220,20 @@ POST /api/chat/rooms/{room_id}/mark_read/
 ```
 
 #### **Get Typing Users**
+
 ```http
 GET /api/chat/rooms/{room_id}/typing_users/
 ```
 
 **Response:**
+
 ```json
 [
   {
     "room": "room-uuid",
-    "user": { /* user object */ },
+    "user": {
+      /* user object */
+    },
     "is_typing": true,
     "last_seen": "2025-10-02T14:35:00Z"
   }
@@ -212,11 +243,13 @@ GET /api/chat/rooms/{room_id}/typing_users/
 **Note:** Only returns users who have typed in the last 30 seconds.
 
 #### **Leave Room**
+
 ```http
 POST /api/chat/rooms/{room_id}/leave/
 ```
 
 **Response:**
+
 ```json
 {
   "status": "left room"
@@ -230,15 +263,18 @@ POST /api/chat/rooms/{room_id}/leave/
 ### Messages
 
 #### **List Messages in Room**
+
 ```http
 GET /api/chat/rooms/{room_id}/messages/
 ```
 
 **Query Parameters:**
+
 - `page` (int): Page number
 - `page_size` (int): Items per page (max 100)
 
 **Response:**
+
 ```json
 {
   "count": 250,
@@ -269,7 +305,9 @@ GET /api/chat/rooms/{room_id}/messages/
         "❤️": ["user-id-3"]
       },
       "read_by": [
-        { /* user object */ }
+        {
+          /* user object */
+        }
       ],
       "is_edited": false
     }
@@ -278,11 +316,13 @@ GET /api/chat/rooms/{room_id}/messages/
 ```
 
 #### **Send Message**
+
 ```http
 POST /api/chat/rooms/{room_id}/messages/
 ```
 
 **Request Body:**
+
 ```json
 {
   "content": "Message text here",
@@ -293,6 +333,7 @@ POST /api/chat/rooms/{room_id}/messages/
 ```
 
 **With File Upload:**
+
 ```http
 Content-Type: multipart/form-data
 
@@ -304,11 +345,13 @@ file_attachment=<binary data>
 **Response:** Returns the created message object
 
 #### **Update Message**
+
 ```http
 PATCH /api/chat/rooms/{room_id}/messages/{message_id}/
 ```
 
 **Request Body:**
+
 ```json
 {
   "content": "Updated message text"
@@ -318,6 +361,7 @@ PATCH /api/chat/rooms/{room_id}/messages/{message_id}/
 **Note:** Only the message sender can update their own messages. Sets `edited_at` timestamp.
 
 #### **Delete Message**
+
 ```http
 DELETE /api/chat/rooms/{room_id}/messages/{message_id}/
 ```
@@ -327,19 +371,22 @@ DELETE /api/chat/rooms/{room_id}/messages/{message_id}/
 **Note:** Soft delete - sets `is_deleted=true`. Only sender can delete their own messages.
 
 #### **Add/Remove Reaction**
+
 ```http
 POST /api/chat/rooms/{room_id}/messages/{message_id}/react/
 ```
 
 **Request Body:**
+
 ```json
 {
   "emoji": "👍",
-  "action": "add"  // or "remove"
+  "action": "add" // or "remove"
 }
 ```
 
 **Response:**
+
 ```json
 {
   "reactions": {
@@ -350,11 +397,13 @@ POST /api/chat/rooms/{room_id}/messages/{message_id}/react/
 ```
 
 #### **Mark Message as Read**
+
 ```http
 POST /api/chat/rooms/{room_id}/messages/{message_id}/mark_read/
 ```
 
 **Response:**
+
 ```json
 {
   "status": "marked as read",
@@ -367,6 +416,7 @@ POST /api/chat/rooms/{room_id}/messages/{message_id}/mark_read/
 ### Search
 
 #### **Search Messages**
+
 ```http
 GET /api/chat/search/messages/?q=search+term
 ```
@@ -374,6 +424,7 @@ GET /api/chat/search/messages/?q=search+term
 **Response:** Array of messages matching the search query (max 50 results)
 
 #### **Search Rooms**
+
 ```http
 GET /api/chat/search/rooms/?q=search+term
 ```
@@ -385,11 +436,13 @@ GET /api/chat/search/rooms/?q=search+term
 ### Chat Sessions
 
 #### **Get Active Sessions**
+
 ```http
 GET /api/chat/sessions/active_sessions/
 ```
 
 **Response:**
+
 ```json
 [
   {
@@ -405,11 +458,13 @@ GET /api/chat/sessions/active_sessions/
 ```
 
 #### **Cleanup Old Sessions**
+
 ```http
 POST /api/chat/sessions/cleanup_old_sessions/
 ```
 
 **Response:**
+
 ```json
 {
   "status": "cleanup completed",
@@ -426,6 +481,7 @@ POST /api/chat/sessions/cleanup_old_sessions/
 ### Connection Endpoints
 
 #### **Chat Room WebSocket**
+
 ```
 ws://your-domain/ws/chat/{room_id}/
 ```
@@ -433,6 +489,7 @@ ws://your-domain/ws/chat/{room_id}/
 Connect to a specific chat room by UUID.
 
 #### **Direct Message WebSocket**
+
 ```
 ws://your-domain/ws/direct/{user_id}/
 ```
@@ -452,6 +509,7 @@ WebSocket connections use the same JWT authentication as REST endpoints. The tok
 #### **1. Send Message**
 
 **Client → Server:**
+
 ```json
 {
   "type": "message",
@@ -461,6 +519,7 @@ WebSocket connections use the same JWT authentication as REST endpoints. The tok
 ```
 
 **Server → All Clients in Room:**
+
 ```json
 {
   "type": "message",
@@ -483,6 +542,7 @@ WebSocket connections use the same JWT authentication as REST endpoints. The tok
 #### **2. Typing Indicator**
 
 **Client → Server:**
+
 ```json
 {
   "type": "typing",
@@ -491,6 +551,7 @@ WebSocket connections use the same JWT authentication as REST endpoints. The tok
 ```
 
 **Server → Other Clients in Room:**
+
 ```json
 {
   "type": "typing",
@@ -505,6 +566,7 @@ WebSocket connections use the same JWT authentication as REST endpoints. The tok
 #### **3. Read Receipt**
 
 **Client → Server:**
+
 ```json
 {
   "type": "read_receipt",
@@ -517,6 +579,7 @@ WebSocket connections use the same JWT authentication as REST endpoints. The tok
 #### **4. User Joined (System Event)**
 
 **Server → All Clients in Room:**
+
 ```json
 {
   "type": "user_joined",
@@ -530,6 +593,7 @@ Sent automatically when a user connects to the WebSocket.
 #### **5. User Left (System Event)**
 
 **Server → All Clients in Room:**
+
 ```json
 {
   "type": "user_left",
@@ -545,6 +609,7 @@ Sent automatically when a user disconnects from the WebSocket.
 ## WebSocket Connection Flow
 
 ### 1. **Establish Connection**
+
 ```javascript
 const roomId = 'your-room-uuid';
 const ws = new WebSocket(`ws://your-domain/ws/chat/${roomId}/`);
@@ -555,11 +620,12 @@ ws.onopen = (event) => {
 ```
 
 ### 2. **Handle Incoming Messages**
+
 ```javascript
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
 
-  switch(data.type) {
+  switch (data.type) {
     case 'message':
       // New message received
       displayMessage(data.message);
@@ -584,38 +650,47 @@ ws.onmessage = (event) => {
 ```
 
 ### 3. **Send Messages**
+
 ```javascript
 function sendMessage(content) {
-  ws.send(JSON.stringify({
-    type: 'message',
-    content: content
-  }));
+  ws.send(
+    JSON.stringify({
+      type: 'message',
+      content: content,
+    })
+  );
 }
 ```
 
 ### 4. **Send Typing Indicator**
+
 ```javascript
 let typingTimeout;
 
 function handleTyping() {
   // Send typing=true
-  ws.send(JSON.stringify({
-    type: 'typing',
-    is_typing: true
-  }));
+  ws.send(
+    JSON.stringify({
+      type: 'typing',
+      is_typing: true,
+    })
+  );
 
   // Auto-cancel after 3 seconds of no typing
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => {
-    ws.send(JSON.stringify({
-      type: 'typing',
-      is_typing: false
-    }));
+    ws.send(
+      JSON.stringify({
+        type: 'typing',
+        is_typing: false,
+      })
+    );
   }, 3000);
 }
 ```
 
 ### 5. **Close Connection**
+
 ```javascript
 ws.close();
 ```
@@ -639,11 +714,11 @@ function ChatRoom({ roomId, authToken }) {
     // Fetch initial messages via REST API
     fetch(`/api/chat/rooms/${roomId}/messages/`, {
       headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
+        Authorization: `Bearer ${authToken}`,
+      },
     })
-      .then(res => res.json())
-      .then(data => setMessages(data.results));
+      .then((res) => res.json())
+      .then((data) => setMessages(data.results));
 
     // Connect to WebSocket
     ws.current = new WebSocket(`ws://localhost:8000/ws/chat/${roomId}/`);
@@ -652,9 +727,9 @@ function ChatRoom({ roomId, authToken }) {
       const data = JSON.parse(event.data);
 
       if (data.type === 'message') {
-        setMessages(prev => [...prev, data.message]);
+        setMessages((prev) => [...prev, data.message]);
       } else if (data.type === 'typing') {
-        setTypingUsers(prev => {
+        setTypingUsers((prev) => {
           const newSet = new Set(prev);
           if (data.is_typing) {
             newSet.add(data.user_id);
@@ -671,25 +746,29 @@ function ChatRoom({ roomId, authToken }) {
 
   const sendMessage = () => {
     if (inputValue.trim()) {
-      ws.current.send(JSON.stringify({
-        type: 'message',
-        content: inputValue
-      }));
+      ws.current.send(
+        JSON.stringify({
+          type: 'message',
+          content: inputValue,
+        })
+      );
       setInputValue('');
     }
   };
 
   const handleTyping = () => {
-    ws.current.send(JSON.stringify({
-      type: 'typing',
-      is_typing: true
-    }));
+    ws.current.send(
+      JSON.stringify({
+        type: 'typing',
+        is_typing: true,
+      })
+    );
   };
 
   return (
     <div>
       <div className="messages">
-        {messages.map(msg => (
+        {messages.map((msg) => (
           <div key={msg.id}>
             <strong>{msg.sender.display_name}:</strong> {msg.content}
           </div>
@@ -772,6 +851,7 @@ function ChatRoom({ roomId, authToken }) {
 ### Common HTTP Error Responses
 
 **400 Bad Request**
+
 ```json
 {
   "error": "Search query is required"
@@ -779,6 +859,7 @@ function ChatRoom({ roomId, authToken }) {
 ```
 
 **403 Forbidden**
+
 ```json
 {
   "detail": "You don't have access to this room"
@@ -786,6 +867,7 @@ function ChatRoom({ roomId, authToken }) {
 ```
 
 **404 Not Found**
+
 ```json
 {
   "detail": "User not found"

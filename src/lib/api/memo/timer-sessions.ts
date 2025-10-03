@@ -78,7 +78,10 @@ export const timerSessionAPI = {
    */
   pingTimerSession: async (sessionId: number): Promise<ActiveTimerSession> => {
     try {
-      const response = await api.patch(`/app/memo/timer/${sessionId}/ping/`, {});
+      const response = await api.patch(
+        `/app/memo/timer/${sessionId}/ping/`,
+        {}
+      );
       return response.data;
     } catch (error) {
       // Don't show error toast - this is a background operation
@@ -106,7 +109,10 @@ export const timerSessionAPI = {
    */
   pauseTimerSession: async (sessionId: number): Promise<ActiveTimerSession> => {
     try {
-      const response = await api.post(`/app/memo/timer/${sessionId}/pause/`, {});
+      const response = await api.post(
+        `/app/memo/timer/${sessionId}/pause/`,
+        {}
+      );
       showSuccessToast('Timer paused');
       return response.data;
     } catch (error) {
@@ -119,9 +125,14 @@ export const timerSessionAPI = {
    * Resume a paused timer session
    * Accumulates pause duration and resumes counting
    */
-  resumeTimerSession: async (sessionId: number): Promise<ActiveTimerSession> => {
+  resumeTimerSession: async (
+    sessionId: number
+  ): Promise<ActiveTimerSession> => {
     try {
-      const response = await api.post(`/app/memo/timer/${sessionId}/resume/`, {});
+      const response = await api.post(
+        `/app/memo/timer/${sessionId}/resume/`,
+        {}
+      );
       showSuccessToast('Timer resumed');
       return response.data;
     } catch (error) {

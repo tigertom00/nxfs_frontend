@@ -49,12 +49,9 @@ export const getChatRooms = async (
   page = 1,
   pageSize = 50
 ): Promise<GetChatRoomsResponse> => {
-  const response = await api.get<GetChatRoomsResponse>(
-    `${BASE_PATH}/rooms/`,
-    {
-      params: { page, page_size: pageSize },
-    }
-  );
+  const response = await api.get<GetChatRoomsResponse>(`${BASE_PATH}/rooms/`, {
+    params: { page, page_size: pageSize },
+  });
   return response.data;
 };
 
@@ -323,12 +320,13 @@ export const getActiveSessions =
 /**
  * Cleanup old inactive sessions
  */
-export const cleanupOldSessions = async (): Promise<CleanupSessionsResponse> => {
-  const response = await api.post<CleanupSessionsResponse>(
-    `${BASE_PATH}/sessions/cleanup_old_sessions/`
-  );
-  return response.data;
-};
+export const cleanupOldSessions =
+  async (): Promise<CleanupSessionsResponse> => {
+    const response = await api.post<CleanupSessionsResponse>(
+      `${BASE_PATH}/sessions/cleanup_old_sessions/`
+    );
+    return response.data;
+  };
 
 /**
  * Export all chat API methods

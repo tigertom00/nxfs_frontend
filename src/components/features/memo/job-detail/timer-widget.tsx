@@ -73,8 +73,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
 
         if (activeSession) {
           // Check if this session is for the current job
-          const sessionJobId =
-            ordreNr || jobId.toString();
+          const sessionJobId = ordreNr || jobId.toString();
 
           if (activeSession.jobb === sessionJobId) {
             // Restore timer from server session
@@ -133,8 +132,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       if (typeof Storage !== 'undefined') {
         localStorage.setItem(`timer-${jobId}`, JSON.stringify(timer));
       }
-    } catch (storageError) {
-    }
+    } catch (storageError) {}
   }, [timer, jobId]);
 
   // Update timer display every second when running (but not when paused)
@@ -188,8 +186,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     if (timer.isRunning) {
       // Request notification permission (mobile-safe)
       if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission().catch((error) => {
-        });
+        Notification.requestPermission().catch((error) => {});
       }
 
       // Show persistent notification (mobile-compatible)
@@ -202,16 +199,14 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             // Remove requireInteraction for mobile compatibility
             silent: false,
           });
-        } catch (error) {
-        }
+        } catch (error) {}
       }
     } else {
       // Close notification when timer stops
       if (notificationRef.current) {
         try {
           notificationRef.current.close();
-        } catch (error) {
-        }
+        } catch (error) {}
       }
     }
 
@@ -219,8 +214,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       if (notificationRef.current) {
         try {
           notificationRef.current.close();
-        } catch (error) {
-        }
+        } catch (error) {}
       }
     };
   }, [timer.isRunning, timer.elapsed, jobId]);
@@ -301,7 +295,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
           ? entries.entries_by_date
           : Object.values(entries.entries_by_date || {});
 
-        const yesterdayGroup = entriesArray.find((g: any) => g.date === yesterday);
+        const yesterdayGroup = entriesArray.find(
+          (g: any) => g.date === yesterday
+        );
         return {
           hours: yesterdayGroup?.total_hours || 0,
           entries: yesterdayGroup?.entries?.length || 0,
@@ -344,12 +340,16 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     // If timer is paused, resume it
     if (timer.isPaused && timer.serverSessionId) {
       try {
-        const updatedSession = await timerSessionAPI.resumeTimerSession(timer.serverSessionId);
+        const updatedSession = await timerSessionAPI.resumeTimerSession(
+          timer.serverSessionId
+        );
 
         // Ensure elapsed_seconds is a valid number and not NaN
-        const elapsedSeconds = typeof updatedSession.elapsed_seconds === 'number' && !isNaN(updatedSession.elapsed_seconds)
-          ? updatedSession.elapsed_seconds
-          : (timer.elapsed || 0); // Fallback to current elapsed or 0 if invalid
+        const elapsedSeconds =
+          typeof updatedSession.elapsed_seconds === 'number' &&
+          !isNaN(updatedSession.elapsed_seconds)
+            ? updatedSession.elapsed_seconds
+            : timer.elapsed || 0; // Fallback to current elapsed or 0 if invalid
 
         console.log('Resume - Updated session:', updatedSession);
         console.log('Resume - Elapsed seconds:', elapsedSeconds);
@@ -370,7 +370,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       } catch (error) {
         toast({
           title: 'Failed to resume timer',
-          description: error instanceof Error ? error.message : 'Could not resume timer',
+          description:
+            error instanceof Error ? error.message : 'Could not resume timer',
           variant: 'destructive',
         });
         return;
@@ -451,7 +452,10 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     setShowStopModal(true);
   };
 
-  const handleTimerSave = async (description?: string, adjustedSeconds?: number) => {
+  const handleTimerSave = async (
+    description?: string,
+    adjustedSeconds?: number
+  ) => {
     if (!user || !timer.serverSessionId) return;
 
     try {
@@ -503,12 +507,16 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     }
 
     try {
-      const updatedSession = await timerSessionAPI.pauseTimerSession(timer.serverSessionId);
+      const updatedSession = await timerSessionAPI.pauseTimerSession(
+        timer.serverSessionId
+      );
 
       // Ensure elapsed_seconds is valid before updating
-      const elapsedSeconds = typeof updatedSession.elapsed_seconds === 'number' && !isNaN(updatedSession.elapsed_seconds)
-        ? updatedSession.elapsed_seconds
-        : timer.elapsed;
+      const elapsedSeconds =
+        typeof updatedSession.elapsed_seconds === 'number' &&
+        !isNaN(updatedSession.elapsed_seconds)
+          ? updatedSession.elapsed_seconds
+          : timer.elapsed;
 
       // Update local state to reflect pause with server's elapsed time
       setTimer((prev) => ({

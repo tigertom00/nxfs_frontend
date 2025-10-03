@@ -37,7 +37,8 @@ export function TimerStopModal({
 }: TimerStopModalProps) {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [adjustedSeconds, setAdjustedSeconds] = useState<number>(elapsedSeconds);
+  const [adjustedSeconds, setAdjustedSeconds] =
+    useState<number>(elapsedSeconds);
 
   // Reset adjusted time when elapsed seconds changes
   useEffect(() => {
@@ -173,8 +174,7 @@ export function TimerStopModal({
 
             {wasAdjusted && (
               <p className="text-xs text-muted-foreground text-center">
-                Time adjusted by{' '}
-                {adjustedSeconds > elapsedSeconds ? '+' : ''}
+                Time adjusted by {adjustedSeconds > elapsedSeconds ? '+' : ''}
                 {((adjustedSeconds - elapsedSeconds) / 60).toFixed(0)} minutes
               </p>
             )}
@@ -193,7 +193,9 @@ export function TimerStopModal({
             <div className="flex justify-between items-center pt-2 border-t border-border">
               <span className="text-sm font-medium">Time to save:</span>
               <span className="font-mono font-bold text-lg">
-                {wasRounded ? roundedTime : formatSecondsToTimeString(adjustedSeconds)}
+                {wasRounded
+                  ? roundedTime
+                  : formatSecondsToTimeString(adjustedSeconds)}
               </span>
             </div>
 
