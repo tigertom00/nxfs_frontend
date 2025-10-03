@@ -449,9 +449,36 @@ export interface MaterialValidationResponse {
 
 // EFO Basen import
 export interface EFOBasenImportPayload {
+  // Basic info
   el_nr?: string;
   tittel?: string;
   varemerke?: string;
+  varenummer?: string;
+  gtin_number?: string;
+  info?: string;
+  teknisk_beskrivelse?: string;
+  varebetegnelse?: string;
+
+  // Dimensions and weight
+  hoyde?: number;
+  bredde?: number;
+  lengde?: number;
+  vekt?: number;
+
+  // URLs and files
+  bilder?: string; // JSON string of image URLs array
+  produktblad?: string;
+  produkt_url?: string;
+  fdv?: string;
+  cpr_sertifikat?: string;
+  miljoinformasjon?: string;
+
+  // Status flags
+  approved?: boolean;
+  discontinued?: boolean;
+  in_stock?: boolean;
+
+  // Supplier info
   leverandor?: {
     navn: string;
     telefon?: string;
@@ -461,6 +488,10 @@ export interface EFOBasenImportPayload {
     postnummer?: string;
     epost?: string;
   };
+
+  // Category
   kategori?: string;
+
+  // Allow additional fields for future expansion
   [key: string]: any;
 }

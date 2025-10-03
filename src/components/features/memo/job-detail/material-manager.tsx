@@ -252,16 +252,42 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     try {
       setLoading(true);
 
-      // Format the data for EFObasen import
+      // Format the data for EFObasen import - capture ALL available fields
       // Ensure leverandor is in the correct format (object with navn field)
       const formattedData = {
+        // Basic info
         el_nr: elData.el_nr,
         tittel: elData.tittel,
         varemerke: elData.varemerke,
+        varenummer: elData.varenummer,
+        gtin_number: elData.gtin_number,
         info: elData.info,
         teknisk_beskrivelse: elData.teknisk_beskrivelse,
         varebetegnelse: elData.varebetegnelse,
+
+        // Dimensions and weight
+        hoyde: elData.hoyde,
+        bredde: elData.bredde,
+        lengde: elData.lengde,
+        vekt: elData.vekt,
+
+        // URLs and files
+        bilder: elData.bilder ? JSON.stringify(elData.bilder) : null, // Convert array to JSON string
+        fdv: elData.fdv,
+        produktblad: elData.produktblad,
+        produkt_url: elData.produkt_url,
+        cpr_sertifikat: elData.cpr_sertifikat,
+        miljoinformasjon: elData.miljoinformasjon,
+
+        // Status flags
+        approved: elData.approved !== undefined ? elData.approved : true,
+        discontinued:
+          elData.discontinued !== undefined ? elData.discontinued : false,
+        in_stock: elData.in_stock !== undefined ? elData.in_stock : true,
+
+        // Category
         kategori: elData.kategori,
+
         // Format leverandor - handle both string and object formats
         leverandor:
           typeof elData.leverandor === 'string'
@@ -271,11 +297,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
               : { navn: 'Unknown Supplier' },
       };
 
-
       // Use the EFObasen import endpoint which handles supplier creation
       const importedMaterial =
         await elNumberLookupAPI.importFromEFObasen(formattedData);
-
 
       if (importedMaterial) {
         // Reload materials to include the new one
