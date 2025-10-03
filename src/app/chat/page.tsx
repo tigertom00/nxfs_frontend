@@ -47,11 +47,13 @@ export default function ChatPage() {
   // Connect socket on mount
   useEffect(() => {
     if (isAuthenticated) {
-      connectSocket();
+      // TODO: Connect to Django Channels WebSocket instead of local Socket.IO
+      // The backend uses Django Channels, not Socket.IO
+      // connectSocket();
     }
 
     return () => {
-      disconnectSocket();
+      // disconnectSocket();
     };
   }, [isAuthenticated, connectSocket, disconnectSocket]);
 
