@@ -343,7 +343,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
 
     if (isGTIN) {
       // Search by GTIN in local materials
-      existingMaterial = allMaterials.find((m) => m.gtin_number === cleanCode);
+      existingMaterial = allMaterials.find(
+        (m) => m.gtin_number && m.gtin_number.toString() === cleanCode
+      );
 
       if (existingMaterial) {
         addMaterialToSelection(existingMaterial);
@@ -372,7 +374,8 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
           return;
         }
       } catch (error) {
-        // Continue to EFObasen lookup
+        console.error('GTIN database search error:', error);
+        // Continue to EFObasen lookup even if database search fails
       }
     } else if (isELNumber) {
       // Parse EL-number
@@ -388,7 +391,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       }
 
       // Search by EL-number in local materials
-      existingMaterial = allMaterials.find((m) => m.el_nr === parsedELNumber);
+      existingMaterial = allMaterials.find(
+        (m) => m.el_nr && m.el_nr.toString() === parsedELNumber.toString()
+      );
 
       if (existingMaterial) {
         addMaterialToSelection(existingMaterial);
