@@ -75,6 +75,27 @@ export function TimerStopModal({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Actions at top for mobile */}
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              className="flex-1"
+              disabled={loading}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Don't Save
+            </Button>
+            <Button
+              onClick={handleConfirm}
+              className="flex-1"
+              disabled={loading}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? 'Saving...' : 'Save Time'}
+            </Button>
+          </div>
+
           {/* Time Summary */}
           <div className="p-4 bg-muted rounded-lg space-y-2">
             <div className="flex justify-between items-center">
@@ -127,27 +148,6 @@ export function TimerStopModal({
             <p className="text-xs text-muted-foreground">
               Add details about what you worked on during this session
             </p>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              className="flex-1"
-              disabled={loading}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Don't Save
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              className="flex-1"
-              disabled={loading}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {loading ? 'Saving...' : 'Save Time'}
-            </Button>
           </div>
 
           <div className="text-center">
