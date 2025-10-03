@@ -36,7 +36,7 @@ import type {
  * WebSocket connections should be handled separately
  */
 
-const BASE_PATH = '/chat';
+const BASE_PATH = '/app/chat';
 
 /**
  * Chat Rooms
