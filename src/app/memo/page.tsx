@@ -121,7 +121,7 @@ export default function MemoPage() {
         const nearby = await jobsAPI.getNearbyJobs({
           lat: currentLocation.latitude,
           lon: currentLocation.longitude,
-          radius: 100,
+          radius: 1000,
           ferdig: false,
         });
 
@@ -130,7 +130,7 @@ export default function MemoPage() {
         if (nearby.length > 0) {
           toast({
             title: 'Nearby jobs found!',
-            description: `Found ${nearby.length} job${nearby.length > 1 ? 's' : ''} within 100m`,
+            description: `Found ${nearby.length} job${nearby.length > 1 ? 's' : ''} within 1000m`,
           });
         }
       } catch (error) {
