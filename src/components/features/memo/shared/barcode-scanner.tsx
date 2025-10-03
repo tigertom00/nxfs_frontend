@@ -320,11 +320,16 @@ export function BarcodeScanner({
 
       console.log('OCR detected text:', text);
 
+      // Show full text on screen for debugging (limit to 200 chars)
+      const displayText = text.substring(0, 200) || 'No text detected';
+      setDetectedText(displayText);
+
       // Normalize and extract Norwegian EL-number
       const normalizedText = normalizeOCRText(text);
       const elNumber = extractNorwegianELNumber(normalizedText);
 
-      setDetectedText(text.substring(0, 50)); // Show first 50 chars for debugging
+      console.log('Normalized text:', normalizedText);
+      console.log('Extracted EL-number:', elNumber);
 
       if (elNumber) {
         // Found Norwegian EL-number!
@@ -339,6 +344,20 @@ export function BarcodeScanner({
         onScan(elNumber);
         setManualInput('');
         onClose();
+      } else if (text && text.trim().length > 0) {
+        // Text was detected but no Norwegian EL-number found
+        toast({
+          title: 'No Norwegian EL-Number Found',
+          description: `Detected text but no "NO XX XXX XX" pattern. Try repositioning.`,
+          variant: 'destructive',
+        });
+      } else {
+        // No text detected at all
+        toast({
+          title: 'No Text Detected',
+          description: 'Try moving closer or improving lighting.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('OCR processing error:', error);
@@ -439,8 +458,11 @@ export function BarcodeScanner({
                       </div>
                     </div>
                     {scanMode === 'text' && detectedText && (
-                      <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded max-h-16 overflow-hidden">
-                        {detectedText}
+                      <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-90 text-white text-xs px-3 py-2 rounded max-h-32 overflow-y-auto">
+                        <div className="font-bold mb-1">OCR Detected:</div>
+                        <div className="whitespace-pre-wrap break-words">
+                          {detectedText}
+                        </div>
                       </div>
                     )}
                     {isOCRProcessing && (
