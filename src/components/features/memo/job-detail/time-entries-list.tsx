@@ -108,7 +108,8 @@ export function TimeEntriesList({
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [dateFilter, setDateFilter] = useState<DateFilter>('this_week');
+  const [userDateFilter, setUserDateFilter] = useState<DateFilter>('this_week');
+  const [jobDateFilter, setJobDateFilter] = useState<DateFilter>('this_week');
 
   const loadTimeEntries = async () => {
     try {
@@ -119,19 +120,21 @@ export function TimeEntriesList({
       // Parse user ID safely
       const userId = parseInt(user?.id || '0');
 
-      // Get date range based on selected filter
-      const dateRange = getDateRange(dateFilter);
+      // Get date range based on selected filters
+      const userDateRange = getDateRange(userDateFilter);
+      const jobDateRange = getDateRange(jobDateFilter);
 
       // Load both job-specific entries and all user entries in parallel
       const [jobResponse, userResponse] = await Promise.all([
-        // Job-specific entries (all users for this job)
+        // Job-specific entries (all users for this job) with date filter
         timeTrackingAPI.getTimeEntriesByDate({
           jobb: jobIdToUse,
+          ...jobDateRange,
         }),
         // All user entries (current user only, all jobs) with date filter
         timeTrackingAPI.getTimeEntriesByDate({
           user_id: userId,
-          ...dateRange,
+          ...userDateRange,
         }),
       ]);
 
@@ -190,12 +193,12 @@ export function TimeEntriesList({
     }
   };
 
-  // Load entries on mount and when refresh trigger or date filter changes
+  // Load entries on mount and when refresh trigger or date filters change
   useEffect(() => {
     if (user) {
       loadTimeEntries();
     }
-  }, [jobId, user, refreshTrigger, dateFilter]);
+  }, [jobId, user, refreshTrigger, userDateFilter, jobDateFilter]);
 
   const toggleDateExpansion = (date: string) => {
     setExpandedDates((prev) => {
@@ -556,16 +559,9 @@ export function TimeEntriesList({
             </TabsList>
 
             <TabsContent value="job" className="mt-4">
-              {renderEntriesList(
-                jobEntries,
-                'No time entries recorded for this job yet'
-              )}
-            </TabsContent>
-
-            <TabsContent value="user" className="mt-4">
               <div className="mb-4 flex items-center gap-3">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <Select value={dateFilter} onValueChange={(value) => setDateFilter(value as DateFilter)}>
+                <Select value={jobDateFilter} onValueChange={(value) => setJobDateFilter(value as DateFilter)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select period" />
                   </SelectTrigger>
@@ -578,11 +574,40 @@ export function TimeEntriesList({
                   </SelectContent>
                 </Select>
                 <span className="text-xs text-muted-foreground">
-                  {dateFilter === 'this_week' && `${format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
-                  {dateFilter === 'last_week' && `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
-                  {dateFilter === 'this_month' && format(new Date(), 'MMMM yyyy')}
-                  {dateFilter === 'last_month' && format(subMonths(new Date(), 1), 'MMMM yyyy')}
-                  {dateFilter === 'all' && 'All entries'}
+                  {jobDateFilter === 'this_week' && `${format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                  {jobDateFilter === 'last_week' && `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                  {jobDateFilter === 'this_month' && format(new Date(), 'MMMM yyyy')}
+                  {jobDateFilter === 'last_month' && format(subMonths(new Date(), 1), 'MMMM yyyy')}
+                  {jobDateFilter === 'all' && 'All entries'}
+                </span>
+              </div>
+              {renderEntriesList(
+                jobEntries,
+                'No time entries recorded for this job yet'
+              )}
+            </TabsContent>
+
+            <TabsContent value="user" className="mt-4">
+              <div className="mb-4 flex items-center gap-3">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <Select value={userDateFilter} onValueChange={(value) => setUserDateFilter(value as DateFilter)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="last_week">Last Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
+                    <SelectItem value="last_month">Last Month</SelectItem>
+                    <SelectItem value="all">All Time</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-xs text-muted-foreground">
+                  {userDateFilter === 'this_week' && `${format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                  {userDateFilter === 'last_week' && `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                  {userDateFilter === 'this_month' && format(new Date(), 'MMMM yyyy')}
+                  {userDateFilter === 'last_month' && format(subMonths(new Date(), 1), 'MMMM yyyy')}
+                  {userDateFilter === 'all' && 'All entries'}
                 </span>
               </div>
               {renderEntriesList(userEntries, 'No time entries recorded yet')}
