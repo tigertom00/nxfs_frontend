@@ -361,15 +361,28 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         const duplicates = await materialsAPI.checkDuplicates({
           gtin_number: cleanCode,
         });
-        const duplicatesArray = Array.isArray(duplicates)
-          ? duplicates
-          : duplicates.results || [];
 
-        if (duplicatesArray.length > 0) {
-          addMaterialToSelection(duplicatesArray[0]);
+        // Handle different response formats
+        let material = null;
+
+        // Check if it's the new format with gtin_duplicate
+        if (duplicates?.results?.gtin_duplicate?.found) {
+          material = duplicates.results.gtin_duplicate.material;
+        }
+        // Check if it's an array format
+        else if (Array.isArray(duplicates) && duplicates.length > 0) {
+          material = duplicates[0];
+        }
+        // Check if it's paginated format
+        else if (duplicates?.results && Array.isArray(duplicates.results)) {
+          material = duplicates.results[0];
+        }
+
+        if (material) {
+          addMaterialToSelection(material);
           toast({
             title: 'Material Found in Database (GTIN)',
-            description: `Added ${duplicatesArray[0].tittel || 'Untitled'} to selection`,
+            description: `Added ${material.tittel || 'Untitled'} to selection`,
           });
           return;
         }
