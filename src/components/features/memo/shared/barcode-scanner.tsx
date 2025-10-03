@@ -449,6 +449,19 @@ export function BarcodeScanner({
                       </div>
                     )}
                   </div>
+
+                  {/* Manual OCR capture button */}
+                  {scanMode === 'text' && (
+                    <Button
+                      onClick={() => processOCRFrame()}
+                      disabled={isOCRProcessing}
+                      className="w-full"
+                    >
+                      <Scan className="h-4 w-4 mr-2" />
+                      {isOCRProcessing ? 'Processing...' : 'Capture Now'}
+                    </Button>
+                  )}
+
                   <Button
                     onClick={stopCamera}
                     variant="outline"
@@ -460,7 +473,7 @@ export function BarcodeScanner({
                   <p className="text-xs text-muted-foreground text-center">
                     {scanMode === 'barcode'
                       ? 'Hold the barcode steady in the frame. Scanning will happen automatically.'
-                      : 'Point at Norwegian EL-number (NO XX XXX XX). Processing every 3 seconds.'}
+                      : 'Click "Capture Now" when label is clearly visible, or wait for auto-scan every 3 seconds.'}
                   </p>
                 </div>
               )}

@@ -12,13 +12,27 @@ export function extractNorwegianELNumber(ocrText: string): string | null {
   const lines = ocrText.split('\n');
 
   for (const line of lines) {
-    // Look for Norwegian EL-number pattern: NO followed by digits with optional spaces
-    // Pattern: NO + 1-2 digits + space + 3 digits + space + 2-3 digits
-    // Examples: "NO 45 234 10", "NO 1 234 567", "NO45 234 10"
-    const norwegianPattern = /NO\s*(\d{1,2})\s*(\d{3})\s*(\d{2,3})/i;
-    const match = line.match(norwegianPattern);
+    // Try multiple patterns for flexibility
 
-    if (match) {
+    // Pattern 1: NO + spaces + digits (most common)
+    // Examples: "NO 45 234 10", "NO 1 234 567", "NO45 234 10"
+    const pattern1 = /NO\s*(\d{1,2})\s*(\d{3})\s*(\d{2,3})/i;
+    let match = line.match(pattern1);
+
+    if (!match) {
+      // Pattern 2: Just "NO" followed by 6-8 digits (no spaces)
+      // Example: "NO4523410"
+      const pattern2 = /NO\s*(\d{6,8})/i;
+      match = line.match(pattern2);
+      if (match) {
+        const elNumber = match[1];
+        if (elNumber.length >= 6 && elNumber.length <= 8) {
+          return elNumber;
+        }
+      }
+    }
+
+    if (match && match.length >= 4) {
       // Extract the three digit groups and combine them
       const part1 = match[1]; // 1-2 digits
       const part2 = match[2]; // 3 digits
@@ -46,9 +60,11 @@ export function normalizeOCRText(text: string): string {
       .replace(/\s+/g, ' ')
       // Convert to uppercase for consistent matching
       .toUpperCase()
+      // Fix common OCR mistakes
+      .replace(/N0/g, 'NO') // "N zero" → "NO"
+      .replace(/\bNO\b/g, 'NO') // Ensure NO is properly recognized
       // Remove common OCR artifacts
       .replace(/[|]/g, 'I')
-      .replace(/[O]/g, '0')
       .trim()
   );
 }
