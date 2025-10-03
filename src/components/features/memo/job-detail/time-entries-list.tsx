@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { EditTimeEntryDialog } from './edit-time-entry-dialog';
 
 interface TimeEntriesListProps {
   jobId: number;
@@ -63,6 +64,8 @@ export function TimeEntriesList({
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
+  const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const loadTimeEntries = async () => {
     try {
@@ -157,6 +160,16 @@ export function TimeEntriesList({
       }
       return newSet;
     });
+  };
+
+  const handleEdit = (entry: TimeEntry) => {
+    setEditingEntry(entry);
+    setShowEditDialog(true);
+  };
+
+  const handleEditSuccess = () => {
+    // Reload the grouped data after edit
+    loadTimeEntries();
   };
 
   const handleDelete = async (entryId: number) => {
@@ -383,7 +396,7 @@ export function TimeEntriesList({
                               size="sm"
                               className="h-6 w-6 p-0"
                               title="Edit time entry"
-                              disabled // TODO: Implement edit functionality
+                              onClick={() => handleEdit(entry)}
                             >
                               <Edit2 className="h-3 w-3" />
                             </Button>
@@ -474,38 +487,47 @@ export function TimeEntriesList({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          Time Entries
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="job" className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4" />
-              Job
-            </TabsTrigger>
-            <TabsTrigger value="user" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              User
-            </TabsTrigger>
-          </TabsList>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Time Entries
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="job" className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                Job
+              </TabsTrigger>
+              <TabsTrigger value="user" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                User
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="job" className="mt-4">
-            {renderEntriesList(
-              jobEntries,
-              'No time entries recorded for this job yet'
-            )}
-          </TabsContent>
+            <TabsContent value="job" className="mt-4">
+              {renderEntriesList(
+                jobEntries,
+                'No time entries recorded for this job yet'
+              )}
+            </TabsContent>
 
-          <TabsContent value="user" className="mt-4">
-            {renderEntriesList(userEntries, 'No time entries recorded yet')}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+            <TabsContent value="user" className="mt-4">
+              {renderEntriesList(userEntries, 'No time entries recorded yet')}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <EditTimeEntryDialog
+        entry={editingEntry}
+        isOpen={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
+        onSuccess={handleEditSuccess}
+      />
+    </>
   );
 }
