@@ -346,17 +346,25 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       try {
         const updatedSession = await timerSessionAPI.resumeTimerSession(timer.serverSessionId);
 
+        // Ensure elapsed_seconds is a valid number and not NaN
+        const elapsedSeconds = typeof updatedSession.elapsed_seconds === 'number' && !isNaN(updatedSession.elapsed_seconds)
+          ? updatedSession.elapsed_seconds
+          : (timer.elapsed || 0); // Fallback to current elapsed or 0 if invalid
+
+        console.log('Resume - Updated session:', updatedSession);
+        console.log('Resume - Elapsed seconds:', elapsedSeconds);
+
         setTimer((prev) => ({
           ...prev,
           isPaused: false,
           isRunning: true,
           startTime: Date.now(), // Reset local start time for display updates
-          elapsed: updatedSession.elapsed_seconds,
+          elapsed: elapsedSeconds,
         }));
 
         toast({
           title: 'Timer resumed',
-          description: 'Timer is now running again',
+          description: `Timer is now running again (${Math.floor(elapsedSeconds / 60)}m elapsed)`,
         });
         return;
       } catch (error) {
@@ -497,10 +505,16 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     try {
       const updatedSession = await timerSessionAPI.pauseTimerSession(timer.serverSessionId);
 
-      // Update local state to reflect pause
+      // Ensure elapsed_seconds is valid before updating
+      const elapsedSeconds = typeof updatedSession.elapsed_seconds === 'number' && !isNaN(updatedSession.elapsed_seconds)
+        ? updatedSession.elapsed_seconds
+        : timer.elapsed;
+
+      // Update local state to reflect pause with server's elapsed time
       setTimer((prev) => ({
         ...prev,
         isPaused: true,
+        elapsed: elapsedSeconds, // Use server's calculated elapsed time
       }));
 
       setShowStopModal(false);
