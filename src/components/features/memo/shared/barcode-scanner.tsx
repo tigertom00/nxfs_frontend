@@ -21,9 +21,9 @@ interface BarcodeScannerProps {
   title?: string;
 }
 
-// Norwegian EL-number validation pattern
-// Based on research: EL-numbers appear to be numeric identifiers
-// Common formats might be 6-8 digits, sometimes with spaces or hyphens
+// Norwegian EL-number and GTIN validation patterns
+// EL-numbers: 6-8 digits, sometimes with spaces or hyphens
+// GTIN: 8, 12, 13, or 14 digits (EAN-8, UPC-A, EAN-13, GTIN-14)
 const EL_NUMBER_PATTERNS = [
   /^\d{6,8}$/, // Simple 6-8 digit number
   /^\d{2}\s?\d{3}\s?\d{2,3}$/, // Format like "10 123 45" or "10 123 456"
@@ -31,11 +31,18 @@ const EL_NUMBER_PATTERNS = [
   /^EL\d{6,8}$/i, // Format like "EL123456"
 ];
 
+const GTIN_PATTERNS = [
+  /^\d{8}$/, // EAN-8
+  /^\d{12}$/, // UPC-A
+  /^\d{13}$/, // EAN-13 (most common for products)
+  /^\d{14}$/, // GTIN-14
+];
+
 export function BarcodeScanner({
   isOpen,
   onClose,
   onScan,
-  title = 'Scan EL-Number',
+  title = 'Scan Product Code',
 }: BarcodeScannerProps) {
   const { toast } = useToast();
   const [manualInput, setManualInput] = useState('');
@@ -78,29 +85,43 @@ export function BarcodeScanner({
     }
   }, [isOpen]);
 
-  const validateELNumber = (code: string): boolean => {
+  const validateProductCode = (code: string): {
+    isValid: boolean;
+    type: 'el_number' | 'gtin' | 'unknown';
+  } => {
     // Remove any whitespace
     const cleanCode = code.trim();
 
-    // Check against known EL-number patterns
-    return EL_NUMBER_PATTERNS.some((pattern) => pattern.test(cleanCode));
+    // Check if it's an EL-number
+    if (EL_NUMBER_PATTERNS.some((pattern) => pattern.test(cleanCode))) {
+      return { isValid: true, type: 'el_number' };
+    }
+
+    // Check if it's a GTIN
+    if (GTIN_PATTERNS.some((pattern) => pattern.test(cleanCode))) {
+      return { isValid: true, type: 'gtin' };
+    }
+
+    return { isValid: false, type: 'unknown' };
   };
 
   const handleManualSubmit = () => {
     if (!manualInput.trim()) {
       toast({
         title: 'Invalid input',
-        description: 'Please enter an EL-number',
+        description: 'Please enter an EL-number or GTIN barcode',
         variant: 'destructive',
       });
       return;
     }
 
-    if (!validateELNumber(manualInput)) {
+    const validation = validateProductCode(manualInput);
+
+    if (!validation.isValid) {
       toast({
-        title: 'Invalid EL-number format',
+        title: 'Invalid product code format',
         description:
-          'Please check the EL-number format. Expected formats: 123456, 10 123 45, or EL123456',
+          'Please check the format. Expected: EL-number (6-8 digits) or GTIN barcode (8-14 digits)',
         variant: 'destructive',
       });
       return;
@@ -120,8 +141,7 @@ export function BarcodeScanner({
       codeReaderRef.current = codeReader;
 
       // Get available video devices
-      const videoInputDevices =
-        await codeReader.listVideoInputDevices();
+      const videoInputDevices = await codeReader.listVideoInputDevices();
 
       if (videoInputDevices.length === 0) {
         throw new Error('No camera found');
@@ -137,7 +157,7 @@ export function BarcodeScanner({
 
       toast({
         title: 'Camera started',
-        description: 'Point camera at the EL-number barcode',
+        description: 'Point camera at the product barcode or EL-number',
       });
 
       // Start continuous barcode scanning
@@ -152,17 +172,21 @@ export function BarcodeScanner({
               // Stop scanning and process the code
               stopCamera();
 
-              if (validateELNumber(scannedCode)) {
+              const validation = validateProductCode(scannedCode);
+
+              if (validation.isValid) {
+                const codeType =
+                  validation.type === 'gtin' ? 'GTIN' : 'EL-Number';
                 toast({
                   title: 'Barcode scanned successfully',
-                  description: `EL-Number: ${scannedCode}`,
+                  description: `${codeType}: ${scannedCode}`,
                 });
                 onScan(scannedCode);
                 setManualInput('');
                 onClose();
               } else {
                 toast({
-                  title: 'Invalid EL-number format',
+                  title: 'Invalid product code format',
                   description: `Scanned: ${scannedCode}. Please try again or use manual input.`,
                   variant: 'destructive',
                 });
@@ -268,12 +292,12 @@ export function BarcodeScanner({
             </h3>
 
             <div className="space-y-2">
-              <Label htmlFor="el-number">EL-Number</Label>
+              <Label htmlFor="product-code">EL-Number or GTIN</Label>
               <Input
-                id="el-number"
+                id="product-code"
                 value={manualInput}
                 onChange={(e) => setManualInput(e.target.value)}
-                placeholder="e.g., 123456, 10 123 45, or EL123456"
+                placeholder="e.g., 123456 or 7020160582119"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     handleManualSubmit();
@@ -281,8 +305,7 @@ export function BarcodeScanner({
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                Supported formats: 6-8 digits, spaced (10 123 45), or with EL
-                prefix
+                EL-number (6-8 digits) or GTIN barcode (8-14 digits)
               </p>
             </div>
 
@@ -291,17 +314,17 @@ export function BarcodeScanner({
               className="w-full"
               disabled={!manualInput.trim()}
             >
-              Add EL-Number
+              Add Product
             </Button>
           </div>
 
           {/* Info Section */}
           <div className="bg-muted p-3 rounded-lg">
-            <h4 className="text-sm font-medium mb-2">About EL-Numbers</h4>
+            <h4 className="text-sm font-medium mb-2">About Product Codes</h4>
             <p className="text-xs text-muted-foreground">
-              EL-numbers are Norwegian electrical product identifiers from
-              EFObasen database. They help identify electrical materials and
-              components for work orders.
+              Scan GTIN barcodes (found on product packaging) or enter EL-numbers
+              (Norwegian electrical product identifiers from EFObasen database)
+              to quickly find and add materials.
             </p>
           </div>
 

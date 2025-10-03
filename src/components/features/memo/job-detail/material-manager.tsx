@@ -331,43 +331,113 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
     }
   };
 
-  const handleELNumberScanned = async (elNumber: string) => {
-    // Parse EL-number
-    const parsedELNumber = parseElNumber(elNumber);
+  const handleELNumberScanned = async (productCode: string) => {
+    // Determine if it's a GTIN or EL-number
+    const cleanCode = productCode.replace(/\s/g, '');
+    const isGTIN = /^\d{8,14}$/.test(cleanCode) && cleanCode.length >= 10; // GTIN is typically 12-13 digits
+    const isELNumber =
+      /^\d{6,8}$/.test(cleanCode) || /^EL\d{6,8}$/i.test(cleanCode);
 
-    if (!parsedELNumber) {
+    // First, check if material already exists locally
+    let existingMaterial = null;
+
+    if (isGTIN) {
+      // Search by GTIN in local materials
+      existingMaterial = allMaterials.find((m) => m.gtin_number === cleanCode);
+
+      if (existingMaterial) {
+        addMaterialToSelection(existingMaterial);
+        toast({
+          title: 'Material Found (GTIN)',
+          description: `Added ${existingMaterial.tittel || 'Untitled'} to selection`,
+        });
+        return;
+      }
+
+      // Search in API by GTIN
+      try {
+        const duplicates = await materialsAPI.checkDuplicates({
+          gtin_number: cleanCode,
+        });
+        const duplicatesArray = Array.isArray(duplicates)
+          ? duplicates
+          : duplicates.results || [];
+
+        if (duplicatesArray.length > 0) {
+          addMaterialToSelection(duplicatesArray[0]);
+          toast({
+            title: 'Material Found in Database (GTIN)',
+            description: `Added ${duplicatesArray[0].tittel || 'Untitled'} to selection`,
+          });
+          return;
+        }
+      } catch (error) {
+        // Continue to EFObasen lookup
+      }
+    } else if (isELNumber) {
+      // Parse EL-number
+      const parsedELNumber = parseElNumber(cleanCode);
+
+      if (!parsedELNumber) {
+        toast({
+          title: 'Invalid Product Code',
+          description: `Could not parse product code from: ${productCode}`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Search by EL-number in local materials
+      existingMaterial = allMaterials.find((m) => m.el_nr === parsedELNumber);
+
+      if (existingMaterial) {
+        addMaterialToSelection(existingMaterial);
+        toast({
+          title: 'Material Found (EL-Number)',
+          description: `Added ${existingMaterial.tittel || 'Untitled'} to selection`,
+        });
+        return;
+      }
+    } else {
       toast({
-        title: 'Invalid EL-Number',
-        description: `Could not parse EL-number from: ${elNumber}`,
+        title: 'Invalid Product Code',
+        description: `Please scan a valid GTIN barcode or EL-number`,
         variant: 'destructive',
       });
       return;
     }
 
-    // First, check if material already exists locally
-    const existingMaterial = allMaterials.find(
-      (m) => m.el_nr === parsedELNumber
-    );
-
-    if (existingMaterial) {
-      addMaterialToSelection(existingMaterial);
-      toast({
-        title: 'Material Found',
-        description: `Added ${existingMaterial.tittel || 'Untitled'} to selection`,
-      });
-      return;
-    }
-
-    // If not found locally, use N8N EL number lookup
+    // If not found locally, use N8N lookup (EFObasen)
     try {
       setLoading(true);
+      const searchType = isGTIN ? 'GTIN' : 'EL-Number';
       toast({
-        title: 'Looking up EL-Number',
-        description: `Searching for EL-number: ${parsedELNumber}`,
+        title: `Looking up ${searchType}`,
+        description: `Searching for product: ${cleanCode}`,
       });
 
-      const lookupResult =
-        await elNumberLookupAPI.lookupELNumber(parsedELNumber);
+      let lookupResult;
+
+      if (isGTIN) {
+        // Try GTIN lookup (requires N8N workflow support)
+        try {
+          lookupResult = await elNumberLookupAPI.lookupGTIN(cleanCode);
+        } catch (gtinError) {
+          // GTIN lookup failed - inform user
+          toast({
+            title: 'GTIN Lookup Not Available',
+            description:
+              'EFObasen lookup by GTIN is not yet configured. The product may need to be looked up by EL-number manually.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+      } else {
+        // EL-number lookup
+        const parsedELNumber = parseElNumber(cleanCode);
+        lookupResult = await elNumberLookupAPI.lookupELNumber(parsedELNumber!);
+      }
 
       // N8N returns an array, get the first item
       const materialData = Array.isArray(lookupResult)
@@ -379,13 +449,13 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         setElLookupResult({ success: true, data: materialData });
         setShowELResult(true);
         toast({
-          title: 'EL-Number Found',
-          description: `Found material data for ${parsedELNumber}`,
+          title: 'Product Found in EFObasen',
+          description: `Found material data for ${cleanCode}`,
         });
       } else {
         toast({
           title: 'Material Not Found',
-          description: `No material found with EL-number: ${parsedELNumber}`,
+          description: `No material found with ${searchType}: ${cleanCode}`,
           variant: 'destructive',
         });
       }
