@@ -453,37 +453,29 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       return;
     }
 
-    // If not found locally, use N8N lookup (EFObasen)
+    // If not found locally, use N8N lookup (EFObasen) - only for EL-numbers
+    if (isGTIN) {
+      // GTIN not found - inform user that EFObasen lookup isn't available for GTINs
+      toast({
+        title: 'Material Not Found',
+        description:
+          'Product not in database. EFObasen lookup by GTIN is not available - please use EL-number instead.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // EL-number lookup in EFObasen
     try {
       setLoading(true);
-      const searchType = isGTIN ? 'GTIN' : 'EL-Number';
       toast({
-        title: `Looking up ${searchType}`,
+        title: 'Looking up EL-Number',
         description: `Searching for product: ${cleanCode}`,
       });
 
-      let lookupResult;
-
-      if (isGTIN) {
-        // Try GTIN lookup (requires N8N workflow support)
-        try {
-          lookupResult = await elNumberLookupAPI.lookupGTIN(cleanCode);
-        } catch (gtinError) {
-          // GTIN lookup failed - inform user
-          toast({
-            title: 'GTIN Lookup Not Available',
-            description:
-              'EFObasen lookup by GTIN is not yet configured. The product may need to be looked up by EL-number manually.',
-            variant: 'destructive',
-          });
-          setLoading(false);
-          return;
-        }
-      } else {
-        // EL-number lookup
-        const parsedELNumber = parseElNumber(cleanCode);
-        lookupResult = await elNumberLookupAPI.lookupELNumber(parsedELNumber!);
-      }
+      const parsedELNumber = parseElNumber(cleanCode);
+      const lookupResult =
+        await elNumberLookupAPI.lookupELNumber(parsedELNumber!);
 
       // N8N returns an array, get the first item
       const materialData = Array.isArray(lookupResult)
@@ -501,7 +493,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       } else {
         toast({
           title: 'Material Not Found',
-          description: `No material found with ${searchType}: ${cleanCode}`,
+          description: `No material found with EL-number: ${cleanCode}`,
           variant: 'destructive',
         });
       }
