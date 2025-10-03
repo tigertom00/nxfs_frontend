@@ -386,6 +386,34 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
           });
           return;
         }
+
+        // If no exact match, try fuzzy search with first 11 digits (for product variants)
+        if (cleanCode.length >= 11) {
+          const gtinPrefix = cleanCode.substring(0, 11);
+          const fuzzyResults = await materialsAPI.getMaterials({
+            search: gtinPrefix,
+            page_size: 5,
+          });
+
+          const fuzzyMaterials = Array.isArray(fuzzyResults)
+            ? fuzzyResults
+            : fuzzyResults.results || [];
+
+          // Find materials where GTIN starts with the same 11 digits
+          const variantMatches = fuzzyMaterials.filter(
+            (m) => m.gtin_number && m.gtin_number.startsWith(gtinPrefix)
+          );
+
+          if (variantMatches.length > 0) {
+            // Found a variant - use the first match
+            addMaterialToSelection(variantMatches[0]);
+            toast({
+              title: 'Material Found (Variant)',
+              description: `Added ${variantMatches[0].tittel || 'Untitled'} - GTIN variant detected`,
+            });
+            return;
+          }
+        }
       } catch (error) {
         console.error('GTIN database search error:', error);
         // Continue to EFObasen lookup even if database search fails
