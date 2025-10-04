@@ -23,10 +23,11 @@ class SocketClient {
       return;
     }
 
-    const socketUrl = url || '/api/socketio';
+    // Connect to Django backend Socket.IO server
+    const socketUrl = url || process.env.NEXT_PUBLIC_SOCKET_URL || 'https://api.nxfs.no';
 
     this.socket = io(socketUrl, {
-      path: '/api/socketio',
+      path: '/api/socketio/',
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: true,
