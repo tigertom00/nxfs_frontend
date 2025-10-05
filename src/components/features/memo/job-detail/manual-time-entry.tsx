@@ -18,7 +18,9 @@ import { Clock, Calendar as CalendarIcon, Plus, Minus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIntl } from '@/hooks/use-intl';
 import { format } from 'date-fns';
+import { nb } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useUIStore } from '@/stores';
 import {
   roundToNearestHalfHour,
   formatMinutesToHourString,
@@ -43,6 +45,7 @@ export function ManualTimeEntry({
   const { toast } = useToast();
   const { t } = useIntl();
   const { user } = useAuthStore();
+  const { language } = useUIStore();
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
   const [hours, setHours] = useState<number>(1.0);
@@ -158,7 +161,13 @@ export function ManualTimeEntry({
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                    {date ? (
+                      format(date, 'PPP', {
+                        locale: language === 'no' ? nb : undefined,
+                      })
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -211,7 +220,7 @@ export function ManualTimeEntry({
                 size="sm"
                 onClick={() => handleQuickTime(8.0)}
               >
-                8h
+                8t
               </Button>
               <Button
                 type="button"
