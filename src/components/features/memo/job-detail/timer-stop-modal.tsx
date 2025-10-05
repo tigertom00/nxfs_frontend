@@ -59,18 +59,12 @@ export function TimerStopModal({
   const wasAdjusted = adjustedSeconds !== initialSeconds;
 
   const handleConfirm = async () => {
-    console.log('[TimerStopModal] handleConfirm called', {
-      adjustedSeconds,
-      initialSeconds,
-      description: description.trim() || undefined,
-    });
     setLoading(true);
     try {
       await onConfirm(description.trim() || undefined, adjustedSeconds);
       // Don't reset here - modal will reset when it reopens
       setLoading(false);
     } catch (error) {
-      console.error('[TimerStopModal] handleConfirm error:', error);
       setLoading(false);
       // Error is handled in parent component
     }

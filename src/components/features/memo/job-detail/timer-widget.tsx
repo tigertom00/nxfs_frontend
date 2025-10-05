@@ -417,10 +417,14 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         jobb: jobIdToUse,
       });
 
-      console.log('[TimerWidget] Timer session created', {
-        sessionId: session.id,
-        session,
-      });
+      if (!session.id) {
+        toast({
+          title: 'Timer start failed',
+          description: 'Server did not return a valid session. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       const now = Date.now();
 
@@ -431,10 +435,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         elapsed: 0,
         serverSessionId: session.id,
         serverStartTime: session.start_time,
-      });
-
-      console.log('[TimerWidget] Timer state updated', {
-        serverSessionId: session.id,
       });
 
       toast({
@@ -465,21 +465,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     description?: string,
     adjustedSeconds?: number
   ) => {
-    console.log('[TimerWidget] handleTimerSave called', {
-      hasUser: !!user,
-      serverSessionId: timer.serverSessionId,
-      timerState: timer,
-      adjustedSeconds,
-      description,
-    });
-
-    if (!user || !timer.serverSessionId) {
-      console.error('[TimerWidget] Cannot save - missing user or session ID', {
-        hasUser: !!user,
-        serverSessionId: timer.serverSessionId,
-      });
-      return;
-    }
+    if (!user || !timer.serverSessionId) return;
 
     try {
       // Stop the server timer session
@@ -523,17 +509,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   };
 
   const handleTimerPause = async () => {
-    console.log('[TimerWidget] handleTimerPause called', {
-      serverSessionId: timer.serverSessionId,
-      timerState: timer,
-    });
-
     // Pause the timer on the backend
     if (!timer.serverSessionId) {
-      console.error(
-        '[TimerWidget] Cannot pause - missing session ID',
-        timer.serverSessionId
-      );
       setShowStopModal(false);
       return;
     }
@@ -570,11 +547,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   };
 
   const handleTimerDelete = async () => {
-    console.log('[TimerWidget] handleTimerDelete called', {
-      serverSessionId: timer.serverSessionId,
-      timerState: timer,
-    });
-
     // When deleting, remove the server session without creating a time entry
     if (timer.serverSessionId) {
       try {

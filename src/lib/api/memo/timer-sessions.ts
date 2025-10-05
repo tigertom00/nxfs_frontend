@@ -26,7 +26,12 @@ export const timerSessionAPI = {
   ): Promise<StartTimerSessionResponse> => {
     try {
       const response = await api.post('/app/memo/timer/start/', payload);
-      return response.data;
+
+      // Backend returns { message: "...", session: {...} }
+      // Extract the session object
+      const sessionData = response.data.session || response.data;
+
+      return sessionData;
     } catch (error) {
       handleApiError(error, 'Starting timer session');
       throw error;
