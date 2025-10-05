@@ -4,6 +4,33 @@ import { createUrlWithParams, normalizeResponse } from '../shared/utils';
 import { JobImage } from './types';
 import { PaginatedResponse } from '../shared/types';
 
+/**
+ * Truncate filename to fit within max length (default 100 chars) while preserving extension
+ * @param filename - Original filename
+ * @param maxLength - Maximum allowed length (default: 100)
+ * @returns Truncated filename
+ */
+const truncateFilename = (
+  filename: string,
+  maxLength: number = 100
+): string => {
+  if (filename.length <= maxLength) {
+    return filename;
+  }
+
+  // Split filename and extension
+  const lastDotIndex = filename.lastIndexOf('.');
+  const name =
+    lastDotIndex > -1 ? filename.substring(0, lastDotIndex) : filename;
+  const extension = lastDotIndex > -1 ? filename.substring(lastDotIndex) : '';
+
+  // Calculate available space for the name (reserving space for extension)
+  const maxNameLength = maxLength - extension.length;
+
+  // Truncate the name and add extension back
+  return name.substring(0, maxNameLength) + extension;
+};
+
 export const jobImagesAPI = {
   // Get all job images
   getJobImages: async (params?: {
@@ -53,15 +80,23 @@ export const jobImagesAPI = {
   }): Promise<JobImage> => {
     try {
       const formData = new FormData();
-      formData.append('image', payload.image);
-      formData.append('jobb', payload.jobb.toString());
 
-      if (payload.name) {
-        formData.append('name', payload.name);
-      } else {
-        // Use filename as name if not provided
-        formData.append('name', payload.image.name);
-      }
+      // Truncate filename if needed
+      const truncatedName = payload.name
+        ? truncateFilename(payload.name)
+        : truncateFilename(payload.image.name);
+
+      // Create a new File object with truncated name if necessary
+      const imageFile =
+        payload.image.name.length > 100
+          ? new File([payload.image], truncatedName, {
+              type: payload.image.type,
+            })
+          : payload.image;
+
+      formData.append('image', imageFile);
+      formData.append('jobb', payload.jobb.toString());
+      formData.append('name', truncatedName);
 
       const response = await api.post('/app/memo/jobb-images/', formData, {
         headers: {
@@ -85,8 +120,15 @@ export const jobImagesAPI = {
     try {
       const formData = new FormData();
 
-      payload.images.forEach((image, index) => {
-        formData.append('images', image);
+      // Truncate filenames for all images if needed
+      payload.images.forEach((image) => {
+        const imageFile =
+          image.name.length > 100
+            ? new File([image], truncateFilename(image.name), {
+                type: image.type,
+              })
+            : image;
+        formData.append('images', imageFile);
       });
       formData.append('jobb', payload.jobb.toString());
 

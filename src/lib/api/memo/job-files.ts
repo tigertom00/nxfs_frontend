@@ -4,6 +4,33 @@ import { createUrlWithParams, normalizeResponse } from '../shared/utils';
 import { JobFile } from './types';
 import { PaginatedResponse } from '../shared/types';
 
+/**
+ * Truncate filename to fit within max length (default 100 chars) while preserving extension
+ * @param filename - Original filename
+ * @param maxLength - Maximum allowed length (default: 100)
+ * @returns Truncated filename
+ */
+const truncateFilename = (
+  filename: string,
+  maxLength: number = 100
+): string => {
+  if (filename.length <= maxLength) {
+    return filename;
+  }
+
+  // Split filename and extension
+  const lastDotIndex = filename.lastIndexOf('.');
+  const name =
+    lastDotIndex > -1 ? filename.substring(0, lastDotIndex) : filename;
+  const extension = lastDotIndex > -1 ? filename.substring(lastDotIndex) : '';
+
+  // Calculate available space for the name (reserving space for extension)
+  const maxNameLength = maxLength - extension.length;
+
+  // Truncate the name and add extension back
+  return name.substring(0, maxNameLength) + extension;
+};
+
 export const jobFilesAPI = {
   // Get all job files
   getJobFiles: async (params?: {
@@ -54,15 +81,21 @@ export const jobFilesAPI = {
   }): Promise<JobFile> => {
     try {
       const formData = new FormData();
-      formData.append('file', payload.file);
-      formData.append('jobb', payload.jobb.toString());
 
-      if (payload.name) {
-        formData.append('name', payload.name);
-      } else {
-        // Use filename as name if not provided
-        formData.append('name', payload.file.name);
-      }
+      // Truncate filename if needed
+      const truncatedName = payload.name
+        ? truncateFilename(payload.name)
+        : truncateFilename(payload.file.name);
+
+      // Create a new File object with truncated name if necessary
+      const file =
+        payload.file.name.length > 100
+          ? new File([payload.file], truncatedName, { type: payload.file.type })
+          : payload.file;
+
+      formData.append('file', file);
+      formData.append('jobb', payload.jobb.toString());
+      formData.append('name', truncatedName);
 
       if (payload.file_type) {
         formData.append('file_type', payload.file_type);
@@ -90,8 +123,13 @@ export const jobFilesAPI = {
     try {
       const formData = new FormData();
 
-      payload.files.forEach((file, index) => {
-        formData.append('files', file);
+      // Truncate filenames for all files if needed
+      payload.files.forEach((file) => {
+        const truncatedFile =
+          file.name.length > 100
+            ? new File([file], truncateFilename(file.name), { type: file.type })
+            : file;
+        formData.append('files', truncatedFile);
       });
       formData.append('jobb', payload.jobb.toString());
 

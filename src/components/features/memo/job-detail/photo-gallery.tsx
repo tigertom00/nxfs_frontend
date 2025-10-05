@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useUIStore } from '@/stores';
+import { useIntl } from '@/hooks/use-intl';
 import { ImageEditorDialog } from '@/components/features/memo/shared/image-editor-dialog';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
@@ -32,6 +33,7 @@ interface PhotoGalleryProps {
 export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   const { toast } = useToast();
   const { language } = useUIStore();
+  const { t } = useIntl();
   const [photos, setPhotos] = useState<JobImage[]>([]);
   const [documents, setDocuments] = useState<JobFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,7 +154,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
 
       if (type === 'image' && !isImage) {
         toast({
-          title: 'Invalid file type',
+          title: t('memo.photos.invalidType'),
           description: `${file.name} is not an image file`,
           variant: 'destructive',
         });
@@ -161,8 +163,8 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
 
       if (!isUnderLimit) {
         toast({
-          title: 'File too large',
-          description: `${file.name} is larger than 10MB`,
+          title: t('memo.photos.fileTooLarge'),
+          description: `${file.name} ${t('memo.photos.fileTooLarge').toLowerCase()}`,
           variant: 'destructive',
         });
         return false;
@@ -356,11 +358,11 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="images">
             <ImageIcon className="h-4 w-4 mr-2" />
-            Images ({photos.length})
+            {t('memo.photos.images')} ({photos.length})
           </TabsTrigger>
           <TabsTrigger value="files">
             <FileText className="h-4 w-4 mr-2" />
-            Files ({documents.length})
+            {t('memo.photos.documents')} ({documents.length})
           </TabsTrigger>
         </TabsList>
 
@@ -370,7 +372,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
             <div className="flex items-center justify-center gap-2">
               <Camera className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">
-                Photos & Files ({photos.length})
+                {t('memo.photos.title')} ({photos.length})
               </h3>
               {uploading && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground ml-auto" />
@@ -434,8 +436,10 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
             {photos.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No photos yet</p>
-                <p className="text-sm">Add photos to document your work</p>
+                <p>{t('memo.photos.noPhotos')}</p>
+                <p className="text-sm">
+                  {t('memo.photos.noPhotosDescription')}
+                </p>
               </div>
             )}
 
@@ -449,7 +453,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                 disabled={uploading}
               >
                 <Camera className="h-4 w-4 mb-1" />
-                <span className="text-xs">Camera</span>
+                <span className="text-xs">{t('memo.photos.camera')}</span>
               </Button>
 
               <Button
@@ -460,7 +464,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                 disabled={uploading}
               >
                 <FolderOpen className="h-4 w-4 mb-1" />
-                <span className="text-xs">Gallery</span>
+                <span className="text-xs">{t('memo.photos.gallery')}</span>
               </Button>
             </div>
           </div>
@@ -524,8 +528,8 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
             {documents.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No files yet</p>
-                <p className="text-sm">Upload documents related to this job</p>
+                <p>{t('memo.photos.noFiles')}</p>
+                <p className="text-sm">{t('memo.photos.noFilesDescription')}</p>
               </div>
             )}
 
@@ -539,7 +543,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                 disabled={uploading}
               >
                 <Upload className="h-4 w-4 mb-1" />
-                <span className="text-xs">Upload File</span>
+                <span className="text-xs">{t('memo.photos.upload')}</span>
               </Button>
 
               <Button
@@ -550,7 +554,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
                 disabled={uploading}
               >
                 <FolderOpen className="h-4 w-4 mb-1" />
-                <span className="text-xs">Choose Files</span>
+                <span className="text-xs">{t('common.choose')}</span>
               </Button>
             </div>
           </div>
@@ -588,7 +592,10 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       />
 
       <div className="text-xs text-muted-foreground text-center mt-2">
-        Max 10MB per file. Images and documents supported.
+        {t('memo.photos.maxSize')}. {t('memo.photos.images')}{' '}
+        {language === 'no' ? 'og' : 'and'}{' '}
+        {t('memo.photos.documents').toLowerCase()}{' '}
+        {language === 'no' ? 'støttes' : 'supported'}.
       </div>
 
       {/* Delete Confirmation Dialog */}
