@@ -75,8 +75,8 @@ export default function Navbar() {
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuItem>
-                      <Link href="/ai/link1" className="w-full">
-                        {language === 'no' ? 'Link 1' : 'Link 1'}
+                      <Link href="/claude-monitor" className="w-full">
+                        📊 {language === 'no' ? 'Claude Monitor' : 'Claude Monitor'}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>

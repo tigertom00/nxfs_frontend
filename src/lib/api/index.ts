@@ -69,6 +69,10 @@ export { dashboardAPI } from './memo/dashboard';
 export { reportsAPI } from './memo/reports';
 export { elNumberLookupAPI } from './memo/n8n-lookup';
 
+// Claude Usage domain
+export * from './claude-usage/types';
+export { claudeUsageAPI } from './claude-usage';
+
 // ============================================================================
 // BACKWARD COMPATIBILITY EXPORTS
 // ============================================================================
