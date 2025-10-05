@@ -116,6 +116,7 @@ export interface StartTimerSessionPayload {
 
 export interface StopTimerSessionPayload {
   beskrivelse?: string; // Optional description for time entry
+  elapsed_seconds?: number; // Optional adjusted time in seconds (overrides calculated time)
 }
 
 export type StartTimerSessionResponse = ActiveTimerSession;
