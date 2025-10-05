@@ -20,6 +20,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useIntl } from '@/hooks/use-intl';
 import { ManualTimeEntry } from './manual-time-entry';
 import { TimeEntriesList } from './time-entries-list';
 import { TimerStopModal } from './timer-stop-modal';
@@ -44,6 +45,7 @@ interface TimerState {
 
 export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const { toast } = useToast();
+  const { t } = useIntl();
   const { user } = useAuthStore();
   const [timer, setTimer] = useState<TimerState>({
     isRunning: false,
@@ -420,7 +422,8 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
       if (!session.id) {
         toast({
           title: 'Timer start failed',
-          description: 'Server did not return a valid session. Please try again.',
+          description:
+            'Server did not return a valid session. Please try again.',
           variant: 'destructive',
         });
         return;
@@ -610,15 +613,15 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="timer" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            Timer
+            {t('memo.timer.timer')}
           </TabsTrigger>
           <TabsTrigger value="manual" className="flex items-center gap-2">
             <PlusCircle className="h-4 w-4" />
-            Add Time Entry
+            {t('memo.timeEntry.manualEntry')}
           </TabsTrigger>
           <TabsTrigger value="entries" className="flex items-center gap-2">
             <List className="h-4 w-4" />
-            Entries
+            {t('memo.timeEntry.title')}
           </TabsTrigger>
         </TabsList>
 
@@ -637,12 +640,12 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
               </div>
               {timer.isRunning && !timer.isPaused && (
                 <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1 animate-pulse">
-                  ● Running
+                  ● {t('common.loading').replace('...', '')}
                 </div>
               )}
               {timer.isPaused && (
                 <div className="text-sm text-orange-600 dark:text-orange-400 font-medium mt-1">
-                  ⏸ Paused
+                  ⏸ {t('memo.timer.paused')}
                 </div>
               )}
             </div>
@@ -656,7 +659,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   variant="default"
                 >
                   <Play className="h-5 w-5 mr-2" />
-                  Start Timer
+                  {t('memo.timer.start')}
                 </Button>
               ) : timer.isPaused ? (
                 <>
@@ -666,7 +669,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                     variant="default"
                   >
                     <Play className="h-5 w-5 mr-2" />
-                    Resume
+                    {t('memo.timer.resume')}
                   </Button>
                   <Button
                     onClick={stopTimer}
@@ -674,7 +677,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                     variant="destructive"
                   >
                     <Square className="h-5 w-5 mr-2" />
-                    Stop & Save
+                    {t('memo.timer.stop')}
                   </Button>
                 </>
               ) : (
@@ -684,7 +687,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   variant="destructive"
                 >
                   <Square className="h-5 w-5 mr-2" />
-                  Stop & Save
+                  {t('memo.timer.stop')}
                 </Button>
               )}
             </div>

@@ -2,6 +2,7 @@
 
 import { Job } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { useIntl } from '@/hooks/use-intl';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface JobHeaderProps {
@@ -10,6 +11,7 @@ interface JobHeaderProps {
 }
 
 export function JobHeader({ job, onBack }: JobHeaderProps) {
+  const { t } = useIntl();
   return (
     <div className="space-y-4">
       {/* Navigation Bar */}
@@ -31,7 +33,9 @@ export function JobHeader({ job, onBack }: JobHeaderProps) {
 
       {/* Job Info Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">Job #{job.ordre_nr}</h1>
+        <h1 className="text-2xl font-bold">
+          {t('memo.job.orderNumber')} #{job.ordre_nr}
+        </h1>
         {job.tittel && (
           <h2 className="text-lg text-muted-foreground">{job.tittel}</h2>
         )}
@@ -51,7 +55,9 @@ export function JobHeader({ job, onBack }: JobHeaderProps) {
               : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 purple:bg-purple-100 purple:text-purple-800'
           }`}
         >
-          {job.ferdig ? '✅ Completed' : '🚧 In Progress'}
+          {job.ferdig
+            ? `✅ ${t('memo.job.completed')}`
+            : `🚧 ${t('memo.job.inProgress')}`}
         </div>
       </div>
     </div>

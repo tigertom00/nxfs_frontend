@@ -44,6 +44,7 @@ import { AdvancedMaterialSearch } from '@/components/features/memo/shared/advanc
 import { efoService, parseElNumber } from '@/lib/efo-api';
 import { useToast } from '@/hooks/use-toast';
 import { useUIStore } from '@/stores';
+import { useIntl } from '@/hooks/use-intl';
 import {
   Package,
   Scan,
@@ -74,6 +75,7 @@ interface SelectedMaterial extends Material {
 export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   const { toast } = useToast();
   const { language } = useUIStore();
+  const { t } = useIntl();
   const [showScanner, setShowScanner] = useState(false);
   const [showMaterialDialog, setShowMaterialDialog] = useState(false);
   const [allMaterials, setAllMaterials] = useState<Material[]>([]);
@@ -474,8 +476,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       });
 
       const parsedELNumber = parseElNumber(cleanCode);
-      const lookupResult =
-        await elNumberLookupAPI.lookupELNumber(parsedELNumber!);
+      const lookupResult = await elNumberLookupAPI.lookupELNumber(
+        parsedELNumber!
+      );
 
       // N8N returns an array, get the first item
       const materialData = Array.isArray(lookupResult)
@@ -763,7 +766,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
             <div className="flex items-center justify-center gap-2">
               <Package className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">
-                Materials ({jobMaterials.length})
+                {t('memo.materials.title')} ({jobMaterials.length})
               </h3>
             </div>
             {jobMaterials.length > 0 ? (
@@ -782,9 +785,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No materials added yet</p>
+                <p>{t('memo.materials.noMaterials')}</p>
                 <p className="text-sm">
-                  Add materials to track usage on this job
+                  {t('memo.materials.noMaterialsDescription')}
                 </p>
               </div>
             )}
@@ -798,7 +801,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
             <div className="flex items-center justify-center gap-2">
               <Package className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">
-                Materials ({jobMaterials.length})
+                {t('memo.materials.title')} ({jobMaterials.length})
               </h3>
             </div>
             {/* EL Number Input with Scan */}
@@ -1050,7 +1053,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
               <TabsContent value="search" className="space-y-2">
                 <div className="space-y-2">
                   <Input
-                    placeholder="Search materials..."
+                    placeholder={t('memo.materials.search')}
                     value={searchQuery}
                     onChange={(e) => {
                       const value = e.target.value;
