@@ -39,25 +39,27 @@ export function TimerStopModal({
   const [loading, setLoading] = useState(false);
   const [adjustedSeconds, setAdjustedSeconds] =
     useState<number>(elapsedSeconds);
+  const [initialSeconds, setInitialSeconds] = useState<number>(elapsedSeconds);
 
-  // Reset adjusted time when elapsed seconds changes
+  // Only reset when modal opens, not on every timer tick
   useEffect(() => {
-    setAdjustedSeconds(elapsedSeconds);
-  }, [elapsedSeconds]);
+    if (isOpen) {
+      setAdjustedSeconds(elapsedSeconds);
+      setInitialSeconds(elapsedSeconds);
+    }
+  }, [isOpen, elapsedSeconds]);
 
-  const originalTime = formatSecondsToTimeString(elapsedSeconds);
+  const originalTime = formatSecondsToTimeString(initialSeconds);
   const roundedSeconds = roundSecondsToNearestHalfHour(adjustedSeconds);
   const roundedTime = formatSecondsToTimeString(roundedSeconds);
   const wasRounded = roundedSeconds !== adjustedSeconds;
-  const wasAdjusted = adjustedSeconds !== elapsedSeconds;
+  const wasAdjusted = adjustedSeconds !== initialSeconds;
 
   const handleConfirm = async () => {
     setLoading(true);
     try {
       await onConfirm(description.trim() || undefined, adjustedSeconds);
-      // Reset state
-      setDescription('');
-      setAdjustedSeconds(elapsedSeconds);
+      // Don't reset here - modal will reset when it reopens
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -69,8 +71,7 @@ export function TimerStopModal({
     setLoading(true);
     try {
       await onDelete();
-      setDescription('');
-      setAdjustedSeconds(elapsedSeconds);
+      // Don't reset here - modal will reset when it reopens
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -84,14 +85,12 @@ export function TimerStopModal({
 
   const handleCancel = () => {
     onCancel();
-    setDescription('');
-    setAdjustedSeconds(elapsedSeconds);
+    // Don't reset here - modal will reset when it reopens
   };
 
   const handleClose = () => {
     onClose();
-    setDescription('');
-    setAdjustedSeconds(elapsedSeconds);
+    // Don't reset here - modal will reset when it reopens
   };
 
   return (
@@ -174,8 +173,8 @@ export function TimerStopModal({
 
             {wasAdjusted && (
               <p className="text-xs text-muted-foreground text-center">
-                Time adjusted by {adjustedSeconds > elapsedSeconds ? '+' : ''}
-                {((adjustedSeconds - elapsedSeconds) / 60).toFixed(0)} minutes
+                Time adjusted by {adjustedSeconds > initialSeconds ? '+' : ''}
+                {((adjustedSeconds - initialSeconds) / 60).toFixed(0)} minutes
               </p>
             )}
 
