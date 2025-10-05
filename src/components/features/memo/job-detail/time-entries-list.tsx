@@ -20,6 +20,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useIntl } from '@/hooks/use-intl';
 import {
   format,
   parseISO,
@@ -121,6 +122,7 @@ export function TimeEntriesList({
   refreshTrigger,
 }: TimeEntriesListProps) {
   const { toast } = useToast();
+  const { t } = useIntl();
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('job');
   const [jobEntries, setJobEntries] = useState<DateGroupedTimeEntries>({});
@@ -379,7 +381,8 @@ export function TimeEntriesList({
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground">
-                      {dateGroup?.entries?.length || 0} entries
+                      {dateGroup?.entries?.length || 0}{' '}
+                      {t('memo.timeEntry.entriesAcrossDays')}
                     </span>
                     <div className="text-right">
                       <div className="font-semibold text-sm">
@@ -458,7 +461,7 @@ export function TimeEntriesList({
                               </p>
                             )}
                             <div className="text-xs text-muted-foreground mt-1">
-                              Created: {createdTime}
+                              {t('memo.timeEntry.createdAt')} {createdTime}
                             </div>
                           </div>
 
@@ -467,7 +470,7 @@ export function TimeEntriesList({
                               variant="ghost"
                               size="sm"
                               className="h-6 w-6 p-0"
-                              title="Edit time entry"
+                              title={t('memo.timeEntry.editTimeEntry')}
                               onClick={() => handleEdit(entry)}
                             >
                               <Edit2 className="h-3 w-3" />
@@ -479,7 +482,7 @@ export function TimeEntriesList({
                                   variant="ghost"
                                   size="sm"
                                   className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                                  title="Delete time entry"
+                                  title={t('memo.timeEntry.deleteTimeEntry')}
                                   disabled={deleting === entry.id}
                                 >
                                   <Trash2 className="h-3 w-3" />
@@ -488,22 +491,21 @@ export function TimeEntriesList({
                               <AlertDialogContent>
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>
-                                    Delete Time Entry
+                                    {t('memo.timeEntry.deleteTimeEntry')}
                                   </AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to delete this time
-                                    entry of{' '}
-                                    {formatMinutesToDecimalHours(entry.timer)}
-                                    h? This action cannot be undone.
+                                    {t('memo.timeEntry.deleteTimeEntryConfirm')}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogCancel>
+                                    {t('common.cancel')}
+                                  </AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => handleDelete(entry.id)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >
-                                    Delete
+                                    {t('common.delete')}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
@@ -524,10 +526,11 @@ export function TimeEntriesList({
           <div className="mt-4 pt-4 border-t">
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">
-                {totalEntries} entries across {sortedDates.length} days
+                {totalEntries} {t('memo.timeEntry.entriesAcrossDays')}{' '}
+                {sortedDates.length} {t('memo.timeEntry.days')}
               </span>
               <span className="font-medium text-foreground">
-                Total: {totalHours.decimal}h
+                {t('memo.timeEntry.total')} {totalHours.decimal}h
               </span>
             </div>
           </div>
@@ -542,7 +545,7 @@ export function TimeEntriesList({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Time Entries
+            {t('memo.timeEntry.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -564,7 +567,7 @@ export function TimeEntriesList({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Time Entries
+            {t('memo.timeEntry.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -576,11 +579,11 @@ export function TimeEntriesList({
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="job" className="flex items-center gap-2">
                 <Briefcase className="h-4 w-4" />
-                Job
+                {t('memo.timeEntry.jobView')}
               </TabsTrigger>
               <TabsTrigger value="user" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                User
+                {t('memo.timeEntry.userView')}
               </TabsTrigger>
             </TabsList>
 
@@ -594,14 +597,26 @@ export function TimeEntriesList({
                   }
                 >
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select period" />
+                    <SelectValue
+                      placeholder={t('memo.timeEntry.selectPeriod')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="this_week">This Week</SelectItem>
-                    <SelectItem value="last_week">Last Week</SelectItem>
-                    <SelectItem value="this_month">This Month</SelectItem>
-                    <SelectItem value="last_month">Last Month</SelectItem>
-                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="this_week">
+                      {t('memo.timeEntry.thisWeek')}
+                    </SelectItem>
+                    <SelectItem value="last_week">
+                      {t('memo.timeEntry.lastWeek')}
+                    </SelectItem>
+                    <SelectItem value="this_month">
+                      {t('memo.timeEntry.thisMonth')}
+                    </SelectItem>
+                    <SelectItem value="last_month">
+                      {t('memo.timeEntry.lastMonth')}
+                    </SelectItem>
+                    <SelectItem value="all">
+                      {t('memo.timeEntry.allTime')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <span className="text-xs text-muted-foreground">
@@ -613,12 +628,12 @@ export function TimeEntriesList({
                     format(new Date(), 'MMMM yyyy')}
                   {jobDateFilter === 'last_month' &&
                     format(subMonths(new Date(), 1), 'MMMM yyyy')}
-                  {jobDateFilter === 'all' && 'All entries'}
+                  {jobDateFilter === 'all' && t('memo.timeEntry.allEntries')}
                 </span>
               </div>
               {renderEntriesList(
                 jobEntries,
-                'No time entries recorded for this job yet'
+                t('memo.timeEntry.noEntriesForJob')
               )}
             </TabsContent>
 
@@ -632,14 +647,26 @@ export function TimeEntriesList({
                   }
                 >
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select period" />
+                    <SelectValue
+                      placeholder={t('memo.timeEntry.selectPeriod')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="this_week">This Week</SelectItem>
-                    <SelectItem value="last_week">Last Week</SelectItem>
-                    <SelectItem value="this_month">This Month</SelectItem>
-                    <SelectItem value="last_month">Last Month</SelectItem>
-                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="this_week">
+                      {t('memo.timeEntry.thisWeek')}
+                    </SelectItem>
+                    <SelectItem value="last_week">
+                      {t('memo.timeEntry.lastWeek')}
+                    </SelectItem>
+                    <SelectItem value="this_month">
+                      {t('memo.timeEntry.thisMonth')}
+                    </SelectItem>
+                    <SelectItem value="last_month">
+                      {t('memo.timeEntry.lastMonth')}
+                    </SelectItem>
+                    <SelectItem value="all">
+                      {t('memo.timeEntry.allTime')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <span className="text-xs text-muted-foreground">
@@ -651,10 +678,10 @@ export function TimeEntriesList({
                     format(new Date(), 'MMMM yyyy')}
                   {userDateFilter === 'last_month' &&
                     format(subMonths(new Date(), 1), 'MMMM yyyy')}
-                  {userDateFilter === 'all' && 'All entries'}
+                  {userDateFilter === 'all' && t('memo.timeEntry.allEntries')}
                 </span>
               </div>
-              {renderEntriesList(userEntries, 'No time entries recorded yet')}
+              {renderEntriesList(userEntries, t('memo.timeEntry.noEntries'))}
             </TabsContent>
           </Tabs>
         </CardContent>
