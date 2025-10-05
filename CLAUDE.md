@@ -102,7 +102,7 @@ Each domain contains:
 - **Sonner**: Toast notifications with enhanced UX and error handling
 - **Prettier**: Code formatting with `.prettierrc` configuration
 - **Bundle Analyzer**: Performance monitoring and optimization insights
-- **Playwright**: Browser automation and testing via MCP server integration
+- **Chrome DevTools MCP**: Advanced browser automation, debugging, and performance profiling via MCP integration
 
 ### Component Architecture
 
@@ -539,14 +539,112 @@ npm run analyze  # Generate bundle analysis report
 npm run format   # Format all code with Prettier
 ```
 
-### Browser Testing with Playwright
+### Browser Testing and Debugging with Chrome DevTools MCP
 
-The project includes Playwright MCP server integration for browser automation and testing:
+The project uses Chrome DevTools MCP for comprehensive browser automation, debugging, and performance analysis:
 
-- **Setup**: Playwright MCP server configured with `npx @playwright/mcp@latest --caps vision`
+- **Setup**: Configured in `.mcp.json` with `npx chrome-devtools-mcp@latest`
 - **Browser Access**: Use `http://10.20.30.202:3000` when testing the development server
-- **Capabilities**: Screenshot capture, page interaction, form filling, navigation testing
-- **Usage**: Available through Claude Code's MCP integration for automated testing and UI verification
+- **26+ Tools Available**:
+  - **Input Automation** (7 tools): Click, type, scroll, drag-drop, file upload, keyboard input, mouse control
+  - **Navigation** (7 tools): Navigate URLs, reload, history, tab management, URL inspection
+  - **Performance** (3 tools): CPU profiling, memory analysis, code coverage, Core Web Vitals
+  - **Network Analysis** (2 tools): Request monitoring with headers, HAR export
+  - **Emulation** (3 tools): Device/viewport emulation, network throttling, geolocation
+  - **Debugging** (4 tools): Console logs, DOM inspection, JavaScript execution, screenshots
+
+#### Key Capabilities
+
+**Performance Profiling:**
+```
+- Measure Core Web Vitals (LCP, CLS, FCP)
+- Identify render-blocking resources
+- Analyze LCP breakdown phases
+- CPU and memory profiling
+- Network request timing analysis
+```
+
+**Network Debugging:**
+```
+- Monitor all requests to Django backend (https://api.nxfs.no)
+- Inspect request/response headers
+- Track WebSocket connections (Socket.IO)
+- Filter by resource type (xhr, fetch, script, etc.)
+- Export HAR files for detailed analysis
+```
+
+**Browser Automation:**
+```
+- Automated UI testing
+- Screenshot capture (full page, viewport, element)
+- Form filling and interaction testing
+- Mobile device emulation (iPhone, iPad, etc.)
+- Network condition simulation (3G, 4G, etc.)
+```
+
+**JavaScript Debugging:**
+```
+- Execute arbitrary JavaScript in page context
+- Inspect localStorage/sessionStorage
+- Query DOM elements
+- Monitor console messages
+- Evaluate React component state
+```
+
+#### Example Usage Patterns
+
+**Test Performance:**
+```typescript
+// Start performance trace with automatic reload
+mcp__chrome-devtools__performance_start_trace({ reload: true, autoStop: true })
+// Analyze specific insights
+mcp__chrome-devtools__performance_analyze_insight({ insightName: "LCPBreakdown" })
+```
+
+**Debug API Calls:**
+```typescript
+// List network requests
+mcp__chrome-devtools__list_network_requests({ resourceTypes: ["xhr", "fetch"], pageSize: 10 })
+// Inspect specific request
+mcp__chrome-devtools__get_network_request({ url: "https://api.nxfs.no/app/blog/posts/public/" })
+```
+
+**Test Responsive Design:**
+```typescript
+// Emulate mobile device
+mcp__chrome-devtools__resize_page({ width: 375, height: 667 })
+// Add network throttling
+mcp__chrome-devtools__emulate_network({ throttlingOption: "Fast 3G" })
+// Take screenshot
+mcp__chrome-devtools__take_screenshot({ filePath: "./mobile-view.png" })
+```
+
+**Execute JavaScript:**
+```typescript
+// Inspect page state
+mcp__chrome-devtools__evaluate_script({
+  function: `() => ({
+    theme: localStorage.getItem('ui-storage'),
+    isAuthenticated: !!document.cookie.includes('auth'),
+    reactVersion: window.React?.version
+  })`
+})
+```
+
+#### Testing Checklist
+
+Use Chrome DevTools MCP to verify:
+- ✅ Authentication flows (JWT token handling)
+- ✅ Theme switching (5 themes: system, light, dark, purple, pink)
+- ✅ API requests to Django backend
+- ✅ Socket.IO WebSocket connections
+- ✅ N8N chatbot integration
+- ✅ Responsive design (mobile/tablet/desktop)
+- ✅ Performance metrics (LCP < 2.5s, CLS < 0.1)
+- ✅ Network request timing
+- ✅ Console error monitoring
+
+For detailed documentation, see `CHROME_DEVTOOLS_MCP.md`.
 
 ### Environment Configuration
 
@@ -567,15 +665,14 @@ The project includes Playwright MCP server integration for browser automation an
 - `NEXT_PUBLIC_N8N_URL`: N8N webhook URL (default: https://n8n.nxfs.no/webhook/nxfs)
 - `NEXT_PUBLIC_N8N_SECRET_KEY`: Authentication key for N8N integration
 - `NEXT_PUBLIC_API_TOKEN`: Django API authentication token (format: "Token xxx#")
-- `PLAYWRIGHT_TEST_EMAIL`: Email for Playwright frontend testing (claude@nxfs.no)
-- `PLAYWRIGHT_TEST_PASSWORD`: Password for Playwright frontend testing
 - `NODE_ENV`: Environment mode (development/production/test)
 
 #### API Schema and Testing
 
 - **Backend API Schema**: https://api.nxfs.no/schema/ - Django REST API documentation
-- **Frontend Testing**: Use `http://10.20.30.202:3000` with Playwright to avoid CORS issues
+- **Frontend Testing**: Use `http://10.20.30.202:3000` when testing with Chrome DevTools MCP to avoid CORS issues
 - **API Authentication**: Token-based authentication for Django backend integration
+- **Performance Monitoring**: Chrome DevTools MCP provides detailed metrics for all API calls
 
 #### Setup Instructions
 

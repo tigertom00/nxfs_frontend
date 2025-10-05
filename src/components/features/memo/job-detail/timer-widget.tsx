@@ -4,6 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   timeEntriesAPI,
   timeTrackingAPI,
   timerSessionAPI,
@@ -18,6 +23,8 @@ import {
   PlusCircle,
   List,
   TrendingUp,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIntl } from '@/hooks/use-intl';
@@ -60,6 +67,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const [showStopModal, setShowStopModal] = useState(false);
   const [userStats, setUserStats] = useState<UserTimeStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [isManualEntryExpanded, setIsManualEntryExpanded] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -604,20 +612,17 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const handleManualEntrySuccess = () => {
     setRefreshTrigger((prev) => prev + 1);
     loadUserStats(); // Refresh stats after manual entry
+    setIsManualEntryExpanded(false); // Close the manual entry section
     setActiveTab('entries'); // Switch to entries tab after adding
   };
 
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="timer" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             {t('memo.timer.timer')}
-          </TabsTrigger>
-          <TabsTrigger value="manual" className="flex items-center gap-2">
-            <PlusCircle className="h-4 w-4" />
-            {t('memo.timeEntry.manualEntry')}
           </TabsTrigger>
           <TabsTrigger value="entries" className="flex items-center gap-2">
             <List className="h-4 w-4" />
@@ -701,6 +706,37 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   : 'Click start to begin tracking time'}
             </div>
 
+            {/* Manual Time Entry - Collapsible */}
+            <Collapsible
+              open={isManualEntryExpanded}
+              onOpenChange={setIsManualEntryExpanded}
+              className="border-t pt-4"
+            >
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <PlusCircle className="h-4 w-4" />
+                    {t('memo.timeEntry.manualEntry')}
+                  </span>
+                  {isManualEntryExpanded ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <ManualTimeEntry
+                  jobId={jobId}
+                  onSuccess={handleManualEntrySuccess}
+                  onCancel={() => setIsManualEntryExpanded(false)}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+
             {/* User Statistics */}
             {userStats && (
               <div className="space-y-3">
@@ -716,7 +752,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                       {t('memo.timer.todayYou')}
                     </div>
                     <div className="text-sm font-semibold">
-                      {(userStats.today.hours / 60).toFixed(1)}h
+                      {(userStats.today.hours / 60).toFixed(1)}t
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {userStats.today.entries} {t('memo.timer.entries')}
@@ -727,7 +763,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                       {t('memo.timer.yesterdayYou')}
                     </div>
                     <div className="text-sm font-semibold">
-                      {(userStats.yesterday.hours / 60).toFixed(1)}h
+                      {(userStats.yesterday.hours / 60).toFixed(1)}t
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {userStats.yesterday.entries} {t('memo.timer.entries')}
@@ -738,7 +774,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                       {t('memo.timer.yourTotal')}
                     </div>
                     <div className="text-sm font-semibold">
-                      {(userStats.total_user.hours / 60).toFixed(1)}h
+                      {(userStats.total_user.hours / 60).toFixed(1)}t
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {userStats.total_user.entries} {t('memo.timer.entries')}
@@ -749,7 +785,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                       {t('memo.timer.allUsers')}
                     </div>
                     <div className="text-sm font-semibold">
-                      {(userStats.total_all_users.hours / 60).toFixed(1)}h
+                      {(userStats.total_all_users.hours / 60).toFixed(1)}t
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {userStats.total_all_users.entries}{' '}
@@ -769,10 +805,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
               </div>
             )}
           </div>
-        </TabsContent>
-
-        <TabsContent value="manual" className="space-y-0">
-          <ManualTimeEntry jobId={jobId} onSuccess={handleManualEntrySuccess} />
         </TabsContent>
 
         <TabsContent value="entries" className="space-y-0">

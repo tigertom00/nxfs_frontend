@@ -86,7 +86,7 @@ export function EditTimeEntryDialog({
 
       toast({
         title: 'Time entry updated',
-        description: `Updated to ${formatMinutesToDecimalHours(finalMinutes)}h`,
+        description: `Updated to ${formatMinutesToDecimalHours(finalMinutes)}t`,
       });
 
       onSuccess();
@@ -157,9 +157,9 @@ export function EditTimeEntryDialog({
             {showRoundingInfo && !roundingDetails.isExact && (
               <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
                 <p>
-                  {formatMinutesToDecimalHours(currentMinutes)}h will be rounded
+                  {formatMinutesToDecimalHours(currentMinutes)}t will be rounded
                   to{' '}
-                  {formatMinutesToDecimalHours(roundingDetails.roundedMinutes)}h
+                  {formatMinutesToDecimalHours(roundingDetails.roundedMinutes)}t
                   ({roundingDetails.roundedMinutes} minutes)
                 </p>
                 <p className="mt-1">

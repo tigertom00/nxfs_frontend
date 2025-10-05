@@ -28,7 +28,7 @@ export function PerformanceMetrics({ stats }: PerformanceMetricsProps) {
   const formatHours = (hours: number) => {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
-    return `${h}h ${m}m`;
+    return `${h}t ${m}m`;
   };
 
   // Calculate performance scores

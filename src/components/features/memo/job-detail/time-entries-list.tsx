@@ -389,7 +389,7 @@ export function TimeEntriesList({
                         {formatMinutesToDecimalHours(
                           dateGroup?.total_hours || 0
                         )}
-                        h
+                        t
                       </div>
                     </div>
                   </div>
@@ -432,7 +432,7 @@ export function TimeEntriesList({
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <div className="font-medium text-sm">
-                                {formatMinutesToDecimalHours(entry.timer)}h
+                                {formatMinutesToDecimalHours(entry.timer)}t
                               </div>
                               {(entry.jobb_tittel ||
                                 entry.jobb_details?.tittel) && (
@@ -530,7 +530,7 @@ export function TimeEntriesList({
                 {sortedDates.length} {t('memo.timeEntry.days')}
               </span>
               <span className="font-medium text-foreground">
-                {t('memo.timeEntry.total')} {totalHours.decimal}h
+                {t('memo.timeEntry.total')} {totalHours.decimal}t
               </span>
             </div>
           </div>

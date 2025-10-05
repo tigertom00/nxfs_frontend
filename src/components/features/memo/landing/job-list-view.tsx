@@ -47,7 +47,7 @@ export function JobListView({
   const formatTime = (hours: number) => {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
-    return `${h}h ${m}m`;
+    return `${h}t ${m}m`;
   };
 
   const getPaginationRange = (): (number | string)[] => {

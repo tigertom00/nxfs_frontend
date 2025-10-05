@@ -93,21 +93,25 @@ export function getTimeRoundingDetails(minutes: number): TimeRoundingResult {
 /**
  * Format minutes into human-readable hour string
  * @param minutes - Time in minutes
- * @returns Formatted string like "1h 30min" or "2h"
+ * @param hourSuffix - Suffix for hours (default: 't' for Norwegian timer)
+ * @returns Formatted string like "1t 30min" or "2t"
  */
-export function formatMinutesToHourString(minutes: number): string {
+export function formatMinutesToHourString(
+  minutes: number,
+  hourSuffix: string = 't'
+): string {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
 
   if (remainingMinutes === 0) {
-    return `${hours}h`;
+    return `${hours}${hourSuffix}`;
   }
 
   if (hours === 0) {
     return `${remainingMinutes}min`;
   }
 
-  return `${hours}h ${remainingMinutes}min`;
+  return `${hours}${hourSuffix} ${remainingMinutes}min`;
 }
 
 /**
