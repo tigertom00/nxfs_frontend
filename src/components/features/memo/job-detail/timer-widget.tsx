@@ -640,7 +640,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
               </div>
               {timer.isRunning && !timer.isPaused && (
                 <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1 animate-pulse">
-                  ● {t('common.loading').replace('...', '')}
+                  ● {t('memo.timer.running')}
                 </div>
               )}
               {timer.isPaused && (
@@ -707,52 +707,53 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs font-medium text-muted-foreground">
-                    TIME OVERVIEW (THIS JOB)
+                    {t('memo.timer.timeOverview')}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">
-                      Today (You)
+                      {t('memo.timer.todayYou')}
                     </div>
                     <div className="text-sm font-semibold">
                       {(userStats.today.hours / 60).toFixed(1)}h
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {userStats.today.entries} entries
+                      {userStats.today.entries} {t('memo.timer.entries')}
                     </div>
                   </div>
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">
-                      Yesterday (You)
+                      {t('memo.timer.yesterdayYou')}
                     </div>
                     <div className="text-sm font-semibold">
                       {(userStats.yesterday.hours / 60).toFixed(1)}h
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {userStats.yesterday.entries} entries
+                      {userStats.yesterday.entries} {t('memo.timer.entries')}
                     </div>
                   </div>
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">
-                      Your Total
+                      {t('memo.timer.yourTotal')}
                     </div>
                     <div className="text-sm font-semibold">
                       {(userStats.total_user.hours / 60).toFixed(1)}h
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {userStats.total_user.entries} entries
+                      {userStats.total_user.entries} {t('memo.timer.entries')}
                     </div>
                   </div>
                   <div className="text-center p-2 bg-muted/30 rounded-lg">
                     <div className="text-xs text-muted-foreground">
-                      All Users
+                      {t('memo.timer.allUsers')}
                     </div>
                     <div className="text-sm font-semibold">
                       {(userStats.total_all_users.hours / 60).toFixed(1)}h
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {userStats.total_all_users.entries} entries
+                      {userStats.total_all_users.entries}{' '}
+                      {t('memo.timer.entries')}
                     </div>
                   </div>
                 </div>
@@ -763,7 +764,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
               <div className="flex items-center justify-center py-3">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                 <span className="ml-2 text-xs text-muted-foreground">
-                  Loading stats...
+                  {t('memo.timer.loadingStats')}
                 </span>
               </div>
             )}

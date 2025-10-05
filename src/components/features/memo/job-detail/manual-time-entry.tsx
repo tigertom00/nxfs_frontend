@@ -16,6 +16,7 @@ import { timeEntriesAPI } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 import { Clock, Calendar as CalendarIcon, Plus, Minus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useIntl } from '@/hooks/use-intl';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
@@ -40,6 +41,7 @@ export function ManualTimeEntry({
   onCancel,
 }: ManualTimeEntryProps) {
   const { toast } = useToast();
+  const { t } = useIntl();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
@@ -137,14 +139,14 @@ export function ManualTimeEntry({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          Add Time Entry
+          {t('memo.timeEntry.manualEntry')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Date Picker */}
           <div className="space-y-2">
-            <Label>Date</Label>
+            <Label>{t('memo.timeEntry.date')}</Label>
             <div className="flex items-center gap-2">
               <Popover>
                 <PopoverTrigger asChild>
@@ -189,7 +191,7 @@ export function ManualTimeEntry({
 
           {/* Time Input */}
           <div className="space-y-2">
-            <Label>Time Entry</Label>
+            <Label>{t('memo.timeEntry.duration')}</Label>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
@@ -200,7 +202,9 @@ export function ManualTimeEntry({
                 max="24"
                 className="text-center"
               />
-              <span className="text-sm text-muted-foreground">hours</span>
+              <span className="text-sm text-muted-foreground">
+                {t('memo.dashboard.hoursToday').toLowerCase().split(' ')[0]}
+              </span>
               <Button
                 type="button"
                 variant={hours === 8.0 ? 'default' : 'outline'}
@@ -251,11 +255,13 @@ export function ManualTimeEntry({
 
           {/* Description */}
           <div className="space-y-2">
-            <Label>Description (Optional)</Label>
+            <Label>
+              {t('memo.timeEntry.description')} ({t('common.or')})
+            </Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter description for this time entry..."
+              placeholder={t('memo.timer.descriptionPlaceholder')}
               rows={3}
             />
           </div>
@@ -263,11 +269,11 @@ export function ManualTimeEntry({
           {/* Actions */}
           <div className="flex gap-3 pt-4">
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? 'Adding...' : 'Add Time Entry'}
+              {loading ? `${t('common.saving')}` : t('memo.timeEntry.save')}
             </Button>
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
+                {t('common.cancel')}
               </Button>
             )}
           </div>
