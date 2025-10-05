@@ -700,10 +700,10 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             {/* Auto-save Status */}
             <div className="text-center text-xs text-muted-foreground">
               {timer.isPaused
-                ? 'Timer is paused. Click Resume to continue or Stop & Save to finish.'
+                ? t('memo.timer.timerPausedMessage')
                 : timer.isRunning
-                  ? 'Timer will auto-save when stopped (with 30-min rounding)'
-                  : 'Click start to begin tracking time'}
+                  ? t('memo.timer.timerWillAutoSave')
+                  : t('memo.timer.clickToStart')}
             </div>
 
             {/* Manual Time Entry - Collapsible */}

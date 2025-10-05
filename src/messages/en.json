@@ -445,7 +445,10 @@
       "timeHasBeenRounded": "Time has been",
       "addDetailsSession": "Add details about what you worked on during this session",
       "timeWillBeSaved": "Time will be saved to Job",
-      "error": "Timer error"
+      "error": "Timer error",
+      "clickToStart": "Click start to begin tracking time",
+      "timerWillAutoSave": "Timer will auto-save when stopped (with 30-min rounding)",
+      "timerPausedMessage": "Timer is paused. Click Resume to continue or Stop & Save to finish."
     },
     "timeEntry": {
       "title": "Time Entries",

@@ -445,7 +445,10 @@
       "timeHasBeenRounded": "Tid har blitt",
       "addDetailsSession": "Legg til detaljer om hva du jobbet med under denne økten",
       "timeWillBeSaved": "Tid vil bli lagret til Jobb",
-      "error": "Tidtakerfeil"
+      "error": "Tidtakerfeil",
+      "clickToStart": "Klikk start for å begynne å spore tid",
+      "timerWillAutoSave": "Tidtaker vil lagres automatisk når den stoppes (med 30-min avrunding)",
+      "timerPausedMessage": "Tidtaker er satt på pause. Klikk Fortsett for å fortsette eller Stopp & Lagre for å fullføre."
     },
     "timeEntry": {
       "title": "Tidsregistreringer",

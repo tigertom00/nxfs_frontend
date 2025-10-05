@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { timeEntriesAPI, timeTrackingAPI } from '@/lib/api';
 import { DateGroupedTimeEntries, TimeEntryWithJob, UserBasic } from '@/lib/api';
-import { useAuthStore } from '@/stores';
+import { useAuthStore, useUIStore } from '@/stores';
 import {
   Clock,
   Edit2,
@@ -31,6 +31,7 @@ import {
   subWeeks,
   subMonths,
 } from 'date-fns';
+import { nb } from 'date-fns/locale';
 import { TimeEntry } from '@/lib/api';
 import {
   formatMinutesToHourString,
@@ -124,6 +125,7 @@ export function TimeEntriesList({
   const { toast } = useToast();
   const { t } = useIntl();
   const { user } = useAuthStore();
+  const { language } = useUIStore();
   const [activeTab, setActiveTab] = useState('job');
   const [jobEntries, setJobEntries] = useState<DateGroupedTimeEntries>({});
   const [userEntries, setUserEntries] = useState<DateGroupedTimeEntries>({});
@@ -621,13 +623,13 @@ export function TimeEntriesList({
                 </Select>
                 <span className="text-xs text-muted-foreground">
                   {jobDateFilter === 'this_week' &&
-                    `${format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                    `${format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d', { locale: language === 'no' ? nb : undefined })} - ${format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d, yyyy', { locale: language === 'no' ? nb : undefined })}`}
                   {jobDateFilter === 'last_week' &&
-                    `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                    `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d', { locale: language === 'no' ? nb : undefined })} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy', { locale: language === 'no' ? nb : undefined })}`}
                   {jobDateFilter === 'this_month' &&
-                    format(new Date(), 'MMMM yyyy')}
+                    format(new Date(), 'MMMM yyyy', { locale: language === 'no' ? nb : undefined })}
                   {jobDateFilter === 'last_month' &&
-                    format(subMonths(new Date(), 1), 'MMMM yyyy')}
+                    format(subMonths(new Date(), 1), 'MMMM yyyy', { locale: language === 'no' ? nb : undefined })}
                   {jobDateFilter === 'all' && t('memo.timeEntry.allEntries')}
                 </span>
               </div>
@@ -671,13 +673,13 @@ export function TimeEntriesList({
                 </Select>
                 <span className="text-xs text-muted-foreground">
                   {userDateFilter === 'this_week' &&
-                    `${format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                    `${format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d', { locale: language === 'no' ? nb : undefined })} - ${format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM d, yyyy', { locale: language === 'no' ? nb : undefined })}`}
                   {userDateFilter === 'last_week' &&
-                    `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d')} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy')}`}
+                    `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d', { locale: language === 'no' ? nb : undefined })} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy', { locale: language === 'no' ? nb : undefined })}`}
                   {userDateFilter === 'this_month' &&
-                    format(new Date(), 'MMMM yyyy')}
+                    format(new Date(), 'MMMM yyyy', { locale: language === 'no' ? nb : undefined })}
                   {userDateFilter === 'last_month' &&
-                    format(subMonths(new Date(), 1), 'MMMM yyyy')}
+                    format(subMonths(new Date(), 1), 'MMMM yyyy', { locale: language === 'no' ? nb : undefined })}
                   {userDateFilter === 'all' && t('memo.timeEntry.allEntries')}
                 </span>
               </div>
