@@ -55,20 +55,20 @@ const DIFFICULTY_CONFIG = {
   easy: {
     mazeSize: 15,
     ghostCount: 2,
-    ghostSpeed: 150,
-    powerPelletDuration: 8000,
+    ghostSpeed: 300,
+    powerPelletDuration: 10000,
   },
   medium: {
     mazeSize: 19,
     ghostCount: 3,
-    ghostSpeed: 120,
-    powerPelletDuration: 6000,
+    ghostSpeed: 250,
+    powerPelletDuration: 8000,
   },
   hard: {
     mazeSize: 23,
     ghostCount: 4,
-    ghostSpeed: 90,
-    powerPelletDuration: 4000,
+    ghostSpeed: 200,
+    powerPelletDuration: 6000,
   },
 };
 
@@ -232,7 +232,7 @@ export default function PacManGame() {
       maze[i][size - 1] = 1;
     }
 
-    // Add power pellets at corners
+    // Add power pellets at corners - ensure they're in accessible spots
     const powerPelletPositions = [
       { x: 2, y: 2 },
       { x: size - 3, y: 2 },
@@ -241,9 +241,18 @@ export default function PacManGame() {
     ];
 
     powerPelletPositions.forEach((pos) => {
-      if (maze[pos.y][pos.x] !== 1) {
-        maze[pos.y][pos.x] = 3; // Power pellet
+      // Clear a small area around power pellets to ensure they're visible and accessible
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = pos.x + dx;
+          const ny = pos.y + dy;
+          if (nx > 0 && nx < size - 1 && ny > 0 && ny < size - 1) {
+            maze[ny][nx] = 2; // Regular pellet
+          }
+        }
       }
+      // Place the power pellet in the center
+      maze[pos.y][pos.x] = 3;
     });
 
     return maze;
@@ -252,7 +261,7 @@ export default function PacManGame() {
   // Initialize ghosts
   const initializeGhosts = useCallback(
     (mazeSize: number, count: number): GhostEntity[] => {
-      const behaviors: GhostBehavior[] = ['chase', 'patrol', 'random', 'chase'];
+      const behaviors: GhostBehavior[] = ['patrol', 'random', 'patrol', 'chase'];
       return Array.from({ length: count }, (_, i) => ({
         id: `ghost-${i}`,
         position: {
