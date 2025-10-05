@@ -116,48 +116,120 @@ export default function PacManGame() {
 
   const config = DIFFICULTY_CONFIG[difficulty];
 
-  // Generate maze using recursive backtracking
+  // Generate maze similar to classic Pac-Man with multiple paths
   const generateMaze = useCallback((size: number): CellType[][] => {
+    // Initialize maze with walls
     const maze: CellType[][] = Array(size)
       .fill(0)
       .map(() => Array(size).fill(1));
 
-    const stack: Position[] = [];
-    const start = { x: 1, y: 1 };
-    maze[start.y][start.x] = 2; // Start with pellet
-    stack.push(start);
-
-    while (stack.length > 0) {
-      const current = stack[stack.length - 1];
-      const neighbors: Position[] = [];
-
-      // Check all directions
-      Object.values(DIRECTIONS).forEach((dir) => {
-        const newX = current.x + dir.x * 2;
-        const newY = current.y + dir.y * 2;
-
-        if (
-          newX > 0 &&
-          newX < size - 1 &&
-          newY > 0 &&
-          newY < size - 1 &&
-          maze[newY][newX] === 1
-        ) {
-          neighbors.push({ x: newX, y: newY });
+    // Helper function to create a corridor
+    const createCorridor = (
+      startX: number,
+      endX: number,
+      startY: number,
+      endY: number
+    ) => {
+      for (let y = Math.min(startY, endY); y <= Math.max(startY, endY); y++) {
+        for (let x = Math.min(startX, endX); x <= Math.max(startX, endX); x++) {
+          if (x >= 0 && x < size && y >= 0 && y < size) {
+            maze[y][x] = 2; // Pellet
+          }
         }
-      });
-
-      if (neighbors.length > 0) {
-        const next = neighbors[Math.floor(Math.random() * neighbors.length)];
-        const wallX = current.x + (next.x - current.x) / 2;
-        const wallY = current.y + (next.y - current.y) / 2;
-
-        maze[wallY][wallX] = 2; // Pellet
-        maze[next.y][next.x] = 2; // Pellet
-        stack.push(next);
-      } else {
-        stack.pop();
       }
+    };
+
+    // Helper function to create room blocks
+    const createBlock = (
+      x: number,
+      y: number,
+      width: number,
+      height: number
+    ) => {
+      for (let dy = 0; dy < height; dy++) {
+        for (let dx = 0; dx < width; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
+            maze[ny][nx] = 1;
+          }
+        }
+      }
+    };
+
+    // Fill entire maze with pellets first
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        maze[y][x] = 2;
+      }
+    }
+
+    // Create a pattern similar to classic Pac-Man
+    const blockSize = Math.floor(size / 8);
+    const spacing = blockSize + 1;
+
+    // Create central ghost house
+    const centerX = Math.floor(size / 2);
+    const centerY = Math.floor(size / 2);
+    createBlock(centerX - 2, centerY - 1, 4, 3);
+
+    // Create symmetric block pattern
+    const positions = [
+      // Top-left quadrant
+      { x: blockSize, y: blockSize },
+      { x: blockSize, y: blockSize * 2.5 },
+      { x: blockSize * 2.5, y: blockSize },
+      { x: blockSize * 2.5, y: blockSize * 2.5 },
+    ];
+
+    // Mirror blocks to create symmetric maze
+    positions.forEach(({ x, y }) => {
+      const w = Math.floor(blockSize * 1.5);
+      const h = Math.floor(blockSize * 0.8);
+
+      // Top-left
+      createBlock(Math.floor(x), Math.floor(y), w, h);
+      // Top-right
+      createBlock(Math.floor(size - x - w), Math.floor(y), w, h);
+      // Bottom-left
+      createBlock(Math.floor(x), Math.floor(size - y - h), w, h);
+      // Bottom-right
+      createBlock(Math.floor(size - x - w), Math.floor(size - y - h), w, h);
+    });
+
+    // Create additional horizontal corridors
+    for (let i = 1; i < 4; i++) {
+      const y = Math.floor((size / 4) * i);
+      createCorridor(1, size - 2, y, y);
+    }
+
+    // Create additional vertical corridors
+    for (let i = 1; i < 4; i++) {
+      const x = Math.floor((size / 4) * i);
+      createCorridor(x, x, 1, size - 2);
+    }
+
+    // Add some random loops for variety
+    const loopCount = Math.floor(size / 4);
+    for (let i = 0; i < loopCount; i++) {
+      const x = Math.floor(Math.random() * (size - 4)) + 2;
+      const y = Math.floor(Math.random() * (size - 4)) + 2;
+      const width = Math.floor(Math.random() * 3) + 2;
+      const height = Math.floor(Math.random() * 3) + 2;
+
+      // Create hollow rectangle (corridor loop)
+      createCorridor(x, x + width, y, y);
+      createCorridor(x, x + width, y + height, y + height);
+      createCorridor(x, x, y, y + height);
+      createCorridor(x + width, x + width, y, y + height);
+    }
+
+    // Ensure borders are walls
+    for (let i = 0; i < size; i++) {
+      maze[0][i] = 1;
+      maze[size - 1][i] = 1;
+      maze[i][0] = 1;
+      maze[i][size - 1] = 1;
     }
 
     // Add power pellets at corners
