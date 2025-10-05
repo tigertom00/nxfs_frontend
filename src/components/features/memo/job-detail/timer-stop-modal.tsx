@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Clock, Save, Pause, Trash2, Plus, Minus } from 'lucide-react';
+import { useIntl } from '@/hooks/use-intl';
 import {
   formatSecondsToTimeString,
   roundSecondsToNearestHalfHour,
@@ -36,6 +37,7 @@ export function TimerStopModal({
   elapsedSeconds,
   jobId,
 }: TimerStopModalProps) {
+  const { t } = useIntl();
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [adjustedSeconds, setAdjustedSeconds] = useState<number>(0);
@@ -103,10 +105,10 @@ export function TimerStopModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Stop Timer & Save Time
+            {t('memo.timer.stopConfirm')}
           </DialogTitle>
           <DialogDescription>
-            Review and adjust your time before saving to Job #{jobId}
+            {t('memo.timer.stopDescription')} #{jobId}
           </DialogDescription>
         </DialogHeader>
 
@@ -120,7 +122,7 @@ export function TimerStopModal({
               className="w-full"
             >
               <Pause className="h-4 w-4 mr-1" />
-              Pause
+              {t('memo.timer.pause')}
             </Button>
             <Button
               onClick={handleConfirm}
@@ -128,7 +130,7 @@ export function TimerStopModal({
               className="w-full"
             >
               <Save className="h-4 w-4 mr-1" />
-              Save
+              {t('common.save')}
             </Button>
             <Button
               variant="destructive"
@@ -137,7 +139,7 @@ export function TimerStopModal({
               className="w-full"
             >
               <Trash2 className="h-4 w-4 mr-1" />
-              Delete
+              {t('common.delete')}
             </Button>
           </div>
 
@@ -145,14 +147,16 @@ export function TimerStopModal({
           <div className="p-4 bg-muted rounded-lg space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">
-                Original time:
+                {t('memo.timer.originalTime')}
               </span>
               <span className="font-mono font-medium">{originalTime}</span>
             </div>
 
             {/* Time adjustment controls */}
             <div className="flex items-center justify-between pt-2 border-t border-border">
-              <span className="text-sm font-medium">Adjust time:</span>
+              <span className="text-sm font-medium">
+                {t('memo.timer.adjustTime')}
+              </span>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -180,15 +184,17 @@ export function TimerStopModal({
 
             {wasAdjusted && (
               <p className="text-xs text-muted-foreground text-center">
-                Time adjusted by {adjustedSeconds > initialSeconds ? '+' : ''}
-                {((adjustedSeconds - initialSeconds) / 60).toFixed(0)} minutes
+                {t('memo.timer.timeAdjusted')}{' '}
+                {adjustedSeconds > initialSeconds ? '+' : ''}
+                {((adjustedSeconds - initialSeconds) / 60).toFixed(0)}{' '}
+                {t('memo.timer.minutes')}
               </p>
             )}
 
             {wasRounded && (
               <div className="flex justify-between items-center pt-2 border-t border-border">
                 <span className="text-sm text-muted-foreground">
-                  Rounded time:
+                  {t('memo.timer.roundedTime')}
                 </span>
                 <span className="font-mono font-medium text-primary">
                   {roundedTime}
@@ -197,7 +203,9 @@ export function TimerStopModal({
             )}
 
             <div className="flex justify-between items-center pt-2 border-t border-border">
-              <span className="text-sm font-medium">Time to save:</span>
+              <span className="text-sm font-medium">
+                {t('memo.timer.timeToSave')}
+              </span>
               <span className="font-mono font-bold text-lg">
                 {wasRounded
                   ? roundedTime
@@ -207,34 +215,36 @@ export function TimerStopModal({
 
             {wasRounded && (
               <p className="text-xs text-muted-foreground">
-                Time has been{' '}
+                {t('memo.timer.timeHasBeenRounded')}{' '}
                 {roundedSeconds > adjustedSeconds
-                  ? 'rounded up'
-                  : 'rounded down'}{' '}
-                to the nearest 30-minute increment
+                  ? t('memo.timer.roundedUp')
+                  : t('memo.timer.roundedDown')}{' '}
+                {t('memo.timer.roundedToNearest')}
               </p>
             )}
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="timer-description">Description (Optional)</Label>
+            <Label htmlFor="timer-description">
+              {t('memo.timeEntry.description')} ({t('common.or')})
+            </Label>
             <Textarea
               id="timer-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={`Timer session for Job #${jobId}...`}
+              placeholder={`${t('memo.timer.stopConfirm')} #${jobId}...`}
               rows={3}
               className="resize-none"
             />
             <p className="text-xs text-muted-foreground">
-              Add details about what you worked on during this session
+              {t('memo.timer.addDetailsSession')}
             </p>
           </div>
 
           <div className="text-center">
             <p className="text-xs text-muted-foreground">
-              Time will be saved to Job #{jobId}
+              {t('memo.timer.timeWillBeSaved')} #{jobId}
             </p>
           </div>
         </div>
