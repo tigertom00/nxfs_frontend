@@ -37,17 +37,20 @@ export function TimerStopModal({
 }: TimerStopModalProps) {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [adjustedSeconds, setAdjustedSeconds] =
-    useState<number>(elapsedSeconds);
-  const [initialSeconds, setInitialSeconds] = useState<number>(elapsedSeconds);
+  const [adjustedSeconds, setAdjustedSeconds] = useState<number>(0);
+  const [initialSeconds, setInitialSeconds] = useState<number>(0);
 
-  // Only reset when modal opens, not on every timer tick
+  // Only initialize when modal opens - ignore elapsedSeconds updates while open
   useEffect(() => {
     if (isOpen) {
+      // Modal is opening - capture the initial time
       setAdjustedSeconds(elapsedSeconds);
       setInitialSeconds(elapsedSeconds);
+      setDescription('');
     }
-  }, [isOpen, elapsedSeconds]);
+    // Intentionally only depend on isOpen, not elapsedSeconds
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const originalTime = formatSecondsToTimeString(initialSeconds);
   const roundedSeconds = roundSecondsToNearestHalfHour(adjustedSeconds);
@@ -56,12 +59,18 @@ export function TimerStopModal({
   const wasAdjusted = adjustedSeconds !== initialSeconds;
 
   const handleConfirm = async () => {
+    console.log('[TimerStopModal] handleConfirm called', {
+      adjustedSeconds,
+      initialSeconds,
+      description: description.trim() || undefined,
+    });
     setLoading(true);
     try {
       await onConfirm(description.trim() || undefined, adjustedSeconds);
       // Don't reset here - modal will reset when it reopens
       setLoading(false);
     } catch (error) {
+      console.error('[TimerStopModal] handleConfirm error:', error);
       setLoading(false);
       // Error is handled in parent component
     }
