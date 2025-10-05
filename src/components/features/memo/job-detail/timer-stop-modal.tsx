@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -104,6 +105,9 @@ export function TimerStopModal({
             <Clock className="h-5 w-5" />
             Stop Timer & Save Time
           </DialogTitle>
+          <DialogDescription>
+            Review and adjust your time before saving to Job #{jobId}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
