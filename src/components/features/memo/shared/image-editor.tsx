@@ -476,8 +476,8 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
       </div>
 
       {/* Canvas */}
-      <div className="flex-1 overflow-auto bg-muted/20 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg">
+      <div className="flex-1 bg-muted/20 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg" style={{ touchAction: 'none' }}>
           <Stage
             ref={stageRef}
             width={stageSize.width}
@@ -488,7 +488,6 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
             onTouchStart={handleMouseDown}
             onTouchMove={handleMouseMove}
             onTouchEnd={handleMouseUp}
-            style={{ touchAction: 'none' }}
           >
             <Layer>
               {/* Background Image */}
