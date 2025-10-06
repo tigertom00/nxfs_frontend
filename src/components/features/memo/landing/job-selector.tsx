@@ -51,7 +51,7 @@ export function JobSelector({
           value={selectedJob?.ordre_nr.toString() || ''}
           onValueChange={(value) => {
             const job = jobs.find((j) => j.ordre_nr.toString() === value);
-            if (job) onJobSelect(job);
+            if (job) {onJobSelect(job);}
           }}
         >
           <SelectTrigger className="h-12">

@@ -31,7 +31,7 @@ export default function ClaudeMonitorPage() {
 
   // Fetch dashboard data
   const fetchDashboard = async () => {
-    if (hasError && !loading) return; // Don't retry if already errored
+    if (hasError && !loading) {return;} // Don't retry if already errored
 
     try {
       const dashboardData = await claudeUsageAPI.getDashboard(6);
@@ -59,7 +59,7 @@ export default function ClaudeMonitorPage() {
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
-    if (!autoRefresh || !isAuthenticated || hasError) return;
+    if (!autoRefresh || !isAuthenticated || hasError) {return;}
 
     const interval = setInterval(fetchDashboard, 30000);
     return () => clearInterval(interval);

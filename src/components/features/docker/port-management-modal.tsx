@@ -32,7 +32,7 @@ interface PortManagementModalProps {
 }
 
 function getPortUrl(port: number, hostName?: string): string | null {
-  if (!hostName) return null;
+  if (!hostName) {return null;}
 
   let baseUrl = '';
   if (hostName === 'nuk') {
@@ -121,7 +121,7 @@ export function PortManagementModal({
   const getFilteredPortsForHost = (hostName: string) => {
     const hostPorts = portsByHost[hostName] || [];
 
-    if (!searchTerm) return hostPorts;
+    if (!searchTerm) {return hostPorts;}
 
     const searchNumber = searchTerm.trim();
     if (!/^\d+$/.test(searchNumber)) {
@@ -158,7 +158,7 @@ export function PortManagementModal({
   // Get next port suggestion only for active tab
   const nextPortSuggestion = useMemo(() => {
     const inputPort = parseInt(nextPortInput);
-    if (isNaN(inputPort) || inputPort <= 0 || !activeTab) return null;
+    if (isNaN(inputPort) || inputPort <= 0 || !activeTab) {return null;}
 
     return findNextAvailablePortForHost(inputPort, activeTab);
   }, [nextPortInput, activeTab, portsByHost]);

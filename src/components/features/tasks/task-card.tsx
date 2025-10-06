@@ -148,7 +148,7 @@ export function TaskCard({
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
+    if (!dateString) {return null;}
     const date = new Date(dateString);
     return date.toLocaleDateString(language === 'no' ? 'nb-NO' : 'en-US', {
       year: 'numeric',
@@ -283,7 +283,7 @@ export function TaskCard({
               <div className="flex flex-wrap gap-1">
                 {task.category.map((categoryId) => {
                   const category = categories.find((c) => c.id === categoryId);
-                  if (!category) return null;
+                  if (!category) {return null;}
                   return (
                     <Badge
                       key={categoryId}

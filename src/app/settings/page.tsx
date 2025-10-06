@@ -107,7 +107,7 @@ export default function SettingsPage() {
     lang: 'en' | 'no',
     themePreference: 'light' | 'dark' | 'purple' | 'pink' | 'system'
   ) => {
-    if (!user) return;
+    if (!user) {return;}
 
     setSaveStatus('saving');
     setError(null);

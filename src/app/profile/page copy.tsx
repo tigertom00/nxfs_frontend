@@ -102,7 +102,7 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user) {return;}
 
     setIsSaving(true);
     setError(null);

@@ -76,7 +76,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   // Load active timer session from server on mount
   useEffect(() => {
     const loadActiveSession = async () => {
-      if (!user) return;
+      if (!user) {return;}
 
       try {
         const activeSession = await timerSessionAPI.getActiveTimerSession();
@@ -234,7 +234,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   };
 
   const loadUserStats = async () => {
-    if (!user) return;
+    if (!user) {return;}
 
     try {
       setStatsLoading(true);
@@ -476,7 +476,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     description?: string,
     adjustedSeconds?: number
   ) => {
-    if (!user || !timer.serverSessionId) return;
+    if (!user || !timer.serverSessionId) {return;}
 
     try {
       // Stop the server timer session

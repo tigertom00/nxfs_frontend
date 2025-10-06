@@ -32,7 +32,7 @@ const statusConfig = {
 };
 
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) {return '0 B';}
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -48,8 +48,8 @@ function formatUptime(createdAt: string, startedAt?: string): string {
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (days > 0) {return `${days}d ${hours}h`;}
+  if (hours > 0) {return `${hours}h ${minutes}m`;}
   return `${minutes}m`;
 }
 
@@ -68,7 +68,7 @@ function getPortUrl(
   port: { container_port: number; host_ip?: string; host_port?: number },
   hostName?: string
 ): string | null {
-  if (!port.host_port) return null;
+  if (!port.host_port) {return null;}
 
   let baseUrl = '';
   if (hostName === 'nuk') {
@@ -408,18 +408,18 @@ export default function DockerPage() {
   const filteredAndSortedContainers = containers
     .filter((container) => {
       // Status filter
-      if (filter === 'running' && container.status !== 'running') return false;
-      if (filter === 'stopped' && container.status === 'running') return false;
+      if (filter === 'running' && container.status !== 'running') {return false;}
+      if (filter === 'stopped' && container.status === 'running') {return false;}
 
       // Host filter
-      if (hostFilter && container.host_name !== hostFilter) return false;
+      if (hostFilter && container.host_name !== hostFilter) {return false;}
 
       return true;
     })
     .sort((a, b) => {
       // First sort by host name
       const hostCompare = (a.host_name || '').localeCompare(b.host_name || '');
-      if (hostCompare !== 0) return hostCompare;
+      if (hostCompare !== 0) {return hostCompare;}
 
       // Then sort by container name within the same host
       return a.name.localeCompare(b.name);

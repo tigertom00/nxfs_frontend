@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
 
       initialize: async () => {
         const { isInitialized, user } = get();
-        if (isInitialized) return;
+        if (isInitialized) {return;}
 
         set({ isLoading: true, error: null });
 

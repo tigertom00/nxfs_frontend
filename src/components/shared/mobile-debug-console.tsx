@@ -25,7 +25,7 @@ export function MobileDebugConsole() {
         navigator.userAgent
       );
 
-    if (!isMobile) return;
+    if (!isMobile) {return;}
 
     // Override console methods to capture logs
     const originalLog = console.log;
@@ -93,7 +93,7 @@ export function MobileDebugConsole() {
       navigator.userAgent
     );
 
-  if (!isMobile) return null;
+  if (!isMobile) {return null;}
 
   return (
     <>

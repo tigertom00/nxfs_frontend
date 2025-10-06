@@ -263,7 +263,7 @@ export default function TasksPage() {
     taskData: CreateTaskPayload,
     files?: File[]
   ) => {
-    if (!editingTask) return;
+    if (!editingTask) {return;}
 
     try {
       setActionLoading(true);
@@ -494,7 +494,7 @@ export default function TasksPage() {
     try {
       setActionLoading(true);
       const task = tasks.find((t) => t.id === taskId);
-      if (!task || !user) return;
+      if (!task || !user) {return;}
 
       const payload = {
         title: task.title,
@@ -528,7 +528,7 @@ export default function TasksPage() {
     try {
       setActionLoading(true);
       const task = tasks.find((t) => t.id === taskId);
-      if (!task || !user) return;
+      if (!task || !user) {return;}
 
       const payload = {
         title: task.title,
@@ -562,7 +562,7 @@ export default function TasksPage() {
     try {
       setActionLoading(true);
       const project = projects.find((p) => p.id === projectId);
-      if (!project || !user) return;
+      if (!project || !user) {return;}
 
       // Map status to Norwegian equivalent
       const statusMapping = {
@@ -620,10 +620,10 @@ export default function TasksPage() {
   // Filter tasks - show only standalone tasks (no project assigned) on main page
   const standaloneTasks = tasks.filter((task) => {
     // Only show tasks without a project (or project = null/undefined)
-    if (task.project) return false;
+    if (task.project) {return false;}
 
     // Filter by completion status
-    if (!showCompleted && task.status === 'completed') return false;
+    if (!showCompleted && task.status === 'completed') {return false;}
 
     // Filter by selected categories
     if (selectedCategories.length > 0) {
@@ -638,7 +638,7 @@ export default function TasksPage() {
 
   // Filter projects by completion status
   const filteredProjects = projects.filter((project) => {
-    if (!showCompleted && project.status === 'completed') return false;
+    if (!showCompleted && project.status === 'completed') {return false;}
     return true;
   });
 
@@ -688,7 +688,7 @@ export default function TasksPage() {
       low: 1,
     };
     const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
-    if (priorityDiff !== 0) return priorityDiff;
+    if (priorityDiff !== 0) {return priorityDiff;}
 
     // 2. Sort by status (in_progress → todo → completed)
     const statusOrder: Record<'in_progress' | 'todo' | 'completed', number> = {
@@ -697,13 +697,13 @@ export default function TasksPage() {
       completed: 1,
     };
     const statusDiff = statusOrder[b.status] - statusOrder[a.status];
-    if (statusDiff !== 0) return statusDiff;
+    if (statusDiff !== 0) {return statusDiff;}
 
     // 3. Sort by updated date (newest first)
     const dateA = new Date(a.updated_at);
     const dateB = new Date(b.updated_at);
     const dateDiff = dateB.getTime() - dateA.getTime();
-    if (dateDiff !== 0) return dateDiff;
+    if (dateDiff !== 0) {return dateDiff;}
 
     // 4. Sort by title alphabetically
     return a.title.localeCompare(b.title);
@@ -718,13 +718,13 @@ export default function TasksPage() {
       completed: 1,
     };
     const statusDiff = statusOrder[b.status] - statusOrder[a.status];
-    if (statusDiff !== 0) return statusDiff;
+    if (statusDiff !== 0) {return statusDiff;}
 
     // 2. Sort by updated date (newest first)
     const dateA = new Date(a.updated_at);
     const dateB = new Date(b.updated_at);
     const dateDiff = dateB.getTime() - dateA.getTime();
-    if (dateDiff !== 0) return dateDiff;
+    if (dateDiff !== 0) {return dateDiff;}
 
     // 3. Sort by name alphabetically
     return a.name.localeCompare(b.name);

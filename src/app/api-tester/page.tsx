@@ -742,7 +742,7 @@ export default function ApiTesterPage() {
                             const header = COMMON_HEADERS.find(
                               (h) => h.key === value
                             );
-                            if (header) addCommonHeader(header);
+                            if (header) {addCommonHeader(header);}
                           }}
                         >
                           <SelectTrigger className="w-40">

@@ -71,7 +71,7 @@ export function EditTimeEntryDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!entry) return;
+    if (!entry) {return;}
 
     setLoading(true);
 
@@ -104,7 +104,7 @@ export function EditTimeEntryDialog({
     }
   };
 
-  if (!entry) return null;
+  if (!entry) {return null;}
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

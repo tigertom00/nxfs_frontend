@@ -132,11 +132,11 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
   }, [cropMode]);
 
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-    if (tool === 'select' || tool === 'crop') return;
+    if (tool === 'select' || tool === 'crop') {return;}
 
     setIsDrawing(true);
     const pos = e.target.getStage()?.getPointerPosition();
-    if (!pos) return;
+    if (!pos) {return;}
 
     if (tool === 'pen' || tool === 'eraser') {
       const newElement: DrawingElement = {
@@ -169,10 +169,10 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     if (!isDrawing || tool === 'text' || tool === 'select' || tool === 'crop')
-      return;
+      {return;}
 
     const pos = e.target.getStage()?.getPointerPosition();
-    if (!pos || !currentLineRef.current) return;
+    if (!pos || !currentLineRef.current) {return;}
 
     if (tool === 'pen' || tool === 'eraser') {
       const lastLine = elements[elements.length - 1];
@@ -199,13 +199,13 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
   };
 
   const handleUndo = () => {
-    if (historyStep === 0) return;
+    if (historyStep === 0) {return;}
     setHistoryStep(historyStep - 1);
     setElements(history[historyStep - 1]);
   };
 
   const handleRedo = () => {
-    if (historyStep === history.length - 1) return;
+    if (historyStep === history.length - 1) {return;}
     setHistoryStep(historyStep + 1);
     setElements(history[historyStep + 1]);
   };
@@ -243,7 +243,7 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
   };
 
   const handleApplyCrop = () => {
-    if (!stageRef.current || !cropMode) return;
+    if (!stageRef.current || !cropMode) {return;}
 
     // Create a temporary canvas to crop the image
     const stage = stageRef.current;
@@ -278,7 +278,7 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
   };
 
   const handleSave = () => {
-    if (!stageRef.current) return;
+    if (!stageRef.current) {return;}
 
     // If in crop mode, apply crop first
     if (cropMode) {

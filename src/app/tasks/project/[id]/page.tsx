@@ -160,8 +160,8 @@ export default function ProjectDetailPage() {
         project: parseInt(projectId), // Assign to current project
       };
 
-      if (!payload.due_date) delete payload.due_date;
-      if (!payload.estimated_time) delete payload.estimated_time;
+      if (!payload.due_date) {delete payload.due_date;}
+      if (!payload.estimated_time) {delete payload.estimated_time;}
 
       await tasksAPI.createTask(payload);
       await fetchProjectData();
@@ -183,7 +183,7 @@ export default function ProjectDetailPage() {
   };
 
   const handleUpdateTask = async (taskData: TaskFormData) => {
-    if (!editingTask) return;
+    if (!editingTask) {return;}
 
     try {
       setActionLoading(true);
@@ -193,8 +193,8 @@ export default function ProjectDetailPage() {
       }
 
       const payload = { ...taskData, user_id: user.id };
-      if (!payload.due_date) delete payload.due_date;
-      if (!payload.estimated_time) delete payload.estimated_time;
+      if (!payload.due_date) {delete payload.due_date;}
+      if (!payload.estimated_time) {delete payload.estimated_time;}
 
       await tasksAPI.updateTask(editingTask.id, payload);
       await fetchProjectData();
@@ -254,7 +254,7 @@ export default function ProjectDetailPage() {
     try {
       setActionLoading(true);
       const task = tasks.find((t) => t.id === taskId);
-      if (!task || !user) return;
+      if (!task || !user) {return;}
 
       const payload = {
         title: task.title,
@@ -292,7 +292,7 @@ export default function ProjectDetailPage() {
     try {
       setActionLoading(true);
       const task = tasks.find((t) => t.id === taskId);
-      if (!task || !user) return;
+      if (!task || !user) {return;}
 
       const payload = {
         title: task.title,
@@ -354,8 +354,8 @@ export default function ProjectDetailPage() {
 
   // Sort tasks
   const sortedTasks = [...filteredTasks].sort((a, b) => {
-    if (a.status === 'completed' && b.status !== 'completed') return 1;
-    if (a.status !== 'completed' && b.status === 'completed') return -1;
+    if (a.status === 'completed' && b.status !== 'completed') {return 1;}
+    if (a.status !== 'completed' && b.status === 'completed') {return -1;}
 
     const priorityOrder: Record<'high' | 'medium' | 'low', number> = {
       high: 3,

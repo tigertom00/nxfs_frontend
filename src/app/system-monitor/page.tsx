@@ -31,7 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 
 const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) {return '0 B';}
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -115,7 +115,7 @@ const SystemMonitorPage = () => {
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {return;}
 
     const interval = setInterval(() => {
       fetchData();

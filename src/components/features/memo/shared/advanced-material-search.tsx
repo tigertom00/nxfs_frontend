@@ -173,35 +173,35 @@ export function AdvancedMaterialSearch({
       // Dimension range filters
       if (searchFilters.heightMin) {
         const val = parseFloat(searchFilters.heightMin);
-        if (!isNaN(val)) params.hoyde_min = val;
+        if (!isNaN(val)) {params.hoyde_min = val;}
       }
       if (searchFilters.heightMax) {
         const val = parseFloat(searchFilters.heightMax);
-        if (!isNaN(val)) params.hoyde_max = val;
+        if (!isNaN(val)) {params.hoyde_max = val;}
       }
       if (searchFilters.widthMin) {
         const val = parseFloat(searchFilters.widthMin);
-        if (!isNaN(val)) params.bredde_min = val;
+        if (!isNaN(val)) {params.bredde_min = val;}
       }
       if (searchFilters.widthMax) {
         const val = parseFloat(searchFilters.widthMax);
-        if (!isNaN(val)) params.bredde_max = val;
+        if (!isNaN(val)) {params.bredde_max = val;}
       }
       if (searchFilters.lengthMin) {
         const val = parseFloat(searchFilters.lengthMin);
-        if (!isNaN(val)) params.lengde_min = val;
+        if (!isNaN(val)) {params.lengde_min = val;}
       }
       if (searchFilters.lengthMax) {
         const val = parseFloat(searchFilters.lengthMax);
-        if (!isNaN(val)) params.lengde_max = val;
+        if (!isNaN(val)) {params.lengde_max = val;}
       }
       if (searchFilters.weightMin) {
         const val = parseFloat(searchFilters.weightMin);
-        if (!isNaN(val)) params.vekt_min = val;
+        if (!isNaN(val)) {params.vekt_min = val;}
       }
       if (searchFilters.weightMax) {
         const val = parseFloat(searchFilters.weightMax);
-        if (!isNaN(val)) params.vekt_max = val;
+        if (!isNaN(val)) {params.vekt_max = val;}
       }
 
       // Perform the search
@@ -270,22 +270,22 @@ export function AdvancedMaterialSearch({
 
   const getActiveFilterCount = () => {
     let count = 0;
-    if (filters.generalSearch.trim()) count++;
-    if (filters.elNumber.trim()) count++;
-    if (filters.gtinNumber.trim()) count++;
-    if (filters.productNumber.trim()) count++;
-    if (filters.supplier && filters.supplier !== 'all') count++;
-    if (filters.categoryBlock.trim()) count++;
-    if (filters.brand.trim()) count++;
-    if (filters.favoritesOnly) count++;
-    if (filters.approvedOnly) count++;
-    if (filters.inStockOnly) count++;
-    if (!filters.excludeDiscontinued) count++; // Inverted logic
+    if (filters.generalSearch.trim()) {count++;}
+    if (filters.elNumber.trim()) {count++;}
+    if (filters.gtinNumber.trim()) {count++;}
+    if (filters.productNumber.trim()) {count++;}
+    if (filters.supplier && filters.supplier !== 'all') {count++;}
+    if (filters.categoryBlock.trim()) {count++;}
+    if (filters.brand.trim()) {count++;}
+    if (filters.favoritesOnly) {count++;}
+    if (filters.approvedOnly) {count++;}
+    if (filters.inStockOnly) {count++;}
+    if (!filters.excludeDiscontinued) {count++;} // Inverted logic
     // Count dimension filters
-    if (filters.heightMin || filters.heightMax) count++;
-    if (filters.widthMin || filters.widthMax) count++;
-    if (filters.lengthMin || filters.lengthMax) count++;
-    if (filters.weightMin || filters.weightMax) count++;
+    if (filters.heightMin || filters.heightMax) {count++;}
+    if (filters.widthMin || filters.widthMax) {count++;}
+    if (filters.lengthMin || filters.lengthMax) {count++;}
+    if (filters.weightMin || filters.weightMax) {count++;}
     return count;
   };
 

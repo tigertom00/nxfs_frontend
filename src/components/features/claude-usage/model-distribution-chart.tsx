@@ -34,10 +34,10 @@ export function ModelDistributionChart({
 
   const getModelShortName = (model: string) => {
     // Extract version number or key part from model name
-    if (model.includes('sonnet-4')) return 'Sonnet 4';
-    if (model.includes('sonnet')) return 'Sonnet 3.5';
-    if (model.includes('opus')) return 'Opus';
-    if (model.includes('haiku')) return 'Haiku';
+    if (model.includes('sonnet-4')) {return 'Sonnet 4';}
+    if (model.includes('sonnet')) {return 'Sonnet 3.5';}
+    if (model.includes('opus')) {return 'Opus';}
+    if (model.includes('haiku')) {return 'Haiku';}
     return model.split('-').slice(-1)[0] || model;
   };
 

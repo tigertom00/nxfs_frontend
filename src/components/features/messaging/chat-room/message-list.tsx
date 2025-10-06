@@ -88,8 +88,8 @@ export default function MessageList({
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    if (isSameDay(date, today)) return 'Today';
-    if (isSameDay(date, yesterday)) return 'Yesterday';
+    if (isSameDay(date, today)) {return 'Today';}
+    if (isSameDay(date, yesterday)) {return 'Yesterday';}
     return formatDate(date, 'MMMM d, yyyy');
   };
 

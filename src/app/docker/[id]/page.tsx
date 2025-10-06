@@ -41,7 +41,7 @@ const statusConfig = {
 };
 
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) {return '0 B';}
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -57,8 +57,8 @@ function formatUptime(createdAt: string, startedAt?: string): string {
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (days > 0) {return `${days}d ${hours}h ${minutes}m`;}
+  if (hours > 0) {return `${hours}h ${minutes}m`;}
   return `${minutes}m`;
 }
 
@@ -81,7 +81,7 @@ function getPortUrl(
   port: { container_port: number; host_ip?: string; host_port?: number },
   hostName?: string
 ): string | null {
-  if (!port.host_port) return null;
+  if (!port.host_port) {return null;}
 
   let baseUrl = '';
   if (hostName === 'nuk') {

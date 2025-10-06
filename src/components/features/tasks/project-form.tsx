@@ -59,7 +59,7 @@ export function ProjectForm({
   };
 
   const handleDeleteImage = async (imageId: string) => {
-    if (!project) return;
+    if (!project) {return;}
 
     try {
       // Note: You'll need to implement the delete image API call

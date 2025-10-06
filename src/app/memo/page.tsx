@@ -111,7 +111,7 @@ export default function MemoPage() {
   // Check for nearby jobs on page load
   useEffect(() => {
     const checkNearbyJobs = async () => {
-      if (!isAuthenticated || locationChecked) return;
+      if (!isAuthenticated || locationChecked) {return;}
 
       setCheckingLocation(true);
       setLocationChecked(true);
@@ -146,7 +146,7 @@ export default function MemoPage() {
   // Fetch jobs with search and pagination
   useEffect(() => {
     const fetchJobs = async () => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated) {return;}
 
       setLoading(true);
       try {

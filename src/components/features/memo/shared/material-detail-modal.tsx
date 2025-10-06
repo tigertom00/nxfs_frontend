@@ -49,7 +49,7 @@ export function MaterialDetailModal({
   const { t } = useIntl();
   const { toast } = useToast();
 
-  if (!material) return null;
+  if (!material) {return null;}
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);

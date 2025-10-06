@@ -86,7 +86,7 @@ export default function ChatPage() {
   const draftMessage = activeRoomId ? getDraftMessage(activeRoomId) : '';
 
   const handleSendMessage = (content: string, file?: File) => {
-    if (!activeRoomId) return;
+    if (!activeRoomId) {return;}
 
     if (file) {
       sendMessageWithFile(activeRoomId, content, file);
@@ -96,17 +96,17 @@ export default function ChatPage() {
   };
 
   const handleTyping = (isTyping: boolean) => {
-    if (!activeRoomId) return;
+    if (!activeRoomId) {return;}
     setTyping(activeRoomId, isTyping);
   };
 
   const handleDraftChange = (value: string) => {
-    if (!activeRoomId) return;
+    if (!activeRoomId) {return;}
     setDraftMessage(activeRoomId, value);
   };
 
   const handleReaction = (messageId: string, emoji: string) => {
-    if (!activeRoomId) return;
+    if (!activeRoomId) {return;}
     reactToMessage(activeRoomId, messageId, emoji);
   };
 

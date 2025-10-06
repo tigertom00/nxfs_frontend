@@ -37,7 +37,7 @@ export function DatePicker({
   };
 
   const formatDisplayDate = (dateString?: string) => {
-    if (!dateString) return '';
+    if (!dateString) {return '';}
 
     try {
       const date = new Date(dateString);

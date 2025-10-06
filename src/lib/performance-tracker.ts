@@ -141,7 +141,7 @@ export const formatResponseTime = (time: number): string => {
 };
 
 export const getPerformanceColor = (responseTime: number): string => {
-  if (responseTime < 0.5) return 'text-green-500';
-  if (responseTime < 1.0) return 'text-yellow-500';
+  if (responseTime < 0.5) {return 'text-green-500';}
+  if (responseTime < 1.0) {return 'text-yellow-500';}
   return 'text-red-500';
 };

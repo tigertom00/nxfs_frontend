@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>()(
 
       initialize: async () => {
         const { isInitialized, user } = get();
-        if (isInitialized) return;
+        if (isInitialized) {return;}
 
         // Zustand persist will restore user and isAuthenticated automatically
         const token = getAccessToken();

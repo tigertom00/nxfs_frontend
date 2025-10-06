@@ -31,7 +31,7 @@ export default function BlogPostPage() {
 
   useEffect(() => {
     const fetchPost = async () => {
-      if (!slug) return;
+      if (!slug) {return;}
 
       try {
         setLoading(true);

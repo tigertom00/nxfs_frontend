@@ -387,7 +387,7 @@ export default function PacManGame() {
         }
       });
 
-      if (possibleDirections.length === 0) return ghost;
+      if (possibleDirections.length === 0) {return ghost;}
 
       if (ghost.scaredTimer > 0) {
         // Random movement when scared
@@ -446,7 +446,7 @@ export default function PacManGame() {
 
   // Check ghost collision
   useEffect(() => {
-    if (!gameStarted || gamePaused) return;
+    if (!gameStarted || gamePaused) {return;}
 
     ghosts.forEach((ghost) => {
       if (
@@ -536,7 +536,7 @@ export default function PacManGame() {
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!gameStarted || gamePaused) return;
+      if (!gameStarted || gamePaused) {return;}
 
       switch (e.key) {
         case 'ArrowUp':
@@ -576,7 +576,7 @@ export default function PacManGame() {
 
   // Game loop for ghost movement
   useEffect(() => {
-    if (!gameStarted || gamePaused) return;
+    if (!gameStarted || gamePaused) {return;}
 
     const animate = (timestamp: number) => {
       // Move ghosts
@@ -599,10 +599,10 @@ export default function PacManGame() {
   // Canvas rendering
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     const cellSize = Math.min(
       canvas.width / config.mazeSize,
@@ -762,7 +762,7 @@ export default function PacManGame() {
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStart || !gameStarted || gamePaused) return;
+    if (!touchStart || !gameStarted || gamePaused) {return;}
 
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStart.x;

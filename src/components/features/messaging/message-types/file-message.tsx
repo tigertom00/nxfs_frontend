@@ -12,9 +12,9 @@ export default function FileMessage({ message }: FileMessageProps) {
   const isImage = message.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
   const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '';
+    if (!bytes) {return '';}
     const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    if (kb < 1024) {return `${kb.toFixed(1)} KB`;}
     return `${(kb / 1024).toFixed(1)} MB`;
   };
 

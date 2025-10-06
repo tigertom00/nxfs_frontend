@@ -335,7 +335,7 @@ export function TimeEntriesList({
         <div className="space-y-2">
           {sortedDates.map((date) => {
             const dateGroup = entries[date];
-            if (!dateGroup) return null; // Skip if no data
+            if (!dateGroup) {return null;} // Skip if no data
 
             const isExpanded = expandedDates.has(date);
             const isToday = date === new Date().toISOString().split('T')[0];
@@ -359,9 +359,9 @@ export function TimeEntriesList({
               }
               displayDate = format(parsedDate, 'EEE. dd.MM.yyyy');
               if (isToday)
-                displayDate = `i dag. ${format(parsedDate, 'dd.MM.yyyy')}`;
+                {displayDate = `i dag. ${format(parsedDate, 'dd.MM.yyyy')}`;}
               if (isYesterday)
-                displayDate = `i går. ${format(parsedDate, 'dd.MM.yyyy')}`;
+                {displayDate = `i går. ${format(parsedDate, 'dd.MM.yyyy')}`;}
             } catch (error) {
               displayDate = date; // Fallback to raw date string
             }

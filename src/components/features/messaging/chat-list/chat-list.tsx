@@ -42,7 +42,7 @@ export default function ChatList({ onNewChat }: ChatListProps) {
 
   // Filter rooms by search query
   const filteredRooms = useMemo(() => {
-    if (!searchQuery) return roomsArray;
+    if (!searchQuery) {return roomsArray;}
 
     const query = searchQuery.toLowerCase();
     return roomsArray.filter((room) => {

@@ -72,7 +72,7 @@ export default function MemoAdminPage() {
   // Load all data
   useEffect(() => {
     const loadData = async () => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated) {return;}
 
       try {
         setLoading(true);

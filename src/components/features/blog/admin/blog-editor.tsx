@@ -196,13 +196,13 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
     setErrors({});
 
     if (!title.trim()) {
-      if (!silent) toast.error(t('blog.editor.titleRequired'));
+      if (!silent) {toast.error(t('blog.editor.titleRequired'));}
       setErrors({ title: [t('blog.editor.titleRequired')] });
       return false;
     }
 
     if (!slug.trim()) {
-      if (!silent) toast.error(t('blog.editor.slugRequired'));
+      if (!silent) {toast.error(t('blog.editor.slugRequired'));}
       setErrors({ slug: [t('blog.editor.slugRequired')] });
       return false;
     }
@@ -233,10 +233,10 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
 
       if (post) {
         await postsAPI.updatePost(post.id, postData);
-        if (!silent) toast.success(t('blog.editor.postUpdated'));
+        if (!silent) {toast.success(t('blog.editor.postUpdated'));}
       } else {
         await postsAPI.createPost(postData);
-        if (!silent) toast.success(t('blog.editor.postCreated'));
+        if (!silent) {toast.success(t('blog.editor.postCreated'));}
       }
 
       setHasUnsavedChanges(false);
@@ -277,7 +277,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
         }
       } else {
         // Generic error handling
-        if (!silent) toast.error(t('blog.editor.saveError'));
+        if (!silent) {toast.error(t('blog.editor.saveError'));}
       }
       return false;
     } finally {
@@ -316,7 +316,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
   // Helper component for displaying field errors
   const FieldError = ({ fieldName }: { fieldName: string }) => {
     const fieldErrors = errors[fieldName];
-    if (!fieldErrors || fieldErrors.length === 0) return null;
+    if (!fieldErrors || fieldErrors.length === 0) {return null;}
 
     return (
       <div className="text-sm text-destructive mt-1">

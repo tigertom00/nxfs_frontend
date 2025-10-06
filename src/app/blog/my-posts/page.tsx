@@ -56,7 +56,7 @@ export default function MyBlogPostsPage() {
 
   useEffect(() => {
     const fetchMyPosts = async () => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated) {return;}
 
       try {
         setLoading(true);

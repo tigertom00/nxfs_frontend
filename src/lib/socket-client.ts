@@ -43,7 +43,7 @@ class SocketClient {
    * Setup Socket.IO event handlers
    */
   private setupEventHandlers(): void {
-    if (!this.socket) return;
+    if (!this.socket) {return;}
 
     // Connection events
     this.socket.on('connect', () => {
@@ -108,7 +108,7 @@ class SocketClient {
    * Notify all handlers for the current room
    */
   private notifyRoomHandlers(data: WSServerMessage): void {
-    if (!this.currentRoom) return;
+    if (!this.currentRoom) {return;}
 
     const handlers = this.roomHandlers.get(this.currentRoom);
     if (handlers) {
@@ -139,7 +139,7 @@ class SocketClient {
    * Leave a chat room
    */
   leaveRoom(roomId: string): void {
-    if (!this.socket?.connected) return;
+    if (!this.socket?.connected) {return;}
 
     this.socket.emit('room:leave', { room_id: roomId });
 
@@ -174,7 +174,7 @@ class SocketClient {
    * Send typing indicator
    */
   sendTyping(roomId: string, isTyping: boolean): void {
-    if (!this.socket?.connected) return;
+    if (!this.socket?.connected) {return;}
 
     const payload: WSClientMessage = {
       type: 'typing',
@@ -191,7 +191,7 @@ class SocketClient {
    * Send read receipt
    */
   sendReadReceipt(roomId: string, messageId: string): void {
-    if (!this.socket?.connected) return;
+    if (!this.socket?.connected) {return;}
 
     const payload: WSClientMessage = {
       type: 'read_receipt',

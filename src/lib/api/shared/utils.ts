@@ -8,7 +8,7 @@ export function createUrlWithParams(
   baseUrl: string,
   params?: Record<string, any>
 ): string {
-  if (!params) return baseUrl;
+  if (!params) {return baseUrl;}
 
   const searchParams = new URLSearchParams();
 
@@ -89,7 +89,7 @@ export function createFormData(data: Record<string, any>): FormData {
  * Get access token from localStorage
  */
 export function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') {return null;}
   return localStorage.getItem('accessToken');
 }
 
@@ -97,7 +97,7 @@ export function getAccessToken(): string | null {
  * Get refresh token from localStorage
  */
 export function getRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') {return null;}
   return localStorage.getItem('refreshToken');
 }
 
@@ -105,7 +105,7 @@ export function getRefreshToken(): string | null {
  * Set authentication tokens in localStorage
  */
 export function setAuthTokens(accessToken: string, refreshToken: string): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
   localStorage.setItem('accessToken', accessToken);
   localStorage.setItem('refreshToken', refreshToken);
 }
@@ -114,7 +114,7 @@ export function setAuthTokens(accessToken: string, refreshToken: string): void {
  * Clear authentication tokens from localStorage
  */
 export function clearAuthTokens(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
 }
@@ -142,7 +142,7 @@ export function safeJsonParse<T>(json: string, fallback: T): T {
  * Clears JWT tokens so requests fall back to NEXT_PUBLIC_API_TOKEN
  */
 export function useApiTokenForTesting(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
   console.log(

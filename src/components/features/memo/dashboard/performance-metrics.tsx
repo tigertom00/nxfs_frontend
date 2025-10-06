@@ -57,16 +57,16 @@ export function PerformanceMetrics({ stats }: PerformanceMetricsProps) {
   );
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
+    if (score >= 80) {return 'text-green-600';}
+    if (score >= 60) {return 'text-yellow-600';}
     return 'text-red-600';
   };
 
   const getScoreBadgeVariant = (
     score: number
   ): 'default' | 'secondary' | 'destructive' | 'outline' => {
-    if (score >= 80) return 'default';
-    if (score >= 60) return 'secondary';
+    if (score >= 80) {return 'default';}
+    if (score >= 60) {return 'secondary';}
     return 'destructive';
   };
 

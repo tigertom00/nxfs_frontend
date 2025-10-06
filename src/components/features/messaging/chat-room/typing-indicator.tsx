@@ -7,7 +7,7 @@ interface TypingIndicatorProps {
 }
 
 export default function TypingIndicator({ users }: TypingIndicatorProps) {
-  if (users.length === 0) return null;
+  if (users.length === 0) {return null;}
 
   const names =
     users.length === 1

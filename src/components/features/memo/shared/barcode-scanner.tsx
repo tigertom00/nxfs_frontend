@@ -301,7 +301,7 @@ export function BarcodeScanner({
       const video = videoRef.current;
       const context = canvas.getContext('2d');
 
-      if (!context) return;
+      if (!context) {return;}
 
       // Use smaller resolution for faster processing
       const scale = 0.5;

@@ -145,7 +145,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
     type: 'image' | 'document' = 'image'
   ) => {
     const files = Array.from(event.target.files || []);
-    if (files.length === 0) return;
+    if (files.length === 0) {return;}
 
     // Validate file types and sizes
     const validFiles = files.filter((file) => {
@@ -173,7 +173,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       return true;
     });
 
-    if (validFiles.length === 0) return;
+    if (validFiles.length === 0) {return;}
 
     setUploading(true);
 
@@ -240,7 +240,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   };
 
   const handleConfirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget) {return;}
 
     try {
       if (deleteTarget.type === 'image') {
@@ -285,7 +285,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   };
 
   const handleSaveEditedImage = async (dataUrl: string) => {
-    if (!editingImage) return;
+    if (!editingImage) {return;}
 
     try {
       setUploading(true);

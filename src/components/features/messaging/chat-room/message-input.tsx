@@ -60,7 +60,7 @@ export default function MessageInput({
   // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {return;}
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
@@ -75,7 +75,7 @@ export default function MessageInput({
   const handleSend = () => {
     const trimmedContent = value.trim();
 
-    if (!trimmedContent && !attachedFile) return;
+    if (!trimmedContent && !attachedFile) {return;}
 
     onSend(trimmedContent, attachedFile || undefined);
     onChange('');

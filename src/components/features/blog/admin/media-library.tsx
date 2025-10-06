@@ -72,7 +72,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   };
 
   const handleImageUpload = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0) {return;}
 
     const file = files[0];
 
@@ -108,7 +108,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   };
 
   const handleAudioUpload = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0) {return;}
 
     const file = files[0];
 
@@ -169,7 +169,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) {return '0 B';}
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -317,7 +317,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                           variant="outline"
                           onClick={() => {
                             const url = normalizeUrl(image.image);
-                            if (url) onInsert(url, 'image');
+                            if (url) {onInsert(url, 'image');}
                           }}
                           className="flex-1"
                           disabled={!normalizeUrl(image.image)}
@@ -330,7 +330,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                           variant="outline"
                           onClick={() => {
                             const url = normalizeUrl(image.image);
-                            if (url) copyToClipboard(url);
+                            if (url) {copyToClipboard(url);}
                           }}
                           disabled={!normalizeUrl(image.image)}
                         >
@@ -424,7 +424,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                           variant="outline"
                           onClick={() => {
                             const url = normalizeUrl(audioFile.audio);
-                            if (url) onInsert(url, 'audio');
+                            if (url) {onInsert(url, 'audio');}
                           }}
                           className="flex-1"
                           disabled={!normalizeUrl(audioFile.audio)}
@@ -437,7 +437,7 @@ export function MediaLibrary({ postId, onInsert }: MediaLibraryProps) {
                           variant="outline"
                           onClick={() => {
                             const url = normalizeUrl(audioFile.audio);
-                            if (url) copyToClipboard(url);
+                            if (url) {copyToClipboard(url);}
                           }}
                           disabled={!normalizeUrl(audioFile.audio)}
                         >

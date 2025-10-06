@@ -190,7 +190,7 @@ export default function ChatBot() {
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     const MAX_FILES = 5;
 
-    if (files.length === 0) return;
+    if (files.length === 0) {return;}
 
     // Check total file limit
     if (attachedFiles.length + files.length > MAX_FILES) {

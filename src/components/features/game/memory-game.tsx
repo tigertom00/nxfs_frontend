@@ -125,10 +125,10 @@ export default function MemoryGame() {
 
   // Handle card click
   const handleCardClick = (cardId: string) => {
-    if (isChecking) return;
+    if (isChecking) {return;}
 
     const card = cards.find((c) => c.id === cardId);
-    if (!card || card.isFlipped || card.isMatched) return;
+    if (!card || card.isFlipped || card.isMatched) {return;}
 
     if (!gameStarted) {
       setGameStarted(true);

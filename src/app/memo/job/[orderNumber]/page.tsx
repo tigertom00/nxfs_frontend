@@ -33,7 +33,7 @@ export default function JobDetailPage() {
   // Load job details
   useEffect(() => {
     const loadJob = async () => {
-      if (!orderNumber || !isAuthenticated) return;
+      if (!orderNumber || !isAuthenticated) {return;}
 
       try {
         setLoading(true);

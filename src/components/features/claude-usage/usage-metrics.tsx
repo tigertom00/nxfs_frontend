@@ -21,8 +21,8 @@ export function UsageMetrics({ summary, rateLimit }: UsageMetricsProps) {
   };
 
   const getProgressColor = (percentage: number) => {
-    if (percentage < 50) return 'bg-green-500';
-    if (percentage < 80) return 'bg-yellow-500';
+    if (percentage < 50) {return 'bg-green-500';}
+    if (percentage < 80) {return 'bg-yellow-500';}
     return 'bg-destructive';
   };
 

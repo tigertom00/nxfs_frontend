@@ -702,7 +702,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   };
 
   const handleConfirmRemove = async () => {
-    if (!materialToRemove) return;
+    if (!materialToRemove) {return;}
 
     try {
       await jobMaterialsAPI.deleteJobMaterial(materialToRemove.id);
@@ -756,8 +756,8 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       const sortedMaterials = materialsArray.sort((a, b) => {
         const aExact = a.el_nr === searchTerm.replace(/\s/g, '');
         const bExact = b.el_nr === searchTerm.replace(/\s/g, '');
-        if (aExact && !bExact) return -1;
-        if (!aExact && bExact) return 1;
+        if (aExact && !bExact) {return -1;}
+        if (!aExact && bExact) {return 1;}
         return 0;
       });
 
@@ -778,8 +778,8 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       const sortedResults = searchResults.sort((a, b) => {
         const aExact = a.el_nr === searchTerm.replace(/\s/g, '');
         const bExact = b.el_nr === searchTerm.replace(/\s/g, '');
-        if (aExact && !bExact) return -1;
-        if (!aExact && bExact) return 1;
+        if (aExact && !bExact) {return -1;}
+        if (!aExact && bExact) {return 1;}
         return 0;
       });
 

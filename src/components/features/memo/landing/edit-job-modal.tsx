@@ -311,7 +311,7 @@ export function EditJobModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!job) return;
+    if (!job) {return;}
 
     setLoading(true);
     try {
@@ -325,7 +325,7 @@ export function EditJobModal({
   };
 
   const handleDelete = async () => {
-    if (!job) return;
+    if (!job) {return;}
 
     setDeleting(true);
     try {
@@ -343,7 +343,7 @@ export function EditJobModal({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  if (!job) return null;
+  if (!job) {return null;}
 
   return (
     <>

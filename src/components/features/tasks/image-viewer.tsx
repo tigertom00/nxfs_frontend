@@ -62,7 +62,7 @@ export function ImageViewer({
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return '';
+    if (!dateString) {return '';}
 
     try {
       // Handle different date formats that might come from the API
@@ -99,8 +99,8 @@ export function ImageViewer({
   };
 
   const formatFileSize = (bytes?: number): string => {
-    if (!bytes) return '';
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes) {return '';}
+    if (bytes === 0) {return '0 Bytes';}
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -120,7 +120,7 @@ export function ImageViewer({
   };
 
   const handlePrevious = () => {
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null) {return;}
     const newIndex =
       selectedImageIndex > 0 ? selectedImageIndex - 1 : images.length - 1;
     setSelectedImageIndex(newIndex);
@@ -129,7 +129,7 @@ export function ImageViewer({
   };
 
   const handleNext = () => {
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null) {return;}
     const newIndex =
       selectedImageIndex < images.length - 1 ? selectedImageIndex + 1 : 0;
     setSelectedImageIndex(newIndex);
@@ -160,7 +160,7 @@ export function ImageViewer({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null) {return;}
 
     switch (e.key) {
       case 'ArrowLeft':
