@@ -1,7 +1,7 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
 import { createUrlWithParams, normalizeResponse } from '../shared/utils';
-import { JobImage } from './types';
+import { JobImage, JobImagesResponse } from './types';
 import { PaginatedResponse } from '../shared/types';
 
 /**
@@ -47,7 +47,9 @@ export const jobImagesAPI = {
   },
 
   // Get images by job ID using the specific endpoint
-  getImagesByJob: async (jobId: string | number): Promise<JobImage[]> => {
+  getImagesByJob: async (
+    jobId: string | number
+  ): Promise<JobImagesResponse | JobImage[]> => {
     try {
       const response = await api.get(
         `/app/memo/jobb-images/by_job/?jobb_id=${jobId}`

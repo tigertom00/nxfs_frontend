@@ -208,10 +208,10 @@ export function AdvancedMaterialSearch({
       const result = await materialsAPI.searchMaterials(params);
       // Update local state
       setSearchResults(result.results);
-      setPagination(result.pagination);
+      setPagination(result);
 
       // Also call parent callback
-      onResults(result.results, result.pagination);
+      onResults(result.results, result);
     } catch (error) {
       toast({
         title: 'Search Failed',
@@ -413,7 +413,7 @@ export function AdvancedMaterialSearch({
                         key={supplier.id}
                         value={supplier.id.toString()}
                       >
-                        {supplier.name}
+                        {supplier.navn}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -12,8 +12,8 @@ import {
 
 interface JobOrderValidatorProps {
   value: number | string;
-  onChange: (orderNumber: number) => void;
-  existingOrderNumbers?: number[];
+  onChange: (orderNumber: string) => void;
+  existingOrderNumbers?: string[];
   className?: string;
   required?: boolean;
   disabled?: boolean;
@@ -52,7 +52,7 @@ export function JobOrderValidator({
     const result = validateJobOrderNumber(orderNumber);
 
     // Check if number already exists
-    if (result.isValid && existingOrderNumbers.includes(orderNumber)) {
+    if (result.isValid && existingOrderNumbers.includes(inputValue)) {
       setValidation({
         ...result,
         isValid: false,
@@ -71,17 +71,19 @@ export function JobOrderValidator({
     const orderNumber = parseInt(newValue);
     if (!isNaN(orderNumber) && newValue.length === 4) {
       const result = validateJobOrderNumber(orderNumber);
-      if (result.isValid && !existingOrderNumbers.includes(orderNumber)) {
-        onChange(orderNumber);
+      if (result.isValid && !existingOrderNumbers.includes(newValue)) {
+        onChange(newValue);
       }
     }
   };
 
   const handleSuggestNext = () => {
     try {
-      const suggested = suggestNextJobOrderNumber(existingOrderNumbers);
-      setInputValue(suggested.toString());
-      onChange(suggested);
+      const existingAsNumbers = existingOrderNumbers.map((num) => parseInt(num, 10)).filter((num) => !isNaN(num));
+      const suggested = suggestNextJobOrderNumber(existingAsNumbers);
+      const suggestedStr = suggested.toString();
+      setInputValue(suggestedStr);
+      onChange(suggestedStr);
     } catch (error) {}
   };
 

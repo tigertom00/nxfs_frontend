@@ -395,18 +395,14 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         });
 
         // Handle different response formats
-        let material = null;
+        let material: Material | null = null;
 
-        // Check if it's the new format with gtin_duplicate
-        if (duplicates?.results?.gtin_duplicate?.found) {
-          material = duplicates.results.gtin_duplicate.material;
-        }
-        // Check if it's an array format
-        else if (Array.isArray(duplicates) && duplicates.length > 0) {
+        // Check if it's an array format (direct Material[])
+        if (Array.isArray(duplicates) && duplicates.length > 0) {
           material = duplicates[0];
         }
-        // Check if it's paginated format
-        else if (duplicates?.results && Array.isArray(duplicates.results)) {
+        // Check if it's paginated format (PaginatedResponse<Material>)
+        else if ('results' in duplicates && Array.isArray(duplicates.results) && duplicates.results.length > 0) {
           material = duplicates.results[0];
         }
 
@@ -676,7 +672,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         // Add with new quantity
         await jobMaterialsAPI.createJobMaterial({
           matriell_id: selectedMaterial.id,
-          jobb: jobId,
+          jobb: ordreNr || String(jobId),
           antall: selectedMaterial.quantity,
         });
 
@@ -1179,7 +1175,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                           </SelectItem>
                           {suppliers.map((sup) => (
                             <SelectItem key={sup.id} value={sup.id.toString()}>
-                              {sup.navn || sup.name}
+                              {sup.navn}
                             </SelectItem>
                           ))}
                         </SelectContent>

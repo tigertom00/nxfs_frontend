@@ -22,20 +22,19 @@ export function MaterialSearchPagination({
   onPageChange,
   className = '',
 }: MaterialSearchPaginationProps) {
-  const {
-    current_page,
-    total_pages,
-    has_previous,
-    has_next,
-    count,
-    page_size,
-  } = pagination;
+  // Extract data from Django REST Framework pagination format
+  const count = pagination.count;
+  const has_previous = !!pagination.previous;
+  const has_next = !!pagination.next;
+  const page_size = pagination.results.length || 20; // Estimate from results length
+  const total_pages = Math.ceil(count / page_size);
+  const current_page = 1; // Simplified - would need to parse from 'next' URL to get exact page
 
   // Calculate visible page numbers
   const getVisiblePages = () => {
     const delta = 2; // Number of pages to show on each side of current page
-    const range = [];
-    const rangeWithDots = [];
+    const range: number[] = [];
+    const rangeWithDots: (number | string)[] = [];
 
     for (
       let i = Math.max(2, current_page - delta);

@@ -125,7 +125,7 @@ export function ReportTemplates({ onTemplateSelected }: ReportTemplatesProps) {
   ];
 
   const [templates, setTemplates] = useState(predefinedTemplates);
-  const [customTemplates, setCustomTemplates] = useState([]);
+  const [customTemplates, setCustomTemplates] = useState<typeof predefinedTemplates>([]);
 
   const handleCreateTemplate = () => {
     const template = {

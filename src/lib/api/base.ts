@@ -96,9 +96,9 @@ api.interceptors.response.use(
           const { authAPI } = await import('./auth/auth');
           const response = await authAPI.refreshToken(refreshToken);
 
-          // Update tokens in localStorage (use new refresh token from response)
+          // Update tokens in localStorage (use new refresh token from response if provided)
           const { setAuthTokens } = await import('./shared/utils');
-          setAuthTokens(response.access, response.refresh);
+          setAuthTokens(response.access, response.refresh || refreshToken);
 
           // Retry the original request with new token
           originalRequest.headers.Authorization = `Bearer ${response.access}`;

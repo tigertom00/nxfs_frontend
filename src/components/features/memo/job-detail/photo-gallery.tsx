@@ -61,7 +61,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
         const jobPhotos = await jobImagesAPI.getImagesByJob(jobIdToUse);
         const photosArray = Array.isArray(jobPhotos)
           ? jobPhotos
-          : jobPhotos?.images && Array.isArray(jobPhotos.images)
+          : 'images' in jobPhotos && Array.isArray(jobPhotos.images)
             ? jobPhotos.images
             : [];
 
@@ -77,7 +77,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
         const jobFiles = await jobFilesAPI.getFilesByJob(jobIdToUse);
         const filesArray = Array.isArray(jobFiles)
           ? jobFiles
-          : jobFiles?.files && Array.isArray(jobFiles.files)
+          : 'files' in jobFiles && Array.isArray(jobFiles.files)
             ? jobFiles.files
             : [];
 

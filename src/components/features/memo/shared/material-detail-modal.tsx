@@ -321,7 +321,7 @@ export function MaterialDetailModal({
                       variant="outline"
                       className="w-full justify-start"
                       onClick={() =>
-                        window.open(material.produktblad, '_blank')
+                        material.produktblad && window.open(material.produktblad, '_blank')
                       }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
@@ -333,7 +333,7 @@ export function MaterialDetailModal({
                       variant="outline"
                       className="w-full justify-start"
                       onClick={() =>
-                        window.open(material.produkt_url, '_blank')
+                        material.produkt_url && window.open(material.produkt_url, '_blank')
                       }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
@@ -344,7 +344,7 @@ export function MaterialDetailModal({
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => window.open(material.fdv, '_blank')}
+                      onClick={() => material.fdv && window.open(material.fdv, '_blank')}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       FDV Document
@@ -355,7 +355,7 @@ export function MaterialDetailModal({
                       variant="outline"
                       className="w-full justify-start"
                       onClick={() =>
-                        window.open(material.cpr_sertifikat, '_blank')
+                        material.cpr_sertifikat && window.open(material.cpr_sertifikat, '_blank')
                       }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
@@ -367,7 +367,7 @@ export function MaterialDetailModal({
                       variant="outline"
                       className="w-full justify-start"
                       onClick={() =>
-                        window.open(material.miljoinformasjon, '_blank')
+                        material.miljoinformasjon && window.open(material.miljoinformasjon, '_blank')
                       }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />

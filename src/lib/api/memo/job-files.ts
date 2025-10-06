@@ -1,7 +1,7 @@
 import api from '../base';
 import { handleApiError, showSuccessToast } from '../shared/error-handler';
 import { createUrlWithParams, normalizeResponse } from '../shared/utils';
-import { JobFile } from './types';
+import { JobFile, JobFilesResponse } from './types';
 import { PaginatedResponse } from '../shared/types';
 
 /**
@@ -47,7 +47,9 @@ export const jobFilesAPI = {
   },
 
   // Get files by job ID using the specific endpoint
-  getFilesByJob: async (jobId: string | number): Promise<JobFile[]> => {
+  getFilesByJob: async (
+    jobId: string | number
+  ): Promise<JobFilesResponse | JobFile[]> => {
     try {
       const response = await api.get(
         `/app/memo/jobb-files/by_job/?jobb_id=${jobId}`

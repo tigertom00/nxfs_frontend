@@ -9,19 +9,21 @@ export function ThemeInitializer() {
   useEffect(() => {
     // Apply the current theme to the document on component mount
     // This ensures the theme is applied even if the store hasn't initialized yet
-    document.documentElement.classList.remove('light', 'dark', 'purple');
-    document.documentElement.classList.add(theme);
+    if (theme) {
+      document.documentElement.classList.remove('light', 'dark', 'purple');
+      document.documentElement.classList.add(theme);
+    }
   }, [theme]);
 
   // Subscribe to theme changes and apply them
   useEffect(() => {
-    const unsubscribe = useUIStore.subscribe(
-      (state) => state.theme,
-      (newTheme) => {
+    const unsubscribe = useUIStore.subscribe((state) => {
+      const newTheme = state.theme;
+      if (newTheme) {
         document.documentElement.classList.remove('light', 'dark', 'purple');
         document.documentElement.classList.add(newTheme);
       }
-    );
+    });
 
     return unsubscribe;
   }, []);

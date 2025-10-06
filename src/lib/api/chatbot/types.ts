@@ -24,7 +24,7 @@ export interface ChatFile {
   url?: string;
 }
 
-export interface ChatSession {
+export interface N8NChatSession {
   id: string;
   user_id: string;
   title?: string;
@@ -53,10 +53,10 @@ export interface UpdateSessionPayload {
 
 // Response types
 export type SendChatMessageResponse = ChatbotResponse;
-export type GetChatSessionsResponse = ChatSession[];
-export type GetChatSessionResponse = ChatSession;
-export type CreateChatSessionResponse = ChatSession;
-export type UpdateChatSessionResponse = ChatSession;
+export type GetChatSessionsResponse = N8NChatSession[];
+export type GetChatSessionResponse = N8NChatSession;
+export type CreateChatSessionResponse = N8NChatSession;
+export type UpdateChatSessionResponse = N8NChatSession;
 export type DeleteChatSessionResponse = void;
 export type GetChatMessagesResponse = ChatMessage[];
 export type GetChatMessageResponse = ChatMessage;

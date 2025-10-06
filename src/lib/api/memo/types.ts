@@ -132,6 +132,12 @@ export interface JobImage {
   created_at: string;
 }
 
+export interface JobImagesResponse {
+  jobb: Job;
+  image_count: number;
+  images: JobImage[];
+}
+
 // Job File types
 export interface JobFile {
   id: number;
@@ -144,17 +150,34 @@ export interface JobFile {
   updated_at: string;
 }
 
+export interface JobFilesResponse {
+  jobb: Job;
+  file_count: number;
+  files: JobFile[];
+}
+
 // Search parameters
 export interface MaterialSearchParams extends BaseSearchParams {
   el_nr?: string;
   tittel?: string;
   varemerke?: string;
+  varenummer?: string;
+  gtin_number?: string;
   approved?: boolean;
   favorites?: boolean;
   in_stock?: boolean;
   discontinued?: boolean;
   kategori_blokknummer?: string;
+  leverandor?: number;
   leverandor_name?: string;
+  hoyde_min?: number;
+  hoyde_max?: number;
+  bredde_min?: number;
+  bredde_max?: number;
+  lengde_min?: number;
+  lengde_max?: number;
+  vekt_min?: number;
+  vekt_max?: number;
 }
 
 export interface JobSearchParams extends BaseSearchParams {

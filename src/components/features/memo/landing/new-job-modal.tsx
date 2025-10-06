@@ -45,11 +45,11 @@ export function NewJobModal({
   const [showResults, setShowResults] = useState(false);
   const [addressSearchTimeout, setAddressSearchTimeout] =
     useState<NodeJS.Timeout | null>(null);
-  const [existingOrderNumbers, setExistingOrderNumbers] = useState<number[]>(
+  const [existingOrderNumbers, setExistingOrderNumbers] = useState<string[]>(
     []
   );
   const [formData, setFormData] = useState<CreateJobPayload>({
-    ordre_nr: 0,
+    ordre_nr: '',
     tittel: '',
     adresse: '',
     postnummer: '',
@@ -74,15 +74,16 @@ export function NewJobModal({
           const orderNumbers = jobs.map((job) => job.ordre_nr);
           setExistingOrderNumbers(orderNumbers);
 
-          // Generate next available order number
-          const nextOrderNr = suggestNextJobOrderNumber(orderNumbers);
-          setFormData((prev) => ({ ...prev, ordre_nr: nextOrderNr }));
+          // Generate next available order number (convert strings to numbers for calculation)
+          const orderNumbersAsNumbers = orderNumbers.map((num) => parseInt(num, 10)).filter((num) => !isNaN(num));
+          const nextOrderNr = suggestNextJobOrderNumber(orderNumbersAsNumbers);
+          setFormData((prev) => ({ ...prev, ordre_nr: String(nextOrderNr) }));
         } catch (error) {
           // Fallback to simple generation
           const currentYear = new Date().getFullYear();
           const yearCode = (currentYear - 2017) % 10;
           const nextOrderNr = yearCode * 1000 + 1; // Start with sequence 1
-          setFormData((prev) => ({ ...prev, ordre_nr: nextOrderNr }));
+          setFormData((prev) => ({ ...prev, ordre_nr: String(nextOrderNr) }));
         }
       };
 
@@ -344,7 +345,7 @@ export function NewJobModal({
 
       // Reset form
       setFormData({
-        ordre_nr: 0,
+        ordre_nr: '',
         tittel: '',
         adresse: '',
         postnummer: '',

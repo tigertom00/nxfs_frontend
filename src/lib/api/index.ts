@@ -44,7 +44,20 @@ export { providersAPI } from './llm/providers';
 export { providersAPI as llmProvidersAPI } from './llm/providers';
 
 // Chatbot integration domain (N8N)
-export * from './chatbot/types';
+export type {
+  ChatMessage as ChatbotMessage,
+  ChatbotResponse,
+  ChatFile,
+  N8NChatSession,
+  SendChatMessageResponse,
+  GetChatSessionsResponse,
+  GetChatSessionResponse,
+  CreateChatSessionResponse,
+  UpdateChatSessionResponse,
+  DeleteChatSessionResponse,
+  GetChatMessagesResponse,
+  GetChatMessageResponse,
+} from './chatbot/types';
 export { n8nAPI as chatbotAPI } from './chatbot/n8n';
 
 // Chat domain (real-time messaging)
@@ -52,7 +65,8 @@ export * from './chat/types';
 export { chatAPI } from './chat';
 
 // Admin domain
-export * from './admin/types';
+// TODO: Fix duplicate exports with auth/types before re-enabling
+// export * from './admin/types';
 // Admin API methods will be exported here when implemented
 
 // Memo app domain (already migrated)

@@ -131,7 +131,7 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
     }
   }, [cropMode]);
 
-  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     if (tool === 'select' || tool === 'crop') return;
 
     setIsDrawing(true);
@@ -167,7 +167,7 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
     }
   };
 
-  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     if (!isDrawing || tool === 'text' || tool === 'select' || tool === 'crop')
       return;
 

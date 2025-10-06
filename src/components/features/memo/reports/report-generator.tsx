@@ -362,7 +362,11 @@ export function ReportGenerator({
   // Helper functions for mock data generation
   const generateMockTrendData = (startDate: string, endDate: string) => {
     const days = getDaysBetweenDates(startDate, endDate);
-    const trends = [];
+    const trends: Array<{
+      date: string;
+      completed: number;
+      started: number;
+    }> = [];
     for (let i = 0; i < days; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
@@ -431,7 +435,11 @@ export function ReportGenerator({
     endDate: string
   ) => {
     const days = getDaysBetweenDates(startDate, endDate);
-    const breakdown = [];
+    const breakdown: Array<{
+      date: string;
+      hours: number;
+      entries: number;
+    }> = [];
 
     for (let i = 0; i < days; i++) {
       const date = new Date(startDate);
