@@ -1,0 +1,73 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "your-github-username" # Replace with your GitHub username
+    labels:
+      - "dependencies"
+      - "automated"
+
+    # Group dependencies to reduce PR noise
+    groups:
+      # Group all patch and minor updates
+      development-dependencies:
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier"
+          - "@testing-library/*"
+          - "jest"
+          - "@playwright/*"
+          - "husky"
+          - "lint-staged"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Group production dependencies by category
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "next"
+        update-types:
+          - "minor"
+          - "patch"
+
+      ui-libraries:
+        patterns:
+          - "@radix-ui/*"
+          - "framer-motion"
+          - "lucide-react"
+          - "tailwindcss"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Auto-merge patch updates for known stable packages
+    # Note: This requires enabling auto-merge in your GitHub settings
+    # ignore:
+    #   - dependency-name: "*"
+    #     update-types: ["version-update:semver-major"]
+
+    # Commit message preferences
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+
+  # Monitor GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "github-actions"
+      - "automated"

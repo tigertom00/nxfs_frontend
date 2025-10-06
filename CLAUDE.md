@@ -16,6 +16,14 @@ npm start
 npm run lint
 npm run format      # Format code with Prettier
 
+# Testing
+npm run test              # Run unit tests in watch mode
+npm run test:ci           # Run all tests with coverage (for CI)
+npm run test:coverage     # Run tests with coverage report
+npm run test:e2e          # Run E2E tests
+npm run test:e2e:ui       # Run E2E tests with UI
+npm run test:e2e:headed   # Run E2E tests in headed mode
+
 # Bundle analysis
 npm run analyze     # Analyze bundle size and dependencies
 
@@ -556,6 +564,7 @@ The project uses Chrome DevTools MCP for comprehensive browser automation, debug
 #### Key Capabilities
 
 **Performance Profiling:**
+
 ```
 - Measure Core Web Vitals (LCP, CLS, FCP)
 - Identify render-blocking resources
@@ -565,6 +574,7 @@ The project uses Chrome DevTools MCP for comprehensive browser automation, debug
 ```
 
 **Network Debugging:**
+
 ```
 - Monitor all requests to Django backend (https://api.nxfs.no)
 - Inspect request/response headers
@@ -574,6 +584,7 @@ The project uses Chrome DevTools MCP for comprehensive browser automation, debug
 ```
 
 **Browser Automation:**
+
 ```
 - Automated UI testing
 - Screenshot capture (full page, viewport, element)
@@ -583,6 +594,7 @@ The project uses Chrome DevTools MCP for comprehensive browser automation, debug
 ```
 
 **JavaScript Debugging:**
+
 ```
 - Execute arbitrary JavaScript in page context
 - Inspect localStorage/sessionStorage
@@ -594,46 +606,61 @@ The project uses Chrome DevTools MCP for comprehensive browser automation, debug
 #### Example Usage Patterns
 
 **Test Performance:**
+
 ```typescript
 // Start performance trace with automatic reload
-mcp__chrome-devtools__performance_start_trace({ reload: true, autoStop: true })
+mcp__chrome -
+  devtools__performance_start_trace({ reload: true, autoStop: true });
 // Analyze specific insights
-mcp__chrome-devtools__performance_analyze_insight({ insightName: "LCPBreakdown" })
+mcp__chrome -
+  devtools__performance_analyze_insight({ insightName: 'LCPBreakdown' });
 ```
 
 **Debug API Calls:**
+
 ```typescript
 // List network requests
-mcp__chrome-devtools__list_network_requests({ resourceTypes: ["xhr", "fetch"], pageSize: 10 })
+mcp__chrome -
+  devtools__list_network_requests({
+    resourceTypes: ['xhr', 'fetch'],
+    pageSize: 10,
+  });
 // Inspect specific request
-mcp__chrome-devtools__get_network_request({ url: "https://api.nxfs.no/app/blog/posts/public/" })
+mcp__chrome -
+  devtools__get_network_request({
+    url: 'https://api.nxfs.no/app/blog/posts/public/',
+  });
 ```
 
 **Test Responsive Design:**
+
 ```typescript
 // Emulate mobile device
-mcp__chrome-devtools__resize_page({ width: 375, height: 667 })
+mcp__chrome - devtools__resize_page({ width: 375, height: 667 });
 // Add network throttling
-mcp__chrome-devtools__emulate_network({ throttlingOption: "Fast 3G" })
+mcp__chrome - devtools__emulate_network({ throttlingOption: 'Fast 3G' });
 // Take screenshot
-mcp__chrome-devtools__take_screenshot({ filePath: "./mobile-view.png" })
+mcp__chrome - devtools__take_screenshot({ filePath: './mobile-view.png' });
 ```
 
 **Execute JavaScript:**
+
 ```typescript
 // Inspect page state
-mcp__chrome-devtools__evaluate_script({
-  function: `() => ({
+mcp__chrome -
+  devtools__evaluate_script({
+    function: `() => ({
     theme: localStorage.getItem('ui-storage'),
     isAuthenticated: !!document.cookie.includes('auth'),
     reactVersion: window.React?.version
-  })`
-})
+  })`,
+  });
 ```
 
 #### Testing Checklist
 
 Use Chrome DevTools MCP to verify:
+
 - ✅ Authentication flows (JWT token handling)
 - ✅ Theme switching (5 themes: system, light, dark, purple, pink)
 - ✅ API requests to Django backend
