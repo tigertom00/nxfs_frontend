@@ -485,6 +485,10 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
             onMouseDown={handleMouseDown}
             onMousemove={handleMouseMove}
             onMouseup={handleMouseUp}
+            onTouchStart={handleMouseDown}
+            onTouchMove={handleMouseMove}
+            onTouchEnd={handleMouseUp}
+            style={{ touchAction: 'none' }}
           >
             <Layer>
               {/* Background Image */}
