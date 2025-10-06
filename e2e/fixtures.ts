@@ -1,9 +1,16 @@
-import { test as base } from '@playwright/test';
+import { test as base, Page } from '@playwright/test';
+
+/**
+ * Extended test fixtures
+ */
+type TestFixtures = {
+  authenticatedPage: Page;
+};
 
 /**
  * Extended test fixture with common setup and utilities
  */
-export const test = base.extend({
+export const test = base.extend<TestFixtures>({
   /**
    * Authenticated page - automatically logs in before each test
    */

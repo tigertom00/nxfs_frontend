@@ -5,7 +5,6 @@ module.exports = {
   // Run Prettier on JSON, CSS, and Markdown files
   '*.{json,css,md}': ['prettier --write'],
 
-  // Skip type checking for now (too many test file type conflicts)
-  // Run manually with: npm run build
-  // '*.{ts,tsx}': () => 'tsc --noEmit',
+  // Type check TypeScript files
+  '*.{ts,tsx}': () => 'tsc --noEmit',
 };

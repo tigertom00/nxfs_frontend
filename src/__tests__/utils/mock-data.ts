@@ -1,6 +1,6 @@
 import type { User } from '@/lib/api/auth/types';
 import type { Task } from '@/lib/api/tasks/types';
-import type { BlogPost } from '@/lib/api/blog/types';
+import type { Post } from '@/lib/api/blog/types';
 
 /**
  * Mock user data for testing
@@ -11,10 +11,12 @@ export const mockUser: User = {
   email: 'test@example.com',
   first_name: 'Test',
   last_name: 'User',
-  session_id: 'test-session-id',
+  chat_session_id: 'test-session-id',
   is_staff: false,
   is_active: true,
   date_joined: '2025-01-01T00:00:00Z',
+  language: 'en',
+  theme: 'system',
 };
 
 /**
@@ -36,9 +38,11 @@ export const mockTask: Task = {
   title: 'Test Task',
   description: 'This is a test task',
   status: 'todo',
+  priority: 'medium',
   user_id: mockUser.id,
-  project_id: 'project-1',
-  category_id: 'category-1',
+  project: 1,
+  category: [1],
+  completed: false,
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z',
 };
@@ -53,7 +57,10 @@ export const mockTasks: Task[] = [
     title: 'Another Task',
     description: 'This is another test task',
     status: 'in_progress',
+    priority: 'high',
     user_id: mockUser.id,
+    category: [],
+    completed: false,
     created_at: '2025-01-02T00:00:00Z',
     updated_at: '2025-01-02T00:00:00Z',
   },
@@ -62,7 +69,10 @@ export const mockTasks: Task[] = [
     title: 'Completed Task',
     description: 'This task is completed',
     status: 'completed',
+    priority: 'low',
     user_id: mockUser.id,
+    category: [1, 2],
+    completed: true,
     created_at: '2025-01-03T00:00:00Z',
     updated_at: '2025-01-03T12:00:00Z',
   },
@@ -71,17 +81,20 @@ export const mockTasks: Task[] = [
 /**
  * Mock blog post data for testing
  */
-export const mockBlogPost: BlogPost = {
-  id: 1,
+export const mockBlogPost: Post = {
+  id: '1',
   title: 'Test Blog Post',
   title_nb: 'Test Blogginnlegg',
-  subtitle: 'A test subtitle',
-  subtitle_nb: 'En test undertittel',
+  slug: 'test-blog-post',
+  content: 'Test content',
+  content_nb: 'Test innhold',
   body_markdown: '# Test Content\n\nThis is test content.',
   body_markdown_nb: '# Test Innhold\n\nDette er test innhold.',
-  author: mockUser.id,
-  tags: ['test', 'blog'],
-  is_published: true,
+  excerpt: 'A test subtitle',
+  excerpt_nb: 'En test undertittel',
+  author_id: mockUser.id,
+  status: 'published',
+  tags: [1, 2],
   published_at: '2025-01-01T00:00:00Z',
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z',

@@ -1,8 +1,6 @@
 import { test, expect } from './fixtures';
 
 test.describe('Task Management Workflow', () => {
-  test.use({ authenticatedPage: true });
-
   test('should display tasks page', async ({ authenticatedPage: page }) => {
     await page.goto('/tasks');
 
@@ -157,7 +155,7 @@ test.describe('Task Management Workflow', () => {
     if (await statusDropdown.isVisible()) {
       // If it's a select element
       if (await statusDropdown.evaluate((el) => el.tagName === 'SELECT')) {
-        await statusDropdown.selectOption({ label: /in progress|doing/i });
+        await statusDropdown.selectOption('in_progress');
       } else {
         // If it's a button/dropdown
         await statusDropdown.click();
