@@ -51,9 +51,7 @@ export function TimerStopModal({
       setInitialSeconds(elapsedSeconds);
       setDescription('');
     }
-    // Intentionally only depend on isOpen, not elapsedSeconds
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, elapsedSeconds]);
 
   const originalTime = formatSecondsToTimeString(initialSeconds);
   const roundedSeconds = roundSecondsToNearestHalfHour(adjustedSeconds);

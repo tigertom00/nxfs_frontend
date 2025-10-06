@@ -112,15 +112,21 @@ export default function ProjectDetailPage() {
 
       setProject(projectResponse);
       // Extract arrays from potentially paginated responses
-      const tasksArray = Array.isArray(tasksResponse)
+      const tasksArray: Task[] = Array.isArray(tasksResponse)
         ? tasksResponse
-        : (tasksResponse as any).results || [];
-      const projectsArray = Array.isArray(projectsResponse)
+        : (typeof tasksResponse === 'object' && tasksResponse !== null && 'results' in tasksResponse)
+          ? (tasksResponse as { results: Task[] }).results
+          : [];
+      const projectsArray: Project[] = Array.isArray(projectsResponse)
         ? projectsResponse
-        : (projectsResponse as any).results || [];
-      const categoriesArray = Array.isArray(categoriesResponse)
+        : (typeof projectsResponse === 'object' && projectsResponse !== null && 'results' in projectsResponse)
+          ? (projectsResponse as { results: Project[] }).results
+          : [];
+      const categoriesArray: Category[] = Array.isArray(categoriesResponse)
         ? categoriesResponse
-        : (categoriesResponse as any).results || [];
+        : (typeof categoriesResponse === 'object' && categoriesResponse !== null && 'results' in categoriesResponse)
+          ? (categoriesResponse as { results: Category[] }).results
+          : [];
 
       setTasks(tasksArray);
       setCategories(categoriesArray);

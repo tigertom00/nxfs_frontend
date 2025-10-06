@@ -106,7 +106,7 @@ const performanceTracker = new PerformanceTracker();
 
 // Make it available globally for the axios interceptor
 if (typeof window !== 'undefined') {
-  (window as any).performanceTracker = performanceTracker;
+  (window as Window & { performanceTracker: PerformanceTracker }).performanceTracker = performanceTracker;
 }
 
 export default performanceTracker;

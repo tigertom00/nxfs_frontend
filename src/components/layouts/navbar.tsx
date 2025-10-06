@@ -70,8 +70,8 @@ export default function Navbar() {
               <DropdownMenuContent align="start" className="w-56">
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
-                    <span className="mr-2">🤖</span>
-                    {language === 'no' ? 'AI' : 'AI'}
+                    <span className="mr-2">💻</span>
+                    {language === 'no' ? 'Monitor' : 'Monitor'}
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuItem>
@@ -80,13 +80,14 @@ export default function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href="/ai/link2" className="w-full">
-                        {language === 'no' ? 'Link 2' : 'Link 2'}
+                      <Link href="/docker" className="w-full">
+                        🐳 {language === 'no' ? 'Docker' : 'Docker'}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href="/ai/link3" className="w-full">
-                        {language === 'no' ? 'Link 3' : 'Link 3'}
+                      <Link href="/system-monitor" className="w-full">
+                        💻{' '}
+                        {language === 'no' ? 'Systemovervåkning' : 'System Monitor'}
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
@@ -135,6 +136,11 @@ export default function Navbar() {
                         🧠 {language === 'no' ? 'Minnespill' : 'Memory Game'}
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/game" className="w-full">
+                        👻 {language === 'no' ? 'Pac-Man' : 'Pac-Man'}
+                      </Link>
+                    </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
 
@@ -158,17 +164,6 @@ export default function Navbar() {
                 <DropdownMenuItem>
                   <Link href="/llm-providers" className="w-full">
                     {language === 'no' ? 'LLM-leverandører' : 'LLM Providers'}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/docker" className="w-full">
-                    {language === 'no' ? 'Docker' : 'Docker'}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/system-monitor" className="w-full">
-                    💻{' '}
-                    {language === 'no' ? 'Systemovervåkning' : 'System Monitor'}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

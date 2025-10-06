@@ -63,8 +63,9 @@ api.interceptors.response.use(
       }
 
       // Store performance data for potential analytics
-      if (typeof window !== 'undefined' && (window as any).performanceTracker) {
-        (window as any).performanceTracker.trackAPIRequest({
+      const performanceWindow = window as Window & { performanceTracker?: { trackAPIRequest: (metric: any) => void } };
+      if (typeof window !== 'undefined' && performanceWindow.performanceTracker) {
+        performanceWindow.performanceTracker.trackAPIRequest({
           url,
           method,
           response_time: responseTime ? parseFloat(responseTime) : undefined,
@@ -77,7 +78,7 @@ api.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as any;
+    const originalRequest = error.config as typeof error.config & { _retry?: boolean };
 
     // Handle 401/403 errors (unauthorized/forbidden)
     if (

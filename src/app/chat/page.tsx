@@ -176,13 +176,15 @@ export default function ChatPage() {
                 </div>
 
                 {/* Message input */}
-                <MessageInput
-                  roomId={activeRoomId}
-                  value={draftMessage}
-                  onChange={handleDraftChange}
-                  onSend={handleSendMessage}
-                  onTyping={handleTyping}
-                />
+                {activeRoomId && (
+                  <MessageInput
+                    roomId={activeRoomId}
+                    value={draftMessage}
+                    onChange={handleDraftChange}
+                    onSend={handleSendMessage}
+                    onTyping={handleTyping}
+                  />
+                )}
               </>
             ) : (
               /* Empty state - no room selected */

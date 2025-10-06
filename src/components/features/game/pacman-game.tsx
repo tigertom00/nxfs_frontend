@@ -84,7 +84,7 @@ const DIRECTIONS: Record<Direction, Position> = {
 export default function PacManGame() {
   const { t } = useIntl();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const gameLoopRef = useRef<number>();
+  const gameLoopRef = useRef<number | undefined>(undefined);
   const lastMoveTimeRef = useRef<number>(0);
   const ghostMoveTimeRef = useRef<number>(0);
 

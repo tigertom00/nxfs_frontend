@@ -100,7 +100,7 @@ export function ManualTimeEntry({
       const finalMinutes = roundingDetails.roundedMinutes;
 
       const timeEntryData = {
-        jobb: jobId,
+        jobb: jobId.toString(),
         user: parseInt(user.id),
         timer: finalMinutes, // Store as minutes
         dato: format(date, 'yyyy-MM-dd'),

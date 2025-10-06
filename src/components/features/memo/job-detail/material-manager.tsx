@@ -167,7 +167,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
 
       const jobMaterials = await jobMaterialsAPI.getJobMaterials({
-        jobb: jobIdToUse,
+        jobb: jobIdToUse.toString(),
       });
 
       // Handle paginated response - extract results array
@@ -177,7 +177,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
           ? jobMaterials.results
           : [];
       const jobSpecificMaterials = jobMaterialsArray.filter(
-        (jm) => jm.jobb === jobIdToUse
+        (jm) => jm.jobb === jobIdToUse.toString()
       );
       setJobMaterials(jobSpecificMaterials);
     } catch (error) {
@@ -304,7 +304,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         vekt: elData.vekt,
 
         // URLs and files
-        bilder: elData.bilder ? JSON.stringify(elData.bilder) : null, // Convert array to JSON string
+        bilder: elData.bilder ? JSON.stringify(elData.bilder) : undefined, // Convert array to JSON string
         fdv: elData.fdv,
         produktblad: elData.produktblad,
         produkt_url: elData.produkt_url,
@@ -371,7 +371,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       /^\d{6,8}$/.test(cleanCode) || /^EL\d{6,8}$/i.test(cleanCode);
 
     // First, check if material already exists locally
-    let existingMaterial = null;
+    let existingMaterial: Material | undefined = undefined;
 
     if (isGTIN) {
       // Search by GTIN in local materials

@@ -544,7 +544,7 @@ export default function MemoAdminPage() {
                           <TableCell>
                             <Badge variant="outline">#{entry.jobb}</Badge>
                           </TableCell>
-                          <TableCell>User {entry.user}</TableCell>
+                          <TableCell>User {typeof entry.user === 'object' ? entry.user.id : entry.user}</TableCell>
                           <TableCell>{formatTime(entry.timer || 0)}</TableCell>
                           <TableCell>
                             {entry.dato ? formatDate(entry.dato) : 'No date'}

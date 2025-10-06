@@ -535,7 +535,7 @@ export function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) {
                 <Label htmlFor="status">{t('blog.editor.status')}</Label>
                 <Select
                   value={status}
-                  onValueChange={(value) => setStatus(value as any)}
+                  onValueChange={(value) => setStatus(value as 'draft' | 'published' | 'archived')}
                 >
                   <SelectTrigger
                     className={errors.status ? 'border-destructive' : ''}

@@ -199,7 +199,11 @@ export default function MemoPage() {
             setTotalPages(Math.ceil(jobs.length / pageSize));
           } else {
             setTotalCount(response.count || 0);
-            setTotalPages(response.page_info?.total_pages || 1);
+            const pageInfo = 'page_info' in response ? response.page_info : undefined;
+            const totalPagesValue = pageInfo && typeof pageInfo === 'object' && 'total_pages' in pageInfo
+              ? (typeof pageInfo.total_pages === 'number' ? pageInfo.total_pages : 1)
+              : 1;
+            setTotalPages(totalPagesValue);
           }
         }
       } catch (error) {
@@ -420,7 +424,7 @@ export default function MemoPage() {
                                 <h3 className="font-semibold text-foreground">
                                   Job #{job.ordre_nr}
                                 </h3>
-                                {job.total_hours > 0 && (
+                                {job.total_hours && job.total_hours > 0 && (
                                   <span className="text-xs text-muted-foreground">
                                     {Math.round(job.total_hours / 60)}h
                                   </span>

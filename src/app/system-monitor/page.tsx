@@ -348,7 +348,7 @@ const SystemMonitorPage = () => {
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Uptime</p>
                       <p className="text-foreground font-mono">
-                        {formatUptime(dashboard.host.boot_time)}
+                        {dashboard.current_system_stats?.boot_time ? formatUptime(dashboard.current_system_stats.boot_time) : 'N/A'}
                       </p>
                     </div>
                   </div>

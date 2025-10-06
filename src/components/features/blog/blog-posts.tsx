@@ -193,7 +193,7 @@ function BlogPostCard({ post }: { post: BlogPost }) {
                 // Check if the code block is inline
                 const isInline =
                   node && typeof node === 'object' && 'inline' in node
-                    ? (node as any).inline
+                    ? (node as { inline?: boolean }).inline
                     : false;
                 if (isInline) {
                   return (

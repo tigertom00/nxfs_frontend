@@ -154,7 +154,7 @@ export function EditTimeEntryDialog({
             </div>
 
             {/* Rounding info */}
-            {showRoundingInfo && !roundingDetails.isExact && (
+            {showRoundingInfo && roundingDetails.wasRounded && (
               <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
                 <p>
                   {formatMinutesToDecimalHours(currentMinutes)}t will be rounded
@@ -163,8 +163,8 @@ export function EditTimeEntryDialog({
                   ({roundingDetails.roundedMinutes} minutes)
                 </p>
                 <p className="mt-1">
-                  Difference: {roundingDetails.difference > 0 ? '+' : ''}
-                  {roundingDetails.difference} minutes
+                  Difference: {(roundingDetails.roundedMinutes - roundingDetails.originalMinutes) > 0 ? '+' : ''}
+                  {roundingDetails.roundedMinutes - roundingDetails.originalMinutes} minutes
                 </p>
               </div>
             )}

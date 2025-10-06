@@ -112,7 +112,7 @@ export default function TasksPage() {
       setError(null);
 
       // Build query parameters using enhanced filtering
-      const queryParams: any = {};
+      const queryParams: Record<string, string | number | string[] | number[]> = {};
 
       if (selectedCategories.length > 0) {
         queryParams.category = selectedCategories;
@@ -148,11 +148,11 @@ export default function TasksPage() {
       let tasksArray: Task[] = [];
       if (Array.isArray(response)) {
         tasksArray = response;
-      } else if (response.results) {
+      } else if ('results' in response && Array.isArray(response.results)) {
         tasksArray = response.results;
-      } else if ((response as any).filters_applied) {
+      } else if ('filters_applied' in response) {
         // Handle TasksFilterResponse format
-        tasksArray = (response as any).results || [];
+        tasksArray = ('results' in response && Array.isArray(response.results)) ? response.results : [];
       }
 
       setTasks(tasksArray);
@@ -214,7 +214,7 @@ export default function TasksPage() {
         estimated_time: taskData.estimated_time || undefined,
         category: taskData.category || [],
         project: taskData.project || undefined,
-        user_id: parseInt(user.id), // Convert string to number for API
+        user_id: user.id, // Keep as string for API
       };
 
       // Remove undefined fields to avoid sending them
@@ -342,11 +342,20 @@ export default function TasksPage() {
         completed: 'fullført' as const,
       };
 
-      const payload: any = {
+      const payload: {
+        name: string;
+        status?: 'todo' | 'in_progress' | 'completed';
+        status_nb?: 'å gjøre' | 'pågående' | 'fullført';
+        user_id: number;
+        name_nb?: string;
+        description?: string;
+        description_nb?: string;
+      } = {
         name: projectData.name.trim(),
-        status: projectData.status,
-        status_nb:
-          statusMapping[projectData.status as keyof typeof statusMapping],
+        ...(projectData.status && {
+          status: projectData.status as 'todo' | 'in_progress' | 'completed',
+          status_nb: statusMapping[projectData.status as keyof typeof statusMapping],
+        }),
         user_id: parseInt(user.id),
         ...(projectData.name_nb?.trim() && {
           name_nb: projectData.name_nb.trim(),
@@ -397,11 +406,21 @@ export default function TasksPage() {
         completed: 'fullført' as const,
       };
 
-      const payload: any = {
+      const payload: {
+        name: string;
+        status?: 'todo' | 'in_progress' | 'completed';
+        status_nb?: 'å gjøre' | 'pågående' | 'fullført';
+        completed: boolean;
+        completed_at?: string;
+        name_nb?: string;
+        description?: string;
+        description_nb?: string;
+      } = {
         name: projectData.name.trim(),
-        status: projectData.status,
-        status_nb:
-          statusMapping[projectData.status as keyof typeof statusMapping],
+        ...(projectData.status && {
+          status: projectData.status as 'todo' | 'in_progress' | 'completed',
+          status_nb: statusMapping[projectData.status as keyof typeof statusMapping],
+        }),
         completed: projectData.status === 'completed',
         ...(projectData.status === 'completed' && {
           completed_at: new Date().toISOString(),
@@ -552,7 +571,15 @@ export default function TasksPage() {
         completed: 'fullført' as const,
       };
 
-      const payload: any = {
+      const payload: {
+        name: string;
+        status: 'todo' | 'in_progress' | 'completed';
+        status_nb: 'å gjøre' | 'pågående' | 'fullført';
+        user_id: number;
+        name_nb?: string;
+        description?: string;
+        description_nb?: string;
+      } = {
         name: project.name.trim(),
         status: newStatus,
         status_nb: statusMapping[newStatus as keyof typeof statusMapping],
