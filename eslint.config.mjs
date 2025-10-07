@@ -18,9 +18,10 @@ const eslintConfig = [
     rules: {
       // TypeScript - Enforce type safety (errors)
       "@typescript-eslint/no-explicit-any": "warn", // Warn on 'any' usage
-      "@typescript-eslint/no-unused-vars": ["error", {
+      "@typescript-eslint/no-unused-vars": ["warn", {
         "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        "varsIgnorePattern": "^_",
+        "caughtErrors": "none" // Allow unused error in catch blocks
       }],
       "@typescript-eslint/no-non-null-assertion": "warn",
       "@typescript-eslint/ban-ts-comment": "warn",

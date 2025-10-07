@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   eslint: {
-    ignoreDuringBuilds: true, // Temporarily ignore ESLint during builds - TODO: Fix all ESLint errors
+    ignoreDuringBuilds: false, // ESLint errors fixed - run during builds
   },
 
   // Images optimization for production

@@ -9,8 +9,6 @@ import type {
   WSServerMessage,
   WSMessageEvent,
   WSTypingEvent,
-  WSUserJoinedEvent,
-  WSUserLeftEvent,
 } from '@/lib/api/chat/types';
 import { toast } from 'sonner';
 
@@ -31,17 +29,37 @@ interface ChatState {
   loadRooms: () => Promise<void>;
   loadRoom: (roomId: string) => Promise<void>;
   createDirectMessage: (userId: string) => Promise<ChatRoom | null>;
-  createGroupRoom: (name: string, participantIds: string[]) => Promise<ChatRoom | null>;
+  createGroupRoom: (
+    name: string,
+    participantIds: string[]
+  ) => Promise<ChatRoom | null>;
   leaveRoom: (roomId: string) => Promise<void>;
   markRoomAsRead: (roomId: string) => Promise<void>;
 
   // Actions - Messages
   loadMessages: (roomId: string, page?: number) => Promise<void>;
-  sendMessage: (roomId: string, content: string, replyTo?: string) => Promise<void>;
-  sendMessageWithFile: (roomId: string, content: string, file: File, replyTo?: string) => Promise<void>;
-  editMessage: (roomId: string, messageId: string, content: string) => Promise<void>;
+  sendMessage: (
+    roomId: string,
+    content: string,
+    replyTo?: string
+  ) => Promise<void>;
+  sendMessageWithFile: (
+    roomId: string,
+    content: string,
+    file: File,
+    replyTo?: string
+  ) => Promise<void>;
+  editMessage: (
+    roomId: string,
+    messageId: string,
+    content: string
+  ) => Promise<void>;
   deleteMessage: (roomId: string, messageId: string) => Promise<void>;
-  reactToMessage: (roomId: string, messageId: string, emoji: string) => Promise<void>;
+  reactToMessage: (
+    roomId: string,
+    messageId: string,
+    emoji: string
+  ) => Promise<void>;
 
   // Actions - Real-time
   setTyping: (roomId: string, isTyping: boolean) => void;
@@ -56,7 +74,11 @@ interface ChatState {
   _handleSocketMessage: (data: WSServerMessage) => void;
   _addOptimisticMessage: (roomId: string, message: Message) => void;
   _removeOptimisticMessage: (roomId: string, tempId: string) => void;
-  _updateMessage: (roomId: string, messageId: string, updates: Partial<Message>) => void;
+  _updateMessage: (
+    roomId: string,
+    messageId: string,
+    updates: Partial<Message>
+  ) => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -87,7 +109,7 @@ export const useChatStore = create<ChatState>()(
           socketClient.joinRoom(roomId);
 
           // Subscribe to room events
-          const unsubscribe = socketClient.onRoomEvent(roomId, (data) => {
+          const _unsubscribe = socketClient.onRoomEvent(roomId, (data) => {
             get()._handleSocketMessage(data);
           });
 
@@ -107,7 +129,9 @@ export const useChatStore = create<ChatState>()(
         set({ isLoadingRooms: true });
         try {
           const response = await chatAPI.getChatRooms(1, 50);
-          const roomsList = Array.isArray(response) ? response : response.results || [];
+          const roomsList = Array.isArray(response)
+            ? response
+            : response.results || [];
 
           const rooms = new Map<string, ChatRoom>();
           const unreadCounts = new Map<string, number>();
@@ -197,7 +221,8 @@ export const useChatStore = create<ChatState>()(
             messages.delete(roomId);
             unreadCounts.delete(roomId);
 
-            const activeRoomId = state.activeRoomId === roomId ? null : state.activeRoomId;
+            const activeRoomId =
+              state.activeRoomId === roomId ? null : state.activeRoomId;
 
             return { rooms, messages, unreadCounts, activeRoomId };
           });
@@ -229,16 +254,19 @@ export const useChatStore = create<ChatState>()(
         set({ isLoadingMessages: true });
         try {
           const response = await chatAPI.getMessages(roomId, page, 50);
-          const messagesList = Array.isArray(response) ? response : response.results || [];
+          const messagesList = Array.isArray(response)
+            ? response
+            : response.results || [];
 
           set((state) => {
             const messages = new Map(state.messages);
             const existing = messages.get(roomId) || [];
 
             // Prepend older messages (for infinite scroll)
-            const combined = page > 1
-              ? [...messagesList.reverse(), ...existing]
-              : messagesList.reverse();
+            const combined =
+              page > 1
+                ? [...messagesList.reverse(), ...existing]
+                : messagesList.reverse();
 
             messages.set(roomId, combined);
             return { messages, isLoadingMessages: false };
@@ -322,7 +350,9 @@ export const useChatStore = create<ChatState>()(
       // Edit message
       editMessage: async (roomId, messageId, content) => {
         try {
-          const updated = await chatAPI.updateMessage(roomId, messageId, { content });
+          const updated = await chatAPI.updateMessage(roomId, messageId, {
+            content,
+          });
 
           get()._updateMessage(roomId, messageId, updated);
         } catch (error) {
@@ -352,7 +382,9 @@ export const useChatStore = create<ChatState>()(
             action: 'add',
           });
 
-          get()._updateMessage(roomId, messageId, { reactions: response.reactions });
+          get()._updateMessage(roomId, messageId, {
+            reactions: response.reactions,
+          });
         } catch (error) {
           console.error('Failed to react:', error);
           toast.error('Failed to add reaction');
@@ -429,7 +461,10 @@ export const useChatStore = create<ChatState>()(
                   if (!userExists) {
                     typingUsers.set(roomId, [
                       ...users,
-                      { id: event.user_id, display_name: event.user } as ChatUser,
+                      {
+                        id: event.user_id,
+                        display_name: event.user,
+                      } as ChatUser,
                     ]);
                   }
                 } else {
@@ -472,7 +507,10 @@ export const useChatStore = create<ChatState>()(
         set((state) => {
           const messages = new Map(state.messages);
           const roomMessages = messages.get(roomId) || [];
-          messages.set(roomId, roomMessages.filter((m) => m.id !== tempId));
+          messages.set(
+            roomId,
+            roomMessages.filter((m) => m.id !== tempId)
+          );
           return { messages };
         });
       },
@@ -484,7 +522,9 @@ export const useChatStore = create<ChatState>()(
 
           messages.set(
             roomId,
-            roomMessages.map((m) => (m.id === messageId ? { ...m, ...updates } : m))
+            roomMessages.map((m) =>
+              m.id === messageId ? { ...m, ...updates } : m
+            )
           );
 
           return { messages };

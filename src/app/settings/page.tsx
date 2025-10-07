@@ -48,7 +48,7 @@ export default function SettingsPage() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<
     'idle' | 'saving' | 'success' | 'error'
   >('idle');
@@ -107,7 +107,9 @@ export default function SettingsPage() {
     lang: 'en' | 'no',
     themePreference: 'light' | 'dark' | 'purple' | 'pink' | 'system'
   ) => {
-    if (!user) {return;}
+    if (!user) {
+      return;
+    }
 
     setSaveStatus('saving');
     setError(null);

@@ -49,21 +49,21 @@ export default function TasksPage() {
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
-  const [actionLoading, setActionLoading] = useState(false);
+  const [_actionLoading, setActionLoading] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<
+  const [selectedStatus, _setSelectedStatus] = useState<
     ('todo' | 'in_progress' | 'completed')[]
   >([]);
-  const [selectedPriority, setSelectedPriority] = useState<
+  const [selectedPriority, _setSelectedPriority] = useState<
     ('low' | 'medium' | 'high')[]
   >([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dateRange, setDateRange] = useState<{ start?: string; end?: string }>(
+  const [searchQuery, _setSearchQuery] = useState('');
+  const [dateRange, _setDateRange] = useState<{ start?: string; end?: string }>(
     {}
   );
-  const [viewingProject, setViewingProject] = useState<Project | null>(null);
+  const [_viewingProject, _setViewingProject] = useState<Project | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   useEffect(() => {
@@ -112,7 +112,8 @@ export default function TasksPage() {
       setError(null);
 
       // Build query parameters using enhanced filtering
-      const queryParams: Record<string, string | number | string[] | number[]> = {};
+      const queryParams: Record<string, string | number | string[] | number[]> =
+        {};
 
       if (selectedCategories.length > 0) {
         queryParams.category = selectedCategories;
@@ -152,7 +153,10 @@ export default function TasksPage() {
         tasksArray = response.results;
       } else if ('filters_applied' in response) {
         // Handle TasksFilterResponse format
-        tasksArray = ('results' in response && Array.isArray(response.results)) ? response.results : [];
+        tasksArray =
+          'results' in response && Array.isArray(response.results)
+            ? response.results
+            : [];
       }
 
       setTasks(tasksArray);
@@ -263,7 +267,9 @@ export default function TasksPage() {
     taskData: CreateTaskPayload,
     files?: File[]
   ) => {
-    if (!editingTask) {return;}
+    if (!editingTask) {
+      return;
+    }
 
     try {
       setActionLoading(true);
@@ -354,7 +360,8 @@ export default function TasksPage() {
         name: projectData.name.trim(),
         ...(projectData.status && {
           status: projectData.status as 'todo' | 'in_progress' | 'completed',
-          status_nb: statusMapping[projectData.status as keyof typeof statusMapping],
+          status_nb:
+            statusMapping[projectData.status as keyof typeof statusMapping],
         }),
         user_id: parseInt(user.id),
         ...(projectData.name_nb?.trim() && {
@@ -386,7 +393,7 @@ export default function TasksPage() {
     }
   };
 
-  const handleUpdateProject = async (projectData: CreateProjectPayload) => {
+  const _handleUpdateProject = async (projectData: CreateProjectPayload) => {
     try {
       setActionLoading(true);
       if (!user || !editingProject) {
@@ -419,7 +426,8 @@ export default function TasksPage() {
         name: projectData.name.trim(),
         ...(projectData.status && {
           status: projectData.status as 'todo' | 'in_progress' | 'completed',
-          status_nb: statusMapping[projectData.status as keyof typeof statusMapping],
+          status_nb:
+            statusMapping[projectData.status as keyof typeof statusMapping],
         }),
         completed: projectData.status === 'completed',
         ...(projectData.status === 'completed' && {
@@ -494,7 +502,9 @@ export default function TasksPage() {
     try {
       setActionLoading(true);
       const task = tasks.find((t) => t.id === taskId);
-      if (!task || !user) {return;}
+      if (!task || !user) {
+        return;
+      }
 
       const payload = {
         title: task.title,
@@ -528,7 +538,9 @@ export default function TasksPage() {
     try {
       setActionLoading(true);
       const task = tasks.find((t) => t.id === taskId);
-      if (!task || !user) {return;}
+      if (!task || !user) {
+        return;
+      }
 
       const payload = {
         title: task.title,
@@ -562,7 +574,9 @@ export default function TasksPage() {
     try {
       setActionLoading(true);
       const project = projects.find((p) => p.id === projectId);
-      if (!project || !user) {return;}
+      if (!project || !user) {
+        return;
+      }
 
       // Map status to Norwegian equivalent
       const statusMapping = {
@@ -620,10 +634,14 @@ export default function TasksPage() {
   // Filter tasks - show only standalone tasks (no project assigned) on main page
   const standaloneTasks = tasks.filter((task) => {
     // Only show tasks without a project (or project = null/undefined)
-    if (task.project) {return false;}
+    if (task.project) {
+      return false;
+    }
 
     // Filter by completion status
-    if (!showCompleted && task.status === 'completed') {return false;}
+    if (!showCompleted && task.status === 'completed') {
+      return false;
+    }
 
     // Filter by selected categories
     if (selectedCategories.length > 0) {
@@ -638,7 +656,9 @@ export default function TasksPage() {
 
   // Filter projects by completion status
   const filteredProjects = projects.filter((project) => {
-    if (!showCompleted && project.status === 'completed') {return false;}
+    if (!showCompleted && project.status === 'completed') {
+      return false;
+    }
     return true;
   });
 
@@ -688,7 +708,9 @@ export default function TasksPage() {
       low: 1,
     };
     const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
-    if (priorityDiff !== 0) {return priorityDiff;}
+    if (priorityDiff !== 0) {
+      return priorityDiff;
+    }
 
     // 2. Sort by status (in_progress → todo → completed)
     const statusOrder: Record<'in_progress' | 'todo' | 'completed', number> = {
@@ -697,13 +719,17 @@ export default function TasksPage() {
       completed: 1,
     };
     const statusDiff = statusOrder[b.status] - statusOrder[a.status];
-    if (statusDiff !== 0) {return statusDiff;}
+    if (statusDiff !== 0) {
+      return statusDiff;
+    }
 
     // 3. Sort by updated date (newest first)
     const dateA = new Date(a.updated_at);
     const dateB = new Date(b.updated_at);
     const dateDiff = dateB.getTime() - dateA.getTime();
-    if (dateDiff !== 0) {return dateDiff;}
+    if (dateDiff !== 0) {
+      return dateDiff;
+    }
 
     // 4. Sort by title alphabetically
     return a.title.localeCompare(b.title);
@@ -718,13 +744,17 @@ export default function TasksPage() {
       completed: 1,
     };
     const statusDiff = statusOrder[b.status] - statusOrder[a.status];
-    if (statusDiff !== 0) {return statusDiff;}
+    if (statusDiff !== 0) {
+      return statusDiff;
+    }
 
     // 2. Sort by updated date (newest first)
     const dateA = new Date(a.updated_at);
     const dateB = new Date(b.updated_at);
     const dateDiff = dateB.getTime() - dateA.getTime();
-    if (dateDiff !== 0) {return dateDiff;}
+    if (dateDiff !== 0) {
+      return dateDiff;
+    }
 
     // 3. Sort by name alphabetically
     return a.name.localeCompare(b.name);

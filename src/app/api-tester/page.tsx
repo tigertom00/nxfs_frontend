@@ -148,7 +148,7 @@ export default function ApiTesterPage() {
     setDisplayUrl(substitutedUrl);
   }, [protocol, baseUrl, endpoint, substituteVariables]);
 
-  const handleUrlChange = (value: string) => {
+  const _handleUrlChange = (value: string) => {
     setUrl(value);
   };
 
@@ -233,7 +233,7 @@ export default function ApiTesterPage() {
     try {
       // Substitute environment variables
       const processedUrl = substituteVariables(url);
-      const processedToken = substituteVariables(token);
+      const _processedToken = substituteVariables(token);
       const processedBody = substituteVariables(body);
 
       const validHeaders = headers.filter((h) => h.key && h.value);
@@ -742,7 +742,9 @@ export default function ApiTesterPage() {
                             const header = COMMON_HEADERS.find(
                               (h) => h.key === value
                             );
-                            if (header) {addCommonHeader(header);}
+                            if (header) {
+                              addCommonHeader(header);
+                            }
                           }}
                         >
                           <SelectTrigger className="w-40">

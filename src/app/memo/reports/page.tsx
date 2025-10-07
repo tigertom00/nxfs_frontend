@@ -216,7 +216,7 @@ export default function MemoReportsPage() {
             {/* Templates Tab */}
             <TabsContent value="templates" className="space-y-6">
               <ReportTemplates
-                onTemplateSelected={(template) => {
+                onTemplateSelected={(_template) => {
                   // Handle template selection
                 }}
               />
@@ -228,7 +228,7 @@ export default function MemoReportsPage() {
                 <ReportViewer
                   reportType={selectedReport}
                   reportData={reportData}
-                  onExport={(format) => {
+                  onExport={(_format) => {
                     // Handle export
                   }}
                 />
