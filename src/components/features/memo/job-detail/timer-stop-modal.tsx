@@ -51,7 +51,7 @@ export function TimerStopModal({
       setInitialSeconds(elapsedSeconds);
       setDescription('');
     }
-  }, [isOpen, elapsedSeconds]);
+  }, [isOpen]); // Remove elapsedSeconds dependency
 
   const originalTime = formatSecondsToTimeString(initialSeconds);
   const roundedSeconds = roundSecondsToNearestHalfHour(adjustedSeconds);

@@ -75,7 +75,9 @@ export function NewJobModal({
           setExistingOrderNumbers(orderNumbers);
 
           // Generate next available order number (convert strings to numbers for calculation)
-          const orderNumbersAsNumbers = orderNumbers.map((num) => parseInt(num, 10)).filter((num) => !isNaN(num));
+          const orderNumbersAsNumbers = orderNumbers
+            .map((num) => parseInt(num, 10))
+            .filter((num) => !isNaN(num));
           const nextOrderNr = suggestNextJobOrderNumber(orderNumbersAsNumbers);
           setFormData((prev) => ({ ...prev, ordre_nr: String(nextOrderNr) }));
         } catch (error) {
@@ -217,6 +219,12 @@ export function NewJobModal({
     }
   };
 
+  const extractStreetNameWithoutNumber = (address: string): string => {
+    // Remove street number from address (e.g., "Stortingsgata 4" -> "Stortingsgata")
+    // Match common Norwegian address patterns
+    return address.replace(/\s+\d+[A-Za-z]?(\s|$).*$/, '').trim();
+  };
+
   const handleUseCurrentLocation = async () => {
     setGettingLocation(true);
     try {
@@ -224,8 +232,12 @@ export function NewJobModal({
 
       const addressData = await reverseGeocode(coords);
 
+      // Auto-fill title with street name (without number)
+      const streetName = extractStreetNameWithoutNumber(addressData.adresse);
+
       setFormData((prev) => ({
         ...prev,
+        tittel: streetName || prev.tittel, // Only update if we got a valid street name
         adresse: addressData.adresse,
         postnummer: addressData.postnummer,
         poststed: addressData.poststed,
@@ -370,6 +382,29 @@ export function NewJobModal({
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Create New Job</DialogTitle>
         </DialogHeader>
+
+        {/* Actions - Moved to top for mobile accessibility */}
+        <div className="flex gap-3 pb-4 border-b flex-shrink-0">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="flex-1"
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} className="flex-1" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              'Create Job'
+            )}
+          </Button>
+        </div>
 
         <div className="flex-1 overflow-y-auto pr-1">
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -534,29 +569,6 @@ export function NewJobModal({
               />
             </div>
           </form>
-        </div>
-
-        {/* Actions - Fixed at bottom */}
-        <div className="flex gap-3 pt-4 border-t flex-shrink-0">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="flex-1"
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} className="flex-1" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              'Create Job'
-            )}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
