@@ -402,7 +402,11 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
           material = duplicates[0];
         }
         // Check if it's paginated format (PaginatedResponse<Material>)
-        else if ('results' in duplicates && Array.isArray(duplicates.results) && duplicates.results.length > 0) {
+        else if (
+          'results' in duplicates &&
+          Array.isArray(duplicates.results) &&
+          duplicates.results.length > 0
+        ) {
           material = duplicates.results[0];
         }
 
@@ -702,7 +706,9 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   };
 
   const handleConfirmRemove = async () => {
-    if (!materialToRemove) {return;}
+    if (!materialToRemove) {
+      return;
+    }
 
     try {
       await jobMaterialsAPI.deleteJobMaterial(materialToRemove.id);
@@ -756,8 +762,12 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       const sortedMaterials = materialsArray.sort((a, b) => {
         const aExact = a.el_nr === searchTerm.replace(/\s/g, '');
         const bExact = b.el_nr === searchTerm.replace(/\s/g, '');
-        if (aExact && !bExact) {return -1;}
-        if (!aExact && bExact) {return 1;}
+        if (aExact && !bExact) {
+          return -1;
+        }
+        if (!aExact && bExact) {
+          return 1;
+        }
         return 0;
       });
 
@@ -778,8 +788,12 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
       const sortedResults = searchResults.sort((a, b) => {
         const aExact = a.el_nr === searchTerm.replace(/\s/g, '');
         const bExact = b.el_nr === searchTerm.replace(/\s/g, '');
-        if (aExact && !bExact) {return -1;}
-        if (!aExact && bExact) {return 1;}
+        if (aExact && !bExact) {
+          return -1;
+        }
+        if (!aExact && bExact) {
+          return 1;
+        }
         return 0;
       });
 
@@ -1148,10 +1162,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
                             {t('memo.materials.allCategories')}
                           </SelectItem>
                           {categories.map((cat: any) => (
-                            <SelectItem
-                              key={cat.id}
-                              value={cat.id.toString()}
-                            >
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
                               {cat.blokknummer}: {cat.kategori}
                             </SelectItem>
                           ))}
@@ -1434,25 +1445,26 @@ function MaterialListItem({
       {/* Compact row - always visible */}
       <div
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center justify-between p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+        className="flex items-center gap-2 p-3 cursor-pointer hover:bg-muted/50 transition-colors"
       >
-        <div className="flex items-center gap-3 flex-1">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-sm">
-                {jobMaterial.matriell.el_nr || 'No EL#'}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {jobMaterial.matriell.tittel || 'Untitled'}
-              </span>
-            </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-medium text-sm whitespace-nowrap">
+              {jobMaterial.matriell.el_nr || 'No EL#'}
+            </span>
+            <span className="text-sm text-muted-foreground truncate">
+              {jobMaterial.matriell.tittel || 'Untitled'}
+            </span>
           </div>
-          {jobMaterial.antall && (
-            <Badge variant="secondary" className="text-xs">
-              {t('memo.materials.qty')}: {jobMaterial.antall}
-            </Badge>
-          )}
         </div>
+        {jobMaterial.antall && (
+          <Badge
+            variant="secondary"
+            className="text-xs flex-shrink-0 whitespace-nowrap"
+          >
+            {t('memo.materials.qty')}: {jobMaterial.antall}
+          </Badge>
+        )}
       </div>
 
       {/* Expanded details */}
@@ -1550,20 +1562,20 @@ function CompactMaterialCard({
 
   return (
     <div
-      className={`flex items-center justify-between p-2 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-colors ${isExactMatch ? 'border-primary bg-primary/10 shadow-sm' : ''}`}
+      className={`flex items-center gap-2 p-2 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-colors ${isExactMatch ? 'border-primary bg-primary/10 shadow-sm' : ''}`}
     >
       <div
-        className="flex-1 cursor-pointer"
+        className="flex-1 min-w-0 cursor-pointer"
         onClick={() => onViewDetail?.(material)}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <span
-            className={`font-medium text-sm ${isExactMatch ? 'text-primary' : ''}`}
+            className={`font-medium text-sm whitespace-nowrap ${isExactMatch ? 'text-primary' : ''}`}
           >
             {material.el_nr || 'No EL#'}
           </span>
           {isExactMatch && (
-            <Badge variant="default" className="text-xs">
+            <Badge variant="default" className="text-xs whitespace-nowrap">
               {t('memo.materials.exactMatch')}
             </Badge>
           )}
@@ -1571,7 +1583,7 @@ function CompactMaterialCard({
             {material.tittel || 'Untitled'}
           </span>
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground truncate">
           {material.leverandor?.navn ||
             (material.leverandor
               ? `${t('memo.materials.supplier')} ID: ${material.leverandor.id}`
@@ -1579,12 +1591,12 @@ function CompactMaterialCard({
           {material.varemerke && ` • ${material.varemerke}`}
         </div>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 flex-shrink-0">
         {material.favorites && (
-          <Star className="h-3 w-3 text-yellow-500 fill-current" />
+          <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
         )}
         {material.discontinued && (
-          <AlertTriangle className="h-3 w-3 text-red-500" />
+          <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />
         )}
         <Button
           size="sm"
@@ -1593,7 +1605,7 @@ function CompactMaterialCard({
             e.stopPropagation();
             onSelect(material);
           }}
-          className="h-6 w-6 p-0"
+          className="h-6 w-6 p-0 flex-shrink-0"
         >
           <Plus className="h-4 w-4" />
         </Button>
