@@ -5,6 +5,9 @@ import { Toaster } from '@/components/ui/toaster';
 import { ErrorBoundary } from '@/components/shared/error-boundary';
 import ThemeProvider from '@/components/shared/theme-provider';
 
+// Suppress React DevTools error in development (React 19 compatibility issue)
+import '@/lib/suppress-devtools-error';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],

@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores';
 import { jobsAPI, Job } from '@/lib/api';
 import { JobHeader } from '@/components/features/memo/job-detail/job-header';
 import { TimerWidget } from '@/components/features/memo/job-detail/timer-widget';
+import { JobberTaskCard } from '@/components/features/memo/job-detail/jobber-task-card';
 import { MaterialManager } from '@/components/features/memo/job-detail/material-manager';
 import { PhotoGallery } from '@/components/features/memo/job-detail/photo-gallery';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
@@ -33,7 +34,9 @@ export default function JobDetailPage() {
   // Load job details
   useEffect(() => {
     const loadJob = async () => {
-      if (!orderNumber || !isAuthenticated) {return;}
+      if (!orderNumber || !isAuthenticated) {
+        return;
+      }
 
       try {
         setLoading(true);
@@ -109,6 +112,12 @@ export default function JobDetailPage() {
 
           {/* Timer Widget */}
           <TimerWidget jobId={parseInt(job.ordre_nr)} ordreNr={job.ordre_nr} />
+
+          {/* Tasks */}
+          <JobberTaskCard
+            jobId={parseInt(job.ordre_nr)}
+            ordreNr={job.ordre_nr}
+          />
 
           {/* Material Manager */}
           <MaterialManager

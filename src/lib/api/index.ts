@@ -73,6 +73,7 @@ export { chatAPI } from './chat';
 export * from './memo/types';
 export { materialsAPI } from './memo/materials';
 export { jobsAPI, jobMaterialsAPI } from './memo/jobs';
+export { jobberTasksAPI } from './memo/jobber-tasks';
 export { jobImagesAPI } from './memo/job-images';
 export { jobFilesAPI } from './memo/job-files';
 export { suppliersAPI } from './memo/suppliers';

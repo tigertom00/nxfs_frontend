@@ -205,6 +205,61 @@ export interface MemoCategorySearchParams extends BaseSearchParams {
   kategori?: string;
 }
 
+// Jobber Tasks types
+export interface JobberTask {
+  id: number;
+  jobb_tittel: string; // Read-only: Job title
+  jobb_ordre_nr: number; // Read-only: Job order number
+  title: string;
+  notes: string | null;
+  completed: boolean;
+  completed_at: string | null;
+  image: string | null;
+  created_at: string;
+  updated_at: string;
+  jobb: number; // Job ordre_nr reference
+}
+
+export interface JobberTaskSearchParams extends BaseSearchParams {
+  completed?: boolean;
+}
+
+export interface JobberTasksByJobResponse {
+  jobb: {
+    ordre_nr: number;
+    tittel: string;
+  };
+  stats: {
+    total: number;
+    completed: number;
+    pending: number;
+    completion_rate: number;
+  };
+  tasks: JobberTask[];
+}
+
+export interface CreateJobberTaskPayload {
+  title: string;
+  notes?: string;
+  completed?: boolean;
+  jobb: string | number; // Job ordre_nr
+  image?: File | string;
+}
+
+export type UpdateJobberTaskPayload = Partial<CreateJobberTaskPayload>;
+
+export interface ToggleJobberTaskCompleteResponse {
+  message: string;
+  task: JobberTask;
+}
+
+export type GetJobberTasksResponse =
+  | JobberTask[]
+  | PaginatedResponse<JobberTask>;
+export type GetJobberTaskResponse = JobberTask;
+export type CreateJobberTaskResponse = JobberTask;
+export type UpdateJobberTaskResponse = JobberTask;
+
 export interface TimeEntrySearchParams extends BaseSearchParams {
   user?: number;
   jobb?: string;
