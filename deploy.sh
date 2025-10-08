@@ -70,6 +70,15 @@ docker-compose down --remove-orphans
 docker-compose build --no-cache
 docker-compose up -d
 
+# Clean up dangling images
+echo -e "${YELLOW}🧹 Cleaning up old Docker images...${NC}"
+DANGLING_IMAGES=$(docker images -f "dangling=true" -q)
+if [ -n "$DANGLING_IMAGES" ]; then
+    docker rmi $DANGLING_IMAGES && echo -e "${GREEN}✅ Removed dangling images${NC}" || echo -e "${YELLOW}⚠️  Some images couldn't be removed (may be in use)${NC}"
+else
+    echo -e "${GREEN}✅ No dangling images to remove${NC}"
+fi
+
 # Wait for services to be healthy
 echo -e "${YELLOW}⏳ Waiting for services to be healthy...${NC}"
 sleep 10
