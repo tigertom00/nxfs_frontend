@@ -5,6 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { timeEntriesAPI, timeTrackingAPI } from '@/lib/api';
 import { DateGroupedTimeEntries, TimeEntryWithJob, UserBasic } from '@/lib/api';
 import { useAuthStore, useUIStore } from '@/stores';
@@ -15,9 +20,11 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   User,
   Briefcase,
   Filter,
+  PlusCircle,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIntl } from '@/hooks/use-intl';
@@ -50,6 +57,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { EditTimeEntryDialog } from './edit-time-entry-dialog';
+import { ManualTimeEntry } from './manual-time-entry';
 import {
   Select,
   SelectContent,
@@ -62,6 +70,7 @@ interface TimeEntriesListProps {
   jobId: number;
   ordreNr?: string; // Order number for API filtering
   refreshTrigger?: number; // Can be used to trigger refresh from parent
+  onManualEntrySuccess?: () => void; // Callback for manual entry success
 }
 
 interface GroupedTimeEntry extends TimeEntry {
@@ -121,6 +130,7 @@ export function TimeEntriesList({
   jobId,
   ordreNr,
   refreshTrigger,
+  onManualEntrySuccess,
 }: TimeEntriesListProps) {
   const { toast } = useToast();
   const { t } = useIntl();
@@ -136,6 +146,7 @@ export function TimeEntriesList({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [userDateFilter, setUserDateFilter] = useState<DateFilter>('this_week');
   const [jobDateFilter, setJobDateFilter] = useState<DateFilter>('this_week');
+  const [isManualEntryExpanded, setIsManualEntryExpanded] = useState(false);
 
   const loadTimeEntries = async () => {
     try {
@@ -335,7 +346,9 @@ export function TimeEntriesList({
         <div className="space-y-2">
           {sortedDates.map((date) => {
             const dateGroup = entries[date];
-            if (!dateGroup) {return null;} // Skip if no data
+            if (!dateGroup) {
+              return null;
+            } // Skip if no data
 
             const isExpanded = expandedDates.has(date);
             const isToday = date === new Date().toISOString().split('T')[0];
@@ -358,10 +371,12 @@ export function TimeEntriesList({
                 throw new Error('Invalid date value');
               }
               displayDate = format(parsedDate, 'EEE. dd.MM.yyyy');
-              if (isToday)
-                {displayDate = `i dag. ${format(parsedDate, 'dd.MM.yyyy')}`;}
-              if (isYesterday)
-                {displayDate = `i går. ${format(parsedDate, 'dd.MM.yyyy')}`;}
+              if (isToday) {
+                displayDate = `i dag. ${format(parsedDate, 'dd.MM.yyyy')}`;
+              }
+              if (isYesterday) {
+                displayDate = `i går. ${format(parsedDate, 'dd.MM.yyyy')}`;
+              }
             } catch (error) {
               displayDate = date; // Fallback to raw date string
             }
@@ -573,6 +588,41 @@ export function TimeEntriesList({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Manual Time Entry - Collapsible at top */}
+          <Collapsible
+            open={isManualEntryExpanded}
+            onOpenChange={setIsManualEntryExpanded}
+            className="mb-4"
+          >
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  {t('memo.timeEntry.manualEntry')}
+                </span>
+                {isManualEntryExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-4">
+              <ManualTimeEntry
+                jobId={jobId}
+                onSuccess={() => {
+                  setIsManualEntryExpanded(false);
+                  loadTimeEntries();
+                  onManualEntrySuccess?.();
+                }}
+                onCancel={() => setIsManualEntryExpanded(false)}
+              />
+            </CollapsibleContent>
+          </Collapsible>
+
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -627,9 +677,13 @@ export function TimeEntriesList({
                   {jobDateFilter === 'last_week' &&
                     `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d', { locale: language === 'no' ? nb : undefined })} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy', { locale: language === 'no' ? nb : undefined })}`}
                   {jobDateFilter === 'this_month' &&
-                    format(new Date(), 'MMMM yyyy', { locale: language === 'no' ? nb : undefined })}
+                    format(new Date(), 'MMMM yyyy', {
+                      locale: language === 'no' ? nb : undefined,
+                    })}
                   {jobDateFilter === 'last_month' &&
-                    format(subMonths(new Date(), 1), 'MMMM yyyy', { locale: language === 'no' ? nb : undefined })}
+                    format(subMonths(new Date(), 1), 'MMMM yyyy', {
+                      locale: language === 'no' ? nb : undefined,
+                    })}
                   {jobDateFilter === 'all' && t('memo.timeEntry.allEntries')}
                 </span>
               </div>
@@ -677,9 +731,13 @@ export function TimeEntriesList({
                   {userDateFilter === 'last_week' &&
                     `${format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d', { locale: language === 'no' ? nb : undefined })} - ${format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), 'MMM d, yyyy', { locale: language === 'no' ? nb : undefined })}`}
                   {userDateFilter === 'this_month' &&
-                    format(new Date(), 'MMMM yyyy', { locale: language === 'no' ? nb : undefined })}
+                    format(new Date(), 'MMMM yyyy', {
+                      locale: language === 'no' ? nb : undefined,
+                    })}
                   {userDateFilter === 'last_month' &&
-                    format(subMonths(new Date(), 1), 'MMMM yyyy', { locale: language === 'no' ? nb : undefined })}
+                    format(subMonths(new Date(), 1), 'MMMM yyyy', {
+                      locale: language === 'no' ? nb : undefined,
+                    })}
                   {userDateFilter === 'all' && t('memo.timeEntry.allEntries')}
                 </span>
               </div>

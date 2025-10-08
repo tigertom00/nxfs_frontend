@@ -4,11 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import {
   timeEntriesAPI,
   timeTrackingAPI,
   timerSessionAPI,
@@ -16,19 +11,9 @@ import {
 } from '@/lib/api';
 import { UserTimeStats } from '@/lib/api';
 import { useAuthStore } from '@/stores';
-import {
-  Play,
-  Square,
-  Clock,
-  PlusCircle,
-  List,
-  TrendingUp,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+import { Play, Square, Clock, List, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIntl } from '@/hooks/use-intl';
-import { ManualTimeEntry } from './manual-time-entry';
 import { TimeEntriesList } from './time-entries-list';
 import { TimerStopModal } from './timer-stop-modal';
 import {
@@ -67,7 +52,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const [showStopModal, setShowStopModal] = useState(false);
   const [userStats, setUserStats] = useState<UserTimeStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
-  const [isManualEntryExpanded, setIsManualEntryExpanded] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,7 +60,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   // Load active timer session from server on mount
   useEffect(() => {
     const loadActiveSession = async () => {
-      if (!user) {return;}
+      if (!user) {
+        return;
+      }
 
       try {
         const activeSession = await timerSessionAPI.getActiveTimerSession();
@@ -234,7 +220,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   };
 
   const loadUserStats = async () => {
-    if (!user) {return;}
+    if (!user) {
+      return;
+    }
 
     try {
       setStatsLoading(true);
@@ -476,7 +464,9 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     description?: string,
     adjustedSeconds?: number
   ) => {
-    if (!user || !timer.serverSessionId) {return;}
+    if (!user || !timer.serverSessionId) {
+      return;
+    }
 
     try {
       // Stop the server timer session
@@ -612,8 +602,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
   const handleManualEntrySuccess = () => {
     setRefreshTrigger((prev) => prev + 1);
     loadUserStats(); // Refresh stats after manual entry
-    setIsManualEntryExpanded(false); // Close the manual entry section
-    setActiveTab('entries'); // Switch to entries tab after adding
   };
 
   return (
@@ -706,37 +694,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   : t('memo.timer.clickToStart')}
             </div>
 
-            {/* Manual Time Entry - Collapsible */}
-            <Collapsible
-              open={isManualEntryExpanded}
-              onOpenChange={setIsManualEntryExpanded}
-              className="border-t pt-4"
-            >
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-between"
-                >
-                  <span className="flex items-center gap-2">
-                    <PlusCircle className="h-4 w-4" />
-                    {t('memo.timeEntry.manualEntry')}
-                  </span>
-                  {isManualEntryExpanded ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-4">
-                <ManualTimeEntry
-                  jobId={jobId}
-                  onSuccess={handleManualEntrySuccess}
-                  onCancel={() => setIsManualEntryExpanded(false)}
-                />
-              </CollapsibleContent>
-            </Collapsible>
-
             {/* User Statistics */}
             {userStats && (
               <div className="space-y-3">
@@ -812,6 +769,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
             jobId={jobId}
             ordreNr={ordreNr}
             refreshTrigger={refreshTrigger}
+            onManualEntrySuccess={handleManualEntrySuccess}
           />
         </TabsContent>
       </Tabs>
