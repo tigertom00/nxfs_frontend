@@ -845,14 +845,8 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         {/* View Tab - Compact expandable list */}
         <TabsContent value="view" className="space-y-0">
           <div className="bg-card border rounded-lg p-4 space-y-4 hover-lift">
-            {/* Header inside card */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold">
-                  {t('memo.materials.title')} ({jobMaterials.length})
-                </h3>
-              </div>
+            {/* Shopping cart icon - shown when materials are selected */}
+            <div className="flex items-center justify-end gap-2">
               {selectedMaterials.length > 0 && (
                 <button
                   onClick={() => {
@@ -917,14 +911,8 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         {/* Add Tab - EL number lookup and quick add */}
         <TabsContent value="add" className="space-y-0">
           <div className="bg-card border rounded-lg p-4 space-y-4 hover-lift">
-            {/* Header inside card */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold">
-                  {t('memo.materials.title')} ({jobMaterials.length})
-                </h3>
-              </div>
+            {/* Shopping cart icon - shown when materials are selected */}
+            <div className="flex items-center justify-end gap-2">
               {selectedMaterials.length > 0 && (
                 <button
                   onClick={() => {

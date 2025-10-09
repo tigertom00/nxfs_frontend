@@ -33,9 +33,7 @@ export function JobHeader({ job, onBack }: JobHeaderProps) {
 
       {/* Job Info Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">
-          {t('memo.job.orderNumber')} #{job.ordre_nr}
-        </h1>
+        <h1 className="text-2xl font-bold">{job.ordre_nr}</h1>
         {job.tittel && (
           <h2 className="text-lg text-muted-foreground">{job.tittel}</h2>
         )}
@@ -57,7 +55,7 @@ export function JobHeader({ job, onBack }: JobHeaderProps) {
         >
           {job.ferdig
             ? `✅ ${t('memo.job.completed')}`
-            : `🚧 ${t('memo.job.inProgress')}`}
+            : t('memo.job.inProgress')}
         </div>
       </div>
     </div>

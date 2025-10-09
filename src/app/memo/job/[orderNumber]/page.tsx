@@ -12,7 +12,6 @@ import { JobberTaskCard } from '@/components/features/memo/job-detail/jobber-tas
 import { MaterialManager } from '@/components/features/memo/job-detail/material-manager';
 import { PhotoGallery } from '@/components/features/memo/job-detail/photo-gallery';
 import { ThemeInitializer } from '@/components/features/memo/shared/theme-initializer';
-import { MobileDebugConsole } from '@/components/shared';
 import { formatMinutesToDecimalHours } from '@/lib/time-utils';
 import { TrendingUp } from 'lucide-react';
 import { useIntl } from '@/hooks/use-intl';
@@ -354,9 +353,6 @@ export default function JobDetailPage() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Debug Console for troubleshooting */}
-      <MobileDebugConsole />
     </>
   );
 }
