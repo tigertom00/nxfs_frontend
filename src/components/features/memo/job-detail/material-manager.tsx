@@ -1689,7 +1689,7 @@ function CompactMaterialCard({
       </div>
       <div className="flex items-center gap-1 flex-shrink-0">
         {material.favorites && (
-          <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
+          <Heart className="h-3 w-3 text-red-500 fill-current flex-shrink-0" />
         )}
         {material.discontinued && (
           <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />

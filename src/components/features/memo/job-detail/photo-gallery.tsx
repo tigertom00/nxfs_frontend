@@ -302,31 +302,45 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       const response = await fetch(dataUrl);
       const blob = await response.blob();
 
-      // Create file from blob
-      const file = new File(
-        [blob],
-        `edited_${editingImage.name || `image_${Date.now()}.png`}`,
-        {
-          type: 'image/png',
-        }
-      );
+      // Create file from blob - keep original filename
+      const originalName = editingImage.name || `image_${Date.now()}.png`;
+      const file = new File([blob], originalName, {
+        type: 'image/png',
+      });
 
-      // Upload as new image
+      // Upload edited image
       const jobIdToUse = ordreNr ? parseInt(ordreNr) : jobId;
       const uploadedImage = await jobImagesAPI.uploadJobImage({
         image: file,
         jobb: jobIdToUse,
       });
 
-      // Add to photos list
-      setPhotos((prev) => [...prev, uploadedImage]);
+      // Delete the original image
+      try {
+        await jobImagesAPI.deleteJobImage(editingImage.id);
+      } catch (deleteError) {
+        // If delete fails, still show the edited image but warn user
+        toast({
+          title: language === 'no' ? 'Advarsel' : 'Warning',
+          description:
+            language === 'no'
+              ? 'Det redigerte bildet ble lagret, men kunne ikke slette originalen'
+              : 'Edited image was saved, but failed to delete original',
+          variant: 'destructive',
+        });
+      }
+
+      // Replace the original image with the edited one in the photos list
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === editingImage.id ? uploadedImage : p))
+      );
 
       toast({
-        title: language === 'no' ? 'Bilde lagret' : 'Image saved',
+        title: language === 'no' ? 'Bilde oppdatert' : 'Image updated',
         description:
           language === 'no'
-            ? 'Det redigerte bildet er lastet opp'
-            : 'Edited image has been uploaded',
+            ? 'Bildet er redigert og oppdatert'
+            : 'Image has been edited and updated',
       });
 
       setEditingImage(null);
