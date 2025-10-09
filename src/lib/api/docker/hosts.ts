@@ -17,7 +17,10 @@ export const hostsAPI = {
   // Get all hosts
   getHosts: async (): Promise<GetDockerHostsResponse> => {
     try {
-      const response = await api.get('/api/docker/hosts/');
+      // Default to large page size to fetch all hosts (fixes pagination issue)
+      const response = await api.get('/api/docker/hosts/', {
+        params: { page_size: 100 },
+      });
 
       // Handle both paginated and array responses
       const normalized = normalizeResponse<DockerHost>(response.data);

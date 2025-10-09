@@ -20,12 +20,42 @@ export const containersAPI = {
     params?: ContainerSearchParams
   ): Promise<GetDockerContainersResponse> => {
     try {
-      const url = createUrlWithParams('/api/docker/containers/', params);
-      const response = await api.get(url);
+      // Fetch all pages to get complete container list (fixes pagination issue)
+      const queryParams = { page_size: 100, ...params };
+      let allContainers: DockerContainer[] = [];
+      let nextUrl: string | null = createUrlWithParams(
+        '/api/docker/containers/',
+        queryParams
+      );
 
-      // Handle both paginated and array responses
-      const normalized = normalizeResponse<DockerContainer>(response.data);
-      return Array.isArray(normalized) ? normalized : normalized.results || [];
+      while (nextUrl) {
+        const response = await api.get(nextUrl);
+
+        // Handle both paginated and array responses
+        const normalized = normalizeResponse<DockerContainer>(response.data);
+        const containers = Array.isArray(normalized)
+          ? normalized
+          : normalized.results || [];
+
+        allContainers = [...allContainers, ...containers];
+
+        // Check if there's a next page
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'next' in response.data
+        ) {
+          nextUrl = response.data.next;
+          // Convert full URL to relative path if needed
+          if (nextUrl && nextUrl.startsWith('http')) {
+            nextUrl = new URL(nextUrl).pathname + new URL(nextUrl).search;
+          }
+        } else {
+          nextUrl = null;
+        }
+      }
+
+      return allContainers;
     } catch (error) {
       handleApiError(error, 'Getting Docker containers');
       throw error;
@@ -48,11 +78,41 @@ export const containersAPI = {
   // Get running containers
   getRunningContainers: async (): Promise<GetRunningContainersResponse> => {
     try {
-      const response = await api.get('/api/docker/containers/running/');
+      // Fetch all pages to get complete running container list (fixes pagination issue)
+      let allContainers: DockerContainer[] = [];
+      let nextUrl: string | null = createUrlWithParams(
+        '/api/docker/containers/running/',
+        { page_size: 100 }
+      );
 
-      // Handle both paginated and array responses
-      const normalized = normalizeResponse<DockerContainer>(response.data);
-      return Array.isArray(normalized) ? normalized : normalized.results || [];
+      while (nextUrl) {
+        const response = await api.get(nextUrl);
+
+        // Handle both paginated and array responses
+        const normalized = normalizeResponse<DockerContainer>(response.data);
+        const containers = Array.isArray(normalized)
+          ? normalized
+          : normalized.results || [];
+
+        allContainers = [...allContainers, ...containers];
+
+        // Check if there's a next page
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'next' in response.data
+        ) {
+          nextUrl = response.data.next;
+          // Convert full URL to relative path if needed
+          if (nextUrl && nextUrl.startsWith('http')) {
+            nextUrl = new URL(nextUrl).pathname + new URL(nextUrl).search;
+          }
+        } else {
+          nextUrl = null;
+        }
+      }
+
+      return allContainers;
     } catch (error) {
       handleApiError(error, 'Getting running containers');
       throw error;
