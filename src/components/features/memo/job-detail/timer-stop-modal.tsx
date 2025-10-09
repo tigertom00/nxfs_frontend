@@ -141,8 +141,9 @@ export function TimerStopModal({
             </Button>
           </div>
 
-          {/* Time Summary - Simplified */}
-          <div className="p-4 bg-muted rounded-lg space-y-2">
+          {/* Time Summary with Adjustment Controls */}
+          <div className="p-4 bg-muted rounded-lg space-y-3">
+            {/* Adjusted Time Display */}
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">
                 {t('memo.timer.timeToSave')}
@@ -151,6 +152,43 @@ export function TimerStopModal({
                 {formatSecondsToTimeString(adjustedSeconds)}
               </span>
             </div>
+
+            {/* Time Adjustment Buttons */}
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => adjustTime(-30)}
+                disabled={loading || adjustedSeconds < 30 * 60}
+              >
+                <Minus className="h-3 w-3 mr-1" />
+                30m
+              </Button>
+              <span className="text-xs text-muted-foreground">Adjust time</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => adjustTime(30)}
+                disabled={loading}
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                30m
+              </Button>
+            </div>
+
+            {/* Rounded Time Info */}
+            {wasRounded && (
+              <div className="text-xs text-center text-muted-foreground pt-2 border-t">
+                Rounded to: {roundedTime}
+              </div>
+            )}
+
+            {/* Original Time Reference */}
+            {wasAdjusted && (
+              <div className="text-xs text-center text-muted-foreground">
+                Original time: {originalTime}
+              </div>
+            )}
           </div>
 
           {/* Description */}
