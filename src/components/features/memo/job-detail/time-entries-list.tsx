@@ -580,7 +580,7 @@ export function TimeEntriesList({
 
   return (
     <>
-      <Card>
+      <Card className="hover-lift">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
@@ -629,11 +629,17 @@ export function TimeEntriesList({
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="job" className="flex items-center gap-2">
+              <TabsTrigger
+                value="job"
+                className="flex items-center gap-2 data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+              >
                 <Briefcase className="h-4 w-4" />
                 {t('memo.timeEntry.jobView')}
               </TabsTrigger>
-              <TabsTrigger value="user" className="flex items-center gap-2">
+              <TabsTrigger
+                value="user"
+                className="flex items-center gap-2 data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+              >
                 <User className="h-4 w-4" />
                 {t('memo.timeEntry.userView')}
               </TabsTrigger>

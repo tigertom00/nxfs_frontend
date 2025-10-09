@@ -820,7 +820,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" id="material-manager">
       {/* Material Management Tabs */}
       <Tabs
         value={materialTab}
@@ -828,19 +828,66 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="view">{t('memo.materials.viewTab')}</TabsTrigger>
-          <TabsTrigger value="add">{t('memo.materials.addTab')}</TabsTrigger>
+          <TabsTrigger
+            value="view"
+            className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+          >
+            {t('memo.materials.viewTab')}
+          </TabsTrigger>
+          <TabsTrigger
+            value="add"
+            className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+          >
+            {t('memo.materials.addTab')}
+          </TabsTrigger>
         </TabsList>
 
         {/* View Tab - Compact expandable list */}
         <TabsContent value="view" className="space-y-0">
-          <div className="bg-card border rounded-lg p-4 space-y-4">
+          <div className="bg-card border rounded-lg p-4 space-y-4 hover-lift">
             {/* Header inside card */}
-            <div className="flex items-center justify-center gap-2">
-              <Package className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-semibold">
-                {t('memo.materials.title')} ({jobMaterials.length})
-              </h3>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-muted-foreground" />
+                <h3 className="font-semibold">
+                  {t('memo.materials.title')} ({jobMaterials.length})
+                </h3>
+              </div>
+              {selectedMaterials.length > 0 && (
+                <button
+                  onClick={() => {
+                    // Scroll to selected materials section
+                    const element = document.getElementById(
+                      'selected-materials-card'
+                    );
+                    if (element) {
+                      element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                      });
+                    }
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 bg-yellow-gradient text-foreground rounded-md hover:bg-yellow-gradient-hover transition-all"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium">
+                    {selectedMaterials.length}
+                  </span>
+                </button>
+              )}
             </div>
             {jobMaterials.length > 0 ? (
               <div className="space-y-2">
@@ -869,13 +916,50 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
 
         {/* Add Tab - EL number lookup and quick add */}
         <TabsContent value="add" className="space-y-0">
-          <div className="bg-card border rounded-lg p-4 space-y-4">
+          <div className="bg-card border rounded-lg p-4 space-y-4 hover-lift">
             {/* Header inside card */}
-            <div className="flex items-center justify-center gap-2">
-              <Package className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-semibold">
-                {t('memo.materials.title')} ({jobMaterials.length})
-              </h3>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-muted-foreground" />
+                <h3 className="font-semibold">
+                  {t('memo.materials.title')} ({jobMaterials.length})
+                </h3>
+              </div>
+              {selectedMaterials.length > 0 && (
+                <button
+                  onClick={() => {
+                    // Scroll to selected materials section
+                    const element = document.getElementById(
+                      'selected-materials-card'
+                    );
+                    if (element) {
+                      element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                      });
+                    }
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 bg-yellow-gradient text-foreground rounded-md hover:bg-yellow-gradient-hover transition-all"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium">
+                    {selectedMaterials.length}
+                  </span>
+                </button>
+              )}
             </div>
             {/* EL Number Input with Scan */}
             <div className="space-y-2">
@@ -1021,13 +1105,22 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
               className="space-y-2"
             >
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="search">
+                <TabsTrigger
+                  value="search"
+                  className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+                >
                   {t('memo.materials.searchTab')}
                 </TabsTrigger>
-                <TabsTrigger value="recent">
+                <TabsTrigger
+                  value="recent"
+                  className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+                >
                   {t('memo.materials.recentTab')}
                 </TabsTrigger>
-                <TabsTrigger value="favorites">
+                <TabsTrigger
+                  value="favorites"
+                  className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+                >
                   {t('memo.materials.favoritesTab')}
                 </TabsTrigger>
               </TabsList>
@@ -1315,7 +1408,10 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
 
       {/* Selection Summary - Show when materials are selected */}
       {selectedMaterials.length > 0 && (
-        <Card className="border-primary">
+        <Card
+          className="border-primary hover-lift"
+          id="selected-materials-card"
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">
               {t('memo.materials.selectedMaterials')} (
@@ -1371,7 +1467,7 @@ export function MaterialManager({ jobId, ordreNr }: MaterialManagerProps) {
             <Button
               onClick={handleAddToJob}
               disabled={loading}
-              className="w-full"
+              className="w-full bg-yellow-gradient hover:bg-yellow-gradient-hover text-foreground"
             >
               {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {t('memo.materials.addToJob')}

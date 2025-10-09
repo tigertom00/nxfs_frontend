@@ -608,18 +608,24 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="timer" className="flex items-center gap-2">
+          <TabsTrigger
+            value="timer"
+            className="flex items-center gap-2 data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+          >
             <Clock className="h-4 w-4" />
             {t('memo.timer.timer')}
           </TabsTrigger>
-          <TabsTrigger value="entries" className="flex items-center gap-2">
+          <TabsTrigger
+            value="entries"
+            className="flex items-center gap-2 data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+          >
             <List className="h-4 w-4" />
             {t('memo.timeEntry.title')}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="timer" className="space-y-0">
-          <div className="bg-card border rounded-lg p-4 space-y-4">
+          <div className="bg-card border rounded-lg p-4 space-y-4 hover-lift">
             {/* Timer Display - Moved to top */}
             <div className="text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
@@ -648,8 +654,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
               {!timer.isRunning ? (
                 <Button
                   onClick={startTimer}
-                  className="flex-1 h-12"
-                  variant="default"
+                  className="flex-1 h-12 bg-yellow-gradient hover:bg-yellow-gradient-hover text-foreground"
                 >
                   <Play className="h-5 w-5 mr-2" />
                   {t('memo.timer.start')}
@@ -658,8 +663,7 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                 <>
                   <Button
                     onClick={startTimer}
-                    className="flex-1 h-12"
-                    variant="default"
+                    className="flex-1 h-12 bg-yellow-gradient hover:bg-yellow-gradient-hover text-foreground"
                   >
                     <Play className="h-5 w-5 mr-2" />
                     {t('memo.timer.resume')}
@@ -693,74 +697,6 @@ export function TimerWidget({ jobId, ordreNr }: TimerWidgetProps) {
                   ? t('memo.timer.timerWillAutoSave')
                   : t('memo.timer.clickToStart')}
             </div>
-
-            {/* User Statistics */}
-            {userStats && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {t('memo.timer.timeOverview')}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="text-center p-2 bg-muted/30 rounded-lg">
-                    <div className="text-xs text-muted-foreground">
-                      {t('memo.timer.todayYou')}
-                    </div>
-                    <div className="text-sm font-semibold">
-                      {(userStats.today.hours / 60).toFixed(1)}t
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {userStats.today.entries} {t('memo.timer.entries')}
-                    </div>
-                  </div>
-                  <div className="text-center p-2 bg-muted/30 rounded-lg">
-                    <div className="text-xs text-muted-foreground">
-                      {t('memo.timer.yesterdayYou')}
-                    </div>
-                    <div className="text-sm font-semibold">
-                      {(userStats.yesterday.hours / 60).toFixed(1)}t
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {userStats.yesterday.entries} {t('memo.timer.entries')}
-                    </div>
-                  </div>
-                  <div className="text-center p-2 bg-muted/30 rounded-lg">
-                    <div className="text-xs text-muted-foreground">
-                      {t('memo.timer.yourTotal')}
-                    </div>
-                    <div className="text-sm font-semibold">
-                      {(userStats.total_user.hours / 60).toFixed(1)}t
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {userStats.total_user.entries} {t('memo.timer.entries')}
-                    </div>
-                  </div>
-                  <div className="text-center p-2 bg-muted/30 rounded-lg">
-                    <div className="text-xs text-muted-foreground">
-                      {t('memo.timer.allUsers')}
-                    </div>
-                    <div className="text-sm font-semibold">
-                      {(userStats.total_all_users.hours / 60).toFixed(1)}t
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {userStats.total_all_users.entries}{' '}
-                      {t('memo.timer.entries')}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {statsLoading && (
-              <div className="flex items-center justify-center py-3">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                <span className="ml-2 text-xs text-muted-foreground">
-                  {t('memo.timer.loadingStats')}
-                </span>
-              </div>
-            )}
           </div>
         </TabsContent>
 

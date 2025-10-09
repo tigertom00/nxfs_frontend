@@ -255,6 +255,33 @@
     0 4px 6px -2px oklch(0.72 0.25 280 / 0.05);
 }
 
+/* Blue-purple gradient utilities for memo app */
+.bg-yellow-gradient {
+  background: linear-gradient(
+    90deg,
+    oklch(0.65 0.25 260) 0%,
+    oklch(0.6 0.28 300) 100%
+  );
+}
+
+.bg-yellow-gradient-hover:hover {
+  background: linear-gradient(
+    90deg,
+    oklch(0.62 0.27 260) 0%,
+    oklch(0.57 0.3 300) 100%
+  );
+}
+
+.shadow-yellow {
+  box-shadow: 0 4px 14px 0 oklch(0.6 0.28 280 / 0.3);
+}
+
+.shadow-yellow-lg {
+  box-shadow:
+    0 10px 25px -3px oklch(0.6 0.28 280 / 0.2),
+    0 4px 6px -2px oklch(0.6 0.28 280 / 0.15);
+}
+
 /* API Tester Styles */
 .api-gradient {
   background: linear-gradient(

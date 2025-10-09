@@ -145,7 +145,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
     type: 'image' | 'document' = 'image'
   ) => {
     const files = Array.from(event.target.files || []);
-    if (files.length === 0) {return;}
+    if (files.length === 0) {
+      return;
+    }
 
     // Validate file types and sizes
     const validFiles = files.filter((file) => {
@@ -173,7 +175,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
       return true;
     });
 
-    if (validFiles.length === 0) {return;}
+    if (validFiles.length === 0) {
+      return;
+    }
 
     setUploading(true);
 
@@ -240,7 +244,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   };
 
   const handleConfirmDelete = async () => {
-    if (!deleteTarget) {return;}
+    if (!deleteTarget) {
+      return;
+    }
 
     try {
       if (deleteTarget.type === 'image') {
@@ -285,7 +291,9 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
   };
 
   const handleSaveEditedImage = async (dataUrl: string) => {
-    if (!editingImage) {return;}
+    if (!editingImage) {
+      return;
+    }
 
     try {
       setUploading(true);
@@ -356,11 +364,17 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="images">
+          <TabsTrigger
+            value="images"
+            className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+          >
             <ImageIcon className="h-4 w-4 mr-2" />
             {t('memo.photos.images')} ({photos.length})
           </TabsTrigger>
-          <TabsTrigger value="files">
+          <TabsTrigger
+            value="files"
+            className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+          >
             <FileText className="h-4 w-4 mr-2" />
             {t('memo.photos.documents')} ({documents.length})
           </TabsTrigger>
@@ -368,7 +382,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
 
         {/* Images Tab */}
         <TabsContent value="images" className="space-y-0">
-          <div className="bg-card border rounded-lg p-4 space-y-4">
+          <div className="bg-card border rounded-lg p-4 space-y-4 hover-lift">
             <div className="flex items-center justify-center gap-2">
               <Camera className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">
@@ -472,7 +486,7 @@ export function PhotoGallery({ jobId, ordreNr }: PhotoGalleryProps) {
 
         {/* Files Tab */}
         <TabsContent value="files" className="space-y-0">
-          <div className="bg-card border rounded-lg p-4 space-y-4">
+          <div className="bg-card border rounded-lg p-4 space-y-4 hover-lift">
             <div className="flex items-center justify-center gap-2">
               <FileText className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">

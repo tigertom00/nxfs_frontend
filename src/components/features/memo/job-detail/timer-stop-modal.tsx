@@ -125,7 +125,7 @@ export function TimerStopModal({
             <Button
               onClick={handleConfirm}
               disabled={loading}
-              className="w-full"
+              className="w-full bg-yellow-gradient hover:bg-yellow-gradient-hover text-foreground"
             >
               <Save className="h-4 w-4 mr-1" />
               {t('common.save')}
@@ -141,85 +141,16 @@ export function TimerStopModal({
             </Button>
           </div>
 
-          {/* Time Summary */}
+          {/* Time Summary - Simplified */}
           <div className="p-4 bg-muted rounded-lg space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                {t('memo.timer.originalTime')}
-              </span>
-              <span className="font-mono font-medium">{originalTime}</span>
-            </div>
-
-            {/* Time adjustment controls */}
-            <div className="flex items-center justify-between pt-2 border-t border-border">
-              <span className="text-sm font-medium">
-                {t('memo.timer.adjustTime')}
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => adjustTime(-30)}
-                  disabled={loading || adjustedSeconds === 0}
-                >
-                  <Minus className="h-3 w-3" />
-                  30m
-                </Button>
-                <span className="font-mono font-bold text-lg min-w-[80px] text-center">
-                  {formatSecondsToTimeString(adjustedSeconds)}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => adjustTime(30)}
-                  disabled={loading}
-                >
-                  <Plus className="h-3 w-3" />
-                  30m
-                </Button>
-              </div>
-            </div>
-
-            {wasAdjusted && (
-              <p className="text-xs text-muted-foreground text-center">
-                {t('memo.timer.timeAdjusted')}{' '}
-                {adjustedSeconds > initialSeconds ? '+' : ''}
-                {((adjustedSeconds - initialSeconds) / 60).toFixed(0)}{' '}
-                {t('memo.timer.minutes')}
-              </p>
-            )}
-
-            {wasRounded && (
-              <div className="flex justify-between items-center pt-2 border-t border-border">
-                <span className="text-sm text-muted-foreground">
-                  {t('memo.timer.roundedTime')}
-                </span>
-                <span className="font-mono font-medium text-primary">
-                  {roundedTime}
-                </span>
-              </div>
-            )}
-
-            <div className="flex justify-between items-center pt-2 border-t border-border">
               <span className="text-sm font-medium">
                 {t('memo.timer.timeToSave')}
               </span>
-              <span className="font-mono font-bold text-lg">
-                {wasRounded
-                  ? roundedTime
-                  : formatSecondsToTimeString(adjustedSeconds)}
+              <span className="font-mono font-bold text-2xl">
+                {formatSecondsToTimeString(adjustedSeconds)}
               </span>
             </div>
-
-            {wasRounded && (
-              <p className="text-xs text-muted-foreground">
-                {t('memo.timer.timeHasBeenRounded')}{' '}
-                {roundedSeconds > adjustedSeconds
-                  ? t('memo.timer.roundedUp')
-                  : t('memo.timer.roundedDown')}{' '}
-                {t('memo.timer.roundedToNearest')}
-              </p>
-            )}
           </div>
 
           {/* Description */}

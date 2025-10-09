@@ -92,6 +92,18 @@ export function JobberTaskCard({ jobId, ordreNr }: JobberTaskCardProps) {
     }
   };
 
+  // Auto-switch tabs based on task count
+  useEffect(() => {
+    if (!loading) {
+      if (tasks.length === 0) {
+        setActiveTab('add');
+      } else if (activeTab === 'add' && tasks.length > 0) {
+        // If we just added a task, switch to tasks view
+        setActiveTab('tasks');
+      }
+    }
+  }, [tasks.length, loading]);
+
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) {
@@ -195,199 +207,221 @@ export function JobberTaskCard({ jobId, ordreNr }: JobberTaskCardProps) {
 
   return (
     <>
-      <Card className="p-4 bg-card border-border">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-muted/50">
-            <TabsTrigger
-              value="tasks"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              {t('memo.tasks.title')} ({pendingCount})
-            </TabsTrigger>
-            <TabsTrigger
-              value="add"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              {t('memo.tasks.addTask')}
-            </TabsTrigger>
-          </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-muted/50">
+          <TabsTrigger
+            value="tasks"
+            className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+          >
+            {t('memo.tasks.title')} ({pendingCount})
+          </TabsTrigger>
+          <TabsTrigger
+            value="add"
+            className="data-[state=active]:bg-yellow-gradient data-[state=active]:text-foreground"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            {t('memo.tasks.addTask')}
+          </TabsTrigger>
+        </TabsList>
 
-          {/* Tasks List Tab */}
-          <TabsContent value="tasks" className="space-y-3 mt-4">
-            {/* Toggle for completed tasks */}
-            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="show-completed"
-                  checked={showCompleted}
-                  onCheckedChange={(checked) => setShowCompleted(!!checked)}
-                />
-                <Label
-                  htmlFor="show-completed"
-                  className="text-sm cursor-pointer"
-                >
-                  {t('memo.tasks.showCompleted')} ({completedCount})
-                </Label>
+        {/* Tasks List Tab */}
+        <TabsContent value="tasks" className="space-y-0">
+          <Card className="p-4 bg-card border-border hover-lift mt-0">
+            <div className="space-y-3">
+              {/* Toggle for completed tasks */}
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="show-completed"
+                    checked={showCompleted}
+                    onCheckedChange={(checked) => setShowCompleted(!!checked)}
+                  />
+                  <Label
+                    htmlFor="show-completed"
+                    className="text-sm cursor-pointer"
+                  >
+                    {t('memo.tasks.showCompleted')} ({completedCount})
+                  </Label>
+                </div>
               </div>
-            </div>
 
-            {/* Tasks list */}
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : filteredTasks.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Circle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>
-                  {showCompleted
-                    ? t('memo.tasks.noTasks')
-                    : t('memo.tasks.noPendingTasks')}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <AnimatePresence>
-                  {filteredTasks.map((task) => (
-                    <motion.div
-                      key={task.id}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                    >
-                      <Collapsible
-                        open={expandedTaskId === task.id}
-                        onOpenChange={(open) =>
-                          setExpandedTaskId(open ? task.id : null)
-                        }
+              {/* Tasks list */}
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : filteredTasks.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Circle className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>
+                    {showCompleted
+                      ? t('memo.tasks.noTasks')
+                      : t('memo.tasks.noPendingTasks')}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <AnimatePresence>
+                    {filteredTasks.map((task) => (
+                      <motion.div
+                        key={task.id}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
                       >
-                        <div
-                          className={`border rounded-lg bg-card hover-lift ${
-                            task.completed
-                              ? 'opacity-60 border-primary/30'
-                              : 'border-border'
-                          }`}
+                        <Collapsible
+                          open={expandedTaskId === task.id}
+                          onOpenChange={(open) =>
+                            setExpandedTaskId(open ? task.id : null)
+                          }
                         >
-                          {/* Task Header */}
-                          <div className="p-3 flex items-center gap-3">
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setTaskToComplete(task);
-                              }}
-                              className="cursor-pointer"
-                            >
-                              {task.completed ? (
-                                <CheckCircle2 className="w-5 h-5 text-primary" />
-                              ) : (
-                                <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
-                              )}
-                            </div>
-
-                            <CollapsibleTrigger className="flex-1 text-left">
-                              <div className="flex items-center justify-between">
-                                <span
-                                  className={`font-medium ${
-                                    task.completed
-                                      ? 'line-through text-muted-foreground'
-                                      : ''
-                                  }`}
-                                >
-                                  {task.title}
-                                </span>
-                                {expandedTaskId === task.id ? (
-                                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                          <div
+                            className={`border rounded-lg bg-card hover-lift ${
+                              task.completed
+                                ? 'opacity-60 border-primary/30'
+                                : 'border-border'
+                            }`}
+                          >
+                            {/* Task Header */}
+                            <div className="p-3 flex items-center gap-3">
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTaskToComplete(task);
+                                }}
+                                className="cursor-pointer"
+                              >
+                                {task.completed ? (
+                                  <CheckCircle2 className="w-5 h-5 text-primary" />
                                 ) : (
-                                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                  <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
                                 )}
                               </div>
-                            </CollapsibleTrigger>
-                          </div>
 
-                          {/* Expanded Content */}
-                          <CollapsibleContent>
-                            <div className="px-3 pb-3 space-y-3 border-t pt-3">
-                              {/* Notes */}
-                              {task.notes && (
-                                <div>
-                                  <Label className="text-xs text-muted-foreground">
-                                    {t('memo.tasks.taskNotes')}
-                                  </Label>
-                                  <p className="text-sm mt-1">{task.notes}</p>
-                                </div>
-                              )}
-
-                              {/* Image */}
-                              {task.image && (
-                                <div>
-                                  <Label className="text-xs text-muted-foreground mb-1 block">
-                                    {t('memo.tasks.taskImage')}
-                                  </Label>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      openImageLightbox(task.image!)
-                                    }
-                                    className="flex items-center gap-2 text-sm text-primary hover:underline"
+                              <CollapsibleTrigger className="flex-1 text-left">
+                                <div className="flex items-center justify-between">
+                                  <span
+                                    className={`font-medium ${
+                                      task.completed
+                                        ? 'line-through text-muted-foreground'
+                                        : ''
+                                    }`}
                                   >
-                                    <ImageIcon className="w-4 h-4" />
-                                    {t('memo.tasks.viewImage')}
-                                  </button>
+                                    {task.title}
+                                  </span>
+                                  {expandedTaskId === task.id ? (
+                                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                  )}
                                 </div>
-                              )}
-
-                              {/* Metadata */}
-                              <div className="text-xs text-muted-foreground space-y-1">
-                                <p>
-                                  {t('memo.tasks.created')}{' '}
-                                  {new Date(task.created_at).toLocaleString()}
-                                </p>
-                                {task.completed_at && (
-                                  <p>
-                                    {t('memo.tasks.completed')}{' '}
-                                    {new Date(
-                                      task.completed_at
-                                    ).toLocaleString()}
-                                  </p>
-                                )}
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex gap-2 pt-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => openEditDialog(task)}
-                                  className="flex-1"
-                                >
-                                  <Edit className="w-4 h-4 mr-1" />
-                                  {t('common.edit')}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => setTaskToDelete(task)}
-                                  className="flex-1"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-1" />
-                                  {t('common.delete')}
-                                </Button>
-                              </div>
+                              </CollapsibleTrigger>
                             </div>
-                          </CollapsibleContent>
-                        </div>
-                      </Collapsible>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            )}
-          </TabsContent>
 
-          {/* Add Task Tab */}
-          <TabsContent value="add" className="mt-4">
+                            {/* Expanded Content */}
+                            <CollapsibleContent>
+                              <div className="px-3 pb-3 space-y-3 border-t pt-3">
+                                {/* Notes */}
+                                {task.notes && (
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">
+                                      {t('memo.tasks.taskNotes')}
+                                    </Label>
+                                    <p className="text-sm mt-1">{task.notes}</p>
+                                  </div>
+                                )}
+
+                                {/* Image */}
+                                {task.image && (
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground mb-1 block">
+                                      {t('memo.tasks.taskImage')}
+                                    </Label>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        openImageLightbox(task.image!)
+                                      }
+                                      className="flex items-center gap-2 text-sm text-primary hover:underline"
+                                    >
+                                      <ImageIcon className="w-4 h-4" />
+                                      {t('memo.tasks.viewImage')}
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* Metadata */}
+                                <div className="text-xs text-muted-foreground space-y-1">
+                                  <p>
+                                    {t('memo.tasks.created')}{' '}
+                                    {new Date(task.created_at).toLocaleString()}
+                                  </p>
+                                  {task.completed_at && (
+                                    <p>
+                                      {t('memo.tasks.completed')}{' '}
+                                      {new Date(
+                                        task.completed_at
+                                      ).toLocaleString()}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-2 pt-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => openEditDialog(task)}
+                                    className="flex-1"
+                                  >
+                                    <Edit className="w-4 h-4 mr-1" />
+                                    {t('common.edit')}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => setTaskToDelete(task)}
+                                    className="flex-1"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-1" />
+                                    {t('common.delete')}
+                                  </Button>
+                                </div>
+                              </div>
+                            </CollapsibleContent>
+                          </div>
+                        </Collapsible>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Add Task Tab */}
+        <TabsContent value="add" className="space-y-0">
+          <Card className="p-4 bg-card border-border hover-lift mt-0">
             <form onSubmit={handleAddTask} className="space-y-4">
+              <Button
+                type="submit"
+                className="w-full bg-yellow-gradient hover:bg-yellow-gradient-hover text-foreground"
+                disabled={submitting || !newTaskTitle.trim()}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t('memo.tasks.creating')}
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    {t('memo.tasks.createTask')}
+                  </>
+                )}
+              </Button>
+
               <div className="space-y-2">
                 <Label htmlFor="task-title">
                   {t('memo.tasks.taskTitle')}{' '}
@@ -422,28 +456,10 @@ export function JobberTaskCard({ jobId, ordreNr }: JobberTaskCardProps) {
                   onChange={(e) => setNewTaskImage(e.target.files?.[0] || null)}
                 />
               </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={submitting || !newTaskTitle.trim()}
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t('memo.tasks.creating')}
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t('memo.tasks.createTask')}
-                  </>
-                )}
-              </Button>
             </form>
-          </TabsContent>
-        </Tabs>
-      </Card>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Edit Task Dialog */}
       <Dialog
