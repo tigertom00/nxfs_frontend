@@ -25,6 +25,9 @@ import {
   Briefcase,
   Filter,
   PlusCircle,
+  FileSpreadsheet,
+  FileText,
+  Download,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIntl } from '@/hooks/use-intl';
@@ -147,6 +150,7 @@ export function TimeEntriesList({
   const [userDateFilter, setUserDateFilter] = useState<DateFilter>('this_week');
   const [jobDateFilter, setJobDateFilter] = useState<DateFilter>('this_week');
   const [isManualEntryExpanded, setIsManualEntryExpanded] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const loadTimeEntries = async () => {
     try {
@@ -279,6 +283,93 @@ export function TimeEntriesList({
       });
     } finally {
       setDeleting(null);
+    }
+  };
+
+  // Helper function to download blob as file
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  // Map DateFilter to API period values
+  const mapFilterToPeriod = (filter: DateFilter): string => {
+    if (filter === 'all') {
+      return 'all_time';
+    }
+    return filter;
+  };
+
+  // Handle Excel export
+  const handleExportExcel = async (tab: 'job' | 'user') => {
+    try {
+      setIsExporting(true);
+      const filter = tab === 'job' ? jobDateFilter : userDateFilter;
+      const period = mapFilterToPeriod(filter);
+      const userId = parseInt(user?.id || '0');
+
+      const params: any = { period };
+
+      if (tab === 'job') {
+        // For job view, include job filter
+        params.jobb = ordreNr || jobId.toString();
+      } else {
+        // For user view, include user_id
+        params.user_id = userId;
+      }
+
+      const blob = await timeTrackingAPI.exportToExcel(params);
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `timeentries_${user?.username || 'user'}_${period}_${timestamp}.xlsx`;
+      downloadBlob(blob, filename);
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description:
+          'Could not export time entries to Excel. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Handle PDF export
+  const handleExportPDF = async (tab: 'job' | 'user') => {
+    try {
+      setIsExporting(true);
+      const filter = tab === 'job' ? jobDateFilter : userDateFilter;
+      const period = mapFilterToPeriod(filter);
+      const userId = parseInt(user?.id || '0');
+
+      const params: any = { period };
+
+      if (tab === 'job') {
+        // For job view, include job filter
+        params.jobb = ordreNr || jobId.toString();
+      } else {
+        // For user view, include user_id
+        params.user_id = userId;
+      }
+
+      const blob = await timeTrackingAPI.exportToPDF(params);
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `timeentries_${user?.username || 'user'}_${period}_${timestamp}.pdf`;
+      downloadBlob(blob, filename);
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description: 'Could not export time entries to PDF. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -693,6 +784,38 @@ export function TimeEntriesList({
                   {jobDateFilter === 'all' && t('memo.timeEntry.allEntries')}
                 </span>
               </div>
+
+              {/* Export Buttons */}
+              <div className="mb-4 flex items-center gap-2">
+                <Download className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground font-medium">
+                  Export:
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExportExcel('job')}
+                  disabled={isExporting || getTotalEntries(jobEntries) === 0}
+                  className="flex items-center gap-1.5 h-8"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  <span className="text-xs">Excel</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExportPDF('job')}
+                  disabled={isExporting || getTotalEntries(jobEntries) === 0}
+                  className="flex items-center gap-1.5 h-8"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  <span className="text-xs">PDF</span>
+                </Button>
+                {isExporting && (
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                )}
+              </div>
+
               {renderEntriesList(
                 jobEntries,
                 t('memo.timeEntry.noEntriesForJob')
@@ -747,6 +870,38 @@ export function TimeEntriesList({
                   {userDateFilter === 'all' && t('memo.timeEntry.allEntries')}
                 </span>
               </div>
+
+              {/* Export Buttons */}
+              <div className="mb-4 flex items-center gap-2">
+                <Download className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground font-medium">
+                  Export:
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExportExcel('user')}
+                  disabled={isExporting || getTotalEntries(userEntries) === 0}
+                  className="flex items-center gap-1.5 h-8"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  <span className="text-xs">Excel</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExportPDF('user')}
+                  disabled={isExporting || getTotalEntries(userEntries) === 0}
+                  className="flex items-center gap-1.5 h-8"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  <span className="text-xs">PDF</span>
+                </Button>
+                {isExporting && (
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                )}
+              </div>
+
               {renderEntriesList(userEntries, t('memo.timeEntry.noEntries'))}
             </TabsContent>
           </Tabs>

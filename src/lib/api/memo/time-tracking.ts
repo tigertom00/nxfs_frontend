@@ -108,4 +108,58 @@ export const timeTrackingAPI = {
       throw error;
     }
   },
+
+  // Export time entries to Excel
+  exportToExcel: async (params?: {
+    period?:
+      | 'this_week'
+      | 'last_week'
+      | 'this_month'
+      | 'last_month'
+      | 'all_time';
+    jobb?: string;
+    user_id?: number;
+  }): Promise<Blob> => {
+    try {
+      const url = createUrlWithParams(
+        '/app/memo/timeliste/export_excel/',
+        params
+      );
+      const response = await api.get(url, {
+        responseType: 'blob',
+      });
+      showSuccessToast('Excel file downloaded successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Exporting time entries to Excel');
+      throw error;
+    }
+  },
+
+  // Export time entries to PDF
+  exportToPDF: async (params?: {
+    period?:
+      | 'this_week'
+      | 'last_week'
+      | 'this_month'
+      | 'last_month'
+      | 'all_time';
+    jobb?: string;
+    user_id?: number;
+  }): Promise<Blob> => {
+    try {
+      const url = createUrlWithParams(
+        '/app/memo/timeliste/export_pdf/',
+        params
+      );
+      const response = await api.get(url, {
+        responseType: 'blob',
+      });
+      showSuccessToast('PDF file downloaded successfully');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Exporting time entries to PDF');
+      throw error;
+    }
+  },
 };
